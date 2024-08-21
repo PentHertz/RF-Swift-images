@@ -4,7 +4,7 @@ on:
   push:
 
 env:
-  REGISTRY_IMAGE: user/app
+  REGISTRY_IMAGE: penthertz/rfswiftdev
 
 jobs:
   build:
@@ -16,6 +16,7 @@ jobs:
           - linux/amd64
           - linux/arm/v6
           - linux/arm/v7
+          - linux/riscv64
           - linux/arm64
     steps:
       - name: Prepare
@@ -87,8 +88,8 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ DockerActions.DOCKERHUB_USERNAME }}
+          password: ${{ DockerActions.DOCKERHUB_TOKEN }}
       
       - name: Create manifest list and push
         working-directory: /tmp/digests
