@@ -36,7 +36,8 @@ jobs:
             -t corebuild:latest \
             -t ${{ env.REGISTRY_IMAGE }}:corebuild \
             -f Dockerfiles/SDR/corebuild.docker \
-            --load
+            --load \
+            .
 
       - name: Push corebuild image to registry
         run: |
@@ -70,7 +71,8 @@ jobs:
             -t sdr_light:latest \
             -t ${{ env.REGISTRY_IMAGE }}:sdr_light \
             -f Dockerfiles/SDR/sdr_light.docker \
-            --load
+            --load \
+            .
 
       - name: Push sdr_light image to registry
         run: |
@@ -104,7 +106,8 @@ jobs:
             -t sdr_full:latest \
             -t ${{ env.REGISTRY_IMAGE }}:sdr_full \
             -f Dockerfiles/SDR/sdr_full.docker \
-            --load
+            --load \
+            .
 
       - name: Push sdr_full image to registry
         run: |
