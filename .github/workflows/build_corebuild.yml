@@ -32,7 +32,7 @@ jobs:
 
       - name: Build corebuild locally
         run: |
-          docker buildx build --platform ${{ matrix.platform }} -t corebuild:${{ matrix.platform }} -f Dockerfiles/SDR/corebuild.docker --push .
+          docker buildx build --platform ${{ matrix.platform }} -t corebuild -f Dockerfiles/SDR/corebuild.docker --push .
 
   sdr_light:
     runs-on: ubuntu-latest
@@ -58,7 +58,7 @@ jobs:
 
       - name: Build sdr_light locally
         run: |
-          docker buildx build --platform ${{ matrix.platform }} -t sdr_light:${{ matrix.platform }} -f Dockerfiles/SDR/sdr_light.docker --push .
+          docker buildx build --platform ${{ matrix.platform }} -t sdr_light -f Dockerfiles/SDR/sdr_light.docker --push .
 
   sdr_full:
     runs-on: ubuntu-latest
@@ -84,7 +84,7 @@ jobs:
 
       - name: Build sdr_full locally
         run: |
-          docker buildx build --platform ${{ matrix.platform }} -t sdr_full:${{ matrix.platform }} -f Dockerfiles/SDR/sdr_full.docker --push .
+          docker buildx build --platform ${{ matrix.platform }} -t sdr_full -f Dockerfiles/SDR/sdr_full.docker --push .
 
   merge_and_push:
     runs-on: ubuntu-latest
