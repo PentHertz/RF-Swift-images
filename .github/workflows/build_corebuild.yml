@@ -27,25 +27,26 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build corebuild image with two tags
+      - name: Build and push corebuild image
         run: |
           docker buildx build --platform ${{ matrix.platform }} \
             -t corebuild:latest \
             -t ${{ env.REGISTRY_IMAGE }}:corebuild \
             -f Dockerfiles/SDR/corebuild.docker \
-            --load \
+            --push \
             .
 
-      - name: Push corebuild image to registry
+      - name: Pull corebuild image for local use
         run: |
-          docker push ${{ env.REGISTRY_IMAGE }}:corebuild
+          docker pull ${{ env.REGISTRY_IMAGE }}:corebuild
+          docker tag ${{ env.REGISTRY_IMAGE }}:corebuild corebuild:latest
 
   sdr_light:
     runs-on: ubuntu-latest
-    needs: corebuild  # Ensure corebuild job completes first
+    needs: corebuild
     strategy:
       fail-fast: false
       matrix:
@@ -62,25 +63,26 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build sdr_light image with two tags
+      - name: Build and push sdr_light image
         run: |
           docker buildx build --platform ${{ matrix.platform }} \
             -t sdr_light:latest \
             -t ${{ env.REGISTRY_IMAGE }}:sdr_light \
             -f Dockerfiles/SDR/sdr_light.docker \
-            --load \
+            --push \
             .
 
-      - name: Push sdr_light image to registry
+      - name: Pull sdr_light image for local use
         run: |
-          docker push ${{ env.REGISTRY_IMAGE }}:sdr_light
+          docker pull ${{ env.REGISTRY_IMAGE }}:sdr_light
+          docker tag ${{ env.REGISTRY_IMAGE }}:sdr_light sdr_light:latest
 
   sdr_full:
     runs-on: ubuntu-latest
-    needs: sdr_light  # Ensure sdr_light job completes first
+    needs: sdr_light
     strategy:
       fail-fast: false
       matrix:
@@ -97,18 +99,19 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build sdr_full image with two tags
+      - name: Build and push sdr_full image
         run: |
           docker buildx build --platform ${{ matrix.platform }} \
             -t sdr_full:latest \
             -t ${{ env.REGISTRY_IMAGE }}:sdr_full \
             -f Dockerfiles/SDR/sdr_full.docker \
-            --load \
+            --push \
             .
 
-      - name: Push sdr_full image to registry
+      - name: Pull sdr_full image for local use
         run: |
-          docker push ${{ env.REGISTRY_IMAGE }}:sdr_full
+          docker pull ${{ env.REGISTRY_IMAGE }}:sdr_full
+          docker tag ${{ env.REGISTRY_IMAGE }}:sdr_full sdr_full:latest
