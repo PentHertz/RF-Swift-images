@@ -30,12 +30,17 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push corebuild image
+      - name: Build corebuild image with two tags
         run: |
-          docker buildx build --platform linux/amd64,linux/arm64 \
+          docker buildx build --platform ${{ matrix.platform }} \
+            -t corebuild:latest \
             -t ${{ env.REGISTRY_IMAGE }}:corebuild \
             -f Dockerfiles/SDR/corebuild.docker \
-            --push .
+            --load
+
+      - name: Push corebuild image to registry
+        run: |
+          docker push ${{ env.REGISTRY_IMAGE }}:corebuild
 
   sdr_light:
     runs-on: ubuntu-latest
@@ -59,12 +64,17 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push sdr_light image
+      - name: Build sdr_light image with two tags
         run: |
-          docker buildx build --platform linux/amd64,linux/arm64 \
+          docker buildx build --platform ${{ matrix.platform }} \
+            -t sdr_light:latest \
             -t ${{ env.REGISTRY_IMAGE }}:sdr_light \
             -f Dockerfiles/SDR/sdr_light.docker \
-            --push .
+            --load
+
+      - name: Push sdr_light image to registry
+        run: |
+          docker push ${{ env.REGISTRY_IMAGE }}:sdr_light
 
   sdr_full:
     runs-on: ubuntu-latest
@@ -88,9 +98,14 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push sdr_full image
+      - name: Build sdr_full image with two tags
         run: |
-          docker buildx build --platform linux/amd64,linux/arm64 \
+          docker buildx build --platform ${{ matrix.platform }} \
+            -t sdr_full:latest \
             -t ${{ env.REGISTRY_IMAGE }}:sdr_full \
             -f Dockerfiles/SDR/sdr_full.docker \
-            --push .
+            --load
+
+      - name: Push sdr_full image to registry
+        run: |
+          docker push ${{ env.REGISTRY_IMAGE }}:sdr_full
