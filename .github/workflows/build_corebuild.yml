@@ -115,9 +115,11 @@ jobs:
             --cache-from=type=local,src=/tmp/.buildx-cache \
             --cache-to=type=local,dest=/tmp/.buildx-cache,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
+            --build-arg UHD_BASE=antsdr_uhd \
+            --build-arg RTLSDR_BASE=rtlsdr \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:sdr_light_antsdr \
-            -f Dockerfiles/SDR/sdr_light_antsdr.docker \
+            -f Dockerfiles/SDR/sdr_light.docker \
             .
 
   sdr_light_rtlsdrv4:
@@ -152,9 +154,11 @@ jobs:
             --cache-from=type=local,src=/tmp/.buildx-cache \
             --cache-to=type=local,dest=/tmp/.buildx-cache,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
+            --build-arg UHD_BASE=uhd \
+            --build-arg RTLSDR_BASE=rtlsdrv4 \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:sdr_light_rtlsdrv4 \
-            -f Dockerfiles/SDR/sdr_light_rtlsdrv4.docker \
+            -f Dockerfiles/SDR/sdr_light.docker \
             .
 
   reversing:
@@ -226,6 +230,8 @@ jobs:
             --cache-from=type=local,src=/tmp/.buildx-cache \
             --cache-to=type=local,dest=/tmp/.buildx-cache,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
+            --build-arg UHD_BASE=uhd \
+            --build-arg RTLSDR_BASE=rtlsdr \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:sdr_light \
             -f Dockerfiles/SDR/sdr_light.docker \
@@ -270,7 +276,7 @@ jobs:
 
   rfid:
     runs-on: ubuntu-latest
-    needs: sdr_light
+    needs: corebuild
     steps:
       - name: Checkout code
         uses: actions/checkout@v3

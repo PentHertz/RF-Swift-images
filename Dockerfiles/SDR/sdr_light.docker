@@ -6,6 +6,9 @@
 ARG BASE_IMAGE=corebuild
 FROM ${BASE_IMAGE}
 
+ARG UHD_BASE=uhd # Use antsdr_uhd with ANTSDR
+ARG RTLSDR_BASE=rtlsdr # rtlsdrv4 for v4 version driver
+
 LABEL "org.container.project"="rfswift"
 LABEL "org.container.author"="Sébastien Dudek"
 
@@ -24,10 +27,8 @@ RUN chmod +x entrypoint.sh
 # Installing Devices 
 
 ## Installing extra peripherals
-RUN ./entrypoint.sh uhd_devices_install && \
-	./entrypoint.sh rtlsdr_devices_install
-#RUN ./entrypoint.sh rtlsdrv4_devices_install # optionnal, remove rtlsdr_devices_install if you are using the v4 version
-#RUN ./entrypoint.sh uhd_devices_fromsource_install
+RUN ./entrypoint.sh ${UHD_BASE}_devices_install && \
+	./entrypoint.sh ${RTLSDR_BASE}_devices_install
 #RUN ./entrypoint.sh antsdr_uhd_devices_install # Disable orignal UHD
 
 # Installing GNU Radio + some OOT modules
