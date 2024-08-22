@@ -54,6 +54,194 @@ jobs:
           path: /tmp/.buildx-cache-new
           key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
 
+  automotive:
+    runs-on: ubuntu-latest
+    needs: corebuild
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [linux/amd64, linux/arm64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+
+      - name: Set up Docker Cache
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ matrix.platform }}-
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push automotive image with corebuild base
+        run: |
+          docker buildx build --platform ${{ matrix.platform }} \
+            --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
+            -t ${{ env.REGISTRY_IMAGE }}:automotive \
+            --cache-from=type=local,src=/tmp/.buildx-cache \
+            --cache-to=type=local,dest=/tmp/.buildx-cache-new \
+            -f Dockerfiles/automotive.docker \
+            --push \
+            .
+
+      - name: Save Docker Cache
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache-new
+          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
+
+  sdr_light_antsdr:
+    runs-on: ubuntu-latest
+    needs: corebuild
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [linux/amd64, linux/arm64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+
+      - name: Set up Docker Cache
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ matrix.platform }}-
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push sdr_light_antsdr image with corebuild base
+        run: |
+          docker buildx build --platform ${{ matrix.platform }} \
+            --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
+            -t ${{ env.REGISTRY_IMAGE }}:sdr_light_antsdr \
+            --cache-from=type=local,src=/tmp/.buildx-cache \
+            --cache-to=type=local,dest=/tmp/.buildx-cache-new \
+            -f Dockerfiles/SDR/sdr_light_antsdr.docker \
+            --push \
+            .
+
+      - name: Save Docker Cache
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache-new
+          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
+
+  sdr_light_rtlsdrv4:
+    runs-on: ubuntu-latest
+    needs: corebuild
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [linux/amd64, linux/arm64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+
+      - name: Set up Docker Cache
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ matrix.platform }}-
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push sdr_light_rtlsdrv4 image with corebuild base
+        run: |
+          docker buildx build --platform ${{ matrix.platform }} \
+            --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
+            -t ${{ env.REGISTRY_IMAGE }}:sdr_light_rtlsdrv4 \
+            --cache-from=type=local,src=/tmp/.buildx-cache \
+            --cache-to=type=local,dest=/tmp/.buildx-cache-new \
+            -f Dockerfiles/SDR/sdr_light_rtlsdrv4.docker \
+            --push \
+            .
+
+      - name: Save Docker Cache
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache-new
+          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
+
+  reversing:
+    runs-on: ubuntu-latest
+    needs: corebuild
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [linux/amd64, linux/arm64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+
+      - name: Set up Docker Cache
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ matrix.platform }}-
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push reversing image with corebuild base
+        run: |
+          docker buildx build --platform ${{ matrix.platform }} \
+            --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
+            -t ${{ env.REGISTRY_IMAGE }}:reversing \
+            --cache-from=type=local,src=/tmp/.buildx-cache \
+            --cache-to=type=local,dest=/tmp/.buildx-cache-new \
+            -f Dockerfiles/reversing.docker \
+            --push \
+            .
+
+      - name: Save Docker Cache
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache-new
+          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
+
   sdr_light:
     runs-on: ubuntu-latest
     needs: corebuild
@@ -139,6 +327,194 @@ jobs:
             --cache-from=type=local,src=/tmp/.buildx-cache \
             --cache-to=type=local,dest=/tmp/.buildx-cache-new \
             -f Dockerfiles/SDR/sdr_full.docker \
+            --push \
+            .
+
+      - name: Save Docker Cache
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache-new
+          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
+
+  rfid:
+    runs-on: ubuntu-latest
+    needs: sdr_light
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [linux/amd64, linux/arm64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+
+      - name: Set up Docker Cache
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ matrix.platform }}-
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push rfid image with sdr_light base
+        run: |
+          docker buildx build --platform ${{ matrix.platform }} \
+            --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
+            -t ${{ env.REGISTRY_IMAGE }}:rfid \
+            --cache-from=type=local,src=/tmp/.buildx-cache \
+            --cache-to=type=local,dest=/tmp/.buildx-cache-new \
+            -f Dockerfiles/rfid.docker \
+            --push \
+            .
+
+      - name: Save Docker Cache
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache-new
+          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
+
+  wifi:
+    runs-on: ubuntu-latest
+    needs: sdr_light
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [linux/amd64, linux/arm64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+
+      - name: Set up Docker Cache
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ matrix.platform }}-
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push wifi image with sdr_light base
+        run: |
+          docker buildx build --platform ${{ matrix.platform }} \
+            --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
+            -t ${{ env.REGISTRY_IMAGE }}:wifi \
+            --cache-from=type=local,src=/tmp/.buildx-cache \
+            --cache-to=type=local,dest=/tmp/.buildx-cache-new \
+            -f Dockerfiles/wifi.docker \
+            --push \
+            .
+
+      - name: Save Docker Cache
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache-new
+          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
+
+  bluetooth:
+    runs-on: ubuntu-latest
+    needs: sdr_light
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [linux/amd64, linux/arm64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+
+      - name: Set up Docker Cache
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ matrix.platform }}-
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push bluetooth image with sdr_light base
+        run: |
+          docker buildx build --platform ${{ matrix.platform }} \
+            --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
+            -t ${{ env.REGISTRY_IMAGE }}:bluetooth \
+            --cache-from=type=local,src=/tmp/.buildx-cache \
+            --cache-to=type=local,dest=/tmp/.buildx-cache-new \
+            -f Dockerfiles/bluetooth.docker \
+            --push \
+            .
+
+      - name: Save Docker Cache
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache-new
+          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
+
+  sdr_deeptemptest_beta:
+    runs-on: ubuntu-latest
+    needs: sdr_light
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [linux/amd64, linux/arm64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+
+      - name: Set up Docker Cache
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ matrix.platform }}-
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push sdr_deeptemptest_beta image with sdr_light base
+        run: |
+          docker buildx build --platform ${{ matrix.platform }} \
+            --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
+            -t ${{ env.REGISTRY_IMAGE }}:sdr_deeptemptest_beta \
+            --cache-from=type=local,src=/tmp/.buildx-cache \
+            --cache-to=type=local,dest=/tmp/.buildx-cache-new \
+            -f Dockerfiles/SDR/sdr_deeptemptest_beta.docker \
             --push \
             .
 
