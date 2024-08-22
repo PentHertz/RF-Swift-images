@@ -3,7 +3,8 @@
 # Author(s): Sébastien Dudek (@FlUxIuS) @Penthertz
 # website: penthertz.com
 
-FROM sdr_light:latest
+ARG BASE_IMAGE=sdr_light
+FROM ${BASE_IMAGE}
 
 LABEL "org.container.project"="rfswift"
 LABEL "org.container.author"="Sébastien Dudek (FlUxIuS)"

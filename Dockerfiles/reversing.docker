@@ -2,8 +2,9 @@
 # Install type: Reversing
 # Author(s): Sébastien Dudek (@FlUxIuS) @Penthertz, djnn @Penthertz
 # website: penthertz.com
-
-FROM corebuild:latest
+ 
+ARG BASE_IMAGE=corebuild
+FROM ${BASE_IMAGE}
 
 LABEL "org.container.project"="rfswift"
 LABEL "org.container.author"="Sébastien Dudek (FlUxIuS)"

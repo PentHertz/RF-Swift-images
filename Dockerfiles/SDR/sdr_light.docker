@@ -2,6 +2,8 @@
 # Install type: Core for SDR Dockers
 # Author(s): Sébastien Dudek (@FlUxIuS) @Penthertz
 # website: penthertz.com
+
+ARG BASE_IMAGE=corebuild
 FROM ${BASE_IMAGE}
 
 LABEL "org.container.project"="rfswift"
