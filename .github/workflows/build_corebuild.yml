@@ -28,11 +28,19 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/SDR/corebuild.docker') }}-${{ env.BUILD_PLATFORMS }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ env.BUILD_PLATFORMS }}-
+
       - name: Build and push corebuild image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=registry,ref=${{ env.CACHE_REPO }}:corebuild \
-            --cache-to=type=registry,ref=${{ env.CACHE_REPO }}:corebuild,mode=max \
+            --cache-from=type=local,src=/tmp/.buildx-cache \
+            --cache-to=type=local,dest=/tmp/.buildx-cache,mode=max \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:corebuild \
             -f Dockerfiles/SDR/corebuild.docker \
@@ -56,11 +64,19 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/automotive.docker') }}-${{ env.BUILD_PLATFORMS }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ env.BUILD_PLATFORMS }}-
+
       - name: Build and push automotive image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=registry,ref=${{ env.CACHE_REPO }}:automotive \
-            --cache-to=type=registry,ref=${{ env.CACHE_REPO }}:automotive,mode=max \
+            --cache-from=type=local,src=/tmp/.buildx-cache \
+            --cache-to=type=local,dest=/tmp/.buildx-cache,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:automotive \
@@ -85,11 +101,19 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/SDR/sdr_light_antsdr.docker') }}-${{ env.BUILD_PLATFORMS }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ env.BUILD_PLATFORMS }}-
+
       - name: Build and push sdr_light_antsdr image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=registry,ref=${{ env.CACHE_REPO }}:sdr_light_antsdr \
-            --cache-to=type=registry,ref=${{ env.CACHE_REPO }}:sdr_light_antsdr,mode=max \
+            --cache-from=type=local,src=/tmp/.buildx-cache \
+            --cache-to=type=local,dest=/tmp/.buildx-cache,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:sdr_light_antsdr \
@@ -114,11 +138,19 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/SDR/sdr_light_rtlsdrv4.docker') }}-${{ env.BUILD_PLATFORMS }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ env.BUILD_PLATFORMS }}-
+
       - name: Build and push sdr_light_rtlsdrv4 image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=registry,ref=${{ env.CACHE_REPO }}:sdr_light_rtlsdrv4 \
-            --cache-to=type=registry,ref=${{ env.CACHE_REPO }}:sdr_light_rtlsdrv4,mode=max \
+            --cache-from=type=local,src=/tmp/.buildx-cache \
+            --cache-to=type=local,dest=/tmp/.buildx-cache,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:sdr_light_rtlsdrv4 \
@@ -143,11 +175,19 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/reversing.docker') }}-${{ env.BUILD_PLATFORMS }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ env.BUILD_PLATFORMS }}-
+
       - name: Build and push reversing image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=registry,ref=${{ env.CACHE_REPO }}:reversing \
-            --cache-to=type=registry,ref=${{ env.CACHE_REPO }}:reversing,mode=max \
+            --cache-from=type=local,src=/tmp/.buildx-cache \
+            --cache-to=type=local,dest=/tmp/.buildx-cache,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:reversing \
@@ -172,11 +212,19 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/SDR/sdr_light.docker') }}-${{ env.BUILD_PLATFORMS }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ env.BUILD_PLATFORMS }}-
+
       - name: Build and push sdr_light image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=registry,ref=${{ env.CACHE_REPO }}:sdr_light \
-            --cache-to=type=registry,ref=${{ env.CACHE_REPO }}:sdr_light,mode=max \
+            --cache-from=type=local,src=/tmp/.buildx-cache \
+            --cache-to=type=local,dest=/tmp/.buildx-cache,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:sdr_light \
@@ -201,11 +249,19 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/SDR/sdr_full.docker') }}-${{ env.BUILD_PLATFORMS }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ env.BUILD_PLATFORMS }}-
+
       - name: Build and push sdr_full image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=registry,ref=${{ env.CACHE_REPO }}:sdr_full \
-            --cache-to=type=registry,ref=${{ env.CACHE_REPO }}:sdr_full,mode=max \
+            --cache-from=type=local,src=/tmp/.buildx-cache \
+            --cache-to=type=local,dest=/tmp/.buildx-cache,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:sdr_full \
@@ -230,11 +286,19 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/rfid.docker') }}-${{ env.BUILD_PLATFORMS }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ env.BUILD_PLATFORMS }}-
+
       - name: Build and push rfid image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=registry,ref=${{ env.CACHE_REPO }}:rfid \
-            --cache-to=type=registry,ref=${{ env.CACHE_REPO }}:rfid,mode=max \
+            --cache-from=type=local,src=/tmp/.buildx-cache \
+            --cache-to=type=local,dest=/tmp/.buildx-cache,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:rfid \
@@ -259,11 +323,19 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/wifi.docker') }}-${{ env.BUILD_PLATFORMS }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ env.BUILD_PLATFORMS }}-
+
       - name: Build and push wifi image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=registry,ref=${{ env.CACHE_REPO }}:wifi \
-            --cache-to=type=registry,ref=${{ env.CACHE_REPO }}:wifi,mode=max \
+            --cache-from=type=local,src=/tmp/.buildx-cache \
+            --cache-to=type=local,dest=/tmp/.buildx-cache,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:wifi \
@@ -288,11 +360,19 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/bluetooth.docker') }}-${{ env.BUILD_PLATFORMS }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ env.BUILD_PLATFORMS }}-
+
       - name: Build and push bluetooth image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=registry,ref=${{ env.CACHE_REPO }}:bluetooth \
-            --cache-to=type=registry,ref=${{ env.CACHE_REPO }}:bluetooth,mode=max \
+            --cache-from=type=local,src=/tmp/.buildx-cache \
+            --cache-to=type=local,dest=/tmp/.buildx-cache,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:bluetooth \
@@ -317,11 +397,19 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/SDR/sdr_deeptemptest_beta.docker') }}-${{ env.BUILD_PLATFORMS }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ env.BUILD_PLATFORMS }}-
+
       - name: Build and push sdr_deeptemptest_beta image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=registry,ref=${{ env.CACHE_REPO }}:sdr_deeptemptest_beta \
-            --cache-to=type=registry,ref=${{ env.CACHE_REPO }}:sdr_deeptemptest_beta,mode=max \
+            --cache-from=type=local,src=/tmp/.buildx-cache \
+            --cache-to=type=local,dest=/tmp/.buildx-cache,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:sdr_deeptemptest_beta \
