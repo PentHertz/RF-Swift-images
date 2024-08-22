@@ -1,14 +1,14 @@
 name: Multi-Platform Docker Build with Caching
 
-on:
-  push:
-    branches:
-      - main
-
 env:
   REGISTRY_IMAGE: penthertz/rfswiftdev
   BUILD_PLATFORMS: linux/amd64,linux/arm64
   CACHE_REPO: ${{ env.REGISTRY_IMAGE }}/cache
+
+on:
+  push:
+    branches:
+      - main
 
 jobs:
   corebuild:
