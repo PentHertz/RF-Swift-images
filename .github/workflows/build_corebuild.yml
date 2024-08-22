@@ -33,16 +33,10 @@ jobs:
       - name: Build and push corebuild image
         run: |
           docker buildx build --platform ${{ matrix.platform }} \
-            -t corebuild:latest \
             -t ${{ env.REGISTRY_IMAGE }}:corebuild \
             -f Dockerfiles/SDR/corebuild.docker \
             --push \
             .
-
-      - name: Pull corebuild image for local use
-        run: |
-          docker pull ${{ env.REGISTRY_IMAGE }}:corebuild
-          docker tag ${{ env.REGISTRY_IMAGE }}:corebuild corebuild:latest
 
   sdr_light:
     runs-on: ubuntu-latest
@@ -66,19 +60,14 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push sdr_light image
+      - name: Build and push sdr_light image with corebuild base
         run: |
           docker buildx build --platform ${{ matrix.platform }} \
-            -t sdr_light:latest \
+            --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             -t ${{ env.REGISTRY_IMAGE }}:sdr_light \
             -f Dockerfiles/SDR/sdr_light.docker \
             --push \
             .
-
-      - name: Pull sdr_light image for local use
-        run: |
-          docker pull ${{ env.REGISTRY_IMAGE }}:sdr_light
-          docker tag ${{ env.REGISTRY_IMAGE }}:sdr_light sdr_light:latest
 
   sdr_full:
     runs-on: ubuntu-latest
@@ -102,16 +91,11 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push sdr_full image
+      - name: Build and push sdr_full image with sdr_light base
         run: |
           docker buildx build --platform ${{ matrix.platform }} \
-            -t sdr_full:latest \
+            --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
             -t ${{ env.REGISTRY_IMAGE }}:sdr_full \
             -f Dockerfiles/SDR/sdr_full.docker \
             --push \
             .
-
-      - name: Pull sdr_full image for local use
-        run: |
-          docker pull ${{ env.REGISTRY_IMAGE }}:sdr_full
-          docker tag ${{ env.REGISTRY_IMAGE }}:sdr_full sdr_full:latest
