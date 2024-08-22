@@ -32,11 +32,15 @@ jobs:
 
       - name: Build and push corebuild image
         run: |
-          docker buildx build --platform ${{ matrix.platform }} \
+          docker buildx build --platform linux/amd64,linux/arm64 \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:corebuild \
             -f Dockerfiles/SDR/corebuild.docker \
             .
+
+      - name: Verify multi-platform build
+        run: |
+          docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:corebuild
 
   verify-corebuild:
     runs-on: ubuntu-latest
