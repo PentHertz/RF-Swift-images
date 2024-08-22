@@ -1,4 +1,4 @@
-name: Multi-Platform Docker Build and Push
+name: Multi-Platform Docker Build with Caching
 
 on:
   push:
@@ -14,29 +14,39 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform:
-          - linux/amd64
-          - linux/arm64
+        platform: [linux/amd64, linux/arm64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          install: true
+
+      - name: Set up Docker Cache
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ matrix.platform }}-
 
       - name: Build and push corebuild image
         run: |
           docker buildx build --platform ${{ matrix.platform }} \
             -t ${{ env.REGISTRY_IMAGE }}:corebuild \
+            --cache-from=type=local,src=/tmp/.buildx-cache \
+            --cache-to=type=local,dest=/tmp/.buildx-cache-new \
             -f Dockerfiles/SDR/corebuild.docker \
             --push \
             .
+
+      - name: Save Docker Cache
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache-new
+          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
 
   sdr_light:
     runs-on: ubuntu-latest
@@ -44,30 +54,40 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform:
-          - linux/amd64
-          - linux/arm64
+        platform: [linux/amd64, linux/arm64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          install: true
 
-      - name: Build and push sdr_light image with corebuild base
+      - name: Set up Docker Cache
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ matrix.platform }}-
+
+      - name: Build and push sdr_light image
         run: |
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             -t ${{ env.REGISTRY_IMAGE }}:sdr_light \
+            --cache-from=type=local,src=/tmp/.buildx-cache \
+            --cache-to=type=local,dest=/tmp/.buildx-cache-new \
             -f Dockerfiles/SDR/sdr_light.docker \
             --push \
             .
+
+      - name: Save Docker Cache
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache-new
+          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
 
   sdr_full:
     runs-on: ubuntu-latest
@@ -75,27 +95,37 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform:
-          - linux/amd64
-          - linux/arm64
+        platform: [linux/amd64, linux/arm64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          install: true
 
-      - name: Build and push sdr_full image with sdr_light base
+      - name: Set up Docker Cache
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ matrix.platform }}-
+
+      - name: Build and push sdr_full image
         run: |
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
             -t ${{ env.REGISTRY_IMAGE }}:sdr_full \
+            --cache-from=type=local,src=/tmp/.buildx-cache \
+            --cache-to=type=local,dest=/tmp/.buildx-cache-new \
             -f Dockerfiles/SDR/sdr_full.docker \
             --push \
             .
+
+      - name: Save Docker Cache
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache-new
+          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
