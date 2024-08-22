@@ -34,17 +34,9 @@ jobs:
         run: |
           docker buildx build --platform ${{ matrix.platform }} \
             --push \
-            -t ${{ env.REGISTRY_IMAGE }}:corebuild-${{ matrix.platform }} \
+            -t ${{ env.REGISTRY_IMAGE }}:corebuild \
             -f Dockerfiles/SDR/corebuild.docker \
             .
-
-      - name: Create and push multi-arch manifest for corebuild
-        if: matrix.platform == 'linux/amd64'
-        run: |
-          docker buildx imagetools create \
-            -t ${{ env.REGISTRY_IMAGE }}:corebuild \
-            ${{ env.REGISTRY_IMAGE }}:corebuild-linux/amd64 \
-            ${{ env.REGISTRY_IMAGE }}:corebuild-linux/arm64
 
   verify-corebuild:
     runs-on: ubuntu-latest
@@ -58,7 +50,7 @@ jobs:
         run: |
           echo "Verifying corebuild image availability..."
           for i in {1..5}; do
-            if docker pull ${{ env.REGISTRY_IMAGE }}:corebuild-${{ matrix.platform }}; then
+            if docker pull ${{ env.REGISTRY_IMAGE }}:corebuild; then
               echo "corebuild image for ${{ matrix.platform }} is available."
               exit 0
             fi
@@ -93,19 +85,11 @@ jobs:
       - name: Build and push automotive image with corebuild base
         run: |
           docker buildx build --platform ${{ matrix.platform }} \
-            --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild-${{ matrix.platform }} \
+            --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --push \
-            -t ${{ env.REGISTRY_IMAGE }}:automotive-${{ matrix.platform }} \
+            -t ${{ env.REGISTRY_IMAGE }}:automotive \
             -f Dockerfiles/automotive.docker \
             .
-
-      - name: Create and push multi-arch manifest for automotive
-        if: matrix.platform == 'linux/amd64'
-        run: |
-          docker buildx imagetools create \
-            -t ${{ env.REGISTRY_IMAGE }}:automotive \
-            ${{ env.REGISTRY_IMAGE }}:automotive-linux/amd64 \
-            ${{ env.REGISTRY_IMAGE }}:automotive-linux/arm64
 
   sdr_light_antsdr:
     runs-on: ubuntu-latest
@@ -132,19 +116,11 @@ jobs:
       - name: Build and push sdr_light_antsdr image with corebuild base
         run: |
           docker buildx build --platform ${{ matrix.platform }} \
-            --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild-${{ matrix.platform }} \
+            --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --push \
-            -t ${{ env.REGISTRY_IMAGE }}:sdr_light_antsdr-${{ matrix.platform }} \
+            -t ${{ env.REGISTRY_IMAGE }}:sdr_light_antsdr \
             -f Dockerfiles/SDR/sdr_light_antsdr.docker \
             .
-
-      - name: Create and push multi-arch manifest for sdr_light_antsdr
-        if: matrix.platform == 'linux/amd64'
-        run: |
-          docker buildx imagetools create \
-            -t ${{ env.REGISTRY_IMAGE }}:sdr_light_antsdr \
-            ${{ env.REGISTRY_IMAGE }}:sdr_light_antsdr-linux/amd64 \
-            ${{ env.REGISTRY_IMAGE }}:sdr_light_antsdr-linux/arm64
 
   sdr_light_rtlsdrv4:
     runs-on: ubuntu-latest
@@ -171,19 +147,11 @@ jobs:
       - name: Build and push sdr_light_rtlsdrv4 image with corebuild base
         run: |
           docker buildx build --platform ${{ matrix.platform }} \
-            --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild-${{ matrix.platform }} \
+            --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --push \
-            -t ${{ env.REGISTRY_IMAGE }}:sdr_light_rtlsdrv4-${{ matrix.platform }} \
+            -t ${{ env.REGISTRY_IMAGE }}:sdr_light_rtlsdrv4 \
             -f Dockerfiles/SDR/sdr_light_rtlsdrv4.docker \
             .
-
-      - name: Create and push multi-arch manifest for sdr_light_rtlsdrv4
-        if: matrix.platform == 'linux/amd64'
-        run: |
-          docker buildx imagetools create \
-            -t ${{ env.REGISTRY_IMAGE }}:sdr_light_rtlsdrv4 \
-            ${{ env.REGISTRY_IMAGE }}:sdr_light_rtlsdrv4-linux/amd64 \
-            ${{ env.REGISTRY_IMAGE }}:sdr_light_rtlsdrv4-linux/arm64
 
   reversing:
     runs-on: ubuntu-latest
@@ -210,19 +178,11 @@ jobs:
       - name: Build and push reversing image with corebuild base
         run: |
           docker buildx build --platform ${{ matrix.platform }} \
-            --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild-${{ matrix.platform }} \
+            --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --push \
-            -t ${{ env.REGISTRY_IMAGE }}:reversing-${{ matrix.platform }} \
+            -t ${{ env.REGISTRY_IMAGE }}:reversing \
             -f Dockerfiles/reversing.docker \
             .
-
-      - name: Create and push multi-arch manifest for reversing
-        if: matrix.platform == 'linux/amd64'
-        run: |
-          docker buildx imagetools create \
-            -t ${{ env.REGISTRY_IMAGE }}:reversing \
-            ${{ env.REGISTRY_IMAGE }}:reversing-linux/amd64 \
-            ${{ env.REGISTRY_IMAGE }}:reversing-linux/arm64
 
   sdr_light:
     runs-on: ubuntu-latest
@@ -249,19 +209,11 @@ jobs:
       - name: Build and push sdr_light image with corebuild base
         run: |
           docker buildx build --platform ${{ matrix.platform }} \
-            --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild-${{ matrix.platform }} \
+            --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --push \
-            -t ${{ env.REGISTRY_IMAGE }}:sdr_light-${{ matrix.platform }} \
+            -t ${{ env.REGISTRY_IMAGE }}:sdr_light \
             -f Dockerfiles/SDR/sdr_light.docker \
             .
-
-      - name: Create and push multi-arch manifest for sdr_light
-        if: matrix.platform == 'linux/amd64'
-        run: |
-          docker buildx imagetools create \
-            -t ${{ env.REGISTRY_IMAGE }}:sdr_light \
-            ${{ env.REGISTRY_IMAGE }}:sdr_light-linux/amd64 \
-            ${{ env.REGISTRY_IMAGE }}:sdr_light-linux/arm64
 
   sdr_full:
     runs-on: ubuntu-latest
@@ -288,19 +240,11 @@ jobs:
       - name: Build and push sdr_full image with sdr_light base
         run: |
           docker buildx build --platform ${{ matrix.platform }} \
-            --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light-${{ matrix.platform }} \
+            --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
             --push \
-            -t ${{ env.REGISTRY_IMAGE }}:sdr_full-${{ matrix.platform }} \
+            -t ${{ env.REGISTRY_IMAGE }}:sdr_full \
             -f Dockerfiles/SDR/sdr_full.docker \
             .
-
-      - name: Create and push multi-arch manifest for sdr_full
-        if: matrix.platform == 'linux/amd64'
-        run: |
-          docker buildx imagetools create \
-            -t ${{ env.REGISTRY_IMAGE }}:sdr_full \
-            ${{ env.REGISTRY_IMAGE }}:sdr_full-linux/amd64 \
-            ${{ env.REGISTRY_IMAGE }}:sdr_full-linux/arm64
 
   rfid:
     runs-on: ubuntu-latest
@@ -327,19 +271,11 @@ jobs:
       - name: Build and push rfid image with sdr_light base
         run: |
           docker buildx build --platform ${{ matrix.platform }} \
-            --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light-${{ matrix.platform }} \
+            --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
             --push \
-            -t ${{ env.REGISTRY_IMAGE }}:rfid-${{ matrix.platform }} \
+            -t ${{ env.REGISTRY_IMAGE }}:rfid \
             -f Dockerfiles/rfid.docker \
             .
-
-      - name: Create and push multi-arch manifest for rfid
-        if: matrix.platform == 'linux/amd64'
-        run: |
-          docker buildx imagetools create \
-            -t ${{ env.REGISTRY_IMAGE }}:rfid \
-            ${{ env.REGISTRY_IMAGE }}:rfid-linux/amd64 \
-            ${{ env.REGISTRY_IMAGE }}:rfid-linux/arm64
 
   wifi:
     runs-on: ubuntu-latest
@@ -366,19 +302,11 @@ jobs:
       - name: Build and push wifi image with sdr_light base
         run: |
           docker buildx build --platform ${{ matrix.platform }} \
-            --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light-${{ matrix.platform }} \
+            --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
             --push \
-            -t ${{ env.REGISTRY_IMAGE }}:wifi-${{ matrix.platform }} \
+            -t ${{ env.REGISTRY_IMAGE }}:wifi \
             -f Dockerfiles/wifi.docker \
             .
-
-      - name: Create and push multi-arch manifest for wifi
-        if: matrix.platform == 'linux/amd64'
-        run: |
-          docker buildx imagetools create \
-            -t ${{ env.REGISTRY_IMAGE }}:wifi \
-            ${{ env.REGISTRY_IMAGE }}:wifi-linux/amd64 \
-            ${{ env.REGISTRY_IMAGE }}:wifi-linux/arm64
 
   bluetooth:
     runs-on: ubuntu-latest
@@ -405,19 +333,11 @@ jobs:
       - name: Build and push bluetooth image with sdr_light base
         run: |
           docker buildx build --platform ${{ matrix.platform }} \
-            --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light-${{ matrix.platform }} \
+            --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
             --push \
-            -t ${{ env.REGISTRY_IMAGE }}:bluetooth-${{ matrix.platform }} \
+            -t ${{ env.REGISTRY_IMAGE }}:bluetooth \
             -f Dockerfiles/bluetooth.docker \
             .
-
-      - name: Create and push multi-arch manifest for bluetooth
-        if: matrix.platform == 'linux/amd64'
-        run: |
-          docker buildx imagetools create \
-            -t ${{ env.REGISTRY_IMAGE }}:bluetooth \
-            ${{ env.REGISTRY_IMAGE }}:bluetooth-linux/amd64 \
-            ${{ env.REGISTRY_IMAGE }}:bluetooth-linux/arm64
 
   sdr_deeptemptest_beta:
     runs-on: ubuntu-latest
@@ -444,16 +364,8 @@ jobs:
       - name: Build and push sdr_deeptemptest_beta image with sdr_light base
         run: |
           docker buildx build --platform ${{ matrix.platform }} \
-            --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light-${{ matrix.platform }} \
+            --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
             --push \
-            -t ${{ env.REGISTRY_IMAGE }}:sdr_deeptemptest_beta-${{ matrix.platform }} \
+            -t ${{ env.REGISTRY_IMAGE }}:sdr_deeptemptest_beta \
             -f Dockerfiles/SDR/sdr_deeptemptest_beta.docker \
             .
-
-      - name: Create and push multi-arch manifest for sdr_deeptemptest_beta
-        if: matrix.platform == 'linux/amd64'
-        run: |
-          docker buildx imagetools create \
-            -t ${{ env.REGISTRY_IMAGE }}:sdr_deeptemptest_beta \
-            ${{ env.REGISTRY_IMAGE }}:sdr_deeptemptest_beta-linux/amd64 \
-            ${{ env.REGISTRY_IMAGE }}:sdr_deeptemptest_beta-linux/arm64
