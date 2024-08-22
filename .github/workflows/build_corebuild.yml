@@ -32,6 +32,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-${{ matrix.platform }}-
 
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
       - name: Build and push corebuild image
         run: |
           docker buildx build --platform ${{ matrix.platform }} \
@@ -72,7 +78,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-${{ matrix.platform }}-
 
-      - name: Build and push sdr_light image
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push sdr_light image with corebuild base
         run: |
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
@@ -113,7 +125,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-${{ matrix.platform }}-
 
-      - name: Build and push sdr_full image
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push sdr_full image with sdr_light base
         run: |
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
