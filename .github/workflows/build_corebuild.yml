@@ -305,7 +305,7 @@ jobs:
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
             --cache-from=type=local,src=/tmp/.buildx-cache \
             --cache-to=type=local,dest=/tmp/.buildx-cache,mode=max \
-            --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
+            --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:rfid \
             -f Dockerfiles/rfid.docker \
