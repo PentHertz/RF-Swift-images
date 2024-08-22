@@ -6,9 +6,9 @@ on:
       - main
 
 env:
-  - REGISTRY_IMAGE: penthertz/rfswiftdev
-  - BUILD_PLATFORMS: linux/amd64,linux/arm64
-  - CACHE_REPO: ${{ env.REGISTRY_IMAGE }}/cache
+  REGISTRY_IMAGE: penthertz/rfswiftdev
+  BUILD_PLATFORMS: linux/amd64,linux/arm64
+  CACHE_REPO: ${{ env.REGISTRY_IMAGE }}/cache
 
 jobs:
   corebuild:
