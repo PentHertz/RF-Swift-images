@@ -24,14 +24,6 @@ jobs:
         with:
           install: true
 
-      - name: Set up Docker Cache
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ matrix.platform }}-
-
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -41,22 +33,36 @@ jobs:
       - name: Build and push corebuild image
         run: |
           docker buildx build --platform ${{ matrix.platform }} \
-            -t ${{ env.REGISTRY_IMAGE }}:corebuild \
-            --cache-from=type=local,src=/tmp/.buildx-cache \
-            --cache-to=type=local,dest=/tmp/.buildx-cache-new \
-            -f Dockerfiles/SDR/corebuild.docker \
             --push \
+            -t ${{ env.REGISTRY_IMAGE }}:corebuild \
+            -f Dockerfiles/SDR/corebuild.docker \
             .
 
-      - name: Save Docker Cache
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache-new
-          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
+  verify-corebuild:
+    runs-on: ubuntu-latest
+    needs: corebuild
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [linux/amd64, linux/arm64]
+    steps:
+      - name: Wait for corebuild image to be available
+        run: |
+          echo "Verifying corebuild image availability..."
+          for i in {1..5}; do
+            if docker pull ${{ env.REGISTRY_IMAGE }}:corebuild; then
+              echo "corebuild image is available."
+              exit 0
+            fi
+            echo "corebuild image is not available yet, retrying in 10 seconds..."
+            sleep 10
+          done
+          echo "corebuild image is not available after multiple attempts, failing."
+          exit 1
 
   automotive:
     runs-on: ubuntu-latest
-    needs: corebuild
+    needs: verify-corebuild
     strategy:
       fail-fast: false
       matrix:
@@ -69,14 +75,6 @@ jobs:
         uses: docker/setup-buildx-action@v3
         with:
           install: true
-
-      - name: Set up Docker Cache
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ matrix.platform }}-
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
@@ -88,22 +86,14 @@ jobs:
         run: |
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
-            -t ${{ env.REGISTRY_IMAGE }}:automotive \
-            --cache-from=type=local,src=/tmp/.buildx-cache \
-            --cache-to=type=local,dest=/tmp/.buildx-cache-new \
-            -f Dockerfiles/automotive.docker \
             --push \
+            -t ${{ env.REGISTRY_IMAGE }}:automotive \
+            -f Dockerfiles/automotive.docker \
             .
-
-      - name: Save Docker Cache
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache-new
-          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
 
   sdr_light_antsdr:
     runs-on: ubuntu-latest
-    needs: corebuild
+    needs: verify-corebuild
     strategy:
       fail-fast: false
       matrix:
@@ -116,14 +106,6 @@ jobs:
         uses: docker/setup-buildx-action@v3
         with:
           install: true
-
-      - name: Set up Docker Cache
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ matrix.platform }}-
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
@@ -135,22 +117,14 @@ jobs:
         run: |
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
-            -t ${{ env.REGISTRY_IMAGE }}:sdr_light_antsdr \
-            --cache-from=type=local,src=/tmp/.buildx-cache \
-            --cache-to=type=local,dest=/tmp/.buildx-cache-new \
-            -f Dockerfiles/SDR/sdr_light_antsdr.docker \
             --push \
+            -t ${{ env.REGISTRY_IMAGE }}:sdr_light_antsdr \
+            -f Dockerfiles/SDR/sdr_light_antsdr.docker \
             .
-
-      - name: Save Docker Cache
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache-new
-          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
 
   sdr_light_rtlsdrv4:
     runs-on: ubuntu-latest
-    needs: corebuild
+    needs: verify-corebuild
     strategy:
       fail-fast: false
       matrix:
@@ -163,14 +137,6 @@ jobs:
         uses: docker/setup-buildx-action@v3
         with:
           install: true
-
-      - name: Set up Docker Cache
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ matrix.platform }}-
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
@@ -182,22 +148,14 @@ jobs:
         run: |
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
-            -t ${{ env.REGISTRY_IMAGE }}:sdr_light_rtlsdrv4 \
-            --cache-from=type=local,src=/tmp/.buildx-cache \
-            --cache-to=type=local,dest=/tmp/.buildx-cache-new \
-            -f Dockerfiles/SDR/sdr_light_rtlsdrv4.docker \
             --push \
+            -t ${{ env.REGISTRY_IMAGE }}:sdr_light_rtlsdrv4 \
+            -f Dockerfiles/SDR/sdr_light_rtlsdrv4.docker \
             .
-
-      - name: Save Docker Cache
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache-new
-          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
 
   reversing:
     runs-on: ubuntu-latest
-    needs: corebuild
+    needs: verify-corebuild
     strategy:
       fail-fast: false
       matrix:
@@ -210,14 +168,6 @@ jobs:
         uses: docker/setup-buildx-action@v3
         with:
           install: true
-
-      - name: Set up Docker Cache
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ matrix.platform }}-
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
@@ -229,22 +179,14 @@ jobs:
         run: |
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
-            -t ${{ env.REGISTRY_IMAGE }}:reversing \
-            --cache-from=type=local,src=/tmp/.buildx-cache \
-            --cache-to=type=local,dest=/tmp/.buildx-cache-new \
-            -f Dockerfiles/reversing.docker \
             --push \
+            -t ${{ env.REGISTRY_IMAGE }}:reversing \
+            -f Dockerfiles/reversing.docker \
             .
-
-      - name: Save Docker Cache
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache-new
-          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
 
   sdr_light:
     runs-on: ubuntu-latest
-    needs: corebuild
+    needs: verify-corebuild
     strategy:
       fail-fast: false
       matrix:
@@ -258,14 +200,6 @@ jobs:
         with:
           install: true
 
-      - name: Set up Docker Cache
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ matrix.platform }}-
-
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -276,18 +210,10 @@ jobs:
         run: |
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
-            -t ${{ env.REGISTRY_IMAGE }}:sdr_light \
-            --cache-from=type=local,src=/tmp/.buildx-cache \
-            --cache-to=type=local,dest=/tmp/.buildx-cache-new \
-            -f Dockerfiles/SDR/sdr_light.docker \
             --push \
+            -t ${{ env.REGISTRY_IMAGE }}:sdr_light \
+            -f Dockerfiles/SDR/sdr_light.docker \
             .
-
-      - name: Save Docker Cache
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache-new
-          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
 
   sdr_full:
     runs-on: ubuntu-latest
@@ -305,14 +231,6 @@ jobs:
         with:
           install: true
 
-      - name: Set up Docker Cache
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ matrix.platform }}-
-
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -323,18 +241,10 @@ jobs:
         run: |
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
-            -t ${{ env.REGISTRY_IMAGE }}:sdr_full \
-            --cache-from=type=local,src=/tmp/.buildx-cache \
-            --cache-to=type=local,dest=/tmp/.buildx-cache-new \
-            -f Dockerfiles/SDR/sdr_full.docker \
             --push \
+            -t ${{ env.REGISTRY_IMAGE }}:sdr_full \
+            -f Dockerfiles/SDR/sdr_full.docker \
             .
-
-      - name: Save Docker Cache
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache-new
-          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
 
   rfid:
     runs-on: ubuntu-latest
@@ -352,14 +262,6 @@ jobs:
         with:
           install: true
 
-      - name: Set up Docker Cache
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ matrix.platform }}-
-
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -370,18 +272,10 @@ jobs:
         run: |
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
-            -t ${{ env.REGISTRY_IMAGE }}:rfid \
-            --cache-from=type=local,src=/tmp/.buildx-cache \
-            --cache-to=type=local,dest=/tmp/.buildx-cache-new \
-            -f Dockerfiles/rfid.docker \
             --push \
+            -t ${{ env.REGISTRY_IMAGE }}:rfid \
+            -f Dockerfiles/rfid.docker \
             .
-
-      - name: Save Docker Cache
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache-new
-          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
 
   wifi:
     runs-on: ubuntu-latest
@@ -399,14 +293,6 @@ jobs:
         with:
           install: true
 
-      - name: Set up Docker Cache
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ matrix.platform }}-
-
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -417,18 +303,10 @@ jobs:
         run: |
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
-            -t ${{ env.REGISTRY_IMAGE }}:wifi \
-            --cache-from=type=local,src=/tmp/.buildx-cache \
-            --cache-to=type=local,dest=/tmp/.buildx-cache-new \
-            -f Dockerfiles/wifi.docker \
             --push \
+            -t ${{ env.REGISTRY_IMAGE }}:wifi \
+            -f Dockerfiles/wifi.docker \
             .
-
-      - name: Save Docker Cache
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache-new
-          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
 
   bluetooth:
     runs-on: ubuntu-latest
@@ -446,14 +324,6 @@ jobs:
         with:
           install: true
 
-      - name: Set up Docker Cache
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ matrix.platform }}-
-
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -464,18 +334,10 @@ jobs:
         run: |
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
-            -t ${{ env.REGISTRY_IMAGE }}:bluetooth \
-            --cache-from=type=local,src=/tmp/.buildx-cache \
-            --cache-to=type=local,dest=/tmp/.buildx-cache-new \
-            -f Dockerfiles/bluetooth.docker \
             --push \
+            -t ${{ env.REGISTRY_IMAGE }}:bluetooth \
+            -f Dockerfiles/bluetooth.docker \
             .
-
-      - name: Save Docker Cache
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache-new
-          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
 
   sdr_deeptemptest_beta:
     runs-on: ubuntu-latest
@@ -493,14 +355,6 @@ jobs:
         with:
           install: true
 
-      - name: Set up Docker Cache
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ matrix.platform }}-
-
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -511,15 +365,7 @@ jobs:
         run: |
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
-            -t ${{ env.REGISTRY_IMAGE }}:sdr_deeptemptest_beta \
-            --cache-from=type=local,src=/tmp/.buildx-cache \
-            --cache-to=type=local,dest=/tmp/.buildx-cache-new \
-            -f Dockerfiles/SDR/sdr_deeptemptest_beta.docker \
             --push \
+            -t ${{ env.REGISTRY_IMAGE }}:sdr_deeptemptest_beta \
+            -f Dockerfiles/SDR/sdr_deeptemptest_beta.docker \
             .
-
-      - name: Save Docker Cache
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache-new
-          key: ${{ runner.os }}-buildx-${{ matrix.platform }}-${{ github.sha }}
