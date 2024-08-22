@@ -6,15 +6,13 @@ on:
       - main
 
 env:
-  REGISTRY_IMAGE: penthertz/rfswiftdev
+  - REGISTRY_IMAGE: penthertz/rfswiftdev
+  - BUILD_PLATFORMS: linux/amd64,linux/arm64
+  - CACHE_REPO: ${{ env.REGISTRY_IMAGE }}/cache
 
 jobs:
   corebuild:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        platform: [linux/amd64, linux/arm64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -27,50 +25,22 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push corebuild image
+      - name: Build and push corebuild image with caching
         run: |
-          docker buildx build --platform linux/amd64,linux/arm64 \
+          docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
+            --cache-from=type=registry,ref=${{ env.CACHE_REPO }}:corebuild \
+            --cache-to=type=registry,ref=${{ env.CACHE_REPO }}:corebuild,mode=max \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:corebuild \
             -f Dockerfiles/SDR/corebuild.docker \
             .
 
-      - name: Verify multi-platform build
-        run: |
-          docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:corebuild
-
-  verify-corebuild:
-    runs-on: ubuntu-latest
-    needs: corebuild
-    strategy:
-      fail-fast: false
-      matrix:
-        platform: [linux/amd64, linux/arm64]
-    steps:
-      - name: Wait for corebuild image to be available
-        run: |
-          echo "Verifying corebuild image availability..."
-          for i in {1..5}; do
-            if docker pull ${{ env.REGISTRY_IMAGE }}:corebuild; then
-              echo "corebuild image is available."
-              exit 0
-            fi
-            echo "corebuild image is not available yet, retrying in 10 seconds..."
-            sleep 10
-          done
-          echo "corebuild image is not available after multiple attempts, failing."
-          exit 1
-
   automotive:
     runs-on: ubuntu-latest
-    needs: verify-corebuild
-    strategy:
-      fail-fast: false
-      matrix:
-        platform: [linux/amd64, linux/arm64]
+    needs: corebuild
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -83,12 +53,14 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push automotive image with corebuild base
+      - name: Build and push automotive image with caching
         run: |
-          docker buildx build --platform ${{ matrix.platform }} \
+          docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
+            --cache-from=type=registry,ref=${{ env.CACHE_REPO }}:automotive \
+            --cache-to=type=registry,ref=${{ env.CACHE_REPO }}:automotive,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:automotive \
@@ -97,11 +69,7 @@ jobs:
 
   sdr_light_antsdr:
     runs-on: ubuntu-latest
-    needs: verify-corebuild
-    strategy:
-      fail-fast: false
-      matrix:
-        platform: [linux/amd64, linux/arm64]
+    needs: corebuild
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -114,12 +82,14 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push sdr_light_antsdr image with corebuild base
+      - name: Build and push sdr_light_antsdr image with caching
         run: |
-          docker buildx build --platform ${{ matrix.platform }} \
+          docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
+            --cache-from=type=registry,ref=${{ env.CACHE_REPO }}:sdr_light_antsdr \
+            --cache-to=type=registry,ref=${{ env.CACHE_REPO }}:sdr_light_antsdr,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:sdr_light_antsdr \
@@ -128,11 +98,7 @@ jobs:
 
   sdr_light_rtlsdrv4:
     runs-on: ubuntu-latest
-    needs: verify-corebuild
-    strategy:
-      fail-fast: false
-      matrix:
-        platform: [linux/amd64, linux/arm64]
+    needs: corebuild
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -145,12 +111,14 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push sdr_light_rtlsdrv4 image with corebuild base
+      - name: Build and push sdr_light_rtlsdrv4 image with caching
         run: |
-          docker buildx build --platform ${{ matrix.platform }} \
+          docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
+            --cache-from=type=registry,ref=${{ env.CACHE_REPO }}:sdr_light_rtlsdrv4 \
+            --cache-to=type=registry,ref=${{ env.CACHE_REPO }}:sdr_light_rtlsdrv4,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:sdr_light_rtlsdrv4 \
@@ -159,11 +127,7 @@ jobs:
 
   reversing:
     runs-on: ubuntu-latest
-    needs: verify-corebuild
-    strategy:
-      fail-fast: false
-      matrix:
-        platform: [linux/amd64, linux/arm64]
+    needs: corebuild
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -176,12 +140,14 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push reversing image with corebuild base
+      - name: Build and push reversing image with caching
         run: |
-          docker buildx build --platform ${{ matrix.platform }} \
+          docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
+            --cache-from=type=registry,ref=${{ env.CACHE_REPO }}:reversing \
+            --cache-to=type=registry,ref=${{ env.CACHE_REPO }}:reversing,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:reversing \
@@ -190,11 +156,7 @@ jobs:
 
   sdr_light:
     runs-on: ubuntu-latest
-    needs: verify-corebuild
-    strategy:
-      fail-fast: false
-      matrix:
-        platform: [linux/amd64, linux/arm64]
+    needs: corebuild
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -207,12 +169,14 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push sdr_light image with corebuild base
+      - name: Build and push sdr_light image with caching
         run: |
-          docker buildx build --platform ${{ matrix.platform }} \
+          docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
+            --cache-from=type=registry,ref=${{ env.CACHE_REPO }}:sdr_light \
+            --cache-to=type=registry,ref=${{ env.CACHE_REPO }}:sdr_light,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:sdr_light \
@@ -222,10 +186,6 @@ jobs:
   sdr_full:
     runs-on: ubuntu-latest
     needs: sdr_light
-    strategy:
-      fail-fast: false
-      matrix:
-        platform: [linux/amd64, linux/arm64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -238,12 +198,14 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push sdr_full image with sdr_light base
+      - name: Build and push sdr_full image with caching
         run: |
-          docker buildx build --platform ${{ matrix.platform }} \
+          docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
+            --cache-from=type=registry,ref=${{ env.CACHE_REPO }}:sdr_full \
+            --cache-to=type=registry,ref=${{ env.CACHE_REPO }}:sdr_full,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:sdr_full \
@@ -253,10 +215,6 @@ jobs:
   rfid:
     runs-on: ubuntu-latest
     needs: sdr_light
-    strategy:
-      fail-fast: false
-      matrix:
-        platform: [linux/amd64, linux/arm64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -269,12 +227,14 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push rfid image with sdr_light base
+      - name: Build and push rfid image with caching
         run: |
-          docker buildx build --platform ${{ matrix.platform }} \
+          docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
+            --cache-from=type=registry,ref=${{ env.CACHE_REPO }}:rfid \
+            --cache-to=type=registry,ref=${{ env.CACHE_REPO }}:rfid,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:rfid \
@@ -284,10 +244,6 @@ jobs:
   wifi:
     runs-on: ubuntu-latest
     needs: sdr_light
-    strategy:
-      fail-fast: false
-      matrix:
-        platform: [linux/amd64, linux/arm64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -300,12 +256,14 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push wifi image with sdr_light base
+      - name: Build and push wifi image with caching
         run: |
-          docker buildx build --platform ${{ matrix.platform }} \
+          docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
+            --cache-from=type=registry,ref=${{ env.CACHE_REPO }}:wifi \
+            --cache-to=type=registry,ref=${{ env.CACHE_REPO }}:wifi,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:wifi \
@@ -315,10 +273,6 @@ jobs:
   bluetooth:
     runs-on: ubuntu-latest
     needs: sdr_light
-    strategy:
-      fail-fast: false
-      matrix:
-        platform: [linux/amd64, linux/arm64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -331,12 +285,14 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push bluetooth image with sdr_light base
+      - name: Build and push bluetooth image with caching
         run: |
-          docker buildx build --platform ${{ matrix.platform }} \
+          docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
+            --cache-from=type=registry,ref=${{ env.CACHE_REPO }}:bluetooth \
+            --cache-to=type=registry,ref=${{ env.CACHE_REPO }}:bluetooth,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:bluetooth \
@@ -345,11 +301,7 @@ jobs:
 
   sdr_deeptemptest_beta:
     runs-on: ubuntu-latest
-    needs: sdr_light
-    strategy:
-      fail-fast: false
-      matrix:
-        platform: [linux/amd64, linux/arm64]
+    needs: sdr_lig
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -362,12 +314,14 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push sdr_deeptemptest_beta image with sdr_light base
+      - name: Build and push sdr_deeptemptest_beta image with caching
         run: |
-          docker buildx build --platform ${{ matrix.platform }} \
+          docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
+            --cache-from=type=registry,ref=${{ env.CACHE_REPO }}:sdr_deeptemptest_beta \
+            --cache-to=type=registry,ref=${{ env.CACHE_REPO }}:sdr_deeptemptest_beta,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:sdr_deeptemptest_beta \
