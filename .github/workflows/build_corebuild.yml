@@ -45,8 +45,8 @@ jobs:
           S3_URL: ${{ secrets.BUCKET_URL }}/${{ secrets.BUCKET_NAME }}
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,region=${{ secrets.BUCKET_REGION }},bucket=${{ secrets.BUCKET_NAME }},name=cache/corebuild,s3-url=${{ env.S3_URL }} \
-            --cache-to=type=s3,region=${{ secrets.BUCKET_REGION }},bucket=${{ secrets.BUCKET_NAME }},name=cache/corebuild,mode=max,s3-url=${{ env.S3_URL }} \
+            --cache-from=type=s3-compatible,region=${{ secrets.BUCKET_REGION }},bucket=${{ secrets.BUCKET_NAME }},name=cache/corebuild,s3-url=${{ env.S3_URL }} \
+            --cache-to=type=s3-compatible,region=${{ secrets.BUCKET_REGION }},bucket=${{ secrets.BUCKET_NAME }},name=cache/corebuild,mode=max,s3-url=${{ env.S3_URL }} \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:corebuild \
             -f Dockerfiles/slim.docker \
