@@ -4,7 +4,7 @@ env:
   REGISTRY_IMAGE: penthertz/rfswiftdev
   BUILD_PLATFORMS: linux/amd64
   CACHE_PLATFORMS: linux_amd64
-  CACHE_REPO: penthertz/rfswiftdev/cache
+  CACHE_REPO: penthertz/rfswiftdev
   DO_SPACES_ENDPOINT: ${{ secrets.BUCKET_URL }}
   DO_SPACES_REGION: ${{ secrets.BUCKET_REGION }}
 
@@ -12,7 +12,6 @@ on:
   push:
     branches:
       - main
-
 
 jobs:
   corebuild:
@@ -34,15 +33,10 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push corebuild image with caching
-        env:
-          DO_SPACES_KEY: ${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
-          DO_SPACES_SECRET: ${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
-          DO_ENDPOINT: "https://gitactions.ams3.digitaloceanspaces.com"
-          DO_SPACE_NAME: ${{ secrets.BUCKET_NAME }}
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,bucket=${{ env.DO_SPACE_NAME }},name=cache/corebuild,s3-url=${{ env.DO_ENDPOINT }} \
-            --cache-to=type=s3,bucket=${{ env.DO_SPACE_NAME }},name=cache/corebuild,mode=max,s3-url=${{ env.DO_ENDPOINT }} \
+            --cache-from=type=registry,ref=${{ env.CACHE_REPO }}:cache-corebuild \
+            --cache-to=type=registry,ref=${{ env.CACHE_REPO }}:cache-corebuild,mode=max \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:corebuild \
             -f Dockerfiles/slim.docker \
