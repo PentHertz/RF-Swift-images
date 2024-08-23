@@ -15,8 +15,7 @@ on:
 
 jobs:
   corebuild:
-    runs-on:
-      labels: superrunner
+    runs-on: superrunner
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
