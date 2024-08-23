@@ -45,8 +45,8 @@ jobs:
       - name: Build and push corebuild image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/corebuild \
-            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/corebuild,mode=max \
+            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/corebuild,endpoint=${{ env.S3_ENDPOINT }} \
+            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/corebuild,mode=max,endpoint=${{ env.S3_ENDPOINT }} \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:corebuild \
             -f Dockerfiles/SDR/corebuild.docker \
@@ -83,8 +83,8 @@ jobs:
       - name: Build and push automotive image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/automotive \
-            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/automotive,mode=max \
+            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/automotive,endpoint=${{ env.S3_ENDPOINT }} \
+            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/automotive,mode=max,endpoint=${{ env.S3_ENDPOINT }} \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:automotive \
@@ -122,8 +122,8 @@ jobs:
       - name: Build and push sdr_light_antsdr image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_light_antsdr \
-            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_light_antsdr,mode=max \
+            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_light_antsdr,endpoint=${{ env.S3_ENDPOINT }} \
+            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_light_antsdr,mode=max,endpoint=${{ env.S3_ENDPOINT }} \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --build-arg UHD_BASE=antsdr_uhd \
             --build-arg RTLSDR_BASE=rtlsdr \
@@ -163,8 +163,8 @@ jobs:
       - name: Build and push sdr_light_rtlsdrv4 image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_light_rtlsdrv4 \
-            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_light_rtlsdrv4,mode=max \
+            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_light_rtlsdrv4,endpoint=${{ env.S3_ENDPOINT }} \
+            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_light_rtlsdrv4,mode=max,endpoint=${{ env.S3_ENDPOINT }} \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --build-arg UHD_BASE=uhd \
             --build-arg RTLSDR_BASE=rtlsdrv4 \
@@ -204,8 +204,8 @@ jobs:
       - name: Build and push reversing image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/reversing \
-            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/reversing,mode=max \
+            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/reversing,endpoint=${{ env.S3_ENDPOINT }} \
+            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/reversing,mode=max,endpoint=${{ env.S3_ENDPOINT }} \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:reversing \
@@ -243,8 +243,8 @@ jobs:
       - name: Build and push sdr_light image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_light \
-            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_light,mode=max \
+            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_light,endpoint=${{ env.S3_ENDPOINT }} \
+            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_light,mode=max,endpoint=${{ env.S3_ENDPOINT }} \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --build-arg UHD_BASE=uhd \
             --build-arg RTLSDR_BASE=rtlsdr \
@@ -284,8 +284,8 @@ jobs:
       - name: Build and push sdr_full image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_full \
-            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_full,mode=max \
+            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_full,endpoint=${{ env.S3_ENDPOINT }} \
+            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_full,mode=max,endpoint=${{ env.S3_ENDPOINT }} \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:sdr_full \
@@ -323,8 +323,8 @@ jobs:
       - name: Build and push rfid image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/rfid \
-            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/rfid,mode=max \
+            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/rfid,endpoint=${{ env.S3_ENDPOINT }} \
+            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/rfid,mode=max,endpoint=${{ env.S3_ENDPOINT }} \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:rfid \
@@ -362,8 +362,8 @@ jobs:
       - name: Build and push wifi image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/wifi \
-            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/wifi,mode=max \
+            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/wifi,endpoint=${{ env.S3_ENDPOINT }} \
+            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/wifi,mode=max,endpoint=${{ env.S3_ENDPOINT }} \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:wifi \
@@ -401,8 +401,8 @@ jobs:
       - name: Build and push bluetooth image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/bluetooth \
-            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/bluetooth,mode=max \
+            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/bluetooth,endpoint=${{ env.S3_ENDPOINT }} \
+            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/bluetooth,mode=max,endpoint=${{ env.S3_ENDPOINT }} \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:bluetooth \
@@ -440,8 +440,8 @@ jobs:
       - name: Build and push sdr_deeptemptest_beta image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_deeptemptest_beta \
-            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_deeptemptest_beta,mode=max \
+            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_deeptemptest_beta,endpoint=${{ env.S3_ENDPOINT }} \
+            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_deeptemptest_beta,mode=max,endpoint=${{ env.S3_ENDPOINT }} \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:sdr_deeptemptest_beta \
