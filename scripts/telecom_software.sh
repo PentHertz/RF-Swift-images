@@ -89,7 +89,6 @@ function openbts_umts_soft_install() {
             ;;
         *)
             criticalecho "[-] Unsupported architecture: $ARCH. OpenBTS UMTS installation is not supported on this architecture."
-            return 1
             ;;
     esac
 }
