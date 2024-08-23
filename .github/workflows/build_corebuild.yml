@@ -44,7 +44,7 @@ jobs:
             --cache-to=type=s3,region=${{ secrets.BUCKET_REGION }},bucket=${{ secrets.BUCKET_NAME }},name=cache/corebuild,mode=max \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:corebuild \
-            -f Dockerfiles/SDR/corebuild.docker \
+            -f Dockerfiles/slim.docker \
             .
 
   automotive:
