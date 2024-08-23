@@ -24,7 +24,6 @@ jobs:
         uses: docker/setup-buildx-action@v3
         with:
           install: true
-          version: latest
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
@@ -32,14 +31,23 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Configure DigitalOcean Spaces credentials
+        run: |
+          mkdir -p ~/.aws
+          echo "[default]
+          aws_access_key_id=${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}" > ~/.aws/credentials
+
       - name: Build and push corebuild image with caching
+        env:
+          AWS_EC2_METADATA_DISABLED: true
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=registry,ref=${{ env.CACHE_REPO }}:cache_corebuild \
-            --cache-to=type=registry,ref=${{ env.CACHE_REPO }}:cache_corebuild,mode=max \
+            --cache-from=type=s3,region=${{ env.DO_SPACES_REGION }},bucket=${{ secrets.BUCKET_NAME }},endpoint_url=${{ env.DO_SPACES_ENDPOINT }},name=cache/corebuild \
+            --cache-to=type=s3,region=${{ env.DO_SPACES_REGION }},bucket=${{ secrets.BUCKET_NAME }},endpoint_url=${{ env.DO_SPACES_ENDPOINT }},name=cache/corebuild,mode=max \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:corebuild \
-            -f Dockerfiles/SDR/corebuild.docker \
+            -f Dockerfiles/slim.docker \
             .
 
   automotive:
