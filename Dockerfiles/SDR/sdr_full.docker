@@ -3,6 +3,7 @@
 # Author(s): Sébastien Dudek (@FlUxIuS) @Penthertz
 # website: penthertz.com
 
+ARG BASE_IMAGE=sdr_full
 FROM ${BASE_IMAGE} as extraoot
 
 LABEL "org.container.project"="rfswift"
