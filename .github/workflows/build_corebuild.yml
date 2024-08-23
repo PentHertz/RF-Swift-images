@@ -35,8 +35,8 @@ jobs:
       - name: Build and push corebuild image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=registry,ref=${{ env.CACHE_REPO }}:cache-corebuild \
-            --cache-to=type=registry,ref=${{ env.CACHE_REPO }}:cache-corebuild,mode=max \
+            --cache-from=type=registry,ref=${{ env.CACHE_REPO }}:cache_corebuild \
+            --cache-to=type=registry,ref=${{ env.CACHE_REPO }}:cache_corebuild,mode=max \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:corebuild \
             -f Dockerfiles/slim.docker \
