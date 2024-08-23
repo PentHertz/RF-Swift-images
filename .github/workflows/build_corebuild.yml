@@ -68,30 +68,20 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Configure AWS Profile
+      - name: Configure DigitalOcean Spaces credentials
         run: |
-          mkdir -p ~/.aws && touch ~/.aws/credentials
-          cat << EOT > ~/.aws/credentials
-          [srv_gha]
+          mkdir -p ~/.aws
+          echo "[default]
           aws_access_key_id=${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
-          EOT
-
-      - name: Configure AWS Config
-        run: |
-          mkdir -p ~/.aws && touch ~/.aws/config
-          cat << EOT > ~/.aws/config
-          [default]
-          region = ${{ env.S3_REGION }}
-          output = json
-          EOT
+          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}" > ~/.aws/credentials
 
       - name: Build and push automotive image with caching
+        env:
+          AWS_EC2_METADATA_DISABLED: true
         run: |
-          export AWS_BUCKET=${{ env.S3_BUCKET }}
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,ref=${AWS_BUCKET}/cache/automotive,endpoint=${{ env.S3_ENDPOINT }} \
-            --cache-to=type=s3,ref=${AWS_BUCKET}/cache/automotive,mode=max,endpoint=${{ env.S3_ENDPOINT }} \
+            --cache-from=type=s3,region=${{ env.DO_SPACES_REGION }},bucket=${{ secrets.BUCKET_NAME }},endpoint=${{ env.DO_SPACES_ENDPOINT }},name=cache/automotive \
+            --cache-to=type=s3,region=${{ env.DO_SPACES_REGION }},bucket=${{ secrets.BUCKET_NAME }},endpoint=${{ env.DO_SPACES_ENDPOINT }},name=cache/automotive,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:automotive \
@@ -116,30 +106,20 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Configure AWS Profile
+      - name: Configure DigitalOcean Spaces credentials
         run: |
-          mkdir -p ~/.aws && touch ~/.aws/credentials
-          cat << EOT > ~/.aws/credentials
-          [srv_gha]
+          mkdir -p ~/.aws
+          echo "[default]
           aws_access_key_id=${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
-          EOT
-
-      - name: Configure AWS Config
-        run: |
-          mkdir -p ~/.aws && touch ~/.aws/config
-          cat << EOT > ~/.aws/config
-          [default]
-          region = ${{ env.S3_REGION }}
-          output = json
-          EOT
+          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}" > ~/.aws/credentials
 
       - name: Build and push sdr_light_antsdr image with caching
+        env:
+          AWS_EC2_METADATA_DISABLED: true
         run: |
-          export AWS_BUCKET=${{ env.S3_BUCKET }}
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,ref=${AWS_BUCKET}/cache/sdr_light_antsdr,endpoint=${{ env.S3_ENDPOINT }} \
-            --cache-to=type=s3,ref=${AWS_BUCKET}/cache/sdr_light_antsdr,mode=max,endpoint=${{ env.S3_ENDPOINT }} \
+            --cache-from=type=s3,region=${{ env.DO_SPACES_REGION }},bucket=${{ secrets.BUCKET_NAME }},endpoint=${{ env.DO_SPACES_ENDPOINT }},name=cache/sdr_light_antsdr \
+            --cache-to=type=s3,region=${{ env.DO_SPACES_REGION }},bucket=${{ secrets.BUCKET_NAME }},endpoint=${{ env.DO_SPACES_ENDPOINT }},name=cache/sdr_light_antsdr,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --build-arg UHD_BASE=antsdr_uhd \
             --build-arg RTLSDR_BASE=rtlsdr \
@@ -166,30 +146,20 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Configure AWS Profile
+      - name: Configure DigitalOcean Spaces credentials
         run: |
-          mkdir -p ~/.aws && touch ~/.aws/credentials
-          cat << EOT > ~/.aws/credentials
-          [srv_gha]
+          mkdir -p ~/.aws
+          echo "[default]
           aws_access_key_id=${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
-          EOT
-
-      - name: Configure AWS Config
-        run: |
-          mkdir -p ~/.aws && touch ~/.aws/config
-          cat << EOT > ~/.aws/config
-          [default]
-          region = ${{ env.S3_REGION }}
-          output = json
-          EOT
+          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}" > ~/.aws/credentials
 
       - name: Build and push sdr_light_rtlsdrv4 image with caching
+        env:
+          AWS_EC2_METADATA_DISABLED: true
         run: |
-          export AWS_BUCKET=${{ env.S3_BUCKET }}
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,ref=${AWS_BUCKET}/cache/sdr_light_rtlsdrv4,endpoint=${{ env.S3_ENDPOINT }} \
-            --cache-to=type=s3,ref=${AWS_BUCKET}/cache/sdr_light_rtlsdrv4,mode=max,endpoint=${{ env.S3_ENDPOINT }} \
+            --cache-from=type=s3,region=${{ env.DO_SPACES_REGION }},bucket=${{ secrets.BUCKET_NAME }},endpoint=${{ env.DO_SPACES_ENDPOINT }},name=cache/sdr_light_rtlsdrv4 \
+            --cache-to=type=s3,region=${{ env.DO_SPACES_REGION }},bucket=${{ secrets.BUCKET_NAME }},endpoint=${{ env.DO_SPACES_ENDPOINT }},name=cache/sdr_light_rtlsdrv4,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --build-arg UHD_BASE=uhd \
             --build-arg RTLSDR_BASE=rtlsdrv4 \
@@ -216,30 +186,20 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Configure AWS Profile
+      - name: Configure DigitalOcean Spaces credentials
         run: |
-          mkdir -p ~/.aws && touch ~/.aws/credentials
-          cat << EOT > ~/.aws/credentials
-          [srv_gha]
+          mkdir -p ~/.aws
+          echo "[default]
           aws_access_key_id=${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
-          EOT
-
-      - name: Configure AWS Config
-        run: |
-          mkdir -p ~/.aws && touch ~/.aws/config
-          cat << EOT > ~/.aws/config
-          [default]
-          region = ${{ env.S3_REGION }}
-          output = json
-          EOT
+          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}" > ~/.aws/credentials
 
       - name: Build and push reversing image with caching
+        env:
+          AWS_EC2_METADATA_DISABLED: true
         run: |
-          export AWS_BUCKET=${{ env.S3_BUCKET }}
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,ref=${AWS_BUCKET}/cache/reversing,endpoint=${{ env.S3_ENDPOINT }} \
-            --cache-to=type=s3,ref=${AWS_BUCKET}/cache/reversing,mode=max,endpoint=${{ env.S3_ENDPOINT }} \
+            --cache-from=type=s3,region=${{ env.DO_SPACES_REGION }},bucket=${{ secrets.BUCKET_NAME }},endpoint=${{ env.DO_SPACES_ENDPOINT }},name=cache/reversing \
+            --cache-to=type=s3,region=${{ env.DO_SPACES_REGION }},bucket=${{ secrets.BUCKET_NAME }},endpoint=${{ env.DO_SPACES_ENDPOINT }},name=cache/reversing,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:reversing \
@@ -264,30 +224,20 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Configure AWS Profile
+      - name: Configure DigitalOcean Spaces credentials
         run: |
-          mkdir -p ~/.aws && touch ~/.aws/credentials
-          cat << EOT > ~/.aws/credentials
-          [srv_gha]
+          mkdir -p ~/.aws
+          echo "[default]
           aws_access_key_id=${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
-          EOT
-
-      - name: Configure AWS Config
-        run: |
-          mkdir -p ~/.aws && touch ~/.aws/config
-          cat << EOT > ~/.aws/config
-          [default]
-          region = ${{ env.S3_REGION }}
-          output = json
-          EOT
+          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}" > ~/.aws/credentials
 
       - name: Build and push sdr_light image with caching
+        env:
+          AWS_EC2_METADATA_DISABLED: true
         run: |
-          export AWS_BUCKET=${{ env.S3_BUCKET }}
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,ref=${AWS_BUCKET}/cache/sdr_light,endpoint=${{ env.S3_ENDPOINT }} \
-            --cache-to=type=s3,ref=${AWS_BUCKET}/cache/sdr_light,mode=max,endpoint=${{ env.S3_ENDPOINT }} \
+            --cache-from=type=s3,region=${{ env.DO_SPACES_REGION }},bucket=${{ secrets.BUCKET_NAME }},endpoint=${{ env.DO_SPACES_ENDPOINT }},name=cache/sdr_light \
+            --cache-to=type=s3,region=${{ env.DO_SPACES_REGION }},bucket=${{ secrets.BUCKET_NAME }},endpoint=${{ env.DO_SPACES_ENDPOINT }},name=cache/sdr_light,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --build-arg UHD_BASE=uhd \
             --build-arg RTLSDR_BASE=rtlsdr \
@@ -314,30 +264,20 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Configure AWS Profile
+      - name: Configure DigitalOcean Spaces credentials
         run: |
-          mkdir -p ~/.aws && touch ~/.aws/credentials
-          cat << EOT > ~/.aws/credentials
-          [srv_gha]
+          mkdir -p ~/.aws
+          echo "[default]
           aws_access_key_id=${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
-          EOT
-
-      - name: Configure AWS Config
-        run: |
-          mkdir -p ~/.aws && touch ~/.aws/config
-          cat << EOT > ~/.aws/config
-          [default]
-          region = ${{ env.S3_REGION }}
-          output = json
-          EOT
+          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}" > ~/.aws/credentials
 
       - name: Build and push sdr_full image with caching
+        env:
+          AWS_EC2_METADATA_DISABLED: true
         run: |
-          export AWS_BUCKET=${{ env.S3_BUCKET }}
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,ref=${AWS_BUCKET}/cache/sdr_full,endpoint=${{ env.S3_ENDPOINT }} \
-            --cache-to=type=s3,ref=${AWS_BUCKET}/cache/sdr_full,mode=max,endpoint=${{ env.S3_ENDPOINT }} \
+            --cache-from=type=s3,region=${{ env.DO_SPACES_REGION }},bucket=${{ secrets.BUCKET_NAME }},endpoint=${{ env.DO_SPACES_ENDPOINT }},name=cache/sdr_full \
+            --cache-to=type=s3,region=${{ env.DO_SPACES_REGION }},bucket=${{ secrets.BUCKET_NAME }},endpoint=${{ env.DO_SPACES_ENDPOINT }},name=cache/sdr_full,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:sdr_full \
@@ -362,30 +302,20 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Configure AWS Profile
+      - name: Configure DigitalOcean Spaces credentials
         run: |
-          mkdir -p ~/.aws && touch ~/.aws/credentials
-          cat << EOT > ~/.aws/credentials
-          [srv_gha]
+          mkdir -p ~/.aws
+          echo "[default]
           aws_access_key_id=${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
-          EOT
-
-      - name: Configure AWS Config
-        run: |
-          mkdir -p ~/.aws && touch ~/.aws/config
-          cat << EOT > ~/.aws/config
-          [default]
-          region = ${{ env.S3_REGION }}
-          output = json
-          EOT
+          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}" > ~/.aws/credentials
 
       - name: Build and push rfid image with caching
+        env:
+          AWS_EC2_METADATA_DISABLED: true
         run: |
-          export AWS_BUCKET=${{ env.S3_BUCKET }}
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,ref=${AWS_BUCKET}/cache/rfid,endpoint=${{ env.S3_ENDPOINT }} \
-            --cache-to=type=s3,ref=${AWS_BUCKET}/cache/rfid,mode=max,endpoint=${{ env.S3_ENDPOINT }} \
+            --cache-from=type=s3,region=${{ env.DO_SPACES_REGION }},bucket=${{ secrets.BUCKET_NAME }},endpoint=${{ env.DO_SPACES_ENDPOINT }},name=cache/rfid \
+            --cache-to=type=s3,region=${{ env.DO_SPACES_REGION }},bucket=${{ secrets.BUCKET_NAME }},endpoint=${{ env.DO_SPACES_ENDPOINT }},name=cache/rfid,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:rfid \
@@ -410,30 +340,20 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Configure AWS Profile
+      - name: Configure DigitalOcean Spaces credentials
         run: |
-          mkdir -p ~/.aws && touch ~/.aws/credentials
-          cat << EOT > ~/.aws/credentials
-          [srv_gha]
+          mkdir -p ~/.aws
+          echo "[default]
           aws_access_key_id=${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
-          EOT
-
-      - name: Configure AWS Config
-        run: |
-          mkdir -p ~/.aws && touch ~/.aws/config
-          cat << EOT > ~/.aws/config
-          [default]
-          region = ${{ env.S3_REGION }}
-          output = json
-          EOT
+          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}" > ~/.aws/credentials
 
       - name: Build and push wifi image with caching
+        env:
+          AWS_EC2_METADATA_DISABLED: true
         run: |
-          export AWS_BUCKET=${{ env.S3_BUCKET }}
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,ref=${AWS_BUCKET}/cache/wifi,endpoint=${{ env.S3_ENDPOINT }} \
-            --cache-to=type=s3,ref=${AWS_BUCKET}/cache/wifi,mode=max,endpoint=${{ env.S3_ENDPOINT }} \
+            --cache-from=type=s3,region=${{ env.DO_SPACES_REGION }},bucket=${{ secrets.BUCKET_NAME }},endpoint=${{ env.DO_SPACES_ENDPOINT }},name=cache/wifi \
+            --cache-to=type=s3,region=${{ env.DO_SPACES_REGION }},bucket=${{ secrets.BUCKET_NAME }},endpoint=${{ env.DO_SPACES_ENDPOINT }},name=cache/wifi,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:wifi \
@@ -458,30 +378,20 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Configure AWS Profile
+      - name: Configure DigitalOcean Spaces credentials
         run: |
-          mkdir -p ~/.aws && touch ~/.aws/credentials
-          cat << EOT > ~/.aws/credentials
-          [srv_gha]
+          mkdir -p ~/.aws
+          echo "[default]
           aws_access_key_id=${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
-          EOT
-
-      - name: Configure AWS Config
-        run: |
-          mkdir -p ~/.aws && touch ~/.aws/config
-          cat << EOT > ~/.aws/config
-          [default]
-          region = ${{ env.S3_REGION }}
-          output = json
-          EOT
+          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}" > ~/.aws/credentials
 
       - name: Build and push bluetooth image with caching
+        env:
+          AWS_EC2_METADATA_DISABLED: true
         run: |
-          export AWS_BUCKET=${{ env.S3_BUCKET }}
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,ref=${AWS_BUCKET}/cache/bluetooth,endpoint=${{ env.S3_ENDPOINT }} \
-            --cache-to=type=s3,ref=${AWS_BUCKET}/cache/bluetooth,mode=max,endpoint=${{ env.S3_ENDPOINT }} \
+            --cache-from=type=s3,region=${{ env.DO_SPACES_REGION }},bucket=${{ secrets.BUCKET_NAME }},endpoint=${{ env.DO_SPACES_ENDPOINT }},name=cache/bluetooth \
+            --cache-to=type=s3,region=${{ env.DO_SPACES_REGION }},bucket=${{ secrets.BUCKET_NAME }},endpoint=${{ env.DO_SPACES_ENDPOINT }},name=cache/bluetooth,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:bluetooth \
@@ -506,30 +416,20 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Configure AWS Profile
+      - name: Configure DigitalOcean Spaces credentials
         run: |
-          mkdir -p ~/.aws && touch ~/.aws/credentials
-          cat << EOT > ~/.aws/credentials
-          [srv_gha]
+          mkdir -p ~/.aws
+          echo "[default]
           aws_access_key_id=${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
-          EOT
-
-      - name: Configure AWS Config
-        run: |
-          mkdir -p ~/.aws && touch ~/.aws/config
-          cat << EOT > ~/.aws/config
-          [default]
-          region = ${{ env.S3_REGION }}
-          output = json
-          EOT
+          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}" > ~/.aws/credentials
 
       - name: Build and push sdr_deeptemptest_beta image with caching
+        env:
+          AWS_EC2_METADATA_DISABLED: true
         run: |
-          export AWS_BUCKET=${{ env.S3_BUCKET }}
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,ref=${AWS_BUCKET}/cache/sdr_deeptemptest_beta,endpoint=${{ env.S3_ENDPOINT }} \
-            --cache-to=type=s3,ref=${AWS_BUCKET}/cache/sdr_deeptemptest_beta,mode=max,endpoint=${{ env.S3_ENDPOINT }} \
+            --cache-from=type=s3,region=${{ env.DO_SPACES_REGION }},bucket=${{ secrets.BUCKET_NAME }},endpoint=${{ env.DO_SPACES_ENDPOINT }},name=cache/sdr_deeptemptest_beta \
+            --cache-to=type=s3,region=${{ env.DO_SPACES_REGION }},bucket=${{ secrets.BUCKET_NAME }},endpoint=${{ env.DO_SPACES_ENDPOINT }},name=cache/sdr_deeptemptest_beta,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:sdr_deeptemptest_beta \
