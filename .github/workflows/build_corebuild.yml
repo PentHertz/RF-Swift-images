@@ -3,6 +3,7 @@ name: Multi-Platform Docker Build with Caching
 env:
   REGISTRY_IMAGE: penthertz/rfswiftdev
   BUILD_PLATFORMS: linux/amd64,linux/arm64/v8
+  CACHE_PLATFORMS: linux_amd64-linux_arm64_v8
   CACHE_REPO: penthertz/rfswiftdev/cache
 
 on:
@@ -32,9 +33,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/SDR/corebuild.docker') }}-${{ env.BUILD_PLATFORMS }}
+          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/SDR/corebuild.docker') }}-${{ env.CACHE_PLATFORMS }}
           restore-keys: |
-            ${{ runner.os }}-buildx-${{ env.BUILD_PLATFORMS }}-
+            ${{ runner.os }}-buildx-${{ env.CACHE_PLATFORMS }}-
 
       - name: Build and push corebuild image with caching
         run: |
@@ -68,9 +69,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/automotive.docker') }}-${{ env.BUILD_PLATFORMS }}
+          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/automotive.docker') }}-${{ env.CACHE_PLATFORMS }}
           restore-keys: |
-            ${{ runner.os }}-buildx-${{ env.BUILD_PLATFORMS }}-
+            ${{ runner.os }}-buildx-${{ env.CACHE_PLATFORMS }}-
 
       - name: Build and push automotive image with caching
         run: |
@@ -105,9 +106,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/SDR/sdr_light_antsdr.docker') }}-${{ env.BUILD_PLATFORMS }}
+          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/SDR/sdr_light_antsdr.docker') }}-${{ env.CACHE_PLATFORMS }}
           restore-keys: |
-            ${{ runner.os }}-buildx-${{ env.BUILD_PLATFORMS }}-
+            ${{ runner.os }}-buildx-${{ env.CACHE_PLATFORMS }}-
 
       - name: Build and push sdr_light_antsdr image with caching
         run: |
@@ -144,9 +145,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/SDR/sdr_light_rtlsdrv4.docker') }}-${{ env.BUILD_PLATFORMS }}
+          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/SDR/sdr_light_rtlsdrv4.docker') }}-${{ env.CACHE_PLATFORMS }}
           restore-keys: |
-            ${{ runner.os }}-buildx-${{ env.BUILD_PLATFORMS }}-
+            ${{ runner.os }}-buildx-${{ env.CACHE_PLATFORMS }}-
 
       - name: Build and push sdr_light_rtlsdrv4 image with caching
         run: |
@@ -183,9 +184,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/reversing.docker') }}-${{ env.BUILD_PLATFORMS }}
+          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/reversing.docker') }}-${{ env.CACHE_PLATFORMS }}
           restore-keys: |
-            ${{ runner.os }}-buildx-${{ env.BUILD_PLATFORMS }}-
+            ${{ runner.os }}-buildx-${{ env.CACHE_PLATFORMS }}-
 
       - name: Build and push reversing image with caching
         run: |
@@ -220,9 +221,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/SDR/sdr_light.docker') }}-${{ env.BUILD_PLATFORMS }}
+          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/SDR/sdr_light.docker') }}-${{ env.CACHE_PLATFORMS }}
           restore-keys: |
-            ${{ runner.os }}-buildx-${{ env.BUILD_PLATFORMS }}-
+            ${{ runner.os }}-buildx-${{ env.CACHE_PLATFORMS }}-
 
       - name: Build and push sdr_light image with caching
         run: |
@@ -259,9 +260,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/SDR/sdr_full.docker') }}-${{ env.BUILD_PLATFORMS }}
+          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/SDR/sdr_full.docker') }}-${{ env.CACHE_PLATFORMS }}
           restore-keys: |
-            ${{ runner.os }}-buildx-${{ env.BUILD_PLATFORMS }}-
+            ${{ runner.os }}-buildx-${{ env.CACHE_PLATFORMS }}-
 
       - name: Build and push sdr_full image with caching
         run: |
@@ -296,9 +297,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/rfid.docker') }}-${{ env.BUILD_PLATFORMS }}
+          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/rfid.docker') }}-${{ env.CACHE_PLATFORMS }}
           restore-keys: |
-            ${{ runner.os }}-buildx-${{ env.BUILD_PLATFORMS }}-
+            ${{ runner.os }}-buildx-${{ env.CACHE_PLATFORMS }}-
 
       - name: Build and push rfid image with caching
         run: |
@@ -333,9 +334,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/wifi.docker') }}-${{ env.BUILD_PLATFORMS }}
+          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/wifi.docker') }}-${{ env.CACHE_PLATFORMS }}
           restore-keys: |
-            ${{ runner.os }}-buildx-${{ env.BUILD_PLATFORMS }}-
+            ${{ runner.os }}-buildx-${{ env.CACHE_PLATFORMS }}-
 
       - name: Build and push wifi image with caching
         run: |
@@ -370,9 +371,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/bluetooth.docker') }}-${{ env.BUILD_PLATFORMS }}
+          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/bluetooth.docker') }}-${{ env.CACHE_PLATFORMS }}
           restore-keys: |
-            ${{ runner.os }}-buildx-${{ env.BUILD_PLATFORMS }}-
+            ${{ runner.os }}-buildx-${{ env.CACHE_PLATFORMS }}-
 
       - name: Build and push bluetooth image with caching
         run: |
@@ -407,9 +408,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/SDR/sdr_deeptemptest_beta.docker') }}-${{ env.BUILD_PLATFORMS }}
+          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/SDR/sdr_deeptemptest_beta.docker') }}-${{ env.CACHE_PLATFORMS }}
           restore-keys: |
-            ${{ runner.os }}-buildx-${{ env.BUILD_PLATFORMS }}-
+            ${{ runner.os }}-buildx-${{ env.CACHE_PLATFORMS }}-
 
       - name: Build and push sdr_deeptemptest_beta image with caching
         run: |
