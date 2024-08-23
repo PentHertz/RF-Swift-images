@@ -34,7 +34,7 @@ function NanoVNASaver_cal_device() {
             NanoVNASaver_cal_device_call
             ;;
         *)
-            criticalecho "[-] Unsupported architecture: $ARCH. NanoVNASaver installation is not supported on this architecture."
+            criticalecho-noexit "[-] Unsupported architecture: $ARCH. NanoVNASaver installation is not supported on this architecture."
             ;;
     esac
 }

@@ -290,7 +290,7 @@ function ice9_bluetooth_soft_install() {
             ice9_bluetooth_soft_install_call
             ;;
         *)
-            criticalecho "[-] Unsupported architecture: $ARCH. ice9_bluetooth installation is not supported on this architecture."
+            criticalecho-noexit "[-] Unsupported architecture: $ARCH. ice9_bluetooth installation is not supported on this architecture."
             ;;
     esac
 }
