@@ -13,6 +13,7 @@ on:
     branches:
       - main
 
+
 jobs:
   corebuild:
     runs-on: ubuntu-latest
@@ -40,8 +41,8 @@ jobs:
           DO_SPACE_NAME: ${{ secrets.BUCKET_NAME }} # Your Space name
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,region=us-east-1,bucket=${{ env.DO_SPACE_NAME }},name=cache/corebuild,s3-url=${{ env.DO_ENDPOINT }} \
-            --cache-to=type=s3,region=us-east-1,bucket=${{ env.DO_SPACE_NAME }},name=cache/corebuild,mode=max,s3-url=${{ env.DO_ENDPOINT }} \
+            --cache-from=type=s3,region=${{ env.DO_SPACES_REGION }},bucket=${{ env.DO_SPACE_NAME }},name=cache/corebuild,s3-url=${{ env.DO_ENDPOINT }} \
+            --cache-to=type=s3,region=${{ env.DO_SPACES_REGION }},bucket=${{ env.DO_SPACE_NAME }},name=cache/corebuild,mode=max,s3-url=${{ env.DO_ENDPOINT }} \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:corebuild \
             -f Dockerfiles/slim.docker \
