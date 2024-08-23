@@ -241,7 +241,6 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push rfid image with caching
-        env:
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
             --cache-from=type=registry,ref=${{ env.CACHE_REPO }}:cache_rfid \
