@@ -32,23 +32,29 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Set up S3 credentials
+      - name: Configure AWS Profile
         run: |
-          mkdir -p ~/.aws
-          echo "[default]" > ~/.aws/credentials
-          echo "aws_access_key_id=${{ secrets.DO_ACCESS_KEY_ID }}" >> ~/.aws/credentials
-          echo "aws_secret_access_key=${{ secrets.DO_SECRET_ACCESS_KEY }}" >> ~/.aws/credentials
-          echo "bucket=${{ env.S3_BUCKET }}" >> ~/.aws/credentials
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.DO_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SECRET_ACCESS_KEY }}
-          AWS_BUCKET: ${{ env.S3_BUCKET }}
+          mkdir -p ~/.aws && touch ~/.aws/credentials
+          cat << EOT > ~/.aws/credentials
+          [srv_gha]
+          aws_access_key_id=${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
+          EOT
+
+      - name: Configure AWS Config
+        run: |
+          mkdir -p ~/.aws && touch ~/.aws/config
+          cat << EOT > ~/.aws/config
+          [default]
+          region = ${{ env.S3_REGION }}
+          output = json
+          EOT
 
       - name: Build and push corebuild image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,ref=${AWS_BUCKET}/cache/corebuild,endpoint=${S3_ENDPOINT} \
-            --cache-to=type=s3,ref=${AWS_BUCKET}/cache/corebuild,mode=max,endpoint=${S3_ENDPOINT} \
+            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/corebuild,endpoint=${{ env.S3_ENDPOINT }} \
+            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/corebuild,mode=max,endpoint=${{ env.S3_ENDPOINT }} \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:corebuild \
             -f Dockerfiles/SDR/corebuild.docker \
@@ -72,23 +78,29 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Set up S3 credentials
+      - name: Configure AWS Profile
         run: |
-          mkdir -p ~/.aws
-          echo "[default]" > ~/.aws/credentials
-          echo "aws_access_key_id=${{ secrets.DO_ACCESS_KEY_ID }}" >> ~/.aws/credentials
-          echo "aws_secret_access_key=${{ secrets.DO_SECRET_ACCESS_KEY }}" >> ~/.aws/credentials
-          echo "bucket=${{ env.S3_BUCKET }}" >> ~/.aws/credentials
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.DO_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SECRET_ACCESS_KEY }}
-          AWS_BUCKET: ${{ env.S3_BUCKET }}
+          mkdir -p ~/.aws && touch ~/.aws/credentials
+          cat << EOT > ~/.aws/credentials
+          [srv_gha]
+          aws_access_key_id=${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
+          EOT
+
+      - name: Configure AWS Config
+        run: |
+          mkdir -p ~/.aws && touch ~/.aws/config
+          cat << EOT > ~/.aws/config
+          [default]
+          region = ${{ env.S3_REGION }}
+          output = json
+          EOT
 
       - name: Build and push automotive image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,ref=${AWS_BUCKET}/cache/automotive,endpoint=${S3_ENDPOINT} \
-            --cache-to=type=s3,ref=${AWS_BUCKET}/cache/automotive,mode=max,endpoint=${S3_ENDPOINT} \
+            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/automotive,endpoint=${{ env.S3_ENDPOINT }} \
+            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/automotive,mode=max,endpoint=${{ env.S3_ENDPOINT }} \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:automotive \
@@ -113,23 +125,29 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Set up S3 credentials
+      - name: Configure AWS Profile
         run: |
-          mkdir -p ~/.aws
-          echo "[default]" > ~/.aws/credentials
-          echo "aws_access_key_id=${{ secrets.DO_ACCESS_KEY_ID }}" >> ~/.aws/credentials
-          echo "aws_secret_access_key=${{ secrets.DO_SECRET_ACCESS_KEY }}" >> ~/.aws/credentials
-          echo "bucket=${{ env.S3_BUCKET }}" >> ~/.aws/credentials
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.DO_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SECRET_ACCESS_KEY }}
-          AWS_BUCKET: ${{ env.S3_BUCKET }}
+          mkdir -p ~/.aws && touch ~/.aws/credentials
+          cat << EOT > ~/.aws/credentials
+          [srv_gha]
+          aws_access_key_id=${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
+          EOT
+
+      - name: Configure AWS Config
+        run: |
+          mkdir -p ~/.aws && touch ~/.aws/config
+          cat << EOT > ~/.aws/config
+          [default]
+          region = ${{ env.S3_REGION }}
+          output = json
+          EOT
 
       - name: Build and push sdr_light_antsdr image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,ref=${AWS_BUCKET}/cache/sdr_light_antsdr,endpoint=${S3_ENDPOINT} \
-            --cache-to=type=s3,ref=${AWS_BUCKET}/cache/sdr_light_antsdr,mode=max,endpoint=${S3_ENDPOINT} \
+            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_light_antsdr,endpoint=${{ env.S3_ENDPOINT }} \
+            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_light_antsdr,mode=max,endpoint=${{ env.S3_ENDPOINT }} \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --build-arg UHD_BASE=antsdr_uhd \
             --build-arg RTLSDR_BASE=rtlsdr \
@@ -156,23 +174,29 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Set up S3 credentials
+      - name: Configure AWS Profile
         run: |
-          mkdir -p ~/.aws
-          echo "[default]" > ~/.aws/credentials
-          echo "aws_access_key_id=${{ secrets.DO_ACCESS_KEY_ID }}" >> ~/.aws/credentials
-          echo "aws_secret_access_key=${{ secrets.DO_SECRET_ACCESS_KEY }}" >> ~/.aws/credentials
-          echo "bucket=${{ env.S3_BUCKET }}" >> ~/.aws/credentials
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.DO_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SECRET_ACCESS_KEY }}
-          AWS_BUCKET: ${{ env.S3_BUCKET }}
+          mkdir -p ~/.aws && touch ~/.aws/credentials
+          cat << EOT > ~/.aws/credentials
+          [srv_gha]
+          aws_access_key_id=${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
+          EOT
+
+      - name: Configure AWS Config
+        run: |
+          mkdir -p ~/.aws && touch ~/.aws/config
+          cat << EOT > ~/.aws/config
+          [default]
+          region = ${{ env.S3_REGION }}
+          output = json
+          EOT
 
       - name: Build and push sdr_light_rtlsdrv4 image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,ref=${AWS_BUCKET}/cache/sdr_light_rtlsdrv4,endpoint=${S3_ENDPOINT} \
-            --cache-to=type=s3,ref=${AWS_BUCKET}/cache/sdr_light_rtlsdrv4,mode=max,endpoint=${S3_ENDPOINT} \
+            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_light_rtlsdrv4,endpoint=${{ env.S3_ENDPOINT }} \
+            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_light_rtlsdrv4,mode=max,endpoint=${{ env.S3_ENDPOINT }} \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --build-arg UHD_BASE=uhd \
             --build-arg RTLSDR_BASE=rtlsdrv4 \
@@ -199,23 +223,29 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Set up S3 credentials
+      - name: Configure AWS Profile
         run: |
-          mkdir -p ~/.aws
-          echo "[default]" > ~/.aws/credentials
-          echo "aws_access_key_id=${{ secrets.DO_ACCESS_KEY_ID }}" >> ~/.aws/credentials
-          echo "aws_secret_access_key=${{ secrets.DO_SECRET_ACCESS_KEY }}" >> ~/.aws/credentials
-          echo "bucket=${{ env.S3_BUCKET }}" >> ~/.aws/credentials
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.DO_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SECRET_ACCESS_KEY }}
-          AWS_BUCKET: ${{ env.S3_BUCKET }}
+          mkdir -p ~/.aws && touch ~/.aws/credentials
+          cat << EOT > ~/.aws/credentials
+          [srv_gha]
+          aws_access_key_id=${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
+          EOT
+
+      - name: Configure AWS Config
+        run: |
+          mkdir -p ~/.aws && touch ~/.aws/config
+          cat << EOT > ~/.aws/config
+          [default]
+          region = ${{ env.S3_REGION }}
+          output = json
+          EOT
 
       - name: Build and push reversing image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,ref=${AWS_BUCKET}/cache/reversing,endpoint=${S3_ENDPOINT} \
-            --cache-to=type=s3,ref=${AWS_BUCKET}/cache/reversing,mode=max,endpoint=${S3_ENDPOINT} \
+            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/reversing,endpoint=${{ env.S3_ENDPOINT }} \
+            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/reversing,mode=max,endpoint=${{ env.S3_ENDPOINT }} \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:reversing \
@@ -240,23 +270,29 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Set up S3 credentials
+      - name: Configure AWS Profile
         run: |
-          mkdir -p ~/.aws
-          echo "[default]" > ~/.aws/credentials
-          echo "aws_access_key_id=${{ secrets.DO_ACCESS_KEY_ID }}" >> ~/.aws/credentials
-          echo "aws_secret_access_key=${{ secrets.DO_SECRET_ACCESS_KEY }}" >> ~/.aws/credentials
-          echo "bucket=${{ env.S3_BUCKET }}" >> ~/.aws/credentials
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.DO_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SECRET_ACCESS_KEY }}
-          AWS_BUCKET: ${{ env.S3_BUCKET }}
+          mkdir -p ~/.aws && touch ~/.aws/credentials
+          cat << EOT > ~/.aws/credentials
+          [srv_gha]
+          aws_access_key_id=${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
+          EOT
+
+      - name: Configure AWS Config
+        run: |
+          mkdir -p ~/.aws && touch ~/.aws/config
+          cat << EOT > ~/.aws/config
+          [default]
+          region = ${{ env.S3_REGION }}
+          output = json
+          EOT
 
       - name: Build and push sdr_light image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,ref=${AWS_BUCKET}/cache/sdr_light,endpoint=${S3_ENDPOINT} \
-            --cache-to=type=s3,ref=${AWS_BUCKET}/cache/sdr_light,mode=max,endpoint=${S3_ENDPOINT} \
+            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_light,endpoint=${{ env.S3_ENDPOINT }} \
+            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_light,mode=max,endpoint=${{ env.S3_ENDPOINT }} \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --build-arg UHD_BASE=uhd \
             --build-arg RTLSDR_BASE=rtlsdr \
@@ -283,23 +319,29 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Set up S3 credentials
+      - name: Configure AWS Profile
         run: |
-          mkdir -p ~/.aws
-          echo "[default]" > ~/.aws/credentials
-          echo "aws_access_key_id=${{ secrets.DO_ACCESS_KEY_ID }}" >> ~/.aws/credentials
-          echo "aws_secret_access_key=${{ secrets.DO_SECRET_ACCESS_KEY }}" >> ~/.aws/credentials
-          echo "bucket=${{ env.S3_BUCKET }}" >> ~/.aws/credentials
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.DO_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SECRET_ACCESS_KEY }}
-          AWS_BUCKET: ${{ env.S3_BUCKET }}
+          mkdir -p ~/.aws && touch ~/.aws/credentials
+          cat << EOT > ~/.aws/credentials
+          [srv_gha]
+          aws_access_key_id=${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
+          EOT
+
+      - name: Configure AWS Config
+        run: |
+          mkdir -p ~/.aws && touch ~/.aws/config
+          cat << EOT > ~/.aws/config
+          [default]
+          region = ${{ env.S3_REGION }}
+          output = json
+          EOT
 
       - name: Build and push sdr_full image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,ref=${AWS_BUCKET}/cache/sdr_full,endpoint=${S3_ENDPOINT} \
-            --cache-to=type=s3,ref=${AWS_BUCKET}/cache/sdr_full,mode=max,endpoint=${S3_ENDPOINT} \
+            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_full,endpoint=${{ env.S3_ENDPOINT }} \
+            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_full,mode=max,endpoint=${{ env.S3_ENDPOINT }} \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:sdr_full \
@@ -324,23 +366,29 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Set up S3 credentials
+      - name: Configure AWS Profile
         run: |
-          mkdir -p ~/.aws
-          echo "[default]" > ~/.aws/credentials
-          echo "aws_access_key_id=${{ secrets.DO_ACCESS_KEY_ID }}" >> ~/.aws/credentials
-          echo "aws_secret_access_key=${{ secrets.DO_SECRET_ACCESS_KEY }}" >> ~/.aws/credentials
-          echo "bucket=${{ env.S3_BUCKET }}" >> ~/.aws/credentials
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.DO_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SECRET_ACCESS_KEY }}
-          AWS_BUCKET: ${{ env.S3_BUCKET }}
+          mkdir -p ~/.aws && touch ~/.aws/credentials
+          cat << EOT > ~/.aws/credentials
+          [srv_gha]
+          aws_access_key_id=${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
+          EOT
+
+      - name: Configure AWS Config
+        run: |
+          mkdir -p ~/.aws && touch ~/.aws/config
+          cat << EOT > ~/.aws/config
+          [default]
+          region = ${{ env.S3_REGION }}
+          output = json
+          EOT
 
       - name: Build and push rfid image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,ref=${AWS_BUCKET}/cache/rfid,endpoint=${S3_ENDPOINT} \
-            --cache-to=type=s3,ref=${AWS_BUCKET}/cache/rfid,mode=max,endpoint=${S3_ENDPOINT} \
+            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/rfid,endpoint=${{ env.S3_ENDPOINT }} \
+            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/rfid,mode=max,endpoint=${{ env.S3_ENDPOINT }} \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:rfid \
@@ -365,23 +413,29 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Set up S3 credentials
+      - name: Configure AWS Profile
         run: |
-          mkdir -p ~/.aws
-          echo "[default]" > ~/.aws/credentials
-          echo "aws_access_key_id=${{ secrets.DO_ACCESS_KEY_ID }}" >> ~/.aws/credentials
-          echo "aws_secret_access_key=${{ secrets.DO_SECRET_ACCESS_KEY }}" >> ~/.aws/credentials
-          echo "bucket=${{ env.S3_BUCKET }}" >> ~/.aws/credentials
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.DO_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SECRET_ACCESS_KEY }}
-          AWS_BUCKET: ${{ env.S3_BUCKET }}
+          mkdir -p ~/.aws && touch ~/.aws/credentials
+          cat << EOT > ~/.aws/credentials
+          [srv_gha]
+          aws_access_key_id=${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
+          EOT
+
+      - name: Configure AWS Config
+        run: |
+          mkdir -p ~/.aws && touch ~/.aws/config
+          cat << EOT > ~/.aws/config
+          [default]
+          region = ${{ env.S3_REGION }}
+          output = json
+          EOT
 
       - name: Build and push wifi image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,ref=${AWS_BUCKET}/cache/wifi,endpoint=${S3_ENDPOINT} \
-            --cache-to=type=s3,ref=${AWS_BUCKET}/cache/wifi,mode=max,endpoint=${S3_ENDPOINT} \
+            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/wifi,endpoint=${{ env.S3_ENDPOINT }} \
+            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/wifi,mode=max,endpoint=${{ env.S3_ENDPOINT }} \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:wifi \
@@ -406,23 +460,29 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Set up S3 credentials
+      - name: Configure AWS Profile
         run: |
-          mkdir -p ~/.aws
-          echo "[default]" > ~/.aws/credentials
-          echo "aws_access_key_id=${{ secrets.DO_ACCESS_KEY_ID }}" >> ~/.aws/credentials
-          echo "aws_secret_access_key=${{ secrets.DO_SECRET_ACCESS_KEY }}" >> ~/.aws/credentials
-          echo "bucket=${{ env.S3_BUCKET }}" >> ~/.aws/credentials
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.DO_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SECRET_ACCESS_KEY }}
-          AWS_BUCKET: ${{ env.S3_BUCKET }}
+          mkdir -p ~/.aws && touch ~/.aws/credentials
+          cat << EOT > ~/.aws/credentials
+          [srv_gha]
+          aws_access_key_id=${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
+          EOT
+
+      - name: Configure AWS Config
+        run: |
+          mkdir -p ~/.aws && touch ~/.aws/config
+          cat << EOT > ~/.aws/config
+          [default]
+          region = ${{ env.S3_REGION }}
+          output = json
+          EOT
 
       - name: Build and push bluetooth image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,ref=${AWS_BUCKET}/cache/bluetooth,endpoint=${S3_ENDPOINT} \
-            --cache-to=type=s3,ref=${AWS_BUCKET}/cache/bluetooth,mode=max,endpoint=${S3_ENDPOINT} \
+            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/bluetooth,endpoint=${{ env.S3_ENDPOINT }} \
+            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/bluetooth,mode=max,endpoint=${{ env.S3_ENDPOINT }} \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:bluetooth \
@@ -447,23 +507,29 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Set up S3 credentials
+      - name: Configure AWS Profile
         run: |
-          mkdir -p ~/.aws
-          echo "[default]" > ~/.aws/credentials
-          echo "aws_access_key_id=${{ secrets.DO_ACCESS_KEY_ID }}" >> ~/.aws/credentials
-          echo "aws_secret_access_key=${{ secrets.DO_SECRET_ACCESS_KEY }}" >> ~/.aws/credentials
-          echo "bucket=${{ env.S3_BUCKET }}" >> ~/.aws/credentials
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.DO_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SECRET_ACCESS_KEY }}
-          AWS_BUCKET: ${{ env.S3_BUCKET }}
+          mkdir -p ~/.aws && touch ~/.aws/credentials
+          cat << EOT > ~/.aws/credentials
+          [srv_gha]
+          aws_access_key_id=${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
+          EOT
+
+      - name: Configure AWS Config
+        run: |
+          mkdir -p ~/.aws && touch ~/.aws/config
+          cat << EOT > ~/.aws/config
+          [default]
+          region = ${{ env.S3_REGION }}
+          output = json
+          EOT
 
       - name: Build and push sdr_deeptemptest_beta image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,ref=${AWS_BUCKET}/cache/sdr_deeptemptest_beta,endpoint=${S3_ENDPOINT} \
-            --cache-to=type=s3,ref=${AWS_BUCKET}/cache/sdr_deeptemptest_beta,mode=max,endpoint=${S3_ENDPOINT} \
+            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_deeptemptest_beta,endpoint=${{ env.S3_ENDPOINT }} \
+            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_deeptemptest_beta,mode=max,endpoint=${{ env.S3_ENDPOINT }} \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:sdr_deeptemptest_beta \
