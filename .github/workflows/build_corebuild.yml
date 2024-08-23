@@ -36,10 +36,14 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
           AWS_EC2_METADATA_DISABLED: true
+          AWS_ENDPOINT: ${{ secrets.BUCKET_URL }}
+          S3_ENDPOINT: ${{ secrets.BUCKET_URL }}
+          S3_USE_PATH_STYLE: true
+          S3_FORCE_PATH_STYLE: true
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,endpoint=${{ secrets.BUCKET_URL }},bucket=${{ secrets.BUCKET_NAME }},region=${{ secrets.BUCKET_REGION }},name=cache/corebuild,insecure=true \
-            --cache-to=type=s3,endpoint=${{ secrets.BUCKET_URL }},bucket=${{ secrets.BUCKET_NAME }},region=${{ secrets.BUCKET_REGION }},name=cache/corebuild,mode=max,insecure=true \
+            --cache-from=type=s3,bucket=${{ secrets.BUCKET_NAME }},name=cache/corebuild \
+            --cache-to=type=s3,bucket=${{ secrets.BUCKET_NAME }},name=cache/corebuild,mode=max \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:corebuild \
             -f Dockerfiles/slim.docker \
