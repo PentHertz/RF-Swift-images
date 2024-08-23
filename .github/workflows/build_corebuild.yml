@@ -5,9 +5,8 @@ env:
   BUILD_PLATFORMS: linux/amd64,linux/arm64/v8
   CACHE_PLATFORMS: linux_amd64-linux_arm64_v8
   CACHE_REPO: penthertz/rfswiftdev/cache
-  S3_BUCKET: ${{ secrets.BUCKET_NAME }}
-  S3_ENDPOINT: ${{ secrets.BUCKET_URL }}
-  S3_REGION: ${{ secrets.BUCKET_REGION }}
+  DO_SPACES_ENDPOINT: ${{ secrets.BUCKET_URL }}
+  DO_SPACES_REGION: ${{ secrets.BUCKET_REGION }}
 
 on:
   push:
@@ -32,18 +31,20 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.S3_REGION }}
+      - name: Configure DigitalOcean Spaces credentials
+        run: |
+          mkdir -p ~/.aws
+          echo "[default]
+          aws_access_key_id=${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}" > ~/.aws/credentials
 
       - name: Build and push corebuild image with caching
+        env:
+          AWS_EC2_METADATA_DISABLED: true
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,region=${{ env.S3_REGION }},bucket=${{ secrets.BUCKET_NAME }},name=cache/corebuild \
-            --cache-to=type=s3,region=${{ env.S3_REGION }},bucket=${{ secrets.BUCKET_NAME }},name=cache/corebuild,mode=max \
+            --cache-from=type=s3,region=${{ env.DO_SPACES_REGION }},bucket=${{ secrets.BUCKET_NAME }},endpoint=${{ env.DO_SPACES_ENDPOINT }},name=cache/corebuild \
+            --cache-to=type=s3,region=${{ env.DO_SPACES_REGION }},bucket=${{ secrets.BUCKET_NAME }},endpoint=${{ env.DO_SPACES_ENDPOINT }},name=cache/corebuild,mode=max \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:corebuild \
             -f Dockerfiles/SDR/corebuild.docker \
