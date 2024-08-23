@@ -5,6 +5,9 @@ env:
   BUILD_PLATFORMS: linux/amd64,linux/arm64/v8
   CACHE_PLATFORMS: linux_amd64-linux_arm64_v8
   CACHE_REPO: penthertz/rfswiftdev/cache
+  S3_BUCKET: ${{ secrets.BUCKET_NAME }}
+  S3_ENDPOINT: ${{ secrets.BUCKET_URL }}
+  S3_REGION: ${{ secrets.BUCKET_REGION }}
 
 on:
   push:
@@ -29,19 +32,21 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Cache Docker layers
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/SDR/corebuild.docker') }}-${{ env.CACHE_PLATFORMS }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ env.CACHE_PLATFORMS }}-
+      - name: Set up S3 credentials
+        run: |
+          mkdir -p ~/.aws
+          echo "[default]" > ~/.aws/credentials
+          echo "aws_access_key_id=${{ secrets.DO_ACCESS_KEY_ID }}" >> ~/.aws/credentials
+          echo "aws_secret_access_key=${{ secrets.DO_SECRET_ACCESS_KEY }}" >> ~/.aws/credentials
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.DO_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SECRET_ACCESS_KEY }}
 
       - name: Build and push corebuild image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=local,src=/tmp/.buildx-cache \
-            --cache-to=type=local,dest=/tmp/.buildx-cache,mode=max \
+            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/corebuild \
+            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/corebuild,mode=max \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:corebuild \
             -f Dockerfiles/SDR/corebuild.docker \
@@ -65,19 +70,21 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Cache Docker layers
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/automotive.docker') }}-${{ env.CACHE_PLATFORMS }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ env.CACHE_PLATFORMS }}-
+      - name: Set up S3 credentials
+        run: |
+          mkdir -p ~/.aws
+          echo "[default]" > ~/.aws/credentials
+          echo "aws_access_key_id=${{ secrets.DO_ACCESS_KEY_ID }}" >> ~/.aws/credentials
+          echo "aws_secret_access_key=${{ secrets.DO_SECRET_ACCESS_KEY }}" >> ~/.aws/credentials
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.DO_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SECRET_ACCESS_KEY }}
 
       - name: Build and push automotive image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=local,src=/tmp/.buildx-cache \
-            --cache-to=type=local,dest=/tmp/.buildx-cache,mode=max \
+            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/automotive \
+            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/automotive,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:automotive \
@@ -102,19 +109,21 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Cache Docker layers
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/SDR/sdr_light_antsdr.docker') }}-${{ env.CACHE_PLATFORMS }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ env.CACHE_PLATFORMS }}-
+      - name: Set up S3 credentials
+        run: |
+          mkdir -p ~/.aws
+          echo "[default]" > ~/.aws/credentials
+          echo "aws_access_key_id=${{ secrets.DO_ACCESS_KEY_ID }}" >> ~/.aws/credentials
+          echo "aws_secret_access_key=${{ secrets.DO_SECRET_ACCESS_KEY }}" >> ~/.aws/credentials
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.DO_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SECRET_ACCESS_KEY }}
 
       - name: Build and push sdr_light_antsdr image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=local,src=/tmp/.buildx-cache \
-            --cache-to=type=local,dest=/tmp/.buildx-cache,mode=max \
+            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_light_antsdr \
+            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_light_antsdr,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --build-arg UHD_BASE=antsdr_uhd \
             --build-arg RTLSDR_BASE=rtlsdr \
@@ -141,19 +150,21 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Cache Docker layers
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/SDR/sdr_light_rtlsdrv4.docker') }}-${{ env.CACHE_PLATFORMS }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ env.CACHE_PLATFORMS }}-
+      - name: Set up S3 credentials
+        run: |
+          mkdir -p ~/.aws
+          echo "[default]" > ~/.aws/credentials
+          echo "aws_access_key_id=${{ secrets.DO_ACCESS_KEY_ID }}" >> ~/.aws/credentials
+          echo "aws_secret_access_key=${{ secrets.DO_SECRET_ACCESS_KEY }}" >> ~/.aws/credentials
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.DO_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SECRET_ACCESS_KEY }}
 
       - name: Build and push sdr_light_rtlsdrv4 image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=local,src=/tmp/.buildx-cache \
-            --cache-to=type=local,dest=/tmp/.buildx-cache,mode=max \
+            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_light_rtlsdrv4 \
+            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_light_rtlsdrv4,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --build-arg UHD_BASE=uhd \
             --build-arg RTLSDR_BASE=rtlsdrv4 \
@@ -180,19 +191,21 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Cache Docker layers
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/reversing.docker') }}-${{ env.CACHE_PLATFORMS }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ env.CACHE_PLATFORMS }}-
+      - name: Set up S3 credentials
+        run: |
+          mkdir -p ~/.aws
+          echo "[default]" > ~/.aws/credentials
+          echo "aws_access_key_id=${{ secrets.DO_ACCESS_KEY_ID }}" >> ~/.aws/credentials
+          echo "aws_secret_access_key=${{ secrets.DO_SECRET_ACCESS_KEY }}" >> ~/.aws/credentials
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.DO_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SECRET_ACCESS_KEY }}
 
       - name: Build and push reversing image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=local,src=/tmp/.buildx-cache \
-            --cache-to=type=local,dest=/tmp/.buildx-cache,mode=max \
+            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/reversing \
+            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/reversing,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:reversing \
@@ -217,19 +230,21 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Cache Docker layers
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/SDR/sdr_light.docker') }}-${{ env.CACHE_PLATFORMS }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ env.CACHE_PLATFORMS }}-
+      - name: Set up S3 credentials
+        run: |
+          mkdir -p ~/.aws
+          echo "[default]" > ~/.aws/credentials
+          echo "aws_access_key_id=${{ secrets.DO_ACCESS_KEY_ID }}" >> ~/.aws/credentials
+          echo "aws_secret_access_key=${{ secrets.DO_SECRET_ACCESS_KEY }}" >> ~/.aws/credentials
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.DO_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SECRET_ACCESS_KEY }}
 
       - name: Build and push sdr_light image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=local,src=/tmp/.buildx-cache \
-            --cache-to=type=local,dest=/tmp/.buildx-cache,mode=max \
+            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_light \
+            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_light,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --build-arg UHD_BASE=uhd \
             --build-arg RTLSDR_BASE=rtlsdr \
@@ -256,19 +271,21 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Cache Docker layers
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/SDR/sdr_full.docker') }}-${{ env.CACHE_PLATFORMS }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ env.CACHE_PLATFORMS }}-
+      - name: Set up S3 credentials
+        run: |
+          mkdir -p ~/.aws
+          echo "[default]" > ~/.aws/credentials
+          echo "aws_access_key_id=${{ secrets.DO_ACCESS_KEY_ID }}" >> ~/.aws/credentials
+          echo "aws_secret_access_key=${{ secrets.DO_SECRET_ACCESS_KEY }}" >> ~/.aws/credentials
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.DO_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SECRET_ACCESS_KEY }}
 
       - name: Build and push sdr_full image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=local,src=/tmp/.buildx-cache \
-            --cache-to=type=local,dest=/tmp/.buildx-cache,mode=max \
+            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_full \
+            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_full,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:sdr_full \
@@ -293,19 +310,21 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Cache Docker layers
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/rfid.docker') }}-${{ env.CACHE_PLATFORMS }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ env.CACHE_PLATFORMS }}-
+      - name: Set up S3 credentials
+        run: |
+          mkdir -p ~/.aws
+          echo "[default]" > ~/.aws/credentials
+          echo "aws_access_key_id=${{ secrets.DO_ACCESS_KEY_ID }}" >> ~/.aws/credentials
+          echo "aws_secret_access_key=${{ secrets.DO_SECRET_ACCESS_KEY }}" >> ~/.aws/credentials
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.DO_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SECRET_ACCESS_KEY }}
 
       - name: Build and push rfid image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=local,src=/tmp/.buildx-cache \
-            --cache-to=type=local,dest=/tmp/.buildx-cache,mode=max \
+            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/rfid \
+            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/rfid,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:corebuild \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:rfid \
@@ -330,19 +349,21 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Cache Docker layers
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/wifi.docker') }}-${{ env.CACHE_PLATFORMS }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ env.CACHE_PLATFORMS }}-
+      - name: Set up S3 credentials
+        run: |
+          mkdir -p ~/.aws
+          echo "[default]" > ~/.aws/credentials
+          echo "aws_access_key_id=${{ secrets.DO_ACCESS_KEY_ID }}" >> ~/.aws/credentials
+          echo "aws_secret_access_key=${{ secrets.DO_SECRET_ACCESS_KEY }}" >> ~/.aws/credentials
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.DO_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SECRET_ACCESS_KEY }}
 
       - name: Build and push wifi image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=local,src=/tmp/.buildx-cache \
-            --cache-to=type=local,dest=/tmp/.buildx-cache,mode=max \
+            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/wifi \
+            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/wifi,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:wifi \
@@ -367,19 +388,21 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Cache Docker layers
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/bluetooth.docker') }}-${{ env.CACHE_PLATFORMS }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ env.CACHE_PLATFORMS }}-
+      - name: Set up S3 credentials
+        run: |
+          mkdir -p ~/.aws
+          echo "[default]" > ~/.aws/credentials
+          echo "aws_access_key_id=${{ secrets.DO_ACCESS_KEY_ID }}" >> ~/.aws/credentials
+          echo "aws_secret_access_key=${{ secrets.DO_SECRET_ACCESS_KEY }}" >> ~/.aws/credentials
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.DO_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SECRET_ACCESS_KEY }}
 
       - name: Build and push bluetooth image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=local,src=/tmp/.buildx-cache \
-            --cache-to=type=local,dest=/tmp/.buildx-cache,mode=max \
+            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/bluetooth \
+            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/bluetooth,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:bluetooth \
@@ -404,19 +427,21 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Cache Docker layers
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfiles/SDR/sdr_deeptemptest_beta.docker') }}-${{ env.CACHE_PLATFORMS }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ env.CACHE_PLATFORMS }}-
+      - name: Set up S3 credentials
+        run: |
+          mkdir -p ~/.aws
+          echo "[default]" > ~/.aws/credentials
+          echo "aws_access_key_id=${{ secrets.DO_ACCESS_KEY_ID }}" >> ~/.aws/credentials
+          echo "aws_secret_access_key=${{ secrets.DO_SECRET_ACCESS_KEY }}" >> ~/.aws/credentials
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.DO_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SECRET_ACCESS_KEY }}
 
       - name: Build and push sdr_deeptemptest_beta image with caching
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=local,src=/tmp/.buildx-cache \
-            --cache-to=type=local,dest=/tmp/.buildx-cache,mode=max \
+            --cache-from=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_deeptemptest_beta \
+            --cache-to=type=s3,ref=${{ env.S3_BUCKET }}/cache/sdr_deeptemptest_beta,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:sdr_deeptemptest_beta \
