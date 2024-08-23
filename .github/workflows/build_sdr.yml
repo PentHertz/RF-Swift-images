@@ -15,7 +15,8 @@ on:
 
 jobs:
   corebuild:
-    runs-on: ubuntu-latest-xl
+    runs-on:
+      labels: superrunner
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
