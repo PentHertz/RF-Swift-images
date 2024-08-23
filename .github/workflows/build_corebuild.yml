@@ -37,7 +37,12 @@ jobs:
           echo "[default]
           aws_access_key_id=${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
           aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
-          endpoint_url=${{ secrets.BUCKET_URL }}" > ~/.aws/credentials
+          endpoint_url=${{ secrets.BUCKET_URL }}
+          region=${{ env.DO_SPACES_REGION }}" > ~/.aws/credentials
+
+      - name: Debug - List DigitalOcean Spaces contents
+        run: |
+          aws s3 ls s3://gitactions --endpoint-url ${{ env.DO_SPACES_ENDPOINT }}
 
       - name: Build and push corebuild image with caching
         env:
