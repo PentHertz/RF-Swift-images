@@ -98,6 +98,6 @@ jobs:
             --cache-to=type=registry,ref=${{ env.CACHE_REPO }}:cache_telecom,mode=max \
             --build-arg BASE_IMAGE=${{ env.REGISTRY_IMAGE }}:sdr_light \
             --push \
-            -t ${{ env.REGISTRY_IMAGE }}:sdr_full \
+            -t ${{ env.REGISTRY_IMAGE }}:telecom \
             -f Dockerfiles/telecom.docker \
             .
