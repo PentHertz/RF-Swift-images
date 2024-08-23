@@ -42,10 +42,11 @@ jobs:
           S3_ENDPOINT: ${{ secrets.BUCKET_URL }}
           S3_USE_PATH_STYLE: true
           S3_FORCE_PATH_STYLE: true
+          S3_URL: ${{ secrets.BUCKET_URL }}/${{ secrets.BUCKET_NAME }}
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3,bucket=${{ secrets.BUCKET_NAME }},region=${{ secrets.BUCKET_REGION }},name=cache/corebuild \
-            --cache-to=type=s3,bucket=${{ secrets.BUCKET_NAME }},region=${{ secrets.BUCKET_REGION }},name=cache/corebuild,mode=max \
+            --cache-from=type=s3,region=${{ secrets.BUCKET_REGION }},bucket=${{ secrets.BUCKET_NAME }},name=cache/corebuild,s3-url=${{ env.S3_URL }} \
+            --cache-to=type=s3,region=${{ secrets.BUCKET_REGION }},bucket=${{ secrets.BUCKET_NAME }},name=cache/corebuild,mode=max,s3-url=${{ env.S3_URL }} \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:corebuild \
             -f Dockerfiles/slim.docker \
