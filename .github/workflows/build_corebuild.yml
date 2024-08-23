@@ -51,8 +51,9 @@ jobs:
           EOT
 
       - name: Build and push corebuild image with caching
+        env:
+          AWS_BUCKET: ${{ secrets.BUCKET_NAME }}
         run: |
-          export AWS_BUCKET=${{ env.S3_BUCKET }}
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
             --cache-from=type=s3,ref=${AWS_BUCKET}/cache/corebuild,endpoint=${{ env.S3_ENDPOINT }} \
             --cache-to=type=s3,ref=${AWS_BUCKET}/cache/corebuild,mode=max,endpoint=${{ env.S3_ENDPOINT }} \
