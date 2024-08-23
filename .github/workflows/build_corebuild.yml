@@ -2,7 +2,7 @@ name: Multi-Platform Docker Build with Caching
 
 env:
   REGISTRY_IMAGE: penthertz/rfswiftdev
-  BUILD_PLATFORMS: linux/amd64,linux/arm64
+  BUILD_PLATFORMS: linux/amd64,linux/arm64/v8
   CACHE_REPO: penthertz/rfswiftdev/cache
 
 on:
