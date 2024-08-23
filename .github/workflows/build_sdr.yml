@@ -15,7 +15,8 @@ on:
 
 jobs:
   corebuild:
-    runs-on: 
+    runs-on:
+      group: Supergroup
       labels: super-runner
     steps:
       - name: Checkout code
