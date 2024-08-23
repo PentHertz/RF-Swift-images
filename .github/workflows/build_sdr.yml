@@ -45,7 +45,9 @@ jobs:
             .
 
   sdr_light:
-    runs-on: ubuntu-latest
+    runs-on:
+      group: Supergroup
+      labels: super-runner
     needs: corebuild
     steps:
       - name: Checkout code
@@ -76,7 +78,9 @@ jobs:
             .
 
   sdr_full:
-    runs-on: ubuntu-latest
+    runs-on:
+      group: Supergroup
+      labels: super-runner
     needs: sdr_light
     steps:
       - name: Checkout code
