@@ -36,18 +36,12 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
-          AWS_EC2_METADATA_DISABLED: true
-          AWS_REGION: ${{ secrets.BUCKET_REGION }}
-          AWS_DEFAULT_REGION: ${{ secrets.BUCKET_REGION }}
-          AWS_ENDPOINT: ${{ secrets.BUCKET_URL }}
-          S3_ENDPOINT: ${{ secrets.BUCKET_URL }}
-          S3_USE_PATH_STYLE: true
-          S3_FORCE_PATH_STYLE: true
-          S3_URL: ${{ secrets.BUCKET_URL }}/${{ secrets.BUCKET_NAME }}
+          DO_ENDPOINT: ${{ secrets.BUCKET_URL }}  # DigitalOcean Spaces endpoint
+          DO_SPACE_NAME: ${{ secrets.BUCKET_NAME }} # Your Space name
         run: |
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
-            --cache-from=type=s3-compatible,region=${{ secrets.BUCKET_REGION }},bucket=${{ secrets.BUCKET_NAME }},name=cache/corebuild,s3-url=${{ env.S3_URL }} \
-            --cache-to=type=s3-compatible,region=${{ secrets.BUCKET_REGION }},bucket=${{ secrets.BUCKET_NAME }},name=cache/corebuild,mode=max,s3-url=${{ env.S3_URL }} \
+            --cache-from=type=s3,region=us-east-1,bucket=${{ env.DO_SPACE_NAME }},name=cache/corebuild,s3-url=${{ env.DO_ENDPOINT }} \
+            --cache-to=type=s3,region=us-east-1,bucket=${{ env.DO_SPACE_NAME }},name=cache/corebuild,mode=max,s3-url=${{ env.DO_ENDPOINT }} \
             --push \
             -t ${{ env.REGISTRY_IMAGE }}:corebuild \
             -f Dockerfiles/slim.docker \
