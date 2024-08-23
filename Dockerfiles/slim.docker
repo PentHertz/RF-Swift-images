@@ -7,14 +7,3 @@ FROM ubuntu:22.04
 
 LABEL "org.container.project"="rfswift"
 LABEL "org.container.author"="Sébastien Dudek (FlUxIuS)"
-
-
-# Cleaning and quitting
-WORKDIR /root/
-RUN rm -rf /root/thirdparty
-RUN rm -rf /root/rules/
-RUN rm -rf /root/config/
-RUN apt-fast clean
-RUN DEBIAN_FRONTEND=noninteractive rm -rf /var/lib/apt/lists/*
-#RUN useradd -ms /bin/bash phzapp
-#USER phzapp
