@@ -36,7 +36,8 @@ jobs:
           mkdir -p ~/.aws
           echo "[default]
           aws_access_key_id=${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}" > ~/.aws/credentials
+          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
+          endpoint_url=${{ secrets.BUCKET_URL }}" > ~/.aws/credentials
 
       - name: Build and push corebuild image with caching
         env:
@@ -73,7 +74,8 @@ jobs:
           mkdir -p ~/.aws
           echo "[default]
           aws_access_key_id=${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}" > ~/.aws/credentials
+          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
+          endpoint_url=${{ secrets.BUCKET_URL }}" > ~/.aws/credentials
 
       - name: Build and push automotive image with caching
         env:
@@ -111,7 +113,8 @@ jobs:
           mkdir -p ~/.aws
           echo "[default]
           aws_access_key_id=${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}" > ~/.aws/credentials
+          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
+          endpoint_url=${{ secrets.BUCKET_URL }}" > ~/.aws/credentials
 
       - name: Build and push sdr_light_antsdr image with caching
         env:
@@ -151,7 +154,8 @@ jobs:
           mkdir -p ~/.aws
           echo "[default]
           aws_access_key_id=${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}" > ~/.aws/credentials
+          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
+          endpoint_url=${{ secrets.BUCKET_URL }}" > ~/.aws/credentials
 
       - name: Build and push sdr_light_rtlsdrv4 image with caching
         env:
@@ -191,7 +195,8 @@ jobs:
           mkdir -p ~/.aws
           echo "[default]
           aws_access_key_id=${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}" > ~/.aws/credentials
+          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
+          endpoint_url=${{ secrets.BUCKET_URL }}" > ~/.aws/credentials
 
       - name: Build and push reversing image with caching
         env:
@@ -229,7 +234,8 @@ jobs:
           mkdir -p ~/.aws
           echo "[default]
           aws_access_key_id=${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}" > ~/.aws/credentials
+          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
+          endpoint_url=${{ secrets.BUCKET_URL }}" > ~/.aws/credentials
 
       - name: Build and push sdr_light image with caching
         env:
@@ -269,7 +275,8 @@ jobs:
           mkdir -p ~/.aws
           echo "[default]
           aws_access_key_id=${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}" > ~/.aws/credentials
+          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
+          endpoint_url=${{ secrets.BUCKET_URL }}" > ~/.aws/credentials
 
       - name: Build and push sdr_full image with caching
         env:
@@ -307,7 +314,8 @@ jobs:
           mkdir -p ~/.aws
           echo "[default]
           aws_access_key_id=${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}" > ~/.aws/credentials
+          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
+          endpoint_url=${{ secrets.BUCKET_URL }}" > ~/.aws/credentials
 
       - name: Build and push rfid image with caching
         env:
@@ -345,7 +353,8 @@ jobs:
           mkdir -p ~/.aws
           echo "[default]
           aws_access_key_id=${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}" > ~/.aws/credentials
+          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
+          endpoint_url=${{ secrets.BUCKET_URL }}" > ~/.aws/credentials
 
       - name: Build and push wifi image with caching
         env:
@@ -383,7 +392,8 @@ jobs:
           mkdir -p ~/.aws
           echo "[default]
           aws_access_key_id=${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}" > ~/.aws/credentials
+          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
+          endpoint_url=${{ secrets.BUCKET_URL }}" > ~/.aws/credentials
 
       - name: Build and push bluetooth image with caching
         env:
@@ -421,7 +431,8 @@ jobs:
           mkdir -p ~/.aws
           echo "[default]
           aws_access_key_id=${{ secrets.SRV_GHA_AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}" > ~/.aws/credentials
+          aws_secret_access_key=${{ secrets.SRV_GHA_AWS_SECRET_ACCESS_KEY }}
+          endpoint_url=${{ secrets.BUCKET_URL }}" > ~/.aws/credentials
 
       - name: Build and push sdr_deeptemptest_beta image with caching
         env:
