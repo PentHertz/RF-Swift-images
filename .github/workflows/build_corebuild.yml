@@ -38,6 +38,7 @@ jobs:
           AWS_EC2_METADATA_DISABLED: true
           AWS_ENDPOINT: ${{ secrets.BUCKET_URL }}
           S3_ENDPOINT: ${{ secrets.BUCKET_URL }}
+          AWS_REGION: ${{ secrets.BUCKET_REGION }}
           S3_USE_PATH_STYLE: true
           S3_FORCE_PATH_STYLE: true
         run: |
