@@ -1,4 +1,4 @@
-name: Multi-Platform Docker Build with Caching
+name: SDR full - Multi-Platform Docker Build with Caching
 
 env:
   REGISTRY_IMAGE: penthertz/rfswiftdev
@@ -15,7 +15,7 @@ on:
 
 jobs:
   corebuild:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-xl
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
