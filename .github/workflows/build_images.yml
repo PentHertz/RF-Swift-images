@@ -15,9 +15,7 @@ on:
 
 jobs:
   corebuild:
-    runs-on:
-      group: Supergroup
-      labels: super-runner
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -45,9 +43,7 @@ jobs:
             .
 
   sdr_light:
-    runs-on:
-      group: Supergroup
-      labels: super-runner
+    runs-on: ubuntu-latest
     needs: corebuild
     steps:
       - name: Checkout code
