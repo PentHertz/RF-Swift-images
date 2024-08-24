@@ -7,11 +7,11 @@ REGISTRY_IMAGE ?= penthertz/rfswiftdev
 ifeq ($(ARCH),amd64)
     PLATFORM=linux/amd64
 else ifeq ($(ARCH),arm64)
-    PLATFORM=linux/arm64
+    PLATFORM=linux/arm64/v8
 else ifeq ($(ARCH),riscv64)
     PLATFORM=linux/riscv64
 else ifeq ($(ARCH),all)
-    PLATFORM=linux/amd64,linux/arm64 #/v8,linux/riscv64
+    PLATFORM=linux/amd64,linux/arm64/v8,linux/riscv64
 else
     $(error Unsupported architecture: $(ARCH). Supported values are amd64, arm64, riscv64, all)
 endif
@@ -22,7 +22,7 @@ common:
             --cache-to=type=registry,ref=$(CACHE_REPO):cache_corebuild,mode=max \
             --push \
             -t $(REGISTRY_IMAGE):corebuild \
-            -f Dockerfiles/SDR/corebuild.docker \
+            -f SDR/corebuild.docker \
             ..
 
 sdrlight: common
@@ -34,7 +34,7 @@ sdrlight: common
             --build-arg RTLSDR_BASE=rtlsdr \
             --push \
             -t $(REGISTRY_IMAGE):sdr_light \
-            -f Dockerfiles/SDR/sdr_light.docker \
+            -f SDR/sdr_light.docker \
             ..
 
 sdrlightantsdr: common
@@ -46,7 +46,7 @@ sdrlightantsdr: common
             --build-arg RTLSDR_BASE=rtlsdr \
             --push \
             -t $(REGISTRY_IMAGE):sdr_light \
-            -f Dockerfiles/SDR/sdr_light.docker \
+            -f SDR/sdr_light.docker \
             ..
 
 sdrlightrtlsdrv4: common
@@ -58,7 +58,7 @@ sdrlightrtlsdrv4: common
             --build-arg RTLSDR_BASE=rtlsdrv4 \
             --push \
             -t $(REGISTRY_IMAGE):sdr_light \
-            -f Dockerfiles/SDR/sdr_light.docker \
+            -f SDR/sdr_light.docker \
             ..
 
 
@@ -70,7 +70,7 @@ sdrfull1: common sdrlight
             --push \
             -t $(REGISTRY_IMAGE):extraoot \
             --target extraoot \
-            -f Dockerfiles/SDR/sdr_full.docker \
+            -f SDR/sdr_full.docker \
             ..
 
 sdrfull2: common sdrlight
@@ -81,7 +81,7 @@ sdrfull2: common sdrlight
             --push \
             -t $(REGISTRY_IMAGE):extrasofts \
             --target extraoot \
-            -f Dockerfiles/SDR/sdr_full.docker \
+            -f SDR/sdr_full.docker \
             ..
 
 sdrfull3: common sdrlight
@@ -92,7 +92,7 @@ sdrfull3: common sdrlight
             --push \
             -t $(REGISTRY_IMAGE):mldlsofts \
             --target extraoot \
-            -f Dockerfiles/SDR/sdr_full.docker \
+            -f SDR/sdr_full.docker \
             ..
 
 sdrfull: common sdrlight
@@ -102,7 +102,7 @@ sdrfull: common sdrlight
             --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light \
             --push \
             -t $(REGISTRY_IMAGE):sdr_full \
-            -f Dockerfiles/SDR/sdr_full.docker \
+            -f SDR/sdr_full.docker \
             ..
 
 rfid: common
@@ -112,7 +112,7 @@ rfid: common
             --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild \
             --push \
             -t $(REGISTRY_IMAGE):rfid \
-            -f Dockerfiles/rfid.docker \
+            -f rfid.docker \
             ..
 
 wifi: common sdrlight
@@ -122,7 +122,7 @@ wifi: common sdrlight
             --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light \
             --push \
             -t $(REGISTRY_IMAGE):wifi \
-            -f Dockerfiles/wifi.docker \
+            -f wifi.docker \
             ..
 
 
@@ -133,7 +133,7 @@ bluetooth: common sdrlight
             --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild \
             --push \
             -t $(REGISTRY_IMAGE):bluetooth \
-            -f Dockerfiles/bluetooth.docker \
+            -f bluetooth.docker \
             ..
 
 reversing: common
@@ -143,7 +143,7 @@ reversing: common
             --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild \
             --push \
             -t $(REGISTRY_IMAGE):reversing \
-            -f Dockerfiles/reversing.docker \
+            -f reversing.docker \
             ..
 
 automotive: common
@@ -153,7 +153,7 @@ automotive: common
             --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild \
             --push \
             -t $(REGISTRY_IMAGE):automotive \
-            -f Dockerfiles/automotive.docker \
+            -f automotive.docker \
             ..
 
 telecom: common sdrlight
@@ -163,7 +163,7 @@ telecom: common sdrlight
             --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light \
             --push \
             -t $(REGISTRY_IMAGE):telecom \
-            -f Dockerfiles/telecom.docker \
+            -f telecom.docker \
             ..
 
 deeptempest: common sdrlight
@@ -173,7 +173,7 @@ deeptempest: common sdrlight
             --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light \
             --push \
             -t $(REGISTRY_IMAGE):sdr_deeptemptest_beta \
-            -f Dockerfiles/sdr_deeptemptest_beta.docker \
+            -f SDR/sdr_deeptemptest_beta.docker \
             ..
 
 build: bluetooth wifi rfid reversing automotive telecom sdrfull sdrlightantsdr sdrlightrtlsdrv4

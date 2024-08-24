@@ -53,7 +53,7 @@ function harogic_sa_device() {
   		aarch64|unknown) # We asume unknwon would be RPi 5 for now...?
     		prog="SAStudio4_aarch64_05_22_17_41";;
   		*)
-    		printf 'Unsupported architecture: "%s"!\n' "$arch" >&2; exit 2;;
+    		printf 'Unsupported architecture: "%s"!\n' "$arch" >&2; exit 0;;
 	esac
 	installfromnet "wget https://github.com/PentHertz/rfswift_harogic_install/releases/download/v05.23.17/$prog.zip"
 	unzip "$prog"

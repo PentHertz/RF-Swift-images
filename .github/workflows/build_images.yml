@@ -74,9 +74,7 @@ jobs:
             .
 
   sdr_full:
-    runs-on:
-      group: Supergroup
-      labels: ultra-runner
+    runs-on: ubuntu-latest
     needs: sdr_light
     steps:
       - name: Checkout code
@@ -95,6 +93,7 @@ jobs:
 
       - name: Build and push sdr_full image with caching
         run: |
+          docker system prune -a -f
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
             --cache-from=type=registry,ref=${{ env.CACHE_REPO }}:cache_sdr_full \
             --cache-to=type=registry,ref=${{ env.CACHE_REPO }}:cache_sdr_full,mode=max \
@@ -196,9 +195,7 @@ jobs:
             .
 
   wifi:
-    runs-on:
-      group: Supergroup
-      labels: ultra-runner
+    runs-on: ubuntu-latest
     needs: sdr_light
     steps:
       - name: Checkout code
@@ -217,6 +214,7 @@ jobs:
 
       - name: Build and push wifi image with caching
         run: |
+          docker system prune -a -f
           docker buildx build --platform ${{ env.BUILD_PLATFORMS }} \
             --cache-from=type=registry,ref=${{ env.CACHE_REPO }}:cache_wifi \
             --cache-to=type=registry,ref=${{ env.CACHE_REPO }}:cache_wifi,mode=max \
