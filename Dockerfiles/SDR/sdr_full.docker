@@ -40,7 +40,7 @@ RUN ./entrypoint.sh grgsm_grmod_install && \
 	./entrypoint.sh grfoo_grmod_install && \
 	./entrypoint.sh grieee802-11_grmod_install && \ 
 	./entrypoint.sh grieee802154_grmod_install  # depends on grfoo_grmod_install
-#RUN ./entrypoint.sh gruaslink_grmod_install # todo: python3 print fixes
+RUN ./entrypoint.sh gruaslink_grmod_install
 
 RUN ./entrypoint.sh grrds_grmod_install && \
 	./entrypoint.sh grdroineid_grmod_install && \

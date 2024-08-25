@@ -28,7 +28,7 @@ function griridium_grmod_install() {
 }
 
 function gruaslink_grmod_install() { 
-    grclone_and_build "https://github.com/bkerler/gr-uaslink.git" "" "gruaslink_grmod_install"
+    grclone_and_build "https://github.com/FlUxIuS/gr-uaslink.git" "" "gruaslink_grmod_install"
 }
 
 function grX10_grmod_install() {
