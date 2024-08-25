@@ -210,7 +210,7 @@ function grbb60_Receiver_grmod_install() {
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
     cd /root/thirdparty
     installfromnet "wget https://ftdichip.com/wp-content/uploads/2022/07/libftd2xx-x86_64-1.4.27.tgz"
-    cd tar xvfz libftd2xx-x86_64-1.4.27.tgz
+    tar xvfz libftd2xx-x86_64-1.4.27.tgz
     cd release/build
     cp libftd2xx.* /usr/local/lib
     chmod 0755 /usr/local/lib/libftd2xx.so.1.4.27
