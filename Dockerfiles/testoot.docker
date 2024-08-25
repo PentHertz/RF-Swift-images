@@ -25,7 +25,7 @@ RUN chmod +x entrypoint.sh
 RUN ./entrypoint.sh grgsm_grmod_install
 RUN ./entrypoint.sh grdroineid_grmod_install
 
-FROM extraoot as mldlsofts
+FROM extraoot AS mldlsofts
 # Installing extra software
 RUN ./entrypoint.sh ml_and_dl_soft_install
 

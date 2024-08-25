@@ -108,51 +108,35 @@ function sdrangel_soft_fromsource_install() {
 	goodecho "[+] SGP4"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	installfromnet "git clone https://github.com/dnwrnr/sgp4.git"
-	cd sgp4
-	mkdir build; cd build
-	cmake -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/sgp4 ..
-	make -j $(nproc) install
+	cmake_clone_and_build "https://github.com/dnwrnr/sgp4.git" "build" -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/sgp4
 
 	goodecho "[+] libsigmf"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	installfromnet "git clone https://github.com/f4exb/libsigmf.git"
-	cd libsigmf
-	git checkout "new-namespaces"
-	mkdir build; cd build
-	cmake -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/libsigmf .. 
-	make -j $(nproc) install
+	cmake_clone_and_build "https://github.com/f4exb/libsigmf.git" "build" -b "new-namespaces" -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/libsigmf
 
 	goodecho "[+] ggmorse"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	installfromnet "git clone https://github.com/ggerganov/ggmorse.git"
-	cd ggmorse
-	mkdir build; cd build
-	cmake -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/ggmorse -DGGMORSE_BUILD_TESTS=OFF -DGGMORSE_BUILD_EXAMPLES=OFF ..
-	make -j $(nproc) install
+	cmake_clone_and_build "https://github.com/ggerganov/ggmorse.git" "build" -Wno-dev \
+		-DCMAKE_INSTALL_PREFIX=/opt/install/ggmorse -DGGMORSE_BUILD_TESTS=OFF -DGGMORSE_BUILD_EXAMPLES=OFF
 
 	goodecho "[+] Installing SDR Angel"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	installfromnet "git clone https://github.com/f4exb/sdrangel.git"
-	cd sdrangel
-	mkdir build; cd build
-	cmake -Wno-dev -DDEBUG_OUTPUT=ON -DRX_SAMPLE_24BIT=ON \
-	-DCMAKE_BUILD_TYPE=RelWithDebInfo \
-	-DAPT_DIR=/opt/install/aptdec \
-	-DCM256CC_DIR=/opt/install/cm256cc \
-	-DDSDCC_DIR=/opt/install/dsdcc \
-	-DSERIALDV_DIR=/opt/install/serialdv \
-	-DMBE_DIR=/opt/install/mbelib \
-	-DCODEC2_DIR=/opt/install/codec2 \
-	-DSGP4_DIR=/opt/install/sgp4 \
-	-DLIBSIGMF_DIR=/opt/install/libsigmf \
-	-DDAB_DIR=/opt/install/libdab \
-	-DGGMORSE_DIR=/opt/install/ggmorse \
-	-DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel ..
-	make -j $(nproc) install
+	cmake_clone_and_build "https://github.com/f4exb/sdrangel.git" "build" -Wno-dev -DDEBUG_OUTPUT=ON -DRX_SAMPLE_24BIT=ON \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DAPT_DIR=/opt/install/aptdec \
+		-DCM256CC_DIR=/opt/install/cm256cc \
+		-DDSDCC_DIR=/opt/install/dsdcc \
+		-DSERIALDV_DIR=/opt/install/serialdv \
+		-DMBE_DIR=/opt/install/mbelib \
+		-DCODEC2_DIR=/opt/install/codec2 \
+		-DSGP4_DIR=/opt/install/sgp4 \
+		-DLIBSIGMF_DIR=/opt/install/libsigmf \
+		-DDAB_DIR=/opt/install/libdab \
+		-DGGMORSE_DIR=/opt/install/ggmorse \
+		-DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
 	ln -s /opt/install/sdrangel/bin/sdrangel /usr/bin/sdrangel
 }
 
@@ -162,22 +146,15 @@ function sdrpp_soft_fromsource_install () { # Beta test, but should work on almo
 	goodecho "[+] Installing SDR++"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	goodecho "[+] Cloning SDR++ project"
-	installfromnet "git clone https://github.com/AlexandreRouma/SDRPlusPlus.git"
-	cd SDRPlusPlus/
-	mkdir build
-	cd build
-	cmake .. -DOPT_BUILD_SOAPY_SOURCE=ON -DOPT_BUILD_AIRSPY_SOURCE=ON -DOPT_BUILD_AIRSPYHF_SOURCE=ON -DOPT_BUILD_NETWORK_SINK=ON \
+	goodecho "[+] Cloning and installing SDR++ project"
+	cmake_clone_and_build "https://github.com/AlexandreRouma/SDRPlusPlus.git" "build" -DOPT_BUILD_SOAPY_SOURCE=ON -DOPT_BUILD_AIRSPY_SOURCE=ON -DOPT_BUILD_AIRSPYHF_SOURCE=ON -DOPT_BUILD_NETWORK_SINK=ON \
 			-DOPT_BUILD_FREQUENCY_MANAGER=ON -DOPT_BUILD_IQ_EXPORTER=ON -DOPT_BUILD_RECORDER=ON -DOPT_BUILD_RIGCTL_SERVER=ON -DOPT_BUILD_METEOR_DEMODULATOR=ON \
 			-DOPT_BUILD_RADIO=ON -DOPT_BUILD_USRP_SOURCE=ON -DOPT_BUILD_FILE_SOURCE=ON -DOPT_BUILD_HACKRF_SOURCE=ON -DOPT_BUILD_RTL_SDR_SOURCE=ON -DOPT_BUILD_RTL_TCP_SOURCE=ON \
 			-DOPT_BUILD_SDRPP_SERVER_SOURCE=ON -DOPT_BUILD_SOAPY_SOURCE=ON -DOPT_BUILD_SPECTRAN_SOURCE=OFF -DOPT_BUILD_SPECTRAN_HTTP_SOURCE=OFF  -DOPT_BUILD_LIMESDR_SOURCE=ON \
 			-DOPT_BUILD_PLUTOSDR_SOURCE=ON -DOPT_BUILD_BLADERF_SOURCE=ON -DOPT_BUILD_AUDIO_SOURCE=ON -DOPT_BUILD_AUDIO_SINK=ON -DOPT_BUILD_PORTAUDIO_SINK=OFF \
-			-DOPT_BUILD_NEW_PORTAUDIO_SINK=OFF -DOPT_BUILD_M17_DECODER=ON -DUSE_BUNDLE_DEFAULTS=ON -DCMAKE_BUILD_TYPE=Release # TODO: support Spectran devices on Docker creation
-	make -j$(nproc)
-	make install
+			-DOPT_BUILD_NEW_PORTAUDIO_SINK=OFF -DOPT_BUILD_M17_DECODER=ON -DUSE_BUNDLE_DEFAULTS=ON -DCMAKE_BUILD_TYPE=Release
 	mkdir -p "/root/Library/Application Support/sdrpp/"
 	cp /root/config/sdrpp-config.json "/root/Library/Application Support/sdrpp/config.json"
-	cd /root
 }
 
 function sdrpp_soft_install () { # Working but not compatible with aarch64

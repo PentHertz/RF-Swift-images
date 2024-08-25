@@ -2,7 +2,7 @@ name: SDR full - Multi-Platform Docker Build with Caching
 
 env:
   REGISTRY_IMAGE: penthertz/rfswiftdevgh
-  BUILD_PLATFORMS: all
+  BUILD_PLATFORMS: amd64
   CACHE_PLATFORMS: linux_amd64-linux_arm64
   CACHE_REPO: penthertz/rfswiftdevgh
   DO_SPACES_ENDPOINT: ${{ secrets.BUCKET_URL }}
