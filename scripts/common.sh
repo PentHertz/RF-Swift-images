@@ -114,7 +114,10 @@ function gitinstall() {
             # Get the absolute path of the repository
             repo_abs_path="$(pwd)/$repo_name"
             cd $repo_name
-            git submodule update --init --recursive
+            # Attempt to update submodules; continue regardless of success
+            git submodule update --init --recursive || {
+                goodecho "Failed to update submodules, but continuing."
+            }
             cd ..
 
             # Append the repository name, absolute path, and method to the file
