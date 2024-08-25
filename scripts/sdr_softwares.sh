@@ -36,32 +36,32 @@ function sdrangel_soft_fromsource_install() {
 	goodecho "[+] APT"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	cmake_clone_and_build "https://github.com/srcejon/aptdec.git" "build" "libaptdec" "" -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/aptdec
+	cmake_clone_and_build "https://github.com/srcejon/aptdec.git" "build" "libaptdec" "" "sdrangel_soft_fromsource_install" -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/aptdec
 
 	goodecho "[+] CM265cc"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	cmake_clone_and_build "https://github.com/f4exb/cm256cc.git" "build" "" 6f4a51802f5f302577d6d270a9fc0cb7a1ee28ef -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/cm256cc
+	cmake_clone_and_build "https://github.com/f4exb/cm256cc.git" "build" "" 6f4a51802f5f302577d6d270a9fc0cb7a1ee28ef "sdrangel_soft_fromsource_install" -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/cm256cc
 
 	goodecho "[+] LibDAB"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	cmake_clone_and_build "https://github.com/srcejon/dab-cmdline" "build" "msvc" "" -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/libdab
+	cmake_clone_and_build "https://github.com/srcejon/dab-cmdline" "build" "msvc" "" "sdrangel_soft_fromsource_install" -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/libdab
 
 	goodecho "[+] MBElib"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	cmake_clone_and_build "https://github.com/szechyjs/mbelib.git" "dab-cmdline/library" "" 9a04ed5c78176a9965f3d43f7aa1b1f5330e771f -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/mbelib
+	cmake_clone_and_build "https://github.com/szechyjs/mbelib.git" "dab-cmdline/library" "" 9a04ed5c78176a9965f3d43f7aa1b1f5330e771f "sdrangel_soft_fromsource_install" -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/mbelib
 
 	goodecho "[+] serialdv"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	cmake_clone_and_build "https://github.com/f4exb/serialDV.git" "build" "" "v1.1.4" -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/serialdv
+	cmake_clone_and_build "https://github.com/f4exb/serialDV.git" "build" "" "v1.1.4" "sdrangel_soft_fromsource_install" -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/serialdv
 
 	goodecho "[+] DSDcc"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	cmake_clone_and_build "https://github.com/f4exb/dsdcc.git" "build" "" "v1.9.5" \
+	cmake_clone_and_build "https://github.com/f4exb/dsdcc.git" "build" "" "v1.9.5" "sdrangel_soft_fromsource_install" \
 		-Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/dsdcc -DUSE_MBELIB=ON -DLIBMBE_INCLUDE_DIR=/opt/install/mbelib/include \
 		-DLIBMBE_LIBRARY=/opt/install/mbelib/lib/libmbe.so -DLIBSERIALDV_INCLUDE_DIR=/opt/install/serialdv/include/serialdv \
 		-DLIBSERIALDV_LIBRARY=/opt/install/serialdv/lib/libserialdv.so
@@ -70,28 +70,28 @@ function sdrangel_soft_fromsource_install() {
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
 	installfromnet "apt-fast -y install libspeexdsp-dev libsamplerate0-dev"
-	cmake_clone_and_build "https://github.com/drowe67/codec2-dev.git" "build" "" "v1.0.3"
+	cmake_clone_and_build "https://github.com/drowe67/codec2-dev.git" "build" "" "v1.0.3" "sdrangel_soft_fromsource_install"
 
 	goodecho "[+] SGP4"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	cmake_clone_and_build "https://github.com/dnwrnr/sgp4.git" "build" "" "" -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/sgp4
+	cmake_clone_and_build "https://github.com/dnwrnr/sgp4.git" "build" "" ""  "sdrangel_soft_fromsource_install"-Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/sgp4
 
 	goodecho "[+] libsigmf"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	cmake_clone_and_build "https://github.com/f4exb/libsigmf.git" "build" "new-namespaces" "" -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/libsigmf
+	cmake_clone_and_build "https://github.com/f4exb/libsigmf.git" "build" "new-namespaces" ""  "sdrangel_soft_fromsource_install"-Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/libsigmf
 
 	goodecho "[+] ggmorse"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	cmake_clone_and_build "https://github.com/ggerganov/ggmorse.git" "build" "" "" -Wno-dev \
+	cmake_clone_and_build "https://github.com/ggerganov/ggmorse.git" "build" "" ""  "sdrangel_soft_fromsource_install"-Wno-dev \
 		-DCMAKE_INSTALL_PREFIX=/opt/install/ggmorse -DGGMORSE_BUILD_TESTS=OFF -DGGMORSE_BUILD_EXAMPLES=OFF
 
 	goodecho "[+] Installing SDR Angel"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	cmake_clone_and_build "https://github.com/f4exb/sdrangel.git" "build" "" "" -Wno-dev -DDEBUG_OUTPUT=ON -DRX_SAMPLE_24BIT=ON \
+	cmake_clone_and_build "https://github.com/f4exb/sdrangel.git" "build" "" "" "sdrangel_soft_fromsource_install" -Wno-dev -DDEBUG_OUTPUT=ON -DRX_SAMPLE_24BIT=ON \
 		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
 		-DAPT_DIR=/opt/install/aptdec \
 		-DCM256CC_DIR=/opt/install/cm256cc \
@@ -114,7 +114,7 @@ function sdrpp_soft_fromsource_install () { # Beta test, but should work on almo
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
 	goodecho "[+] Cloning and installing SDR++ project"
-	cmake_clone_and_build "https://github.com/AlexandreRouma/SDRPlusPlus.git" "build" "" "" -DOPT_BUILD_SOAPY_SOURCE=ON -DOPT_BUILD_AIRSPY_SOURCE=ON -DOPT_BUILD_AIRSPYHF_SOURCE=ON -DOPT_BUILD_NETWORK_SINK=ON \
+	cmake_clone_and_build "https://github.com/AlexandreRouma/SDRPlusPlus.git" "build" "" ""  "sdrpp_soft_fromsource_install" -DOPT_BUILD_SOAPY_SOURCE=ON -DOPT_BUILD_AIRSPY_SOURCE=ON -DOPT_BUILD_AIRSPYHF_SOURCE=ON -DOPT_BUILD_NETWORK_SINK=ON \
 			-DOPT_BUILD_FREQUENCY_MANAGER=ON -DOPT_BUILD_IQ_EXPORTER=ON -DOPT_BUILD_RECORDER=ON -DOPT_BUILD_RIGCTL_SERVER=ON -DOPT_BUILD_METEOR_DEMODULATOR=ON \
 			-DOPT_BUILD_RADIO=ON -DOPT_BUILD_USRP_SOURCE=ON -DOPT_BUILD_FILE_SOURCE=ON -DOPT_BUILD_HACKRF_SOURCE=ON -DOPT_BUILD_RTL_SDR_SOURCE=ON -DOPT_BUILD_RTL_TCP_SOURCE=ON \
 			-DOPT_BUILD_SDRPP_SERVER_SOURCE=ON -DOPT_BUILD_SOAPY_SOURCE=ON -DOPT_BUILD_SPECTRAN_SOURCE=OFF -DOPT_BUILD_SPECTRAN_HTTP_SOURCE=OFF  -DOPT_BUILD_LIMESDR_SOURCE=ON \
@@ -162,7 +162,7 @@ function cyberther_soft_install() {
 	goodecho "[+] Installing Cyber Ether"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	cmake_clone_and_build "https://github.com/catchorg/Catch2.git" "build"
+	cmake_clone_and_build "https://github.com/catchorg/Catch2.git" "build" "" "" "cyberther_soft_install"
 
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
@@ -195,7 +195,7 @@ function inspection_decoding_tools () {
 	goodecho "[+] Installing rtl_433 tools"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	cmake_clone_and_build "https://github.com/merbanan/rtl_433.git" "build"
+	cmake_clone_and_build "https://github.com/merbanan/rtl_433.git" "build" "" "" "inspection_decoding_tools"
 }
 
 function qsstv_soft_install () {
@@ -229,13 +229,13 @@ function ice9_bluetooth_soft_install() {
     esac
 }
 
-function ice9_bluetooth_soft_install_call () {
+function inspection_decoding_tools () {
 	goodecho "[+] Installing dependencies for ice9_bluetooth"
 	installfromnet "apt-fast install -y libliquid-dev libhackrf-dev libbladerf-dev libuhd-dev libfftw3-dev"
 	goodecho "[+] Cloning ice9-bluetooth-sniffer"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	cmake_clone_and_build "https://github.com/mikeryan/ice9-bluetooth-sniffer.git" "build"
+	cmake_clone_and_build "https://github.com/mikeryan/ice9-bluetooth-sniffer.git" "build" "" "" "inspection_decoding_tools"
 }
 
 function nfclaboratory_soft_install () {
@@ -286,7 +286,7 @@ function acarsdec_soft_install () {
 	goodecho "[+] Installing acarsdec"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	cmake_clone_and_build "https://github.com/TLeconte/acarsdec.git" "build" "" "" -Drtl=ON -Dairspy=ON -Dsoapy=ON
+	cmake_clone_and_build "https://github.com/TLeconte/acarsdec.git" "build" "" "" "acarsdec_soft_install" -Drtl=ON -Dairspy=ON -Dsoapy=ON
 }
 
 function meshtastic_sdr_soft_install () {

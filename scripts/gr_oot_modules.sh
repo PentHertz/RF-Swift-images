@@ -1,42 +1,42 @@
 #!/bin/bash
 
 function common_sources_and_sinks() {
-    grclone_and_build "https://github.com/osmocom/gr-osmosdr.git"
+    grclone_and_build "https://github.com/osmocom/gr-osmosdr.git" "" "common_sources_and_sinks"
 }
 
 function grgsm_grmod_install() {
     install_dependencies "build-essential libtool libtalloc-dev libsctp-dev shtool autoconf automake git-core pkg-config make gcc gnutls-dev libusb-1.0-0-dev libmnl-dev libosmocore libosmocore-dev"
-    grclone_and_build "https://github.com/bkerler/gr-gsm.git"
+    grclone_and_build "https://github.com/bkerler/gr-gsm.git" "" "grgsm_grmod_install"
 }
 
 function grlora_grmod_install() {
     install_dependencies "libliquid-dev libliquid2d"
-    grclone_and_build "https://github.com/rpp0/gr-lora.git"
+    grclone_and_build "https://github.com/rpp0/gr-lora.git" "" "grlora_grmod_install"
 }
 
 function grlorasdr_grmod_install() {
-    grclone_and_build "https://github.com/tapparelj/gr-lora_sdr.git"
+    grclone_and_build "https://github.com/tapparelj/gr-lora_sdr.git" "" "grlorasdr_grmod_install"
 }
 
 function grinspector_grmod_install() {
     install_dependencies "libqwt-qt5-dev"
-    grclone_and_build "https://github.com/gnuradio/gr-inspector.git"
+    grclone_and_build "https://github.com/gnuradio/gr-inspector.git" "" "grinspector_grmod_install"
 }
 
 function griridium_grmod_install() {
-    grclone_and_build "https://github.com/muccc/gr-iridium.git"
+    grclone_and_build "https://github.com/muccc/gr-iridium.git" "" "griridium_grmod_install"
 }
 
 function gruaslink_grmod_install() { 
-    grclone_and_build "https://github.com/bkerler/gr-uaslink.git"
+    grclone_and_build "https://github.com/bkerler/gr-uaslink.git" "" "gruaslink_grmod_install"
 }
 
 function grX10_grmod_install() {
-    grclone_and_build "https://github.com/cpoore1/gr-X10.git"
+    grclone_and_build "https://github.com/cpoore1/gr-X10.git" "" "grX10_grmod_install"
 }
 
 function grgfdm_grmod_install() {
-    grclone_and_build "https://github.com/bkerler/gr-gfdm.git"
+    grclone_and_build "https://github.com/bkerler/gr-gfdm.git" "" "grgfdm_grmod_install"
 }
 
 function graaronia_rtsa_grmod_install() {
@@ -44,62 +44,62 @@ function graaronia_rtsa_grmod_install() {
     goodecho "[+] Cloning and installing libspectranstream"
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
     cd /root/thirdparty
-    cmake_clone_and_build " https://github.com/hb9fxq/libspectranstream.git" "build"
+    cmake_clone_and_build "https://github.com/hb9fxq/libspectranstream.git" "build" "" "" "graaronia_rtsa_grmod_install"
     cd /root/thirdparty
-    grclone_and_build "https://github.com/hb9fxq/gr-aaronia_rtsa.git"
+    grclone_and_build "https://github.com/hb9fxq/gr-aaronia_rtsa.git" "" "graaronia_rtsa_grmod_install"
 }
 
 function grccsds_move_rtsa_grmod_install() {
     install_dependencies "rapidjson-dev"
-    grclone_and_build "https://github.com/bkerler/gr-ccsds_move.git"
+    grclone_and_build "https://github.com/bkerler/gr-ccsds_move.git" "" "grccsds_move_rtsa_grmod_install"
 }
 
 function grais_grmod_install() {
-    grclone_and_build "https://github.com/bkerler/gr-ais.git"
+    grclone_and_build "https://github.com/bkerler/gr-ais.git" "" "grais_grmod_install"
 }
 
 function graistx_grmod_install() {
-    grclone_and_build "https://github.com/bkerler/ais.git" "ais/gr-aistx"
+    grclone_and_build "https://github.com/bkerler/ais.git" "ais/gr-aistx" "graistx_grmod_install"
 }
 
 function grairmodes_grmod_install() {
-    grclone_and_build "https://github.com/bistromath/gr-air-modes.git"
+    grclone_and_build "https://github.com/bistromath/gr-air-modes.git" "" "grairmodes_grmod_install"
 }
 
 function grj2497_grmod_install() {
-    grclone_and_build "https://github.com/ainfosec/gr-j2497.git"
+    grclone_and_build "https://github.com/ainfosec/gr-j2497.git" "" "grj2497_grmod_install"
 }
 
 function grzwavepoore_grmod_install() {
-    grclone_and_build "https://github.com/cpoore1/gr-zwave_poore.git"
+    grclone_and_build "https://github.com/cpoore1/gr-zwave_poore.git" "" "grzwavepoore_grmod_install"
 }
 
 function grmixalot_grmod_install() {
-    grclone_and_build "https://github.com/unsynchronized/gr-mixalot.git"
+    grclone_and_build "https://github.com/unsynchronized/gr-mixalot.git" "" "grmixalot_grmod_install"
 }
 
 function grreveng_grmod_install() {
-    grclone_and_build "https://github.com/paulgclark/gr-reveng.git"
+    grclone_and_build "https://github.com/paulgclark/gr-reveng.git" "" "grreveng_grmod_install"
 }
 
 function grpdu_utils_grmod_install() {
-    grclone_and_build "https://github.com/sandialabs/gr-pdu_utils.git"
+    grclone_and_build "https://github.com/sandialabs/gr-pdu_utils.git" "" "grpdu_utils_grmod_install"
 }
 
 function grsandia_utils_grmod_install() {
-    grclone_and_build "https://github.com/bkerler/gr-sandia_utils.git"
+    grclone_and_build "https://github.com/bkerler/gr-sandia_utils.git" "" "grsandia_utils_grmod_install"
 }
 
 function grdvbs2_grmod_install() {
-    grclone_and_build "https://github.com/bkerler/gr-dvbs2.git"
+    grclone_and_build "https://github.com/bkerler/gr-dvbs2.git" "" "grdvbs2_grmod_install"
 }
 
 function grtempest_grmod_install() { 
-    grclone_and_build "https://github.com/nash-pillai/gr-tempest.git"
+    grclone_and_build "https://github.com/nash-pillai/gr-tempest.git" "" "grtempest_grmod_install"
 }
 
 function deeptempest_grmod_install() {
-    grclone_and_build "https://github.com/PentHertz/deep-tempest.git" "deep-tempest/gr-tempest"
+    grclone_and_build "https://github.com/PentHertz/deep-tempest.git" "deep-tempest/gr-tempest" "deeptempest_grmod_install"
     cd deep-tempest/examples
     grcc *.grc
     mkdir -p /root/.grc_gnuradio
@@ -111,37 +111,37 @@ function deeptempest_grmod_install() {
 }
 
 function grfhss_utils_grmod_install() {
-    grclone_and_build "https://github.com/sandialabs/gr-fhss_utils.git"
+    grclone_and_build "https://github.com/sandialabs/gr-fhss_utils.git" "" "grfhss_utils_grmod_install"
 }
 
 function grtiming_utils_grmod_install() {
-    grclone_and_build "https://github.com/sandialabs/gr-timing_utils.git"
+    grclone_and_build "https://github.com/sandialabs/gr-timing_utils.git" "" "grtiming_utils_grmod_install"
 }
 
 function grdab_grmod_install() {
     install_dependencies "libfaad-dev"
-    grclone_and_build "https://github.com/bkerler/gr-dab.git"
+    grclone_and_build "https://github.com/bkerler/gr-dab.git" "" "grdab_grmod_install"
 }
 
 function grdect2_grmod_install() {
-    grclone_and_build "https://github.com/pavelyazev/gr-dect2.git"
+    grclone_and_build "https://github.com/pavelyazev/gr-dect2.git" "" "grdect2_grmod_install"
 }
 
 function grfoo_grmod_install() {
-    grclone_and_build "https://github.com/bastibl/gr-foo.git"
+    grclone_and_build "https://github.com/bastibl/gr-foo.git" "" "grfoo_grmod_install"
 }
 
 function grieee802-11_grmod_install() {
-    grclone_and_build "https://github.com/bastibl/gr-ieee802-11.git"
+    grclone_and_build "https://github.com/bastibl/gr-ieee802-11.git" "" "grieee802-11_grmod_install"
 }
 
 function grieee802154_grmod_install() {
-    grclone_and_build "https://github.com/bastibl/gr-ieee802-15-4.git"
+    grclone_and_build "https://github.com/bastibl/gr-ieee802-15-4.git" "" "grieee802154_grmod_install"
 }
 
 function grrds_grmod_install() {
     install_dependencies "libboost-all-dev"
-    grclone_and_build "https://github.com/bastibl/gr-rds.git"
+    grclone_and_build "https://github.com/bastibl/gr-rds.git" "" "grrds_grmod_install"
 }
 
 function grfosphor_grmod_install() {
@@ -149,9 +149,9 @@ function grfosphor_grmod_install() {
     goodecho "[+] Cloning and building GLFW3"
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
     cd /root/thirdparty
-    cmake_clone_and_build "https://github.com/glfw/glfw" "build" "" "" -DBUILD_SHARED_LIBS=true
+    cmake_clone_and_build "https://github.com/glfw/glfw" "build" "" "" "grfosphor_grmod_install" -DBUILD_SHARED_LIBS=true
     cd /root/thirdparty
-    grclone_and_build "https://github.com/osmocom/gr-fosphor.git"
+    grclone_and_build "https://github.com/osmocom/gr-fosphor.git" "" "grfosphor_grmod_install"
 }
 
 function grdroineid_grmod_install() {
@@ -160,39 +160,39 @@ function grdroineid_grmod_install() {
     cd /root/thirdparty
     cmake_clone_and_build "https://github.com/zlinwei/turbofec.git" "build"
     cd /root/thirdparty
-    cmake_clone_and_build "https://github.com/d-bahr/CRCpp.git" "build"
-    grclone_and_build "https://github.com/proto17/dji_droneid.git" "dji_droneid/gnuradio/gr-droneid" "gr-droneid"
+    cmake_clone_and_build "https://github.com/d-bahr/CRCpp.git" "build" "" "" "grdroineid_grmod_install"
+    grclone_and_build "https://github.com/proto17/dji_droneid.git" "dji_droneid/gnuradio/gr-droneid" "grdroineid_grmod_install" -b "gr-droneid"
 }
 
 function grsatellites_grmod_install() {
     install_dependencies "liborc-0.4-dev"
     installfromnet "pip3 install --user --upgrade construct requests"
-    grclone_and_build "https://github.com/daniestevez/gr-satellites.git"
+    grclone_and_build "https://github.com/daniestevez/gr-satellites.git" "" "grsatellites_grmod_install"
 }
 
 function gradsb_grmod_install() {
     installfromnet "pip3 install zmq flask flask-socketio gevent gevent-websocket"
-    grclone_and_build "https://github.com/mhostetter/gr-adsb"
+    grclone_and_build "https://github.com/mhostetter/gr-adsb" "" "gradsb_grmod_install"
 }
 
 function grkeyfob_grmod_install() {
-    grclone_and_build "https://github.com/bastibl/gr-keyfob.git"
+    grclone_and_build "https://github.com/bastibl/gr-keyfob.git" "" "grkeyfob_grmod_install"
 }
 
 function grradar_grmod_install() {
-    grclone_and_build "https://github.com/radioconda/gr-radar.git"
+    grclone_and_build "https://github.com/radioconda/gr-radar.git" "" "grradar_grmod_install"
 }
 
 function grnordic_grmod_install() {
-    grclone_and_build "https://github.com/bkerler/gr-nordic.git"
+    grclone_and_build "https://github.com/bkerler/gr-nordic.git" "" "grnordic_grmod_install"
 }
 
 function grpaint_grmod_install() {
-    grclone_and_build "https://github.com/drmpeg/gr-paint.git"
+    grclone_and_build "https://github.com/drmpeg/gr-paint.git" "" "grpaint_grmod_install"
 }
 
 function gr_DCF77_Receiver_grmod_install() {
-    grclone_and_build "https://github.com/henningM1r/gr_DCF77_Receiver.git"
+    grclone_and_build "https://github.com/henningM1r/gr_DCF77_Receiver.git" "" "gr_DCF77_Receiver_grmod_install"
 }
 
 function grbb60_Receiver_grmod_install() {
@@ -215,5 +215,5 @@ function grbb60_Receiver_grmod_install() {
     cp libbb_api.* /usr/local/lib
     ldconfig -v -n /usr/local/lib
     ln -sf /usr/local/lib/libbb_api.so.5 /usr/local/lib/libbb_api.so
-    grclone_and_build "https://github.com/SignalHound/gr-bb60.git"
+    grclone_and_build "https://github.com/SignalHound/gr-bb60.git" "" "grbb60_Receiver_grmod_install"
 }

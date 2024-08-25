@@ -45,12 +45,13 @@ function install_dependencies() {
     installfromnet "apt-fast install -y ${dependencies}"
 }
 
-function grclone_and_build() {
+grclone_and_build() {
     local repo_url=$1
     local repo_subdir=$2
+    local method=$3  # Custom method name
     local build_dir="build"
     local branch=""
-    shift 2
+    shift 3
 
     # Check if a branch is specified (e.g., -b branch_name)
     if [[ $1 == "-b" ]]; then
@@ -70,7 +71,7 @@ function grclone_and_build() {
     fi
 
     # Clone the repository and switch to the specified branch if provided
-    cmake_clone_and_build "$repo_url" "$repo_subdir/$build_dir" "$branch" "" "-DCMAKE_INSTALL_PREFIX=/usr" "${cmake_args[@]}"
+    cmake_clone_and_build "$repo_url" "$repo_subdir/$build_dir" "$branch" "" "$method" "-DCMAKE_INSTALL_PREFIX=/usr" "${cmake_args[@]}"
 }
 
 function gitinstall() {
@@ -130,7 +131,8 @@ function cmake_clone_and_build() {
     local build_dir=$2
     local branch=$3  # This can be empty if no branch is specified
     local reset_commit=$4  # This can be empty if reset is not needed
-    shift 4
+    local method=$5  # The method name to pass to gitinstall
+    shift 5
     local cmake_args=("$@")  # Capture all remaining arguments as CMake arguments
 
     # Extract the repository name from the URL
@@ -139,7 +141,7 @@ function cmake_clone_and_build() {
     # Clone the repository if it doesn't exist, otherwise check for updates
     if [ ! -d "$repo_name" ]; then
         goodecho "[+] Cloning ${repo_name}"
-        gitinstall "$repo_url" "cmake_clone_and_build" "$branch"
+        gitinstall "$repo_url" "$method" "$branch"
         cd "$repo_name" || exit
         should_build=true
     else
