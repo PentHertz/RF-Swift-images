@@ -40,7 +40,17 @@ function AFL_install() {
 }
 
 function honggfuzz_install() {
-    echo "[+] installing honggfuzz"
+    echo "[+] Checking system architecture..."
+
+    ARCH=$(uname -m)
+    if [[ "$ARCH" != "x86_64" && "$ARCH" != "aarch64" ]]; then
+        criticalecho-noexit "[-] Unsupported architecture: $ARCH"
+        criticalecho-noexit "    Honggfuzz installation is supported only on arm64/aarch64 or amd64."
+    fi
+
+    echo "[+] Architecture $ARCH supported. Proceeding with installation."
+
+    echo "[+] Installing honggfuzz"
 
     installfromnet "apt-fast install -y binutils-dev libunwind-dev libblocksruntime-dev git"
 
@@ -51,6 +61,7 @@ function honggfuzz_install() {
 
     cd honggfuzz && make && make install
 }
+
 
 function clang_static_analyzer_install() {
     echo "[+] installing clang-static-analyzer"

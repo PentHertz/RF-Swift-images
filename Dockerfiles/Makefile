@@ -25,7 +25,7 @@ common:
             -f SDR/corebuild.docker \
             ..
 
-sdrlight: common
+sdrlight: #common
 		docker buildx build --platform $(PLATFORM) \
             --cache-from=type=registry,ref=$(CACHE_REPO):cache_sdr_light \
             --cache-to=type=registry,ref=$(CACHE_REPO):cache_sdr_light,mode=max \
@@ -37,7 +37,7 @@ sdrlight: common
             -f SDR/sdr_light.docker \
             ..
 
-sdrlightantsdr: common
+sdrlightantsdr: #common
 		docker buildx build --platform $(PLATFORM) \
             --cache-from=type=registry,ref=$(CACHE_REPO):cache_sdr_light \
             --cache-to=type=registry,ref=$(CACHE_REPO):cache_sdr_light,mode=max \
@@ -49,7 +49,7 @@ sdrlightantsdr: common
             -f SDR/sdr_light.docker \
             ..
 
-sdrlightrtlsdrv4: common
+sdrlightrtlsdrv4: #common
 		docker buildx build --platform $(PLATFORM) \
             --cache-from=type=registry,ref=$(CACHE_REPO):cache_sdr_light \
             --cache-to=type=registry,ref=$(CACHE_REPO):cache_sdr_light,mode=max \
@@ -62,7 +62,7 @@ sdrlightrtlsdrv4: common
             ..
 
 
-sdrfull1: common sdrlight
+sdrfull1: #common sdrlight
 	docker buildx build --platform $(PLATFORM) \
             --cache-from=type=registry,ref=$(CACHE_REPO):cache_extraoot \
             --cache-to=type=registry,ref=$(CACHE_REPO):cache_extraoot,mode=max \
@@ -73,7 +73,7 @@ sdrfull1: common sdrlight
             -f SDR/sdr_full.docker \
             ..
 
-sdrfull2: common sdrlight
+sdrfull2: #common sdrlight
 	docker buildx build --platform $(PLATFORM) \
             --cache-from=type=registry,ref=$(CACHE_REPO):cache_extrasofts \
             --cache-to=type=registry,ref=$(CACHE_REPO):cache_extrasofts,mode=max \
@@ -84,7 +84,7 @@ sdrfull2: common sdrlight
             -f SDR/sdr_full.docker \
             ..
 
-sdrfull3: common sdrlight
+sdrfull3: #common sdrlight
 	docker buildx build --platform $(PLATFORM) \
             --cache-from=type=registry,ref=$(CACHE_REPO):cache_mldlsofts \
             --cache-to=type=registry,ref=$(CACHE_REPO):cache_mldlsofts,mode=max \
@@ -95,7 +95,7 @@ sdrfull3: common sdrlight
             -f SDR/sdr_full.docker \
             ..
 
-sdrfull: common sdrlight
+sdrfull: #common sdrlight
 	docker buildx build --platform $(PLATFORM) \
             --cache-from=type=registry,ref=$(CACHE_REPO):cache_sdr_full \
             --cache-to=type=registry,ref=$(CACHE_REPO):cache_sdr_full,mode=max \
@@ -105,7 +105,7 @@ sdrfull: common sdrlight
             -f SDR/sdr_full.docker \
             ..
 
-rfid: common
+rfid: #common
 	docker buildx build --platform $(PLATFORM) \
             --cache-from=type=registry,ref=$(CACHE_REPO):cache_rfid \
             --cache-to=type=registry,ref=$(CACHE_REPO):cache_rfid,mode=max \
@@ -115,7 +115,7 @@ rfid: common
             -f rfid.docker \
             ..
 
-wifi: common sdrlight
+wifi: #common sdrlight
 	docker buildx build --platform $(PLATFORM) \
             --cache-from=type=registry,ref=$(CACHE_REPO):cache_wifi \
             --cache-to=type=registry,ref=$(CACHE_REPO):cache_wifi,mode=max \
@@ -126,7 +126,7 @@ wifi: common sdrlight
             ..
 
 
-bluetooth: common sdrlight
+bluetooth: #common sdrlight
 	docker buildx build --platform $(PLATFORM) \
             --cache-from=type=registry,ref=$(CACHE_REPO):cache_bluetooth \
             --cache-to=type=registry,ref=$(CACHE_REPO):cache_bluetooth,mode=max \
@@ -136,7 +136,7 @@ bluetooth: common sdrlight
             -f bluetooth.docker \
             ..
 
-reversing: common
+reversing: #common
 	docker buildx build --platform $(PLATFORM) \
             --cache-from=type=registry,ref=$(CACHE_REPO):cache_reversing \
             --cache-to=type=registry,ref=$(CACHE_REPO):cache_reversing,mode=max \
@@ -146,7 +146,7 @@ reversing: common
             -f reversing.docker \
             ..
 
-automotive: common
+automotive: #common
 	docker buildx build --platform $(PLATFORM) \
             --cache-from=type=registry,ref=$(CACHE_REPO):cache_automotive \
             --cache-to=type=registry,ref=$(CACHE_REPO):cache_automotive,mode=max \
@@ -156,7 +156,7 @@ automotive: common
             -f automotive.docker \
             ..
 
-telecom: common sdrlight
+telecom: #common sdrlight
 	docker buildx build --platform $(PLATFORM) \
             --cache-from=type=registry,ref=$(CACHE_REPO):cache_telecom \
             --cache-to=type=registry,ref=$(CACHE_REPO):cache_telecom,mode=max \
@@ -166,7 +166,7 @@ telecom: common sdrlight
             -f telecom.docker \
             ..
 
-deeptempest: common sdrlight
+deeptempest: #common sdrlight
 	docker buildx build --platform $(PLATFORM) \
             --cache-from=type=registry,ref=$(CACHE_REPO):cache_sdr_deeptemptest_beta \
             --cache-to=type=registry,ref=$(CACHE_REPO):cache_sdr_deeptemptest_beta,mode=max \
@@ -176,5 +176,5 @@ deeptempest: common sdrlight
             -f SDR/sdr_deeptemptest_beta.docker \
             ..
 
-build: bluetooth wifi rfid reversing automotive telecom sdrfull sdrlightantsdr sdrlightrtlsdrv4
+build: common sdrlight sdrfull sdrlightantsdr sdrlightrtlsdrv4 automotive rfid telecom reversing bluetooth wifi
 	echo "Done!"
