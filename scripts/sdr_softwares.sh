@@ -36,95 +36,62 @@ function sdrangel_soft_fromsource_install() {
 	goodecho "[+] APT"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	installfromnet "git clone https://github.com/srcejon/aptdec.git"
-	cd aptdec
-	git checkout libaptdec
-	git submodule update --init --recursive
-	mkdir build; cd build
-	cmake -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/aptdec ..
-	make -j $(nproc) install
+	cmake_clone_and_build "https://github.com/srcejon/aptdec.git" "build" "libaptdec" "" -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/aptdec
 
 	goodecho "[+] CM265cc"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	installfromnet "git clone https://github.com/f4exb/cm256cc.git"
-	cd cm256cc
-	git reset --hard 6f4a51802f5f302577d6d270a9fc0cb7a1ee28ef
-	mkdir build; cd build
-	cmake -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/cm256cc ..
-	make -j $(nproc) install
+	cmake_clone_and_build "https://github.com/f4exb/cm256cc.git" "build" "" 6f4a51802f5f302577d6d270a9fc0cb7a1ee28ef -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/cm256cc
 
 	goodecho "[+] LibDAB"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	installfromnet "git clone https://github.com/srcejon/dab-cmdline"
-	cd dab-cmdline/library
-	git checkout msvc
-	mkdir build; cd build
-	cmake -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/libdab ..
-	make -j $(nproc) install
+	cmake_clone_and_build "https://github.com/srcejon/dab-cmdline" "build" "msvc" "" -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/libdab
 
 	goodecho "[+] MBElib"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	installfromnet "git clone https://github.com/szechyjs/mbelib.git"
-	cd mbelib
-	git reset --hard 9a04ed5c78176a9965f3d43f7aa1b1f5330e771f
-	mkdir build; cd build
-	cmake -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/mbelib ..
-	make -j $(nproc) install
+	cmake_clone_and_build "https://github.com/szechyjs/mbelib.git" "dab-cmdline/library" "" 9a04ed5c78176a9965f3d43f7aa1b1f5330e771f -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/mbelib
 
 	goodecho "[+] serialdv"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	installfromnet "git clone https://github.com/f4exb/serialDV.git"
-	cd serialDV
-	git reset --hard "v1.1.4"
-	mkdir build; cd build
-	cmake -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/serialdv ..
-	make -j $(nproc) install
+	cmake_clone_and_build "https://github.com/f4exb/serialDV.git" "build" "" "v1.1.4" -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/serialdv
 
 	goodecho "[+] DSDcc"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	installfromnet "git clone https://github.com/f4exb/dsdcc.git"
-	cd dsdcc
-	git reset --hard "v1.9.5"
-	mkdir build; cd build
-	cmake -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/dsdcc -DUSE_MBELIB=ON -DLIBMBE_INCLUDE_DIR=/opt/install/mbelib/include -DLIBMBE_LIBRARY=/opt/install/mbelib/lib/libmbe.so -DLIBSERIALDV_INCLUDE_DIR=/opt/install/serialdv/include/serialdv -DLIBSERIALDV_LIBRARY=/opt/install/serialdv/lib/libserialdv.so ..
-	make -j $(nproc) install
+	cmake_clone_and_build "https://github.com/f4exb/dsdcc.git" "build" "" "v1.9.5" \
+		-Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/dsdcc -DUSE_MBELIB=ON -DLIBMBE_INCLUDE_DIR=/opt/install/mbelib/include \
+		-DLIBMBE_LIBRARY=/opt/install/mbelib/lib/libmbe.so -DLIBSERIALDV_INCLUDE_DIR=/opt/install/serialdv/include/serialdv \
+		-DLIBSERIALDV_LIBRARY=/opt/install/serialdv/lib/libserialdv.so
 
 	goodecho "[+] Codec2"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
 	installfromnet "apt-fast -y install libspeexdsp-dev libsamplerate0-dev"
-	git clone https://github.com/drowe67/codec2-dev.git codec2
-	cd codec2
-	git reset --hard "v1.0.3"
-	mkdir build_linux; cd build_linux
-	cmake -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/codec2 ..
-	make -j $(nproc) install
+	cmake_clone_and_build "https://github.com/drowe67/codec2-dev.git" "build" "" "v1.0.3"
 
 	goodecho "[+] SGP4"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	cmake_clone_and_build "https://github.com/dnwrnr/sgp4.git" "build" -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/sgp4
+	cmake_clone_and_build "https://github.com/dnwrnr/sgp4.git" "build" "" "" -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/sgp4
 
 	goodecho "[+] libsigmf"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	cmake_clone_and_build "https://github.com/f4exb/libsigmf.git" "build" -b "new-namespaces" -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/libsigmf
+	cmake_clone_and_build "https://github.com/f4exb/libsigmf.git" "build" "new-namespaces" "" -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/libsigmf
 
 	goodecho "[+] ggmorse"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	cmake_clone_and_build "https://github.com/ggerganov/ggmorse.git" "build" -Wno-dev \
+	cmake_clone_and_build "https://github.com/ggerganov/ggmorse.git" "build" "" "" -Wno-dev \
 		-DCMAKE_INSTALL_PREFIX=/opt/install/ggmorse -DGGMORSE_BUILD_TESTS=OFF -DGGMORSE_BUILD_EXAMPLES=OFF
 
 	goodecho "[+] Installing SDR Angel"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	cmake_clone_and_build "https://github.com/f4exb/sdrangel.git" "build" -Wno-dev -DDEBUG_OUTPUT=ON -DRX_SAMPLE_24BIT=ON \
+	cmake_clone_and_build "https://github.com/f4exb/sdrangel.git" "build" "" "" -Wno-dev -DDEBUG_OUTPUT=ON -DRX_SAMPLE_24BIT=ON \
 		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
 		-DAPT_DIR=/opt/install/aptdec \
 		-DCM256CC_DIR=/opt/install/cm256cc \
@@ -147,7 +114,7 @@ function sdrpp_soft_fromsource_install () { # Beta test, but should work on almo
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
 	goodecho "[+] Cloning and installing SDR++ project"
-	cmake_clone_and_build "https://github.com/AlexandreRouma/SDRPlusPlus.git" "build" -DOPT_BUILD_SOAPY_SOURCE=ON -DOPT_BUILD_AIRSPY_SOURCE=ON -DOPT_BUILD_AIRSPYHF_SOURCE=ON -DOPT_BUILD_NETWORK_SINK=ON \
+	cmake_clone_and_build "https://github.com/AlexandreRouma/SDRPlusPlus.git" "build" "" "" -DOPT_BUILD_SOAPY_SOURCE=ON -DOPT_BUILD_AIRSPY_SOURCE=ON -DOPT_BUILD_AIRSPYHF_SOURCE=ON -DOPT_BUILD_NETWORK_SINK=ON \
 			-DOPT_BUILD_FREQUENCY_MANAGER=ON -DOPT_BUILD_IQ_EXPORTER=ON -DOPT_BUILD_RECORDER=ON -DOPT_BUILD_RIGCTL_SERVER=ON -DOPT_BUILD_METEOR_DEMODULATOR=ON \
 			-DOPT_BUILD_RADIO=ON -DOPT_BUILD_USRP_SOURCE=ON -DOPT_BUILD_FILE_SOURCE=ON -DOPT_BUILD_HACKRF_SOURCE=ON -DOPT_BUILD_RTL_SDR_SOURCE=ON -DOPT_BUILD_RTL_TCP_SOURCE=ON \
 			-DOPT_BUILD_SDRPP_SERVER_SOURCE=ON -DOPT_BUILD_SOAPY_SOURCE=ON -DOPT_BUILD_SPECTRAN_SOURCE=OFF -DOPT_BUILD_SPECTRAN_HTTP_SOURCE=OFF  -DOPT_BUILD_LIMESDR_SOURCE=ON \
@@ -195,14 +162,10 @@ function cyberther_soft_install() {
 	goodecho "[+] Installing Cyber Ether"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	installfromnet "git clone https://github.com/catchorg/Catch2.git"
-	cd Catch2/
-	mkdir build/ \
-	&& cd build/ \
-	&& cmake ../ \
-	&& make -j$(nproc) \
-	&& make install
-	cd ../..
+	cmake_clone_and_build "https://github.com/catchorg/Catch2.git" "build"
+
+	[ -d /root/thirdparty ] || mkdir /root/thirdparty
+	cd /root/thirdparty
 	goodecho "[CyberEther][+] Installing core dependencies"
 	installfromnet "apt-fast install -y git build-essential cmake pkg-config ninja-build meson git zenity curl"
 	installfromnet "apt-fast install -y rustc"
@@ -218,7 +181,7 @@ function cyberther_soft_install() {
 	goodecho "[CyberEther][+] Cloning GitHub repository"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	installfromnet "git clone https://github.com/luigifcruz/CyberEther.git"
+    gitinstall "https://github.com/luigifcruz/CyberEther.git" "cyberther_soft_install"
 	cd CyberEther
 	meson setup -Dbuildtype=debugoptimized build && cd build
 	ninja install
@@ -232,13 +195,7 @@ function inspection_decoding_tools () {
 	goodecho "[+] Installing rtl_433 tools"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	installfromnet "git clone https://github.com/merbanan/rtl_433.git"
-	cd rtl_433/ \
-	&& mkdir build \
-	&& cd build \
-	&& cmake ../ \
-	&& make -j$(nproc) && sudo make install
-	cd /root
+	cmake_clone_and_build "https://github.com/merbanan/rtl_433.git" "build"
 }
 
 function qsstv_soft_install () {
@@ -247,7 +204,7 @@ function qsstv_soft_install () {
 	goodecho "[+] Cloning QSSTV"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	installfromnet "git clone https://github.com/ON4QZ/QSSTV.git"
+	gitinstall "https://github.com/ON4QZ/QSSTV.git" "qsstv_soft_install"
 	cd QSSTV/
 	mkdir src/build
 	cd src/build
@@ -278,13 +235,7 @@ function ice9_bluetooth_soft_install_call () {
 	goodecho "[+] Cloning ice9-bluetooth-sniffer"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	installfromnet "git clone https://github.com/mikeryan/ice9-bluetooth-sniffer.git"
-	cd ice9-bluetooth-sniffer
-	mkdir build
-	cd build
-	cmake ..
-	make -j$(nproc)
-	make install
+	cmake_clone_and_build "https://github.com/mikeryan/ice9-bluetooth-sniffer.git" "build"
 }
 
 function nfclaboratory_soft_install () {
@@ -293,7 +244,7 @@ function nfclaboratory_soft_install () {
 	goodecho "[+] Installing nfc-laboratory"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	installfromnet "git clone https://github.com/josevcm/nfc-laboratory.git"
+	gitinstall "https://github.com/josevcm/nfc-laboratory.git" "nfclaboratory_soft_install"
 	cmake -DCMAKE_BUILD_TYPE=Release -S nfc-laboratory -B cmake-build-release
 	cmake --build cmake-build-release --target nfc-lab -- -j $(nproc)
 	cp nfc-laboratory/dat/config/nfc-lab.conf /root
@@ -308,7 +259,7 @@ function retrogram_soapysdr_soft_install () {
 	goodecho "[+] Installing retrogram_soapysdr"
 	[ -d /rftools/sdr ] || mkdir -p /rftools/sdr
 	cd /rftools/sdr
-	installfromnet "git clone https://github.com/r4d10n/retrogram-soapysdr.git"
+	gitinstall "https://github.com/r4d10n/retrogram-soapysdr.git" "retrogram_soapysdr_soft_install"
 	cd retrogram-soapysdr
 	make -j$(nproc)
 	ln -s /rftool/sdr/retrogram-soapysdr/retrogram-soapysdr /usr/bin/retrogram-soapysdr
@@ -318,7 +269,7 @@ function gps_sdr_sim_soft_install () {
 	goodecho "[+] Installing gps-sdr-sim"
 	[ -d /rftools/sdr ] || mkdir -p /rftools/sdr
 	cd /rftools/sdr
-	installfromnet "git clone https://github.com/osqzss/gps-sdr-sim.git"
+	gitinstall "https://github.com/osqzss/gps-sdr-sim.git" "gps_sdr_sim_soft_install"
 	cd gps-sdr-sim
 	gcc gpssim.c -lm -O3 -o gps-sdr-sim
 	ln -s /rftool/sdr/gps-sdr-sim/gps-sdr-sim /usr/bin/gps-sdr-sim
@@ -329,25 +280,13 @@ function acarsdec_soft_install () {
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
 	installfromnet "apt-fast install -y zlib1g-dev libjansson-dev libxml2-dev"
-	installfromnet "git clone https://github.com/szpajder/libacars.git"
-	cd libacars
-	mkdir build
-	cd build
-	cmake ../
-	make -j$(nproc)
-	make install
+	cmake_clone_and_build "https://github.com/szpajder/libacars.git" "build"
 	ldconfig
 
 	goodecho "[+] Installing acarsdec"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	installfromnet "git clone https://github.com/TLeconte/acarsdec.git"
-	cd acarsdec
-	mkdir build
-	cd build
-	cmake .. -Drtl=ON -Dairspy=ON -Dsoapy=ON #-Dsdrplay=ON
-	make -j$(nproc)
-	make install
+	cmake_clone_and_build "https://github.com/TLeconte/acarsdec.git" "build" "" "" -Drtl=ON -Dairspy=ON -Dsoapy=ON
 }
 
 function meshtastic_sdr_soft_install () {
@@ -356,7 +295,7 @@ function meshtastic_sdr_soft_install () {
 	[ -d /rftools/sdr ] || mkdir -p /rftools/sdr
 	cd /rftools/sdr
 	goodecho "[+] Cloning Meshtastic_SDR"
-	installfromnet "git clone https://gitlab.com/crankylinuxuser/meshtastic_sdr.git"
+	gitinstall "https://gitlab.com/crankylinuxuser/meshtastic_sdr.git" "meshtastic_sdr_soft_install"
 }
 
 function gpredict_sdr_soft_install () {
@@ -365,7 +304,7 @@ function gpredict_sdr_soft_install () {
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
 	goodecho "[+] Cloning Meshtastic_SDR"
-	installfromnet "git clone https://github.com/csete/gpredict.git"
+	gitinstall "https://github.com/csete/gpredict.git" "gpredict_sdr_soft_install"
 	cd gpredict
 	./autogen.sh
 	./configure
@@ -379,7 +318,7 @@ function v2verifier_sdr_soft_install () {
 	[ -d /rftools/sdr ] || mkdir -p /rftools/sdr
 	cd /rftools/sdr
 	goodecho "[+] Cloning v2verifier"
-	installfromnet "git clone https://github.com/FlUxIuS/v2verifier.git"
+	gitinstall "https://github.com/FlUxIuS/v2verifier.git" "v2verifier_sdr_soft_install"
 	cd v2verifier
 	mkdir build
 	cd build
@@ -391,7 +330,7 @@ function wavingz_sdr_soft_install () {
 	[ -d /rftools/sdr ] || mkdir -p /rftools/sdr
 	cd /rftools/sdr
 	goodecho "[+] Cloning waving-z"
-	installfromnet "git clone https://github.com/baol/waving-z.git"
+	gitinstall "https://github.com/baol/waving-z.git" "wavingz_sdr_soft_install"
 	cd waving-z
 	mkdir build
 	cd build

@@ -49,7 +49,7 @@ sdrlightantsdr: #common
             --build-arg UHD_BASE=antsdr_uhd \
             --build-arg RTLSDR_BASE=rtlsdr \
             --push \
-            -t $(REGISTRY_IMAGE):sdr_light \
+            -t $(REGISTRY_IMAGE):sdr_light_antsdr \
             -f SDR/sdr_light.docker \
             ..
 
@@ -61,7 +61,7 @@ sdrlightrtlsdrv4: #common
             --build-arg UHD_BASE=uhd \
             --build-arg RTLSDR_BASE=rtlsdrv4 \
             --push \
-            -t $(REGISTRY_IMAGE):sdr_light \
+            -t $(REGISTRY_IMAGE):sdr_light_rtlsdrv4 \
             -f SDR/sdr_light.docker \
             ..
 

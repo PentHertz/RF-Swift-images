@@ -149,7 +149,7 @@ function grfosphor_grmod_install() {
     goodecho "[+] Cloning and building GLFW3"
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
     cd /root/thirdparty
-    cmake_clone_and_build "https://github.com/glfw/glfw" "build" -DBUILD_SHARED_LIBS=true
+    cmake_clone_and_build "https://github.com/glfw/glfw" "build" "" "" -DBUILD_SHARED_LIBS=true
     cd /root/thirdparty
     grclone_and_build "https://github.com/osmocom/gr-fosphor.git"
 }
@@ -161,7 +161,7 @@ function grdroineid_grmod_install() {
     cmake_clone_and_build "https://github.com/zlinwei/turbofec.git" "build"
     cd /root/thirdparty
     cmake_clone_and_build "https://github.com/d-bahr/CRCpp.git" "build"
-    grclone_and_build "https://github.com/proto17/dji_droneid.git" "dji_droneid/gnuradio/gr-droneid" -b "gr-droneid"
+    grclone_and_build "https://github.com/proto17/dji_droneid.git" "dji_droneid/gnuradio/gr-droneid" "gr-droneid"
 }
 
 function grsatellites_grmod_install() {

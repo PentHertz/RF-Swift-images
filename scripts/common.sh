@@ -70,7 +70,7 @@ function grclone_and_build() {
     fi
 
     # Clone the repository and switch to the specified branch if provided
-    cmake_clone_and_build "$repo_url" "$repo_subdir/$build_dir" "$branch" "-DCMAKE_INSTALL_PREFIX=/usr" "${cmake_args[@]}"
+    cmake_clone_and_build "$repo_url" "$repo_subdir/$build_dir" "$branch" "" "-DCMAKE_INSTALL_PREFIX=/usr" "${cmake_args[@]}"
 }
 
 function gitinstall() {
@@ -110,6 +110,9 @@ function gitinstall() {
             
             # Get the absolute path of the repository
             repo_abs_path="$(pwd)/$repo_name"
+            cd $repo_name
+            git submodule update --init --recursive
+            cd ..
 
             # Append the repository name, absolute path, and method to the file
             echo "$repo_name:$repo_abs_path:$method" | sudo tee -a /var/lib/db/rfswift_github.lst > /dev/null
@@ -125,8 +128,9 @@ function gitinstall() {
 function cmake_clone_and_build() {
     local repo_url=$1
     local build_dir=$2
-    local branch=$3
-    shift 3
+    local branch=$3  # This can be empty if no branch is specified
+    local reset_commit=$4  # This can be empty if reset is not needed
+    shift 4
     local cmake_args=("$@")  # Capture all remaining arguments as CMake arguments
 
     # Extract the repository name from the URL
@@ -153,6 +157,14 @@ function cmake_clone_and_build() {
             colorecho "[+] No updates found, skipping build and installation"
             should_build=false
         fi
+    fi
+
+    # Optionally reset the repository to the specified commit/tag
+    if [ -n "$reset_commit" ]; then
+        goodecho "[+] Resetting repository to commit/tag '$reset_commit'"
+        git reset --hard "$reset_commit"
+    else
+        goodecho "[+] No reset specified, skipping git reset."
     fi
 
     # If updates are found or it's the first time cloning, build and install the project
