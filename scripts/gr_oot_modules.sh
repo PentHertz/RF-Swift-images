@@ -75,6 +75,7 @@ function grzwavepoore_grmod_install() {
 }
 
 function grmixalot_grmod_install() {
+    install_dependencies "libitpp-dev"
     grclone_and_build "https://github.com/unsynchronized/gr-mixalot.git" "" "grmixalot_grmod_install"
 }
 
