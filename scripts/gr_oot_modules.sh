@@ -44,12 +44,8 @@ function graaronia_rtsa_grmod_install() {
     goodecho "[+] Cloning and installing libspectranstream"
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
     cd /root/thirdparty
-    installfromnet "git clone https://github.com/hb9fxq/libspectranstream.git"
-    cd libspectranstream
-    mkdir build
-    cd build
-    cmake ../
-    make -j$(nproc); sudo make install
+    cmake_clone_and_build " https://github.com/hb9fxq/libspectranstream.git" "build"
+    cd /root/thirdparty
     grclone_and_build "https://github.com/hb9fxq/gr-aaronia_rtsa.git"
 }
 
@@ -153,16 +149,9 @@ function grfosphor_grmod_install() {
     goodecho "[+] Cloning and building GLFW3"
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
     cd /root/thirdparty
-    installfromnet "git clone https://github.com/glfw/glfw"
-    cd glfw
-    mkdir build
-    cd build
-    cmake ../ -DBUILD_SHARED_LIBS=true
-    make -j$(nproc)
-    make install
-    ldconfig
-    cd ..
-    grclone_and_build "https://github.com/osmocom/gr-fosphor.git" "gr-fosphor"
+    cmake_clone_and_build "https://github.com/glfw/glfw" "build" -DBUILD_SHARED_LIBS=true
+    cd /root/thirdparty
+    grclone_and_build "https://github.com/osmocom/gr-fosphor.git"
 }
 
 function grdroineid_grmod_install() {

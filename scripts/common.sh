@@ -45,7 +45,7 @@ function install_dependencies() {
     installfromnet "apt-fast install -y ${dependencies}"
 }
 
-grclone_and_build() {
+function grclone_and_build() {
     local repo_url=$1
     local repo_subdir=$2
     local build_dir="build"
@@ -73,7 +73,7 @@ grclone_and_build() {
     cmake_clone_and_build "$repo_url" "$repo_subdir/$build_dir" "$branch" "-DCMAKE_INSTALL_PREFIX=/usr" "${cmake_args[@]}"
 }
 
-gitinstall() {
+function gitinstall() {
     # Extract the repository URL from the argument
     repo_url="$1"
     method="$2"
@@ -122,7 +122,7 @@ gitinstall() {
     fi
 }
 
-cmake_clone_and_build() {
+function cmake_clone_and_build() {
     local repo_url=$1
     local build_dir=$2
     local branch=$3
