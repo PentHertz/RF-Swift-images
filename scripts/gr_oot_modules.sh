@@ -160,7 +160,10 @@ function grdroineid_grmod_install() {
     cd /root/thirdparty
     cmake_clone_and_build "https://github.com/zlinwei/turbofec.git" "build"
     cd /root/thirdparty
+    goodecho "[+] Cloning CRCpp"
     cmake_clone_and_build "https://github.com/d-bahr/CRCpp.git" "build" "" "" "grdroineid_grmod_install"
+    cd /root/thirdparty
+    goodecho "[+] Cloning dji_droneid"
     grclone_and_build "https://github.com/proto17/dji_droneid.git" "gnuradio/gr-droneid" "grdroineid_grmod_install" -b "gr-droneid"
 }
 
