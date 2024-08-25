@@ -158,7 +158,11 @@ function grdroineid_grmod_install() {
     goodecho "[+] Cloning turbofec"
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
     cd /root/thirdparty
-    cmake_clone_and_build "https://github.com/zlinwei/turbofec.git" "build"
+    gitinstall "https://github.com/zlinwei/turbofec.git"
+    cd turbofec 
+    autoreconf -i
+    ./configure
+    make -j$(nproc); sudo make install
     cd /root/thirdparty
     goodecho "[+] Cloning CRCpp"
     cmake_clone_and_build "https://github.com/d-bahr/CRCpp.git" "build" "" "" "grdroineid_grmod_install"
