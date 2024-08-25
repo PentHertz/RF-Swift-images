@@ -200,7 +200,9 @@ function grpaint_grmod_install() {
 }
 
 function gr_DCF77_Receiver_grmod_install() {
-    grclone_and_build "https://github.com/henningM1r/gr_DCF77_Receiver.git" "" "gr_DCF77_Receiver_grmod_install"
+    [ -d /rftools/sdr/oot ] || mkdir -p /rftools/sdr/oot
+    cd /rftools/sdr/oot || exit
+    gitinstall "https://github.com/henningM1r/gr_DCF77_Receiver.git" "gr_DCF77_Receiver_grmod_install"
 }
 
 function grbb60_Receiver_grmod_install() {
