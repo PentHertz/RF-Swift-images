@@ -6,7 +6,7 @@ function leobodnarv1_cal_device() {
 	cd /rftools/calibration
 	installfromnet "apt-fast install -y libhidapi-libusb0 libhidapi-hidraw0"
 	goodecho "[+] Cloning repository for Leobodnar v1 GPSDO"
-	installfromnet "git clone https://github.com/hamarituc/lbgpsdo.git"
+	gitinstall "https://github.com/hamarituc/lbgpsdo.git"
 	cd /root/
 }
 
@@ -45,7 +45,7 @@ function NanoVNASaver_cal_device_call() {
 	cd /root/thirdparty
 	installfromnet "apt-fast install -y libxcb-cursor0 xcb"
 	goodecho "[+] Cloning and installing NanoVNASaver"
-	installfromnet "git clone https://github.com/NanoVNA-Saver/nanovna-saver.git"
+	gitinstall "https://github.com/NanoVNA-Saver/nanovna-saver.git"
 	cd nanovna-saver
 	installfromnet "pip3 install -U setuptools setuptools_scm wheel"
 	installfromnet "pip3 install -r requirements.txt"
@@ -58,7 +58,7 @@ function NanoVNA_QT_cal_device() {
 	cd /rftools/calibration
 	installfromnet "apt-fast install -y automake libtool make g++ libeigen3-dev libfftw3-dev libqt5charts5-dev"
 	goodecho "[+] Cloning and installing NanoVNA-QT"
-	installfromnet "git clone https://github.com/nanovna-v2/NanoVNA-QT.git"
+	gitinstall "https://github.com/nanovna-v2/NanoVNA-QT.git"
 	cd NanoVNA-QT
 	autoreconf --install
 	./configure
