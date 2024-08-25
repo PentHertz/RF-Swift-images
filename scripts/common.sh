@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -o pipefail
+
 ### Part picket from Exegol project with love <3 (https://github.com/ThePorgs/Exegol)
 
 export RED='\033[1;31m'
