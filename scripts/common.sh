@@ -70,6 +70,8 @@ function grclone_and_build() {
     # If no subdirectory is provided, use the repository name as the build directory
     if [ -z "$repo_subdir" ]; then
         repo_subdir=$build_dir
+    else
+        repo_subdir=$repo_subdir/$build_dir
     fi
 
     # Clone the repository and switch to the specified branch if provided

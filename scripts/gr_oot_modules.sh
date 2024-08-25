@@ -59,7 +59,7 @@ function grais_grmod_install() {
 }
 
 function graistx_grmod_install() {
-    grclone_and_build "https://github.com/bkerler/ais.git" "ais/gr-aistx" "graistx_grmod_install"
+    grclone_and_build "https://github.com/bkerler/ais.git" "gr-aistx" "graistx_grmod_install"
 }
 
 function grairmodes_grmod_install() {
@@ -99,7 +99,7 @@ function grtempest_grmod_install() {
 }
 
 function deeptempest_grmod_install() {
-    grclone_and_build "https://github.com/PentHertz/deep-tempest.git" "deep-tempest/gr-tempest" "deeptempest_grmod_install"
+    grclone_and_build "https://github.com/PentHertz/deep-tempest.git" "gr-tempest" "deeptempest_grmod_install"
     cd deep-tempest/examples
     grcc *.grc
     mkdir -p /root/.grc_gnuradio
@@ -161,7 +161,7 @@ function grdroineid_grmod_install() {
     cmake_clone_and_build "https://github.com/zlinwei/turbofec.git" "build"
     cd /root/thirdparty
     cmake_clone_and_build "https://github.com/d-bahr/CRCpp.git" "build" "" "" "grdroineid_grmod_install"
-    grclone_and_build "https://github.com/proto17/dji_droneid.git" "dji_droneid/gnuradio/gr-droneid" "grdroineid_grmod_install" -b "gr-droneid"
+    grclone_and_build "https://github.com/proto17/dji_droneid.git" "gnuradio/gr-droneid" "grdroineid_grmod_install" -b "gr-droneid"
 }
 
 function grsatellites_grmod_install() {
