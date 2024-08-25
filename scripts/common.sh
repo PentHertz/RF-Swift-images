@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -o pipefail
+set -euo pipefail
 
 ### Part picket from Exegol project with love <3 (https://github.com/ThePorgs/Exegol)
 
