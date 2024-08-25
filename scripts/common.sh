@@ -45,7 +45,7 @@ function install_dependencies() {
     installfromnet "apt-fast install -y ${dependencies}"
 }
 
-grclone_and_build() {
+function grclone_and_build() {
     local repo_url=$1
     local repo_subdir=$2
     local method=$3  # Custom method name
@@ -129,67 +129,56 @@ function gitinstall() {
 function cmake_clone_and_build() {
     local repo_url=$1
     local build_dir=$2
-    local branch=$3  # This can be empty if no branch is specified
-    local reset_commit=$4  # This can be empty if reset is not needed
-    local method=$5  # The method name to pass to gitinstall
+    local branch=$3
+    local reset_commit=$4
+    local method=$5
     shift 5
-    local cmake_args=("$@")  # Capture all remaining arguments as CMake arguments
+    local cmake_args=("$@")
 
-    # Extract the repository name from the URL
     local repo_name=$(basename "$repo_url" .git)
 
-    # Clone the repository if it doesn't exist, otherwise check for updates
+    # Ensure directory doesn't mix with URL
+    echo "Repository URL: $repo_url"
+    echo "Build Directory: $build_dir"
+
     if [ ! -d "$repo_name" ]; then
-        goodecho "[+] Cloning ${repo_name}"
+        echo "Cloning $repo_name..."
         gitinstall "$repo_url" "$method" "$branch"
         cd "$repo_name" || exit
         should_build=true
     else
-        goodecho "[+] Repository ${repo_name} already exists, checking for updates"
+        echo "Repository $repo_name exists, checking for updates..."
         cd "$repo_name" || exit
         installfromnet "git fetch"
         LOCAL=$(git rev-parse @)
         REMOTE=$(git rev-parse @{u})
-
         if [ "$LOCAL" != "$REMOTE" ]; then
-            goodecho "[+] Updates found, pulling latest changes"
+            echo "Updates found, pulling latest changes..."
             installfromnet "git pull"
             should_build=true
         else
-            colorecho "[+] No updates found, skipping build and installation"
+            echo "No updates found, skipping build."
             should_build=false
         fi
     fi
 
-    # Optionally reset the repository to the specified commit/tag
     if [ -n "$reset_commit" ]; then
-        goodecho "[+] Resetting repository to commit/tag '$reset_commit'"
+        echo "Resetting to $reset_commit..."
         git reset --hard "$reset_commit"
-    else
-        goodecho "[+] No reset specified, skipping git reset."
     fi
 
-    # If updates are found or it's the first time cloning, build and install the project
     if [ "$should_build" = true ]; then
-        # Create the build directory if it doesn't exist
         if [ ! -d "$build_dir" ]; then
             mkdir -p "$build_dir"
         fi
-
-        # Navigate to the build directory
         cd "$build_dir" || exit
-
-        # Run CMake with additional arguments, build, and install
-        goodecho "[+] Building and installing ${repo_name}"
+        echo "Building and installing in $build_dir..."
         cmake "${cmake_args[@]}" ../
         make -j$(nproc)
         sudo make install
-
-        # Clean up the build directory if needed
         cd ..
         rm -rf "$build_dir"
     fi
 
-    # Return to the original directory
     cd ..
 }
