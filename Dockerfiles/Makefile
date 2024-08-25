@@ -3,6 +3,10 @@ ARCH ?= all
 CACHE_REPO ?= penthertz/rfswiftdev
 REGISTRY_IMAGE ?= penthertz/rfswiftdev
 
+# Drivers
+UHD_BASE ?= uhd
+RTLSDR_BASE ?= rtlsdr
+
 # Determine the platform based on the ARCH value
 ifeq ($(ARCH),amd64)
     PLATFORM=linux/amd64
@@ -30,8 +34,8 @@ sdrlight: #common
             --cache-from=type=registry,ref=$(CACHE_REPO):cache_sdr_light \
             --cache-to=type=registry,ref=$(CACHE_REPO):cache_sdr_light,mode=max \
             --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild \
-            --build-arg UHD_BASE=uhd \
-            --build-arg RTLSDR_BASE=rtlsdr \
+            --build-arg UHD_BASE=$(UHD_BASE) \
+            --build-arg RTLSDR_BASE=$(RTLSDR_BASE) \
             --push \
             -t $(REGISTRY_IMAGE):sdr_light \
             -f SDR/sdr_light.docker \
@@ -91,7 +95,7 @@ sdrfull3: #common sdrlight
             --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light \
             --push \
             -t $(REGISTRY_IMAGE):mldlsofts \
-            --target extraoot \
+            --target mldlsofts \
             -f SDR/sdr_full.docker \
             ..
 
