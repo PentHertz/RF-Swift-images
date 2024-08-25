@@ -128,7 +128,7 @@ function gitinstall() {
 
 function cmake_clone_and_build() {
     local repo_url=$1
-    local build_dir=$2
+    local build_dir=$2  # This should be a path relative to the repo root
     local branch=$3
     local reset_commit=$4
     local method=$5
@@ -137,48 +137,45 @@ function cmake_clone_and_build() {
 
     local repo_name=$(basename "$repo_url" .git)
 
-    # Ensure directory doesn't mix with URL
-    echo "Repository URL: $repo_url"
-    echo "Build Directory: $build_dir"
+    echo "Checking directory for: $repo_name"
 
     if [ ! -d "$repo_name" ]; then
-        echo "Cloning $repo_name..."
+        echo "Cloning repository..."
         gitinstall "$repo_url" "$method" "$branch"
-        cd "$repo_name" || exit 2
+        cd "$repo_name" || exit
         should_build=true
     else
-        echo "Repository $repo_name exists, checking for updates..."
-        cd "$repo_name" || exit 2
+        echo "Repository exists. Ensuring it's up to date..."
+        cd "$repo_name" || exit
         installfromnet "git fetch"
-        LOCAL=$(git rev-parse @)
-        REMOTE=$(git rev-parse @{u})
+        local LOCAL=$(git rev-parse @)
+        local REMOTE=$(git rev-parse @{u})
         if [ "$LOCAL" != "$REMOTE" ]; then
-            echo "Updates found, pulling latest changes..."
             installfromnet "git pull"
             should_build=true
         else
-            echo "No updates found, skipping build."
+            echo "No updates needed."
             should_build=false
         fi
     fi
 
     if [ -n "$reset_commit" ]; then
-        echo "Resetting to $reset_commit..."
+        echo "Resetting repository to commit/tag $reset_commit"
         git reset --hard "$reset_commit"
     fi
 
     if [ "$should_build" = true ]; then
         if [ ! -d "$build_dir" ]; then
+            echo "Creating build directory..."
             mkdir -p "$build_dir"
         fi
-        cd "$build_dir" || exit 2
-        echo "Building and installing in $build_dir..."
+        cd "$build_dir" || exit
+        echo "Running CMake and building..."
         cmake "${cmake_args[@]}" ../
         make -j$(nproc)
         sudo make install
-        cd ..
-        rm -rf "$build_dir"
     fi
 
-    cd ..
+    # Return to original or base directory
+    cd ../..
 }
