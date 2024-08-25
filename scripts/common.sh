@@ -144,11 +144,11 @@ function cmake_clone_and_build() {
     if [ ! -d "$repo_name" ]; then
         echo "Cloning $repo_name..."
         gitinstall "$repo_url" "$method" "$branch"
-        cd "$repo_name" || exit
+        cd "$repo_name" || exit 2
         should_build=true
     else
         echo "Repository $repo_name exists, checking for updates..."
-        cd "$repo_name" || exit
+        cd "$repo_name" || exit 2
         installfromnet "git fetch"
         LOCAL=$(git rev-parse @)
         REMOTE=$(git rev-parse @{u})
@@ -171,7 +171,7 @@ function cmake_clone_and_build() {
         if [ ! -d "$build_dir" ]; then
             mkdir -p "$build_dir"
         fi
-        cd "$build_dir" || exit
+        cd "$build_dir" || exit 2
         echo "Building and installing in $build_dir..."
         cmake "${cmake_args[@]}" ../
         make -j$(nproc)
