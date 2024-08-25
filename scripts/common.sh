@@ -69,11 +69,11 @@ function grclone_and_build() {
 
     # If no subdirectory is provided, use the repository name as the build directory
     if [ -z "$repo_subdir" ]; then
-        repo_subdir=$(basename "$repo_url" .git)
+        repo_subdir=$build_dir
     fi
 
     # Clone the repository and switch to the specified branch if provided
-    cmake_clone_and_build "$repo_url" "$repo_subdir/$build_dir" "$branch" "" "$method" "-DCMAKE_INSTALL_PREFIX=/usr" "${cmake_args[@]}"
+    cmake_clone_and_build "$repo_url" "$repo_subdir" "$branch" "" "$method" "-DCMAKE_INSTALL_PREFIX=/usr" "${cmake_args[@]}"
 }
 
 function gitinstall() {
