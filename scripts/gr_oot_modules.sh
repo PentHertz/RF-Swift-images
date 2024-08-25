@@ -63,7 +63,7 @@ function graistx_grmod_install() {
 }
 
 function grairmodes_grmod_install() {
-    grclone_and_build "https://github.com/bistromath/gr-air-modes.git" "" "grairmodes_grmod_install"
+    grclone_and_build "https://github.com/bistromath/gr-air-modes.git" "" "grairmodes_grmod_install" -b "gr3.9"
 }
 
 function grj2497_grmod_install() {
