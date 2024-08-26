@@ -30,7 +30,7 @@ function kc908_sa_device() {
         && make -j$(nproc); sudo make install
         cd /root/
     else
-        criticalecho-noexi "[!] Architecture is not amd64 or x86_64. Skipping installation."
+        criticalecho-noexit "[!] Architecture is not amd64 or x86_64. Skipping installation."
     fi
 }
 
