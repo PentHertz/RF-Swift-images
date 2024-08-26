@@ -1,44 +1,56 @@
 #!/bin/bash
 
 function kc908_sa_device() {
-	goodecho "[+] Downloading bin from DEEPACE"
-	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
-	cd /root/thirdparty
-	installfromnet "wget https://deepace.net/wp-content/uploads/2024/04/KC908-GNURadio24.4.06.zip"
-	unzip KC908-GNURadio24.4.06.zip
-	rm KC908-GNURadio24.4.06.zip
-	cd KC908-GNURadio/lib
-	INCLUDE_DIR="/usr/local/include/kcsdr"
-	LIB_DIR="/usr/local/lib"
-	mkdir ${INCLUDE_DIR}
-	cp ./kcsdr.h ${INCLUDE_DIR}
-	cp ./libkcsdr.so ${LIB_DIR}
-	chmod 666 ${INCLUDE_DIR}/kcsdr.h
-	chmod 666 ${LIB_DIR}/libkcsdr.so
-	rm -f /usr/lib/libftd3xx.so
-	cp ./linux/libftd3xx.so /usr/lib/
-	cp ./linux/libftd3xx.so.0.5.21 /usr/lib/
-	cp ./linux/51-ftd3xx.rules /etc/udev/rules.d/
-	cd /root/thirdparty
-	cd KC908-GNURadio/module3.9/gr-kc_sdr
-	mkdir build \
-	&& cd build/ \
-	&& cmake -DCMAKE_INSTALL_PREFIX=/usr ../ \
-	&& make -j$(nproc); sudo make install
-	cd /root/
+    ARCH=$(uname -m)
+    if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then
+        colorecho "[+] Architecture is $ARCH, proceeding with installation"
+        colorecho "[+] Downloading bin from DEEPACE"
+        [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
+        cd /root/thirdparty
+        installfromnet "wget https://deepace.net/wp-content/uploads/2024/04/KC908-GNURadio24.4.06.zip"
+        unzip KC908-GNURadio24.4.06.zip
+        rm KC908-GNURadio24.4.06.zip
+        cd KC908-GNURadio/lib
+        INCLUDE_DIR="/usr/local/include/kcsdr"
+        LIB_DIR="/usr/local/lib"
+        mkdir ${INCLUDE_DIR}
+        cp ./kcsdr.h ${INCLUDE_DIR}
+        cp ./libkcsdr.so ${LIB_DIR}
+        chmod 666 ${INCLUDE_DIR}/kcsdr.h
+        chmod 666 ${LIB_DIR}/libkcsdr.so
+        rm -f /usr/lib/libftd3xx.so
+        cp ./linux/libftd3xx.so /usr/lib/
+        cp ./linux/libftd3xx.so.0.5.21 /usr/lib/
+        cp ./linux/51-ftd3xx.rules /etc/udev/rules.d/
+        cd /root/thirdparty
+        cd KC908-GNURadio/module3.9/gr-kc_sdr
+        mkdir build \
+        && cd build/ \
+        && cmake -DCMAKE_INSTALL_PREFIX=/usr ../ \
+        && make -j$(nproc); sudo make install
+        cd /root/
+    else
+        criticalecho-noexi "[!] Architecture is not amd64 or x86_64. Skipping installation."
+    fi
 }
 
 function signalhound_sa_device() {
-	goodecho "[+] Downloading bin from SignalHound"
-	[ -d /rftools/analysers ] || mkdir -p /rftools/analysers
-	cd /rftools/analysers
-	installfromnet "wget --no-check-certificate https://signalhound.com/sigdownloads/Spike/Spike(Ubuntu22.04x64)_3_9_6.zip"
-	unzip Spike\(Ubuntu22.04x64\)_3_9_6.zip
-	rm Spike\(Ubuntu22.04x64\)_3_9_6.zip
-	cd Spike\(Ubuntu22.04x64\)_3_9_6/
-	chmod +x setup.sh
-	sh -c ./setup.sh
-	ln -s Spike /usr/bin/Spike
+    ARCH=$(uname -m)
+    if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then
+        colorecho "[+] Architecture is $ARCH, proceeding with installation"
+        colorecho "[+] Downloading bin from SignalHound"
+        [ -d /rftools/analysers ] || mkdir -p /rftools/analysers
+        cd /rftools/analysers
+        installfromnet "wget --no-check-certificate https://signalhound.com/sigdownloads/Spike/Spike(Ubuntu22.04x64)_3_9_6.zip"
+        unzip Spike\(Ubuntu22.04x64\)_3_9_6.zip
+        rm Spike\(Ubuntu22.04x64\)_3_9_6.zip
+        cd Spike\(Ubuntu22.04x64\)_3_9_6/
+        chmod +x setup.sh
+        sh -c ./setup.sh
+        ln -s Spike /usr/bin/Spike
+    else
+        criticalecho-noexit "[!] Architecture is not amd64 or x86_64. Skipping installation."
+    fi
 }
 
 function harogic_sa_device() {
