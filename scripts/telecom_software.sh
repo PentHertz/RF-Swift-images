@@ -2,6 +2,8 @@
 
 
 function yatebts_blade2_soft_install() { # TODO: make few tests with new Nuand libs, if unstable: fetch 3a411c87c2416dc68030d5823d73ebf3f797a145 
+	set +e # TODO: debug that function
+    set +o pipefail
 	goodecho "[+] Feching YateBTS from Nuand for firwmares"
 	installfromnet "apt-fast install -y qtmultimedia5-dev libqt5multimediawidgets5 libqt5multimedia5-plugins libqt5multimedia5 qttools5-dev qttools5-dev-tools"
 	[ -d /telecom/2G ] || mkdir -p /telecom/2G
@@ -31,6 +33,8 @@ function yatebts_blade2_soft_install() { # TODO: make few tests with new Nuand l
 	# chown root:yate /usr/local/etc/yate/*.conf # TODO: next when dropping root privs
 	chmod g+w /usr/local/etc/yate/*.conf
 	colorecho "[+] Now it's time for you to configure ;)"
+	set -e
+    set -o pipefail
 }
 
 # TODO: move to QT5
