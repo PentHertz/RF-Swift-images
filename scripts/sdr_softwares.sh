@@ -235,7 +235,7 @@ function inspection_decoding_tools () {
 	goodecho "[+] Cloning ice9-bluetooth-sniffer"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	cmake_clone_and_build "https://github.com/mikeryan/ice9-bluetooth-sniffer.git" "build" "" "" "inspection_decoding_tools"
+	cmake_clone_and_build "https://github.com/merbanan/rtl_433.git" "build" "" "" "inspection_decoding_tools"
 }
 
 function nfclaboratory_soft_install () {
