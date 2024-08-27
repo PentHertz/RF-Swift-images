@@ -56,27 +56,26 @@ function sniffle_soft_install() {
 }
 
 function bluing_soft_install() {
-	goodecho "[+] Installing bdaddr"
-	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
-	cd /root/thirdparty
-	goodecho "[+] Installing Python3.10 for bluing"
-	installfromnet "wget https://www.python.org/ftp/python/3.10.0/Python-3.10.0.tgz"
-	tar -xvf Python-3.10.0.tgz
-	cd Python-3.10.0
-	./configure --enable-optimizations
-	make -j $(nproc)
-	sudo make altinstall
-	[ -d /rftools/bluetooth ] || mkdir -p /rftools/bluetooth
-	cd /rftools/bluetooth
-	mkdir bluing
-	installfromnet "apt-fast -y install libgirepository1.0-dev"
-	python3.10 -m pip install --upgrade pip
-	python3.10 -m pip install venv
-	python3.10 -m vevn bluing
-	source bluing/bin/activate
-	python3.10 -m pip install dbus-python==1.2.18
-	python3.10 -m pip install --no-dependencies bluing PyGObject docopt btsm btatt bluepy configobj btl2cap pkginfo xpycommon halo pyserial bthci btgatt log_symbols colorama spinners six termcolor
+    echo "[+] Installing necessary packages"
+    
+    # Update package lists and install Python 3.10 along with necessary packages
+    sudo apt-get update
+    sudo apt-get -y install python3.10 python3.10-venv python3.10-dev libgirepository1.0-dev
+
+    # Create directories
+    [ -d /rftools/bluetooth/bluing ] || mkdir -p /rftools/bluetooth/bluing
+    cd /rftools/bluetooth/bluing
+
+    # Upgrade pip and set up the virtual environment
+    python3.10 -m pip install --upgrade pip
+    python3.10 -m venv bluing
+    source bluing/bin/activate
+
+    # Install necessary Python packages
+    python3.10 -m pip install dbus-python==1.2.18
+    python3.10 -m pip install --no-dependencies bluing PyGObject docopt btsm btatt bluepy configobj btl2cap pkginfo xpycommon halo pyserial bthci btgatt log_symbols colorama spinners six termcolor
 }
+
 
 function bdaddr_soft_install() {
 	goodecho "[+] Installing bluing"
