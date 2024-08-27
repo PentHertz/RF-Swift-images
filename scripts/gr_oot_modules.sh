@@ -155,20 +155,33 @@ function grfosphor_grmod_install() {
     grclone_and_build "https://github.com/osmocom/gr-fosphor.git" "" "grfosphor_grmod_install"
 }
 
-function grdroineid_grmod_install() {
-    goodecho "[+] Cloning turbofec"
-    [ -d /root/thirdparty ] || mkdir /root/thirdparty
+function grdroineid_grmod_install() { # TODO: for turbofec RISCV64:  gcc: error: '-march=native': ISA string must begin with rv32 or rv64 
+    # Check the system architecture
+    ARCH=$(uname -m)
+
+    echo "[+] Cloning turbofec"
+    [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
     cd /root/thirdparty
-    gitinstall "https://github.com/zlinwei/turbofec.git"
-    cd turbofec 
+    installfromnet "git clone https://github.com/zlinwei/turbofec.git"
+    cd turbofec
+
     autoreconf -i
-    ./configure
-    make -j$(nproc); sudo make install
+    if [ "$ARCH" = "riscv64" ]; then
+        colorecho "[!] Note: RISCV64 may have compilation issues with '-march=native'"
+        ./configure CFLAGS="-march=rv64" || { criticalecho-noexit "[!] Failed to configure turbofec"; return 0; }
+    else
+        ./configure || { criticalecho-noexit "[!] Failed to configure turbofec"; return 0; }
+    fi
+
+    make -j$(nproc) || { criticalecho "[!] Failed to build turbofec"; }
+    sudo make install || { criticalecho "[!] Failed to install turbofec"; }
+
     cd /root/thirdparty
-    goodecho "[+] Cloning CRCpp"
+    echo "[+] Cloning CRCpp"
     cmake_clone_and_build "https://github.com/d-bahr/CRCpp.git" "build" "" "" "grdroineid_grmod_install"
+
     cd /root/thirdparty
-    goodecho "[+] Cloning dji_droneid"
+    echo "[+] Cloning dji_droneid"
     grclone_and_build "https://github.com/proto17/dji_droneid.git" "gnuradio/gr-droneid" "grdroineid_grmod_install" -b "gr-droneid"
 }
 
