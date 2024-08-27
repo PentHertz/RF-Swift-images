@@ -81,5 +81,7 @@ function harogic_sa_device() {
 	goodecho "[+] Installing htraapi"
 	cd "$currentpath"
 	sh -c ./htraapi.sh
+	cp $pwd/lib/libhtraapi.so.0 /usr/lib/
+	cp $pwd/lib/libhtraapi.so /usr/lib/
 	colorecho "[+] Note: you'll have to put your calibration data after!"
 }
