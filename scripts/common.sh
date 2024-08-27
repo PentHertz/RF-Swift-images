@@ -186,3 +186,26 @@ function cmake_clone_and_build() {
     # Return to original or base directory
     cd ../..
 }
+
+function check_and_install_lib() {
+    local lib_name=$1
+    local pkg_config_name=$2
+
+    # Check if the library is installed using pkg-config
+    if pkg-config --exists "$pkg_config_name"; then
+        goodecho "[+] $lib_name is already installed."
+    else
+        colorecho "[!] $lib_name is not installed. Attempting to install..."
+        
+        # Attempt to install the library using apt-get
+        installfromnet "apt-fast update"
+        installfromnet "apt-fast -y install $lib_name"
+
+        # Verify the installation
+        if pkg-config --exists "$pkg_config_name"; then
+            goodecho "[+] $lib_name has been successfully installed."
+        else
+            criticalecho "[!] Failed to install $lib_name. Please check the package name or install it manually."
+        fi
+    fi
+}
