@@ -229,13 +229,13 @@ function ice9_bluetooth_soft_install() {
     esac
 }
 
-function inspection_decoding_tools () {
+function ice9_bluetooth_soft_install_call () {
 	goodecho "[+] Installing dependencies for ice9_bluetooth"
 	installfromnet "apt-fast install -y libliquid-dev libhackrf-dev libbladerf-dev libuhd-dev libfftw3-dev"
 	goodecho "[+] Cloning ice9-bluetooth-sniffer"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	cmake_clone_and_build "https://github.com/merbanan/rtl_433.git" "build" "" "" "inspection_decoding_tools"
+	cmake_clone_and_build "https://github.com/mikeryan/ice9-bluetooth-sniffer.git" "build" "" "" "inspection_decoding_tools"
 }
 
 function nfclaboratory_soft_install () {
