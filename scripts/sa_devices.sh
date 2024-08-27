@@ -71,11 +71,15 @@ function harogic_sa_device() {
 	unzip "$prog"
 	rm "$prog.zip"
 	cd "$prog"
+	currentpath=$(pwd)
 	sh -c ./install.sh
 	case "$arch" in # quick fix for aarch64
   		aarch64|unknown) 
     		ln -s /usr/lib/aarch64-linux-gnu/libffi.so.8 /usr/lib/libffi.so.6;;
 	esac
 	ln -s /usr/local/bin/sastudio/.sastudio.sh /usr/sbin/sastudio
+	goodecho "[+] Installing htraapi"
+	cd "$currentpath"
+	sh -c ./htraapi.sh
 	colorecho "[+] Note: you'll have to put your calibration data after!"
 }
