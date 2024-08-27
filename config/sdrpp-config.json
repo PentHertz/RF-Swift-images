@@ -150,6 +150,10 @@
         "SpyServer Source": {
             "enabled": true,
             "module": "spyserver_source"
+        },
+        "Harogic Source": {
+            "enabled": true,
+            "module": "harogic_source"
         }
     },
     "modules": [],

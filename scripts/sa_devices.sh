@@ -59,6 +59,7 @@ function harogic_sa_device() {
 	cd /rftools/analysers
 	arch=`uname -i`
 	prog=""
+    sdkarch=""
 	case "$arch" in
   		x86_64|amd64)
     		prog="SAStudio4_x86_64_05_23_17_06";;
@@ -84,5 +85,16 @@ function harogic_sa_device() {
     cd Install_HTRA_SDK/
     chmod +x install_htraapi_lib.sh
     sh -c ./install_htraapi_lib.sh
+    case "$arch" in
+        x86_64|amd64)
+            sdkarch="x86_64";;
+        aarch64|unknown) # We asume unknwon would be RPi 5 for now...?
+            sdkarch="aarch64";;
+        *)
+            printf 'Unsupported architecture: "%s"!\n' "$arch" >&2; exit 0;;
+    esac
+    cd "/opt/htraapi/lib/$sdkarch"
+    cp libhtraapi.so* /usr/lib
+    cp libhtraapi.so* /usr/lib
 	colorecho "[+] Note: you'll have to put your calibration data after!"
 }
