@@ -80,6 +80,7 @@ function harogic_sa_device() {
 	ln -s /usr/local/bin/sastudio/.sastudio.sh /usr/sbin/sastudio
 	goodecho "[+] Installing htraapi"
 	installfromnet "wget https://github.com/PentHertz/rfswift_harogic_install/releases/download/v05.23.17/Install_HTRA_SDK.zip"
+    unzip Install_HTRA_SDK.zip
     cd Install_HTRA_SDK/
     chmod +x install_htraapi_lib.sh
     sh -c ./install_htraapi_lib.sh
