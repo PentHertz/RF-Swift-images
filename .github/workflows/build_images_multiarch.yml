@@ -1,4 +1,4 @@
-name: SDR full - Multi-Platform Docker Build with Caching
+name: All Dockerfiles - Multi-Platform Docker Build with Caching
 
 env:
   REGISTRY_IMAGE: penthertz/rfswiftdevgh
@@ -36,11 +36,12 @@ jobs:
       - name: Build and push corebuild image with caching
         run: |
           cd Dockerfiles
+          TAG_PLATFORM=${{ matrix.platform }}/corebuild | tr '/' '_' | tr '-' '_'
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
-            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-corebuild \
-            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-corebuild,mode=max \
-            --push -t ${{ env.REGISTRY_IMAGE }}:corebuild-${{ matrix.platform }} .
+            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
+            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM},mode=max \
+            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM} .
 
   sdr_light:
     runs-on: ubuntu-latest
@@ -66,11 +67,12 @@ jobs:
       - name: Build and push sdr_light image with caching
         run: |
           cd Dockerfiles
+          TAG_PLATFORM=${{ matrix.platform }}/sdrlight | tr '/' '_' | tr '-' '_'
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
-            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-sdrlight \
-            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-sdrlight,mode=max \
-            --push -t ${{ env.REGISTRY_IMAGE }}:sdrlight-${{ matrix.platform }} .
+            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
+            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM},mode=max \
+            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM} .
 
   extraoot:
     runs-on: ubuntu-latest
@@ -96,11 +98,12 @@ jobs:
       - name: Build and push sdr_full image with caching
         run: |
           cd Dockerfiles
+          TAG_PLATFORM=${{ matrix.platform }}/sdrfull | tr '/' '_' | tr '-' '_'
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
-            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-sdrfull \
-            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-sdrfull,mode=max \
-            --push -t ${{ env.REGISTRY_IMAGE }}:sdrfull-${{ matrix.platform }} .
+            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
+            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM},mode=max \
+            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM} .
 
   extrasoft:
     runs-on: ubuntu-latest
@@ -126,11 +129,12 @@ jobs:
       - name: Build and push sdr_full image with caching
         run: |
           cd Dockerfiles
+          TAG_PLATFORM=${{ matrix.platform }}/sdrfull | tr '/' '_' | tr '-' '_'
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
-            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-sdrfull \
-            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-sdrfull,mode=max \
-            --push -t ${{ env.REGISTRY_IMAGE }}:sdrfull-${{ matrix.platform }} .
+            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
+            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM},mode=max \
+            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM} .
 
   mldlsofts:
     runs-on: ubuntu-latest
@@ -156,11 +160,12 @@ jobs:
       - name: Build and push sdr_full image with caching
         run: |
           cd Dockerfiles
+          TAG_PLATFORM=${{ matrix.platform }}/sdrfull | tr '/' '_' | tr '-' '_'
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
-            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-sdrfull \
-            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-sdrfull,mode=max \
-            --push -t ${{ env.REGISTRY_IMAGE }}:sdrfull-${{ matrix.platform }} .
+            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
+            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM},mode=max \
+            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM} .
 
   sdr_light_antsdr:
     runs-on: ubuntu-latest
@@ -186,11 +191,12 @@ jobs:
       - name: Build and push sdr_light_antsdr image with caching
         run: |
           cd Dockerfiles
+          TAG_PLATFORM=${{ matrix.platform }}/sdrlightantsdr | tr '/' '_' | tr '-' '_'
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
-            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-sdrlightantsdr \
-            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-sdrlightantsdr,mode=max \
-            --push -t ${{ env.REGISTRY_IMAGE }}:sdrlightantsdr-${{ matrix.platform }} .
+            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
+            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM},mode=max \
+            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM} .
 
   sdr_light_rtlsdrv4:
     runs-on: ubuntu-latest
@@ -216,11 +222,12 @@ jobs:
       - name: Build and push sdr_light_rtlsdrv4 image with caching
         run: |
           cd Dockerfiles
+          TAG_PLATFORM=${{ matrix.platform }}/sdrlightrtlsdrv4 | tr '/' '_' | tr '-' '_'
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
-            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-sdrlightrtlsdrv4 \
-            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-sdrlightrtlsdrv4,mode=max \
-            --push -t ${{ env.REGISTRY_IMAGE }}:sdrlightrtlsdrv4-${{ matrix.platform }} .
+            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
+            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM},mode=max \
+            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM} .
 
   telecom:
     runs-on: ubuntu-latest
@@ -246,11 +253,12 @@ jobs:
       - name: Build and push telecom image with caching
         run: |
           cd Dockerfiles
+          TAG_PLATFORM=${{ matrix.platform }}/telecom | tr '/' '_' | tr '-' '_'
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
-            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-telecom \
-            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-telecom,mode=max \
-            --push -t ${{ env.REGISTRY_IMAGE }}:telecom-${{ matrix.platform }} .
+            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
+            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM},mode=max \
+            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM} .
 
   wifi:
     runs-on: ubuntu-latest
@@ -276,11 +284,12 @@ jobs:
       - name: Build and push wifi image with caching
         run: |
           cd Dockerfiles
+          TAG_PLATFORM=${{ matrix.platform }}/wifi | tr '/' '_' | tr '-' '_'
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
-            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-wifi \
-            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-wifi,mode=max \
-            --push -t ${{ env.REGISTRY_IMAGE }}:wifi-${{ matrix.platform }} .
+            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
+            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM},mode=max \
+            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM} .
 
   bluetooth:
     runs-on: ubuntu-latest
@@ -306,11 +315,12 @@ jobs:
       - name: Build and push bluetooth image with caching
         run: |
           cd Dockerfiles
+          TAG_PLATFORM=${{ matrix.platform }}/bluetooth | tr '/' '_' | tr '-' '_'
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
-            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-bluetooth \
-            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-bluetooth,mode=max \
-            --push -t ${{ env.REGISTRY_IMAGE }}:bluetooth-${{ matrix.platform }} .
+            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
+            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM},mode=max \
+            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM} .
 
   rfid:
     runs-on: ubuntu-latest
@@ -336,11 +346,12 @@ jobs:
       - name: Build and push rfid image with caching
         run: |
           cd Dockerfiles
+          TAG_PLATFORM=${{ matrix.platform }}/rfid | tr '/' '_' | tr '-' '_'
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
-            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-rfid \
-            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-rfid,mode=max \
-            --push -t ${{ env.REGISTRY_IMAGE }}:rfid-${{ matrix.platform }} .
+            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
+            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM},mode=max \
+            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM} .
 
   automotive:
     runs-on: ubuntu-latest
@@ -366,11 +377,12 @@ jobs:
       - name: Build and push automotive image with caching
         run: |
           cd Dockerfiles
+          TAG_PLATFORM=${{ matrix.platform }}/automotive | tr '/' '_' | tr '-' '_'
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
-            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-automotive \
-            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-automotive,mode=max \
-            --push -t ${{ env.REGISTRY_IMAGE }}:automotive-${{ matrix.platform }} .
+            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
+            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM},mode=max \
+            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM} .
 
   reversing:
     runs-on: ubuntu-latest
@@ -396,8 +408,9 @@ jobs:
       - name: Build and push reversing image with caching
         run: |
           cd Dockerfiles
+          TAG_PLATFORM=${{ matrix.platform }}/reversing | tr '/' '_' | tr '-' '_'
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
-            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-reversing \
-            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-reversing,mode=max \
-            --push -t ${{ env.REGISTRY_IMAGE }}:reversing-${{ matrix.platform }} .
+            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
+            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM},mode=max \
+            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM} .
