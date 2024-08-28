@@ -5,8 +5,10 @@ function docker_preinstall() {
     export DEBIAN_FRONTEND=noninteractive
     export TZ=Etc/UTC
 
-    # Basic update and ensure necessary tools are installed
-    apt-get update
+    # Basic update
+    apt-get update -y
+
+    # Install necessary tools and repositories
     apt-get install -y software-properties-common gnupg2
 
     # Check if gpg-agent is installed and running
@@ -17,15 +19,15 @@ function docker_preinstall() {
 
     # Add apt-fast repository and update
     apt-add-repository ppa:apt-fast/stable -y
-    apt-get update
+    apt-get update -y
     echo apt-fast apt-fast/maxdownloads string 10 | debconf-set-selections
     echo apt-fast apt-fast/dlflag boolean true | debconf-set-selections
     echo apt-fast apt-fast/aptmanager string apt-get | debconf-set-selections
 
     # List of all packages
     local packages=(
-        wget curl sudo pulseaudio udev python3-packaging vim
-        autoconf build-essential cmake python3-pip libsndfile-dev scapy screen tcpdump
+        python3 python3-pip tzdata wget curl sudo pulseaudio udev python3-packaging vim
+        autoconf build-essential cmake libsndfile-dev scapy screen tcpdump
         qt5-qmake qtbase5-dev xterm libusb-1.0-0-dev pkg-config git apt-utils
         libusb-1.0-0 libncurses5-dev libtecla1 libtecla-dev dialog procps unzip
         texlive liblog4cpp5-dev libcurl4-gnutls-dev libpcap-dev libgtk-3-dev
@@ -41,9 +43,7 @@ function docker_preinstall() {
     # Install apt-fast and all other packages with apt-fast
     installfromnet "apt-get -y install apt-fast"
     installfromnet "apt-fast update"
-    installfromnet "apt-fast install -y \"${packages[@]}\" --no-install-recommends"
-
-     installfromnet "apt-fast install -y python3 tzdata"
+    installfromnet "apt-fast install -y ${packages[@]} --no-install-recommends"
 
     # Configure keyboard and locale settings
     echo apt-fast keyboard-configuration/layout string "English (US)" | debconf-set-selections
