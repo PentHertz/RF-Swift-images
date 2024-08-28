@@ -40,6 +40,7 @@ function docker_preinstall() {
 
     # Install apt-fast and all other packages with apt-fast
     installfromnet "apt-get -y install apt-fast"
+    installfromnet "apt-fast update"
     installfromnet "apt-fast install -y \"${packages[@]}\" --no-install-recommends"
 
     # Configure keyboard and locale settings
