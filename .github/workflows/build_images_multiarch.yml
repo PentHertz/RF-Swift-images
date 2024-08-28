@@ -41,7 +41,9 @@ jobs:
             --build-arg ARCH=${{ matrix.platform }} \
             --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
             --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM},mode=max \
-            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM} .
+            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM}
+            -f SDR/corebuild.docker \
+            ..
 
   sdr_light:
     runs-on: ubuntu-latest
@@ -70,9 +72,14 @@ jobs:
           TAG_PLATFORM=$(echo "${{ matrix.platform }}/sdrlight" | tr '/' '_' | tr '-' '_')
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
+            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild \
+            --build-arg UHD_BASE=$(UHD_BASE) \
+            --build-arg RTLSDR_BASE=$(RTLSDR_BASE) \
             --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
             --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM},mode=max \
-            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM} .
+            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM}
+            -f SDR/sdr_light.docker \
+            ..
 
   extraoot:
     runs-on: ubuntu-latest
@@ -101,9 +108,13 @@ jobs:
           TAG_PLATFORM=$(echo "${{ matrix.platform }}/sdrfull" | tr '/' '_' | tr '-' '_')
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
+            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light \
             --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
             --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM},mode=max \
-            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM} .
+            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM}
+            --target extraoot \
+            -f SDR/sdr_full.docker \
+            ..
 
   extrasoft:
     runs-on: ubuntu-latest
@@ -132,9 +143,13 @@ jobs:
           TAG_PLATFORM=$(echo "${{ matrix.platform }}/sdrfull" | tr '/' '_' | tr '-' '_')
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
+            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light \
             --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
             --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM},mode=max \
-            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM} .
+            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM}
+            --target extraoot \
+            -f SDR/sdr_full.docker \
+            ..
 
   mldlsofts:
     runs-on: ubuntu-latest
@@ -163,9 +178,12 @@ jobs:
           TAG_PLATFORM=$(echo "${{ matrix.platform }}/sdrfull" | tr '/' '_' | tr '-' '_')
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
+            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light \
             --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
             --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM},mode=max \
-            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM} .
+            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM}
+            -f SDR/sdr_full.docker \
+            ..
 
   sdr_light_antsdr:
     runs-on: ubuntu-latest
@@ -194,9 +212,14 @@ jobs:
           TAG_PLATFORM=$(echo "${{ matrix.platform }}/sdrlightantsdr" | tr '/' '_' | tr '-' '_')
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
+            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild \
+            --build-arg UHD_BASE=antsdr_uhd \
+            --build-arg RTLSDR_BASE=rtlsdr \
             --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
             --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM},mode=max \
-            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM} .
+            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM}
+            -f SDR/sdr_light.docker \
+            ..
 
   sdr_light_rtlsdrv4:
     runs-on: ubuntu-latest
@@ -225,9 +248,14 @@ jobs:
           TAG_PLATFORM=$(echo "${{ matrix.platform }}/sdrlightrtlsdrv4" | tr '/' '_' | tr '-' '_')
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
+            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild \
+            --build-arg UHD_BASE=uhd \
+            --build-arg RTLSDR_BASE=rtlsdrv4 \
             --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
             --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM},mode=max \
-            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM} .
+            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM}
+            -f SDR/sdr_light.docker \
+            ..
 
   telecom:
     runs-on: ubuntu-latest
@@ -256,9 +284,12 @@ jobs:
           TAG_PLATFORM=$(echo "${{ matrix.platform }}/telecom" | tr '/' '_' | tr '-' '_')
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
+            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light \
             --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
             --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM},mode=max \
-            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM} .
+            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM}
+            -f telecom.docker \
+            ..
 
   wifi:
     runs-on: ubuntu-latest
@@ -287,9 +318,12 @@ jobs:
           TAG_PLATFORM=$(echo "${{ matrix.platform }}/wifi" | tr '/' '_' | tr '-' '_')
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
+            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light \
             --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
             --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM},mode=max \
-            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM} .
+            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM}
+            -f wifi.docker \
+            ..
 
   bluetooth:
     runs-on: ubuntu-latest
@@ -318,9 +352,12 @@ jobs:
           TAG_PLATFORM=$(echo "${{ matrix.platform }}/bluetooth" | tr '/' '_' | tr '-' '_')
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
+            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild \
             --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
             --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM},mode=max \
-            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM} .
+            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM}
+            -f bluetooth.docker \
+            ..
 
   rfid:
     runs-on: ubuntu-latest
@@ -349,9 +386,12 @@ jobs:
           TAG_PLATFORM=$(echo "${{ matrix.platform }}/rfid" | tr '/' '_' | tr '-' '_')
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
+            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild \
             --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
             --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM},mode=max \
-            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM} .
+            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM}
+            -f rfid.docker \
+            ..
 
   automotive:
     runs-on: ubuntu-latest
@@ -380,9 +420,12 @@ jobs:
           TAG_PLATFORM=$(echo "${{ matrix.platform }}/automotive" | tr '/' '_' | tr '-' '_')
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
+            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild \
             --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
             --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM},mode=max \
-            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM} .
+            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM}
+            -f automotive.docker \
+            ..
 
   reversing:
     runs-on: ubuntu-latest
@@ -411,6 +454,9 @@ jobs:
           TAG_PLATFORM=$(echo "${{ matrix.platform }}/reversing" | tr '/' '_' | tr '-' '_')
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
+            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild \
             --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
             --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM},mode=max \
-            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM} .
+            --push -t ${{ env.REGISTRY_IMAGE }}:${TAG_PLATFORM}
+            -f reversing.docker \
+            ..
