@@ -118,7 +118,7 @@ jobs:
 
   sdr_light:
     runs-on: ubuntu-latest
-    needs: corebuild
+    needs: sdrsa_devices
     strategy:
       matrix:
         platform: [amd64, arm64, riscv64]
