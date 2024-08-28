@@ -31,7 +31,7 @@ RUN ./entrypoint.sh gnuradio_soft_install && \
 # Installing extra software
 RUN ./entrypoint.sh jupiter_soft_install && \
 	./entrypoint.sh sdrpp_soft_fromsource_install && \
-	./entrypoint.sh sdrangel_soft_fromsource_install
+	./entrypoint.sh sdrangel_soft_fromsource_install && \
 	./entrypoint.sh gqrx_soft_install && \
 	./entrypoint.sh multimon_ng_soft_install && \
 	./entrypoint.sh urh_soft_install && \
