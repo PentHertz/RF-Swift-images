@@ -1,4 +1,4 @@
-name: All Dockerfiles - Multi-Platform Docker Build with Caching
+name: SDR full - Multi-Platform Docker Build with Caching
 
 env:
   REGISTRY_IMAGE: penthertz/rfswiftdevgh
@@ -36,7 +36,7 @@ jobs:
       - name: Build and push corebuild image with caching
         run: |
           cd Dockerfiles
-          TAG_PLATFORM=${{ matrix.platform }}/corebuild | tr '/' '_' | tr '-' '_'
+          TAG_PLATFORM=$(echo "${{ matrix.platform }}/corebuild" | tr '/' '_' | tr '-' '_')
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
             --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
@@ -67,7 +67,7 @@ jobs:
       - name: Build and push sdr_light image with caching
         run: |
           cd Dockerfiles
-          TAG_PLATFORM=${{ matrix.platform }}/sdrlight | tr '/' '_' | tr '-' '_'
+          TAG_PLATFORM=$(echo "${{ matrix.platform }}/sdrlight" | tr '/' '_' | tr '-' '_')
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
             --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
@@ -98,7 +98,7 @@ jobs:
       - name: Build and push sdr_full image with caching
         run: |
           cd Dockerfiles
-          TAG_PLATFORM=${{ matrix.platform }}/sdrfull | tr '/' '_' | tr '-' '_'
+          TAG_PLATFORM=$(echo "${{ matrix.platform }}/sdrfull" | tr '/' '_' | tr '-' '_')
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
             --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
@@ -129,7 +129,7 @@ jobs:
       - name: Build and push sdr_full image with caching
         run: |
           cd Dockerfiles
-          TAG_PLATFORM=${{ matrix.platform }}/sdrfull | tr '/' '_' | tr '-' '_'
+          TAG_PLATFORM=$(echo "${{ matrix.platform }}/sdrfull" | tr '/' '_' | tr '-' '_')
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
             --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
@@ -160,7 +160,7 @@ jobs:
       - name: Build and push sdr_full image with caching
         run: |
           cd Dockerfiles
-          TAG_PLATFORM=${{ matrix.platform }}/sdrfull | tr '/' '_' | tr '-' '_'
+          TAG_PLATFORM=$(echo "${{ matrix.platform }}/sdrfull" | tr '/' '_' | tr '-' '_')
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
             --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
@@ -191,7 +191,7 @@ jobs:
       - name: Build and push sdr_light_antsdr image with caching
         run: |
           cd Dockerfiles
-          TAG_PLATFORM=${{ matrix.platform }}/sdrlightantsdr | tr '/' '_' | tr '-' '_'
+          TAG_PLATFORM=$(echo "${{ matrix.platform }}/sdrlightantsdr" | tr '/' '_' | tr '-' '_')
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
             --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
@@ -222,7 +222,7 @@ jobs:
       - name: Build and push sdr_light_rtlsdrv4 image with caching
         run: |
           cd Dockerfiles
-          TAG_PLATFORM=${{ matrix.platform }}/sdrlightrtlsdrv4 | tr '/' '_' | tr '-' '_'
+          TAG_PLATFORM=$(echo "${{ matrix.platform }}/sdrlightrtlsdrv4" | tr '/' '_' | tr '-' '_')
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
             --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
@@ -253,7 +253,7 @@ jobs:
       - name: Build and push telecom image with caching
         run: |
           cd Dockerfiles
-          TAG_PLATFORM=${{ matrix.platform }}/telecom | tr '/' '_' | tr '-' '_'
+          TAG_PLATFORM=$(echo "${{ matrix.platform }}/telecom" | tr '/' '_' | tr '-' '_')
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
             --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
@@ -284,7 +284,7 @@ jobs:
       - name: Build and push wifi image with caching
         run: |
           cd Dockerfiles
-          TAG_PLATFORM=${{ matrix.platform }}/wifi | tr '/' '_' | tr '-' '_'
+          TAG_PLATFORM=$(echo "${{ matrix.platform }}/wifi" | tr '/' '_' | tr '-' '_')
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
             --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
@@ -315,7 +315,7 @@ jobs:
       - name: Build and push bluetooth image with caching
         run: |
           cd Dockerfiles
-          TAG_PLATFORM=${{ matrix.platform }}/bluetooth | tr '/' '_' | tr '-' '_'
+          TAG_PLATFORM=$(echo "${{ matrix.platform }}/bluetooth" | tr '/' '_' | tr '-' '_')
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
             --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
@@ -346,7 +346,7 @@ jobs:
       - name: Build and push rfid image with caching
         run: |
           cd Dockerfiles
-          TAG_PLATFORM=${{ matrix.platform }}/rfid | tr '/' '_' | tr '-' '_'
+          TAG_PLATFORM=$(echo "${{ matrix.platform }}/rfid" | tr '/' '_' | tr '-' '_')
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
             --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
@@ -377,7 +377,7 @@ jobs:
       - name: Build and push automotive image with caching
         run: |
           cd Dockerfiles
-          TAG_PLATFORM=${{ matrix.platform }}/automotive | tr '/' '_' | tr '-' '_'
+          TAG_PLATFORM=$(echo "${{ matrix.platform }}/automotive" | tr '/' '_' | tr '-' '_')
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
             --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
@@ -408,7 +408,7 @@ jobs:
       - name: Build and push reversing image with caching
         run: |
           cd Dockerfiles
-          TAG_PLATFORM=${{ matrix.platform }}/reversing | tr '/' '_' | tr '-' '_'
+          TAG_PLATFORM=$(echo "${{ matrix.platform }}/reversing" | tr '/' '_' | tr '-' '_')
           docker buildx build --platform ${{ matrix.platform }} \
             --build-arg ARCH=${{ matrix.platform }} \
             --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${TAG_PLATFORM} \
