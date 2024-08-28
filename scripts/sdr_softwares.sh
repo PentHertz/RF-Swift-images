@@ -198,11 +198,23 @@ function cyberther_soft_install() {
 	ninja install
 }
 
-function inspection_decoding_tools () {
-	goodecho "[+] Installing common inspection and decoding tools from package manager"
-	installfromnet "apt-fast install -y audacity inspectrum sox multimon-ng gqrx-sdr"
-	installfromnet "pip3 install cython"
+
+function gqrx_soft_install () {
+	goodecho "[+] Installing GQRX"
+	installfromnet "apt-fast install -y gqrx-sdr"
+}
+
+function multimon_ng_soft_install () {
+	goodecho "[+] Installing multimon-ng"
+	installfromnet "apt-fast install -y multimon-ng"
+}
+
+function urh_soft_install () {
+	goodecho "[+] Installing URH"
 	installfromnet "pip3 install urh"
+}
+
+function rtl_433_soft_install () {
 	goodecho "[+] Installing rtl_433 tools"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty

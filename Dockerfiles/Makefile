@@ -69,9 +69,7 @@ sdrlight:
 	docker buildx build --platform $(PLATFORM) \
             --cache-from=type=registry,ref=$(CACHE_REPO):cache_sdr_light \
             --cache-to=type=registry,ref=$(CACHE_REPO):cache_sdr_light,mode=max \
-            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild \
-            --build-arg UHD_BASE=$(UHD_BASE) \
-            --build-arg RTLSDR_BASE=$(RTLSDR_BASE) \
+            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices \
             --push \
             -t $(REGISTRY_IMAGE):sdr_light \
             -f SDR/sdr_light.docker \

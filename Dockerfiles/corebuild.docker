@@ -25,7 +25,8 @@ RUN ./entrypoint.sh docker_preinstall
 # Installing Terminal harnesses
 RUN ./entrypoint.sh fzf_soft_install && \
 	./entrypoint.sh zsh_tools_install && \
-	./entrypoint.sh arsenal_soft_install
+	./entrypoint.sh arsenal_soft_install && \
+	./entrypoint.sh audio_tools
 COPY config/.zshrc /root/.zshrc 
 
 # Cleaning and quitting

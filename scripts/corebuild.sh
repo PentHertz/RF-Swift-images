@@ -39,12 +39,20 @@ function docker_preinstall() {
     )
 
     # Install apt-fast and all other packages with apt-fast
-    apt-get -y install apt-fast
-    apt-fast install -y "${packages[@]}" --no-install-recommends
+    installfromnet "apt-get -y install apt-fast"
+    installfromnet "apt-fast install -y \"${packages[@]}\" --no-install-recommends"
 
     # Configure keyboard and locale settings
     echo apt-fast keyboard-configuration/layout string "English (US)" | debconf-set-selections
     echo apt-fast keyboard-configuration/variant string "English (US)" | debconf-set-selections
     apt-fast -y install task-lxqt-desktop language-pack-en
     update-locale
+
+    # Installing Cython
+    installfromnet "pip3 install cython"
+}
+
+function audio_tools () {
+    goodecho "[+] Installing audio tools from package manager"
+    installfromnet "apt-fast install -y audacity sox"
 }
