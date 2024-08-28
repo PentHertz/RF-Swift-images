@@ -142,7 +142,7 @@ bluetooth:
 	docker buildx build --platform $(PLATFORM) \
             --cache-from=type=registry,ref=$(CACHE_REPO):cache_bluetooth \
             --cache-to=type=registry,ref=$(CACHE_REPO):cache_bluetooth,mode=max \
-            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild \
+            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light \
             --push \
             -t $(REGISTRY_IMAGE):bluetooth \
             -f bluetooth.docker \
