@@ -219,9 +219,20 @@ function gr_DCF77_Receiver_grmod_install() {
 }
 
 function grbb60_Receiver_grmod_install() {
+    # Check if the system architecture is x86_64/amd64
+    if [[ "$(uname -m)" != "x86_64" && "$(uname -m)" != "amd64" ]]; then
+        criticalecho-noexit "[!] This installation script is only compatible with x86_64/amd64 architecture."
+        return 0
+    fi
+
+    # Install the necessary dependencies
     install_dependencies "libusb-1.0-0"
+
+    # Create third-party directory if it doesn't exist
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
     cd /root/thirdparty
+
+    # Download and install the FTDI library
     installfromnet "wget https://ftdichip.com/wp-content/uploads/2022/07/libftd2xx-x86_64-1.4.27.tgz"
     tar xvfz libftd2xx-x86_64-1.4.27.tgz
     cd release/build
@@ -229,14 +240,18 @@ function grbb60_Receiver_grmod_install() {
     chmod 0755 /usr/local/lib/libftd2xx.so.1.4.27
     ln -sf /usr/local/lib/libftd2xx.so.1.4.27 /usr/local/lib/libftd2xx.so
     cd ..
-    cp ftd2xx.h  /usr/local/include
-    cp WinTypes.h  /usr/local/include
+    cp ftd2xx.h /usr/local/include
+    cp WinTypes.h /usr/local/include
     ldconfig -v
+
+    # Download and install the Signal Hound SDK
     installfromnet "wget https://signalhound.com/sigdownloads/SDK/signal_hound_sdk_06_24_24.zip"
     unzip signal_hound_sdk_06_24_24.zip
     cd "signal_hound_sdk/device_apis/bb_series/lib/linux/Ubuntu 18.04"
     cp libbb_api.* /usr/local/lib
     ldconfig -v -n /usr/local/lib
     ln -sf /usr/local/lib/libbb_api.so.5 /usr/local/lib/libbb_api.so
+
+    # Clone and build the gr-bb60 repository
     grclone_and_build "https://github.com/SignalHound/gr-bb60.git" "" "grbb60_Receiver_grmod_install"
 }
