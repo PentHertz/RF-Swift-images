@@ -87,7 +87,9 @@ function harogic_sa_device() {
     cp htraapi/configs/htra-cyusb.rules /etc/udev/rules.d/
     rm -rf /opt/htraapi/
     cp -r htraapi/ /opt/
-    version="0.55.45"
+    file=$( ls htraapi/lib/x86_64/libhtraapi.so.* )
+    file=$( basename $file )
+    version=${file#*so.}
     majornum=${version%%.*}
     case "$arch" in
         x86_64|amd64)
@@ -110,7 +112,6 @@ function harogic_sa_device() {
             ;;
     esac
     cd "/opt/htraapi/lib/$sdkarch"
-    cp libhtraapi.so* /usr/lib
     cp libhtraapi.so* /usr/lib
 	colorecho "[+] Note: you'll have to put your calibration data after!"
 }
