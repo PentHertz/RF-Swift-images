@@ -1,9 +1,7 @@
-name: All Dockerfiles - AMD64-Platform Docker Build with Caching
+name: SDR full - Multi-Platform Docker Build with Caching
 
 env:
   REGISTRY_IMAGE: penthertz/rfswiftdevgh
-  BUILD_PLATFORMS: amd64
-  CACHE_PLATFORMS: linux_amd64-linux_arm64
   CACHE_REPO: penthertz/rfswiftdevgh
   DO_SPACES_ENDPOINT: ${{ secrets.BUCKET_URL }}
   DO_SPACES_REGION: ${{ secrets.BUCKET_REGION }}
@@ -16,6 +14,9 @@ on:
 jobs:
   corebuild:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: [linux/amd64, linux/arm64, linux/riscv64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -35,11 +36,18 @@ jobs:
       - name: Build and push corebuild image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make common
+          docker buildx build --platform ${{ matrix.platform }} \
+            --build-arg ARCH=${{ matrix.platform }} \
+            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-corebuild \
+            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-corebuild,mode=max \
+            --push -t ${{ env.REGISTRY_IMAGE }}:corebuild-${{ matrix.platform }} .
 
   sdr_light:
     runs-on: ubuntu-latest
     needs: corebuild
+    strategy:
+      matrix:
+        platform: [linux/amd64, linux/arm64, linux/riscv64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -58,12 +66,18 @@ jobs:
       - name: Build and push sdr_light image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} \
-          REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=uhd RTLSDR_BASE=rtlsdr make sdrlight 
+          docker buildx build --platform ${{ matrix.platform }} \
+            --build-arg ARCH=${{ matrix.platform }} \
+            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-sdrlight \
+            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-sdrlight,mode=max \
+            --push -t ${{ env.REGISTRY_IMAGE }}:sdrlight-${{ matrix.platform }} .
 
   extraoot:
     runs-on: ubuntu-latest
     needs: sdr_light
+    strategy:
+      matrix:
+        platform: [linux/amd64, linux/arm64, linux/riscv64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -82,11 +96,18 @@ jobs:
       - name: Build and push sdr_full image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrfull1
+          docker buildx build --platform ${{ matrix.platform }} \
+            --build-arg ARCH=${{ matrix.platform }} \
+            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-sdrfull \
+            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-sdrfull,mode=max \
+            --push -t ${{ env.REGISTRY_IMAGE }}:sdrfull-${{ matrix.platform }} .
 
   extrasoft:
     runs-on: ubuntu-latest
     needs: sdr_light
+    strategy:
+      matrix:
+        platform: [linux/amd64, linux/arm64, linux/riscv64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -105,11 +126,18 @@ jobs:
       - name: Build and push sdr_full image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrfull2
+          docker buildx build --platform ${{ matrix.platform }} \
+            --build-arg ARCH=${{ matrix.platform }} \
+            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-sdrfull \
+            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-sdrfull,mode=max \
+            --push -t ${{ env.REGISTRY_IMAGE }}:sdrfull-${{ matrix.platform }} .
 
   mldlsofts:
     runs-on: ubuntu-latest
     needs: sdr_light
+    strategy:
+      matrix:
+        platform: [linux/amd64, linux/arm64, linux/riscv64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -128,11 +156,18 @@ jobs:
       - name: Build and push sdr_full image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrfull3
+          docker buildx build --platform ${{ matrix.platform }} \
+            --build-arg ARCH=${{ matrix.platform }} \
+            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-sdrfull \
+            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-sdrfull,mode=max \
+            --push -t ${{ env.REGISTRY_IMAGE }}:sdrfull-${{ matrix.platform }} .
 
   sdr_light_antsdr:
     runs-on: ubuntu-latest
     needs: corebuild
+    strategy:
+      matrix:
+        platform: [linux/amd64, linux/arm64, linux/riscv64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -151,12 +186,18 @@ jobs:
       - name: Build and push sdr_light_antsdr image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} \
-          REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrlightantsdr
+          docker buildx build --platform ${{ matrix.platform }} \
+            --build-arg ARCH=${{ matrix.platform }} \
+            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-sdrlightantsdr \
+            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-sdrlightantsdr,mode=max \
+            --push -t ${{ env.REGISTRY_IMAGE }}:sdrlightantsdr-${{ matrix.platform }} .
 
   sdr_light_rtlsdrv4:
     runs-on: ubuntu-latest
     needs: corebuild
+    strategy:
+      matrix:
+        platform: [linux/amd64, linux/arm64, linux/riscv64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -175,12 +216,18 @@ jobs:
       - name: Build and push sdr_light_rtlsdrv4 image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} \
-          REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrlightrtlsdrv4
+          docker buildx build --platform ${{ matrix.platform }} \
+            --build-arg ARCH=${{ matrix.platform }} \
+            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-sdrlightrtlsdrv4 \
+            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-sdrlightrtlsdrv4,mode=max \
+            --push -t ${{ env.REGISTRY_IMAGE }}:sdrlightrtlsdrv4-${{ matrix.platform }} .
 
   telecom:
     runs-on: ubuntu-latest
     needs: sdr_light
+    strategy:
+      matrix:
+        platform: [linux/amd64, linux/arm64, linux/riscv64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -196,15 +243,21 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push sdr_full image with caching
+      - name: Build and push telecom image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} \
-          REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make telecom
+          docker buildx build --platform ${{ matrix.platform }} \
+            --build-arg ARCH=${{ matrix.platform }} \
+            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-telecom \
+            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-telecom,mode=max \
+            --push -t ${{ env.REGISTRY_IMAGE }}:telecom-${{ matrix.platform }} .
 
   wifi:
     runs-on: ubuntu-latest
     needs: sdr_light
+    strategy:
+      matrix:
+        platform: [linux/amd64, linux/arm64, linux/riscv64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -223,12 +276,18 @@ jobs:
       - name: Build and push wifi image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} \
-          REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make wifi
+          docker buildx build --platform ${{ matrix.platform }} \
+            --build-arg ARCH=${{ matrix.platform }} \
+            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-wifi \
+            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-wifi,mode=max \
+            --push -t ${{ env.REGISTRY_IMAGE }}:wifi-${{ matrix.platform }} .
 
   bluetooth:
     runs-on: ubuntu-latest
     needs: sdr_light
+    strategy:
+      matrix:
+        platform: [linux/amd64, linux/arm64, linux/riscv64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -245,16 +304,20 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push bluetooth image with caching
-        env:
-          AWS_EC2_METADATA_DISABLED: true
         run: |
           cd Dockerfiles
-          ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} \
-          REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make bluetooth
+          docker buildx build --platform ${{ matrix.platform }} \
+            --build-arg ARCH=${{ matrix.platform }} \
+            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-bluetooth \
+            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-bluetooth,mode=max \
+            --push -t ${{ env.REGISTRY_IMAGE }}:bluetooth-${{ matrix.platform }} .
 
   rfid:
     runs-on: ubuntu-latest
     needs: corebuild
+    strategy:
+      matrix:
+        platform: [linux/amd64, linux/arm64, linux/riscv64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -273,12 +336,18 @@ jobs:
       - name: Build and push rfid image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} \
-          REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make rfid
+          docker buildx build --platform ${{ matrix.platform }} \
+            --build-arg ARCH=${{ matrix.platform }} \
+            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-rfid \
+            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-rfid,mode=max \
+            --push -t ${{ env.REGISTRY_IMAGE }}:rfid-${{ matrix.platform }} .
 
   automotive:
     runs-on: ubuntu-latest
     needs: corebuild
+    strategy:
+      matrix:
+        platform: [linux/amd64, linux/arm64, linux/riscv64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -297,12 +366,18 @@ jobs:
       - name: Build and push automotive image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} \
-          REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make automotive
+          docker buildx build --platform ${{ matrix.platform }} \
+            --build-arg ARCH=${{ matrix.platform }} \
+            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-automotive \
+            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-automotive,mode=max \
+            --push -t ${{ env.REGISTRY_IMAGE }}:automotive-${{ matrix.platform }} .
 
   reversing:
     runs-on: ubuntu-latest
     needs: corebuild
+    strategy:
+      matrix:
+        platform: [linux/amd64, linux/arm64, linux/riscv64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -321,5 +396,8 @@ jobs:
       - name: Build and push reversing image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} \
-          REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make reversing
+          docker buildx build --platform ${{ matrix.platform }} \
+            --build-arg ARCH=${{ matrix.platform }} \
+            --cache-from type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-reversing \
+            --cache-to type=registry,ref=${{ env.CACHE_REPO }}:${{ matrix.platform }}-reversing,mode=max \
+            --push -t ${{ env.REGISTRY_IMAGE }}:reversing-${{ matrix.platform }} .
