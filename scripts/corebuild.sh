@@ -5,9 +5,15 @@ function docker_preinstall() {
     export DEBIAN_FRONTEND=noninteractive
     export TZ=Etc/UTC
 
-    # Basic update and install software-properties-common
+    # Basic update and ensure necessary tools are installed
     apt-get update
-    apt-get install -y software-properties-common
+    apt-get install -y software-properties-common gnupg2
+
+    # Check if gpg-agent is installed and running
+    if ! command -v gpg-agent &> /dev/null; then
+        echo "Installing gnupg and gpg-agent..."
+        apt-get install -y gpg-agent
+    fi
 
     # Add apt-fast repository and update
     apt-add-repository ppa:apt-fast/stable -y
@@ -18,7 +24,7 @@ function docker_preinstall() {
 
     # List of all packages
     local packages=(
-        python3 wget curl sudo gpg-agent pulseaudio udev python3-packaging vim
+        python3 wget curl sudo pulseaudio udev python3-packaging vim
         autoconf build-essential cmake python3-pip libsndfile-dev scapy screen tcpdump
         qt5-qmake qtbase5-dev xterm libusb-1.0-0-dev pkg-config git apt-utils
         libusb-1.0-0 libncurses5-dev libtecla1 libtecla-dev dialog procps unzip
