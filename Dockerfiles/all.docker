@@ -1,0 +1,103 @@
+# This DockerFile is part of the RFSwift project
+# Install type: All
+# Author(s): Sébastien Dudek (@FlUxIuS) @Penthertz
+# website: penthertz.com
+
+ARG BASE_REGISTRY=sdr_full
+FROM ${BASE_IMAGE}
+
+LABEL "org.container.project"="rfswift"
+LABEL "org.container.author"="Sébastien Dudek (FlUxIuS)"
+
+RUN echo 'APT::Install-Suggests "0";' >> /etc/apt/apt.conf.d/00-docker
+RUN echo 'APT::Install-Recommends "0";' >> /etc/apt/apt.conf.d/00-docker
+
+RUN apt-fast update
+
+COPY scripts /root/scripts/
+COPY rules /root/rules/
+COPY config /root/config
+
+WORKDIR /root/scripts/
+RUN chmod +x entrypoint.sh
+
+# Tools for RFID
+RUN ./entrypoint.sh proxmark3_soft_install && \
+	./entrypoint.sh libnfc_soft_install && \
+	./entrypoint.sh mfoc_soft_install && \
+	./entrypoint.sh mfcuk_soft_install && \
+	./entrypoint.sh mfread_soft_install
+
+# Tools for Wi-Fi
+RUN ./entrypoint.sh common_nettools && \
+	./entrypoint.sh aircrack_soft_install && \
+	./entrypoint.sh reaver_soft_install && \
+	./entrypoint.sh bully_soft_install && \
+	./entrypoint.sh pixiewps_soft_install && \
+	./entrypoint.sh Pyrit_soft_install && \
+	./entrypoint.sh eaphammer_soft_install && \
+	./entrypoint.sh airgeddon_soft_install && \
+	./entrypoint.sh wifite2_soft_install
+
+# Tools for Telecom
+RUN ./entrypoint.sh yatebts_blade2_soft_install && \
+	./entrypoint.sh openbts_uhd_soft_install && \
+	./entrypoint.sh openbts_umts_soft_install && \
+	./entrypoint.sh srsran4G_5GNSA_soft_install && \
+	./entrypoint.sh srsran5GSA_soft_install && \
+	./entrypoint.sh Open5GS_soft_install && \
+	./entrypoint.sh pycrate_soft_install && \
+	./entrypoint.sh osmobts_suite_soft_install
+
+# Installing bettecap tool
+RUN ./entrypoint.sh bettercap_soft_install
+
+# Tools for Bluetooth #TODO: more more!
+RUN ./entrypoint.sh blueztools_soft_install && \
+	./entrypoint.sh bluing_soft_install && \
+	./entrypoint.sh bdaddr_soft_install
+
+# Tools for Bluetooth LE
+RUN ./entrypoint.sh mirage_soft_install && \
+	./entrypoint.sh sniffle_soft_install
+
+# General monitoring software
+RUN ./entrypoint.sh kismet_soft_install
+
+# Installing Automotive tools
+RUN ./entrypoint.sh canutils_soft_install && \
+	./entrypoint.sh cantact_soft_install && \
+	./entrypoint.sh caringcaribou_soft_install && \
+	./entrypoint.sh savvycan_soft_install && \
+	./entrypoint.sh gallia_soft_install && \
+	./entrypoint.sh v2ginjector_soft_install
+
+# Installing Reversing tools
+RUN ./entrypoint.sh kataistruct_soft_install && \
+ 	./entrypoint.sh unicorn_soft_install && \
+ 	./entrypoint.sh keystone_soft_install && \
+ 	./entrypoint.sh radare2_soft_install && \
+ 	./entrypoint.sh binwalk_soft_install
+RUN ./entrypoint.sh ghidra_soft_install
+
+# adding some SAST / DAST tools
+RUN ./entrypoint.sh LLVM_install && \
+	./entrypoint.sh AFL_install && \
+	./entrypoint.sh honggfuzz_install && \
+	./entrypoint.sh semgrep_install && \
+	./entrypoint.sh cppcheck_install && \
+	./entrypoint.sh clang_static_analyzer_install
+
+#RUN ./entrypoint.sh cutter_soft_install #TODO: fix install
+#RUN ./entrypoint.sh qiling_soft_install # TODO: resolve some debconf
+
+RUN mkdir -p /sdrtools/
+COPY run /sdrtools/run
+
+# Cleaning and quitting
+WORKDIR /root/
+#RUN rm -rf /root/scripts/
+RUN rm -rf /root/rules/
+RUN rm -rf /root/thirdparty
+RUN apt-fast clean
+RUN DEBIAN_FRONTEND=noninteractive rm -rf /var/lib/apt/lists/*
