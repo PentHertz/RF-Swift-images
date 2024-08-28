@@ -3,11 +3,8 @@
 # Author(s): Sébastien Dudek (@FlUxIuS) @Penthertz
 # website: penthertz.com
 
-ARG BASE_IMAGE=corebuild
+ARG BASE_IMAGE=sdrsa_devices
 FROM ${BASE_IMAGE}
-
-ARG UHD_BASE=uhd # Use antsdr_uhd with ANTSDR
-ARG RTLSDR_BASE=rtlsdr # rtlsdrv4 for v4 version driver
 
 LABEL "org.container.project"="rfswift"
 LABEL "org.container.author"="Sébastien Dudek"
@@ -24,33 +21,11 @@ COPY config /root/config/
 WORKDIR /root/scripts/
 RUN chmod +x entrypoint.sh
 
-# Installing Devices 
-
-## Installing extra peripherals
-RUN ./entrypoint.sh ${UHD_BASE}_devices_install && \
-	./entrypoint.sh ${RTLSDR_BASE}_devices_install
-#RUN ./entrypoint.sh antsdr_uhd_devices_install # Disable orignal UHD
-
 # Installing GNU Radio + some OOT modules
 RUN ./entrypoint.sh gnuradio_soft_install && \ 
 	./entrypoint.sh common_sources_and_sinks && \
 	./entrypoint.sh install_soapy_modules && \
 	./entrypoint.sh install_soapyPlutoSDR_modules
-
-# Installing SA device modules
-RUN ./entrypoint.sh kc908_sa_device && \
-	./entrypoint.sh signalhound_sa_device && \ 
-	./entrypoint.sh harogic_sa_device
-
-# SDR extra tools
-RUN ./entrypoint.sh sdrpp_soft_fromsource_install && \
-	./entrypoint.sh retrogram_soapysdr_soft_install
-
-# Calibration equipements
-RUN ./entrypoint.sh leobodnarv1_cal_device && \
-	./entrypoint.sh KCSDI_cal_device && \
-	./entrypoint.sh NanoVNASaver_cal_device && \
-	./entrypoint.sh NanoVNA_QT_cal_device
 
 # Installing extra software
 RUN ./entrypoint.sh jupiter_soft_install && \
@@ -61,10 +36,10 @@ COPY run /sdrtools/run
 
 # Cleaning and quitting
 WORKDIR /root/
-RUN rm -rf /root/thirdparty
-RUN rm -rf /root/rules/
-RUN rm -rf /root/config/
-RUN apt-fast clean
+RUN rm -rf /root/thirdparty && \
+	rm -rf /root/rules/ && \
+	rm -rf /root/config/ && \
+	apt-fast clean
 RUN DEBIAN_FRONTEND=noninteractive rm -rf /var/lib/apt/lists/*
 #RUN useradd -ms /bin/bash phzapp
 #USER phzapp

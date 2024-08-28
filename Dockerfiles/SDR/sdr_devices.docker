@@ -1,32 +1,28 @@
 # This DockerFile is part of the RFSwift project
-# Install type: subbuild for SDR
+# Install type: SDR devices for SDR Dockers
 # Author(s): Sébastien Dudek (@FlUxIuS) @Penthertz
 # website: penthertz.com
 
-FROM ubuntu:22.04
+ARG BASE_IMAGE=corebuild
+FROM ${BASE_IMAGE}
+
+ARG UHD_BASE=uhd # Use antsdr_uhd with ANTSDR
+ARG RTLSDR_BASE=rtlsdr # rtlsdrv4 for v4 version driver
 
 LABEL "org.container.project"="rfswift"
-LABEL "org.container.author"="Sébastien Dudek (FlUxIuS)"
+LABEL "org.container.author"="Sébastien Dudek"
 
 RUN echo 'APT::Install-Suggests "0";' >> /etc/apt/apt.conf.d/00-docker
 RUN echo 'APT::Install-Recommends "0";' >> /etc/apt/apt.conf.d/00-docker
 
-# Set-up scripts
+RUN apt-fast update
+
 COPY scripts /root/scripts/
 COPY rules /root/rules/
 COPY config /root/config/
 
 WORKDIR /root/scripts/
 RUN chmod +x entrypoint.sh
-
-# Pre-installation tools
-RUN ./entrypoint.sh docker_preinstall
-
-# Installing Terminal harnesses
-RUN ./entrypoint.sh fzf_soft_install && \
-	./entrypoint.sh zsh_tools_install && \
-	./entrypoint.sh arsenal_soft_install
-COPY config/.zshrc /root/.zshrc 
 
 # Installing Devices 
 ## Installing peripherals
@@ -38,18 +34,28 @@ RUN ./entrypoint.sh ad_devices_install && \
 	./entrypoint.sh osmofl2k_devices_install && \
 	./entrypoint.sh xtrx_devices_install && \
 	./entrypoint.sh funcube_devices_install
-#RUN ./entrypoint.sh uhd_devices_install # to install after
-#RUN ./entrypoint.sh antsdr_uhd_devices_install # Disable orignal UHD
-#RUN ./entrypoint.sh nuand_devices_fromsource_install
-#RUN ./entrypoint.sh rtlsdr_devices_install to install later
-#RUN ./entrypoint.sh rtlsdrv4_devices_install # optionnal, remove rtlsdr_devices_install if you are using the v4 version
+
+## Installing peripherals with optional drivers
+RUN ./entrypoint.sh ${UHD_BASE}_devices_install && \
+	./entrypoint.sh ${RTLSDR_BASE}_devices_install
+
+# Installing GNU Radio + some OOT modules
+RUN ./entrypoint.sh gnuradio_soft_install && \ 
+	./entrypoint.sh common_sources_and_sinks && \
+	./entrypoint.sh install_soapy_modules && \
+	./entrypoint.sh install_soapyPlutoSDR_modules
+
+# Installing SA device modules
+RUN ./entrypoint.sh kc908_sa_device && \
+	./entrypoint.sh signalhound_sa_device && \ 
+	./entrypoint.sh harogic_sa_device
 
 # Cleaning and quitting
 WORKDIR /root/
-RUN rm -rf /root/thirdparty && \
-	rm -rf /root/rules/ && \
-	rm -rf /root/config/ && \
-	apt-fast clean
+RUN rm -rf /root/thirdparty
+RUN rm -rf /root/rules/
+RUN rm -rf /root/config/
+RUN apt-fast clean
 RUN DEBIAN_FRONTEND=noninteractive rm -rf /var/lib/apt/lists/*
 #RUN useradd -ms /bin/bash phzapp
 #USER phzapp

@@ -26,7 +26,44 @@ common:
             --cache-to=type=registry,ref=$(CACHE_REPO):cache_corebuild,mode=max \
             --push \
             -t $(REGISTRY_IMAGE):corebuild \
-            -f SDR/corebuild.docker \
+            -f corebuild.docker \
+            ..
+
+sdrsadevices:
+    docker buildx build --platform $(PLATFORM) \
+            --cache-from=type=registry,ref=$(CACHE_REPO):cache_sdrsadevices \
+            --cache-to=type=registry,ref=$(CACHE_REPO):cache_sdrsadevices,mode=max \
+            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild \
+            --build-arg UHD_BASE=uhd \
+            --build-arg RTLSDR_BASE=rtlsdr \
+            --push \
+            -t $(REGISTRY_IMAGE):sdrsa_devices \
+            -f SDR/sdrsa_devices.docker \
+            ..
+
+
+sdrsadevicesantsdr: #common
+        docker buildx build --platform $(PLATFORM) \
+            --cache-from=type=registry,ref=$(CACHE_REPO):cache_sdr_devices_antsdr \
+            --cache-to=type=registry,ref=$(CACHE_REPO):cache_sdr_devices_antsdr,mode=max \
+            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild \
+            --build-arg UHD_BASE=antsdr_uhd \
+            --build-arg RTLSDR_BASE=rtlsdr \
+            --push \
+            -t $(REGISTRY_IMAGE):sdrsa_devices_antsdr \
+            -f SDR/sdrsa_devices.docker \
+            ..
+
+sdrsadevicesrtlsdrv4: #common
+        docker buildx build --platform $(PLATFORM) \
+            --cache-from=type=registry,ref=$(CACHE_REPO):cache_sdrsa_devices_rtlsdrv4 \
+            --cache-to=type=registry,ref=$(CACHE_REPO):cache_sdrsa_devices_rtlsdrv4,mode=max \
+            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild \
+            --build-arg UHD_BASE=uhd \
+            --build-arg RTLSDR_BASE=rtlsdrv4 \
+            --push \
+            -t $(REGISTRY_IMAGE):sdrsa_devices_rtlsdrv4 \
+            -f SDR/sdrsa_devices.docker \
             ..
 
 sdrlight: #common
@@ -38,30 +75,6 @@ sdrlight: #common
             --build-arg RTLSDR_BASE=$(RTLSDR_BASE) \
             --push \
             -t $(REGISTRY_IMAGE):sdr_light \
-            -f SDR/sdr_light.docker \
-            ..
-
-sdrlightantsdr: #common
-		docker buildx build --platform $(PLATFORM) \
-            --cache-from=type=registry,ref=$(CACHE_REPO):cache_sdr_light \
-            --cache-to=type=registry,ref=$(CACHE_REPO):cache_sdr_light,mode=max \
-            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild \
-            --build-arg UHD_BASE=antsdr_uhd \
-            --build-arg RTLSDR_BASE=rtlsdr \
-            --push \
-            -t $(REGISTRY_IMAGE):sdr_light_antsdr \
-            -f SDR/sdr_light.docker \
-            ..
-
-sdrlightrtlsdrv4: #common
-		docker buildx build --platform $(PLATFORM) \
-            --cache-from=type=registry,ref=$(CACHE_REPO):cache_sdr_light \
-            --cache-to=type=registry,ref=$(CACHE_REPO):cache_sdr_light,mode=max \
-            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild \
-            --build-arg UHD_BASE=uhd \
-            --build-arg RTLSDR_BASE=rtlsdrv4 \
-            --push \
-            -t $(REGISTRY_IMAGE):sdr_light_rtlsdrv4 \
             -f SDR/sdr_light.docker \
             ..
 
@@ -180,5 +193,5 @@ deeptempest: #common sdrlight
             -f SDR/sdr_deeptemptest_beta.docker \
             ..
 
-build: common sdrlight sdrfull sdrlightantsdr sdrlightrtlsdrv4 automotive rfid telecom reversing bluetooth wifi
+build: common sdrsadevices sdrlight sdrfull sdrsadevicesantsdr sdrsadevicesrtlsdrv4 automotive rfid telecom reversing bluetooth wifi
 	echo "Done!"
