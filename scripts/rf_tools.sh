@@ -89,6 +89,8 @@ function bdaddr_soft_install() {
 
 # RFID package
 function proxmark3_soft_install() {
+	set +e # TODO: debug that function
+    set +o pipefail
 	goodecho "[+] Installing proxmark3 dependencies"
 	installfromnet "apt-fast install -y --no-install-recommends git ca-certificates build-essential pkg-config libreadline-dev"
 	installfromnet "apt-fast install -y  gcc-arm-none-eabi libnewlib-dev qtbase5-dev libbz2-dev liblz4-dev libbluetooth-dev libpython3-dev libssl-dev libgd-dev"
@@ -99,6 +101,8 @@ function proxmark3_soft_install() {
 	cd proxmark3/
 	make clean && make -j$(nproc)
 	ln -s pm3 /usr/sbin/pm3
+	set -e
+    set -o pipefail
 }
 
 function libnfc_soft_install() {

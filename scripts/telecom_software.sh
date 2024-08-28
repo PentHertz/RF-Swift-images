@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 function yatebts_blade2_soft_install() { # TODO: make few tests with new Nuand libs, if unstable: fetch 3a411c87c2416dc68030d5823d73ebf3f797a145 
 	set +e # TODO: debug that function
     set +o pipefail

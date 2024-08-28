@@ -83,15 +83,31 @@ function harogic_sa_device() {
 	installfromnet "wget https://github.com/PentHertz/rfswift_harogic_install/releases/download/v05.23.17/Install_HTRA_SDK.zip"
     unzip Install_HTRA_SDK.zip
     cd Install_HTRA_SDK/
-    chmod +x install_htraapi_lib.sh
-    sh -c ./install_htraapi_lib.sh
+    cp htraapi/configs/htrausb.conf /etc/
+    cp htraapi/configs/htra-cyusb.rules /etc/udev/rules.d/
+    rm -rf /opt/htraapi/
+    cp -r htraapi/ /opt/
+    version="0.55.45"
+    majornum=${version%%.*}
     case "$arch" in
         x86_64|amd64)
-            sdkarch="x86_64";;
-        aarch64|unknown) # We asume unknwon would be RPi 5 for now...?
-            sdkarch="aarch64";;
+            sdkarch="x86_64"
+            ln -sf /opt/htraapi/lib/x86_64/libhtraapi.so.${version} /opt/htraapi/lib/x86_64/libhtraapi.so.${majornum}
+            ln -sf /opt/htraapi/lib/x86_64/libhtraapi.so.${majornum} /opt/htraapi/lib/x86_64/libhtraapi.so
+            ln -sf /opt/htraapi/lib/x86_64/libusb-1.0.so.0.2.0 /opt/htraapi/lib/x86_64/libusb-1.0.so.0
+            ln -sf /opt/htraapi/lib/x86_64/libusb-1.0.so.0 /opt/htraapi/lib/x86_64/libusb-1.0.so
+            ;;
+        aarch64|unknown) # We assume unknown would be RPi 5 for now...?
+            sdkarch="aarch64"
+            ln -sf /opt/htraapi/lib/aarch64/libhtraapi.so.${version} /opt/htraapi/lib/aarch64/libhtraapi.so.${majornum}
+            ln -sf /opt/htraapi/lib/aarch64/libhtraapi.so.${majornum} /opt/htraapi/lib/aarch64/libhtraapi.so
+            ln -sf /opt/htraapi/lib/aarch64/libusb-1.0.so.0.2.0 /opt/htraapi/lib/aarch64/libusb-1.0.so.0
+            ln -sf /opt/htraapi/lib/aarch64/libusb-1.0.so.0 /opt/htraapi/lib/aarch64/libusb-1.0.so
+            ;;
         *)
-            printf 'Unsupported architecture: "%s"!\n' "$arch" >&2; exit 0;;
+            printf 'Unsupported architecture: "%s"!\n' "$arch" >&2
+            exit 0
+            ;;
     esac
     cd "/opt/htraapi/lib/$sdkarch"
     cp libhtraapi.so* /usr/lib
