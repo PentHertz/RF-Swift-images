@@ -4,6 +4,9 @@
 # website: penthertz.com
 
 ARG BASE_IMAGE=sdr_light
+ARG JMPSTAGE1=extraoot
+ARG JMPSTAGE2=extrasofts
+ARG JMPSTAGE3=mldlsofts
 FROM ${BASE_IMAGE} as extraoot
 
 LABEL "org.container.project"="rfswift"
@@ -67,25 +70,22 @@ RUN ./entrypoint.sh grpdu_utils_grmod_install && \
 	./entrypoint.sh grfhss_utils_grmod_install 
 # depends on 'grpdu_utils_grmod_install' and 'grtiming_utils_grmod_install' and 'grsandia_utils_grmod_install'
 
-
-FROM extraoot as gpumods
+#FROM extraoot as gpumods
 # Installing OpenCL
 ## NVidia drivers
 #RUN apt-fast install -y nvidia-opencl-dev nvidia-modprobe
 ## Installing Intel's OpenCL
 #RUN apt-fast install -y intel-opencl-icd ocl-icd-dev ocl-icd-opencl-dev
-
+#
 # Installing gr-fosphor with OpenCL
 #RUN ./entrypoint.sh grfosphor_grmod_install
 
-FROM extraoot as extrasofts
+FROM ${JMPSTAGE1} as extrasofts
 # Installing CyberEther
 RUN ./entrypoint.sh cyberther_soft_install # Enabe OpenCL for better exp
 
 # Installing softwares
-#RUN ./entrypoint.sh sdrangel_soft_install
-RUN ./entrypoint.sh sdrangel_soft_fromsource_install && \
-	./entrypoint.sh sigdigger_soft_install && \
+RUN	./entrypoint.sh sigdigger_soft_install && \
 	./entrypoint.sh qsstv_soft_install && \
 	./entrypoint.sh ice9_bluetooth_soft_install && \
 	./entrypoint.sh meshtastic_sdr_soft_install && \
@@ -95,7 +95,7 @@ RUN ./entrypoint.sh sdrangel_soft_fromsource_install && \
 	./entrypoint.sh v2verifier_sdr_soft_install && \
 	./entrypoint.sh wavingz_sdr_soft_install
 
-FROM extraoot as mldlsofts
+FROM ${JMPSTAGE2} as mldlsofts
 # Installing extra software
 RUN ./entrypoint.sh ml_and_dl_soft_install
 

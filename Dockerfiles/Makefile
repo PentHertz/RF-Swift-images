@@ -80,6 +80,7 @@ sdrfull1:
             --cache-from=type=registry,ref=$(CACHE_REPO):cache_extraoot \
             --cache-to=type=registry,ref=$(CACHE_REPO):cache_extraoot,mode=max \
             --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light \
+            --build-arg JMPSTAGE2=extraoot \
             --push \
             -t $(REGISTRY_IMAGE):extraoot \
             --target extraoot \
@@ -91,6 +92,7 @@ sdrfull2:
             --cache-from=type=registry,ref=$(CACHE_REPO):cache_extrasofts \
             --cache-to=type=registry,ref=$(CACHE_REPO):cache_extrasofts,mode=max \
             --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light \
+            --build-arg JMPSTAGE2=extraoot \
             --push \
             -t $(REGISTRY_IMAGE):extrasofts \
             --target extrasofts \
@@ -102,6 +104,7 @@ sdrfull3:
             --cache-from=type=registry,ref=$(CACHE_REPO):cache_mldlsofts \
             --cache-to=type=registry,ref=$(CACHE_REPO):cache_mldlsofts,mode=max \
             --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light \
+            --build-arg JMPSTAGE2=extraoot \
             --push \
             -t $(REGISTRY_IMAGE):mldlsofts \
             --target mldlsofts \
