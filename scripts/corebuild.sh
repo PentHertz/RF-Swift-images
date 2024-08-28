@@ -24,7 +24,7 @@ function docker_preinstall() {
 
     # List of all packages
     local packages=(
-        python3 wget curl sudo pulseaudio udev python3-packaging vim
+        wget curl sudo pulseaudio udev python3-packaging vim
         autoconf build-essential cmake python3-pip libsndfile-dev scapy screen tcpdump
         qt5-qmake qtbase5-dev xterm libusb-1.0-0-dev pkg-config git apt-utils
         libusb-1.0-0 libncurses5-dev libtecla1 libtecla-dev dialog procps unzip
@@ -35,13 +35,15 @@ function docker_preinstall() {
         libreadline-dev automake qtdeclarative5-dev libqt5serialport5-dev
         libqt5serialbus5-dev qttools5-dev golang-go python3-matplotlib
         pulseaudio-utils libasound2-dev libavahi-client-dev task-lxqt-desktop
-        language-pack-en tzdata
+        language-pack-en
     )
 
     # Install apt-fast and all other packages with apt-fast
     installfromnet "apt-get -y install apt-fast"
     installfromnet "apt-fast update"
     installfromnet "apt-fast install -y \"${packages[@]}\" --no-install-recommends"
+
+     installfromnet "apt-fast install -y python3 tzdata"
 
     # Configure keyboard and locale settings
     echo apt-fast keyboard-configuration/layout string "English (US)" | debconf-set-selections
