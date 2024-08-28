@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        platform: [linux/amd64, linux/arm64, linux/riscv64]
+        platform: [amd64, arm64, riscv64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -43,7 +43,7 @@ jobs:
     needs: corebuild
     strategy:
       matrix:
-        platform: [linux/amd64, linux/arm64, linux/riscv64]
+        platform: [amd64, arm64, riscv64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -70,7 +70,7 @@ jobs:
     needs: corebuild
     strategy:
       matrix:
-        platform: [linux/amd64, linux/arm64, linux/riscv64]
+        platform: [amd64, arm64, riscv64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -97,7 +97,7 @@ jobs:
     needs: corebuild
     strategy:
       matrix:
-        platform: [linux/amd64, linux/arm64, linux/riscv64]
+        platform: [amd64, arm64, riscv64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -124,7 +124,7 @@ jobs:
     needs: corebuild
     strategy:
       matrix:
-        platform: [linux/amd64, linux/arm64, linux/riscv64]
+        platform: [amd64, arm64, riscv64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -151,7 +151,7 @@ jobs:
     needs: sdr_light
     strategy:
       matrix:
-        platform: [linux/amd64, linux/arm64, linux/riscv64]
+        platform: [amd64, arm64, riscv64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -177,7 +177,7 @@ jobs:
     needs: sdr_light
     strategy:
       matrix:
-        platform: [linux/amd64, linux/arm64, linux/riscv64]
+        platform: [amd64, arm64, riscv64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -202,7 +202,7 @@ jobs:
     needs: sdr_light
     strategy:
       matrix:
-        platform: [linux/amd64, linux/arm64, linux/riscv64]
+        platform: [amd64, arm64, riscv64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -228,7 +228,7 @@ jobs:
     needs: sdr_light
     strategy:
       matrix:
-        platform: [linux/amd64, linux/arm64, linux/riscv64]
+        platform: [amd64, arm64, riscv64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -255,7 +255,7 @@ jobs:
     needs: sdr_light
     strategy:
       matrix:
-        platform: [linux/amd64, linux/arm64, linux/riscv64]
+        platform: [amd64, arm64, riscv64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -282,7 +282,7 @@ jobs:
     needs: sdr_light
     strategy:
       matrix:
-        platform: [linux/amd64, linux/arm64, linux/riscv64]
+        platform: [amd64, arm64, riscv64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -309,7 +309,7 @@ jobs:
     needs: corebuild
     strategy:
       matrix:
-        platform: [linux/amd64, linux/arm64, linux/riscv64]
+        platform: [amd64, arm64, riscv64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -336,7 +336,7 @@ jobs:
     needs: corebuild
     strategy:
       matrix:
-        platform: [linux/amd64, linux/arm64, linux/riscv64]
+        platform: [amd64, arm64, riscv64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -363,7 +363,7 @@ jobs:
     needs: corebuild
     strategy:
       matrix:
-        platform: [linux/amd64, linux/arm64, linux/riscv64]
+        platform: [amd64, arm64, riscv64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
