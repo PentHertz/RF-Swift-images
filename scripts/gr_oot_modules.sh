@@ -112,7 +112,7 @@ function deeptempest_grmod_install() {
 }
 
 function grfhss_utils_grmod_install() {
-    grclone_and_build "https://github.com/sandialabs/gr-fhss_utils.git" "" "grfhss_utils_grmod_install"
+    grclone_and_build "https://github.com/FlUxIuS/gr-fhss_utils.git" "" "grfhss_utils_grmod_install"
 }
 
 function grtiming_utils_grmod_install() {
