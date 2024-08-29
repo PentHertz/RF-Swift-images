@@ -205,7 +205,6 @@ function cyberther_soft_install() {
 	ninja install
 }
 
-
 function gqrx_soft_install () {
 	goodecho "[+] Installing GQRX"
 	installfromnet "apt-fast install -y gqrx-sdr"

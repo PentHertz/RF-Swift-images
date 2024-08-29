@@ -225,7 +225,7 @@ jobs:
     needs: sdrsa_devices
     strategy:
       matrix:
-        platform: [amd64, arm64, riscv64]
+        platform: [amd64, arm64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
