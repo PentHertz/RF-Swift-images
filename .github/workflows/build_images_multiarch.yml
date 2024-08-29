@@ -1,4 +1,4 @@
-name: SDR full - Multi-Platform Docker Build with Caching
+name: Full build - Multi-Platform Docker Build with Caching
 
 env:
   REGISTRY_IMAGE: penthertz/rfswiftdevghm
@@ -222,7 +222,7 @@ jobs:
 
   telecom:
     runs-on: ubuntu-latest
-    needs: sdr_light
+    needs: sdrsa_devices
     strategy:
       matrix:
         platform: [amd64, arm64, riscv64]
@@ -248,7 +248,7 @@ jobs:
 
   wifi:
     runs-on: ubuntu-latest
-    needs: sdr_light
+    needs: sdrsa_devices
     strategy:
       matrix:
         platform: [amd64, arm64, riscv64]
@@ -274,7 +274,7 @@ jobs:
 
   bluetooth:
     runs-on: ubuntu-latest
-    needs: sdr_light
+    needs: sdrsa_devices
     strategy:
       matrix:
         platform: [amd64, arm64, riscv64]

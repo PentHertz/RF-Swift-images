@@ -135,7 +135,7 @@ wifi:
 	docker buildx build --platform $(PLATFORM) \
             --cache-from=type=registry,ref=$(CACHE_REPO):cache_wifi \
             --cache-to=type=registry,ref=$(CACHE_REPO):cache_wifi,mode=max \
-            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light \
+            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices \
             --push \
             -t $(REGISTRY_IMAGE):wifi \
             -f wifi.docker \
@@ -145,7 +145,7 @@ bluetooth:
 	docker buildx build --platform $(PLATFORM) \
             --cache-from=type=registry,ref=$(CACHE_REPO):cache_bluetooth \
             --cache-to=type=registry,ref=$(CACHE_REPO):cache_bluetooth,mode=max \
-            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light \
+            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices \
             --push \
             -t $(REGISTRY_IMAGE):bluetooth \
             -f bluetooth.docker \
@@ -175,7 +175,7 @@ telecom:
 	docker buildx build --platform $(PLATFORM) \
             --cache-from=type=registry,ref=$(CACHE_REPO):cache_telecom \
             --cache-to=type=registry,ref=$(CACHE_REPO):cache_telecom,mode=max \
-            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light \
+            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices \
             --push \
             -t $(REGISTRY_IMAGE):telecom \
             -f telecom.docker \
@@ -191,5 +191,5 @@ deeptempest:
             -f SDR/sdr_deeptemptest_beta.docker \
             ..
 
-build: common sdrsadevices sdrlight sdrfull sdrsadevicesantsdr sdrsadevicesrtlsdrv4 automotive rfid telecom reversing bluetooth wifi
+build: common sdrsadevices sdrlight sdrfull sdrsadevicesantsdr sdrsadevicesrtlsdrv4 rfid telecom bluetooth wifi automotive reversing
 	echo "Done!"

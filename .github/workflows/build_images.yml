@@ -204,7 +204,7 @@ jobs:
 
   telecom:
     runs-on: ubuntu-latest
-    needs: sdr_light
+    needs: sdrsa_devices
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -228,7 +228,7 @@ jobs:
 
   wifi:
     runs-on: ubuntu-latest
-    needs: sdr_light
+    needs: sdrsa_devices
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -252,7 +252,7 @@ jobs:
 
   bluetooth:
     runs-on: ubuntu-latest
-    needs: sdr_light
+    needs: sdrsa_devices
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
