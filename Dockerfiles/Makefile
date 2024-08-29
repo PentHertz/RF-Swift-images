@@ -77,37 +77,58 @@ sdrlight:
 
 sdrfull1:
 	docker buildx build --platform $(PLATFORM) \
-            --cache-from=type=registry,ref=$(CACHE_REPO):cache_extraoot \
-            --cache-to=type=registry,ref=$(CACHE_REPO):cache_extraoot,mode=max \
+            --cache-from=type=registry,ref=$(CACHE_REPO):cache_extraoot1 \
+            --cache-to=type=registry,ref=$(CACHE_REPO):cache_extraoot1,mode=max \
             --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light \
             --build-arg JMPSTAGE1=extraoot \
             --build-arg JMPSTAGE2=extraoot \
+            --build-arg JMPSTAGE3=extraoot \
+            --build-arg JMPSTAGE4=extraoot \
             --push \
-            -t $(REGISTRY_IMAGE):extraoot \
-            --target extraoot \
+            -t $(REGISTRY_IMAGE):extraoot1 \
+            --target extraoot1 \
             -f SDR/sdr_full.docker \
             ..
 
 sdrfull2:
+	docker buildx build --platform $(PLATFORM) \
+            --cache-from=type=registry,ref=$(CACHE_REPO):cache_extraoot2 \
+            --cache-to=type=registry,ref=$(CACHE_REPO):cache_extraoot2,mode=max \
+            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light \
+            --build-arg JMPSTAGE1=extraoot \
+            --build-arg JMPSTAGE2=extraoot \
+            --build-arg JMPSTAGE3=extraoot \
+            --build-arg JMPSTAGE4=extraoot \
+            --push \
+            -t $(REGISTRY_IMAGE):extraoot2 \
+            --target extraoot2 \
+            -f SDR/sdr_full.docker \
+            ..
+
+sdrfull3:
 	docker buildx build --platform $(PLATFORM) \
             --cache-from=type=registry,ref=$(CACHE_REPO):cache_extrasofts \
             --cache-to=type=registry,ref=$(CACHE_REPO):cache_extrasofts,mode=max \
             --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light \
             --build-arg JMPSTAGE1=extraoot \
             --build-arg JMPSTAGE2=extraoot \
+            --build-arg JMPSTAGE3=extraoot \
+            --build-arg JMPSTAGE4=extraoot \
             --push \
             -t $(REGISTRY_IMAGE):extrasofts \
             --target extrasofts \
             -f SDR/sdr_full.docker \
             ..
 
-sdrfull3:
+sdrfull4:
 	docker buildx build --platform $(PLATFORM) \
             --cache-from=type=registry,ref=$(CACHE_REPO):cache_mldlsofts \
             --cache-to=type=registry,ref=$(CACHE_REPO):cache_mldlsofts,mode=max \
             --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light \
             --build-arg JMPSTAGE1=extraoot \
             --build-arg JMPSTAGE2=extraoot \
+            --build-arg JMPSTAGE3=extraoot \
+            --build-arg JMPSTAGE4=extraoot \
             --push \
             -t $(REGISTRY_IMAGE):mldlsofts \
             --target mldlsofts \

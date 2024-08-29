@@ -4,10 +4,11 @@
 # website: penthertz.com
 
 ARG BASE_IMAGE=sdr_light
-ARG JMPSTAGE1=extraoot
-ARG JMPSTAGE2=extrasofts
-ARG JMPSTAGE3=mldlsofts
-FROM ${BASE_IMAGE} as extraoot
+ARG JMPSTAGE1=begin
+ARG JMPSTAGE2=extraoot1
+ARG JMPSTAGE3=extraoot2
+ARG JMPSTAGE4=extrasofts
+FROM ${BASE_IMAGE} as begin
 
 LABEL "org.container.project"="rfswift"
 LABEL "org.container.author"="Sébastien Dudek (FlUxIuS)"
@@ -24,6 +25,7 @@ COPY config /root/config/
 WORKDIR /root/scripts/
 RUN chmod +x entrypoint.sh
 
+FROM ${JMPSTAGE1} as extraoot1
 # Installing GNU Radio + extra OOT modules
 RUN ./entrypoint.sh grgsm_grmod_install && \
 	./entrypoint.sh grlora_grmod_install && \
@@ -45,6 +47,7 @@ RUN ./entrypoint.sh grgsm_grmod_install && \
 	./entrypoint.sh grieee802154_grmod_install  # depends on grfoo_grmod_install
 RUN ./entrypoint.sh gruaslink_grmod_install
 
+FROM ${JMPSTAGE2} as extraoot2
 RUN ./entrypoint.sh grrds_grmod_install && \
 	./entrypoint.sh grdroineid_grmod_install && \
 	./entrypoint.sh grsatellites_grmod_install && \
@@ -70,7 +73,7 @@ RUN ./entrypoint.sh grpdu_utils_grmod_install && \
 	./entrypoint.sh grfhss_utils_grmod_install 
 # depends on 'grpdu_utils_grmod_install' and 'grtiming_utils_grmod_install' and 'grsandia_utils_grmod_install'
 
-#FROM extraoot as gpumods
+#FROM extraoot2 as gpumods
 # Installing OpenCL
 ## NVidia drivers
 #RUN apt-fast install -y nvidia-opencl-dev nvidia-modprobe
@@ -80,22 +83,22 @@ RUN ./entrypoint.sh grpdu_utils_grmod_install && \
 # Installing gr-fosphor with OpenCL
 #RUN ./entrypoint.sh grfosphor_grmod_install
 
-FROM ${JMPSTAGE1} as extrasofts
+FROM ${JMPSTAGE3} as extrasofts
 # Installing CyberEther
 RUN ./entrypoint.sh cyberther_soft_install # Enabe OpenCL for better exp
 
 # Installing softwares
 RUN	./entrypoint.sh sigdigger_soft_install && \
 	./entrypoint.sh qsstv_soft_install && \
+	./entrypoint.sh nfclaboratory_soft_install && \
 	./entrypoint.sh ice9_bluetooth_soft_install && \
 	./entrypoint.sh meshtastic_sdr_soft_install && \
 	./entrypoint.sh gps_sdr_sim_soft_install && \
-	./entrypoint.sh nfclaboratory_soft_install && \
 	./entrypoint.sh gpredict_sdr_soft_install && \
 	./entrypoint.sh v2verifier_sdr_soft_install && \
 	./entrypoint.sh wavingz_sdr_soft_install
 
-FROM ${JMPSTAGE2} as mldlsofts
+FROM ${JMPSTAGE4} as mldlsofts
 # Installing extra software
 RUN ./entrypoint.sh ml_and_dl_soft_install
 
