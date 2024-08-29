@@ -71,6 +71,7 @@ function openbts_uhd_soft_install() {
 	goodecho "[+] Cloninig OpenBTS"
 	installfromnet "git clone https://github.com/PentHertz/OpenBTS.git"
 	cd OpenBTS
+	./tools/install_liba53.sh
 	./preinstall.sh
 	./autogen.sh
 	./configure --with-uhd
