@@ -65,13 +65,18 @@ function yatebts_blade2_soft_install_toreview() { # TODO: make few tests with ne
 }
 
 function openbts_uhd_soft_install() {
+	# Check architecture
+    ARCH=$(uname -m)
+    if [[ "$ARCH" != "x86_64" ]]; then
+        criticalecho-noexit "[-] Unsupported architecture: $ARCH"
+        exit 0
+    fi
 	goodecho "[+] Feching OpenBTS from penthertz"
 	[ -d /telecom/2G ] || mkdir -p /telecom/2G
 	cd /telecom/2G
 	goodecho "[+] Cloninig OpenBTS"
 	installfromnet "git clone https://github.com/PentHertz/OpenBTS.git"
 	cd OpenBTS
-	./tools/install_liba53.sh
 	./preinstall.sh
 	./autogen.sh
 	./configure --with-uhd
