@@ -170,7 +170,7 @@ function sigdigger_soft_install () {
 	[ -d /rftools/sdr ] || mkdir -p /rftools/sdr
 	cd /rftools/sdr
 	installfromnet "wget https://actinid.org/blsd"
-	chmod +x blsd \ 
+	chmod +x blsd
 	./blsd
 	cd /root
 	ln -s /rftools/sdr/blsd-dir/SigDigger/SigDigger /usr/sbin/SigDigger
