@@ -37,6 +37,12 @@ function keystone_soft_install() {
 }
 
 function radare2_soft_install() {
+	# Check architecture
+    ARCH=$(uname -m)
+    if [[ "$ARCH" != "x86_64" ]]; then
+        criticalecho-noexit "[-] Unsupported architecture: $ARCH"
+        exit 0
+    fi
 	goodecho "[+] Installing Radare"
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
 	cd /root/thirdparty
