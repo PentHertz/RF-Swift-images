@@ -33,8 +33,8 @@ function sdrangel_soft_fromsource_install() {
 	# Check architecture
     ARCH=$(uname -m)
     if [[ "$ARCH" != "x86_64" && "$ARCH" != "aarch64" ]]; then
-        echo "[-] Unsupported architecture: $ARCH"
-        exit 1
+        criticalecho-noexit "[-] Unsupported architecture: $ARCH"
+        exit 0
     fi
     
 	goodecho "[+] Installing dependencies"
