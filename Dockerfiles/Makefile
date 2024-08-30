@@ -21,8 +21,8 @@ endif
 # Common build and push function
 define build_and_push
     @docker buildx build --platform $(PLATFORM) \
-        --cache-from=type=registry,ref=$(CACHE_REPO):cache_$(1)$(ARCH) \
-        --cache-to=type=registry,ref=$(CACHE_REPO):cache_$(1)$(ARCH),mode=max \
+        --cache-from=type=registry,ref=$(CACHE_REPO):cache_$(1)_$(ARCH) \
+        --cache-to=type=registry,ref=$(CACHE_REPO):cache_$(1)_$(ARCH),mode=max \
         $(2) \
         --push \
         -t $(REGISTRY_IMAGE):$(1)_$(ARCH) \
