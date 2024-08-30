@@ -119,6 +119,8 @@ function openbts_umts_soft_install_call() {
 }
 
 function srsran4G_5GNSA_soft_install() {
+	set +e # TODO: debug that function
+    set +o pipefail
 	goodecho "[+] Installing srsRAN_4G dependencies"
 	installfromnet "apt-fast -y install build-essential cmake libfftw3-dev libmbedtls-dev libboost-program-options-dev libconfig++-dev libsctp-dev"
 	goodecho "[+] Feching srsRAN_4G"
@@ -132,9 +134,13 @@ function srsran4G_5GNSA_soft_install() {
 	cmake ../
 	make -j$(nproc)
 	#make test
+	set -e
+    set -o pipefail
 }
 
 function srsran5GSA_soft_install() {
+	set +e # TODO: debug that function
+    set +o pipefail
 	goodecho "[+] Installing srsran_project dependencies"
 	installfromnet "apt-fast -y install cmake make gcc g++ pkg-config libfftw3-dev libmbedtls-dev libsctp-dev libyaml-cpp-dev libgtest-dev"
 	goodecho "[+] Feching srsran_project"
@@ -148,6 +154,8 @@ function srsran5GSA_soft_install() {
 	cmake ../
 	make -j $(nproc)
 	#make test -j $(nproc)
+	set -e
+    set -o pipefail
 }
 
 function Open5GS_soft_install() {
