@@ -172,7 +172,7 @@ jobs:
       - name: Build and push sdr_light image with caching
         run: |
           cd Dockerfiles
-          STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=antsdr_uhd RTLSDR_BASE=rtlsdr make sdrsadevices
+          STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=antsdr_uhd RTLSDR_BASE=rtlsdr make sdrsadevicesantsdr
 
   sdrsa_devices_antsdr-manifest:
     runs-on: ubuntu-latest
@@ -240,7 +240,7 @@ jobs:
       - name: Build and push sdr_light image with caching
         run: |
           cd Dockerfiles
-          STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=uhd RTLSDR_BASE=rtlsdrv4 make sdrsadevices
+          STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=uhd RTLSDR_BASE=rtlsdrv4 make sdrsadevicesrtlsdrv4
 
   sdrsa_devices_rtlsdrv4-manifest:
     runs-on: ubuntu-latest

@@ -83,7 +83,7 @@ jobs:
         run: |
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} \
-          REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=antsdr_uhd RTLSDR_BASE=rtlsdr make sdrsadevices 
+          REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=antsdr_uhd RTLSDR_BASE=rtlsdr make sdrsadevicesantsdr 
 
   sdr_devices_rtlsdrv4:
     runs-on: ubuntu-latest
@@ -107,7 +107,7 @@ jobs:
         run: |
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} \
-          REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=uhd RTLSDR_BASE=rtlsdrv4 make sdrsadevices 
+          REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=uhd RTLSDR_BASE=rtlsdrv4 make sdrsadevicesrtlsdrv4 
 
   sdr_light:
     runs-on: ubuntu-latest
