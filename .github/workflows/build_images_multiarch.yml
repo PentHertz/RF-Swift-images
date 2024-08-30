@@ -36,7 +36,7 @@ jobs:
       - name: Build and push corebuild image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make common
+          ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make common
 
   corebuild-manifest:
     runs-on: ubuntu-latest
@@ -104,7 +104,7 @@ jobs:
       - name: Build and push sdr_light image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=uhd RTLSDR_BASE=rtlsdr make sdrsadevices
+          ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=uhd RTLSDR_BASE=rtlsdr make sdrsadevices
 
   sdrsa_devices-manifest:
     runs-on: ubuntu-latest
@@ -172,7 +172,7 @@ jobs:
       - name: Build and push sdr_light image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=antsdr_uhd RTLSDR_BASE=rtlsdr make sdrsadevices
+          ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=antsdr_uhd RTLSDR_BASE=rtlsdr make sdrsadevices
 
   sdrsa_devices_antsdr-manifest:
     runs-on: ubuntu-latest
@@ -240,7 +240,7 @@ jobs:
       - name: Build and push sdr_light image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=uhd RTLSDR_BASE=rtlsdrv4 make sdrsadevices
+          ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=uhd RTLSDR_BASE=rtlsdrv4 make sdrsadevices
 
   sdrsa_devices_rtlsdrv4-manifest:
     runs-on: ubuntu-latest
@@ -309,7 +309,7 @@ jobs:
       - name: Build and push sdr_light image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrlight
+          ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrlight
 
   sdr_light-manifest:
     runs-on: ubuntu-latest
@@ -377,7 +377,7 @@ jobs:
       - name: Build and push sdr_full extraoot1 image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrfull1
+          ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrfull1
 
   extraoot2:
     runs-on: ubuntu-latest
@@ -403,7 +403,7 @@ jobs:
       - name: Build and push sdr_full extraoot2 image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrfull2
+          ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrfull2
 
   extrasoft:
     runs-on: ubuntu-latest
@@ -429,7 +429,7 @@ jobs:
       - name: Build and push sdr_full extrasoft image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrfull3
+          ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrfull3
 
   mldlsofts:
     runs-on: ubuntu-latest
@@ -455,7 +455,7 @@ jobs:
       - name: Build and push sdr_full mldlsofts image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrfull4
+          ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrfull4
 
   telecom:
     runs-on: ubuntu-latest
@@ -481,7 +481,7 @@ jobs:
       - name: Build and push telecom image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make telecom
+          ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make telecom
 
   telecom-manifest:
     runs-on: ubuntu-latest
@@ -546,7 +546,7 @@ jobs:
       - name: Build and push wifi image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make wifi
+          ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make wifi
 
   wifi-manifest:
     runs-on: ubuntu-latest
@@ -614,7 +614,7 @@ jobs:
       - name: Build and push bluetooth image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make bluetooth
+          ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make bluetooth
 
   bluetooth-manifest:
     runs-on: ubuntu-latest
@@ -682,7 +682,7 @@ jobs:
       - name: Build and push rfid image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make rfid
+          ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make rfid
 
   rfid-manifest:
     runs-on: ubuntu-latest
@@ -750,7 +750,7 @@ jobs:
       - name: Build and push automotive image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make automotive
+          ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make automotive
 
   automotive-manifest:
     runs-on: ubuntu-latest
@@ -816,7 +816,7 @@ jobs:
       - name: Build and push reversing image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make reversing
+          ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make reversing
 
   reversing-manifest:
     runs-on: ubuntu-latest
