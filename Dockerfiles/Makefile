@@ -2,6 +2,7 @@
 ARCH ?= amd64
 CACHE_REPO ?= penthertz/rfswiftdev
 REGISTRY_IMAGE ?= penthertz/rfswiftdev
+CACHE_TYPE ?= local  # Set to "registry" to use registry-based caching
 
 # Drivers
 UHD_BASE ?= uhd
@@ -18,8 +19,8 @@ else
     $(error Unsupported architecture: $(ARCH). Supported values are amd64, arm64, riscv64)
 endif
 
-# Common build and push function
-define build_and_push
+# Function to build and push using registry cache
+define build_and_push_registry
     @docker buildx build --platform $(PLATFORM) \
         --cache-from=type=registry,ref=$(CACHE_REPO):cache_$(1)_$(ARCH) \
         --cache-to=type=registry,ref=$(CACHE_REPO):cache_$(1)_$(ARCH),mode=max \
@@ -28,6 +29,27 @@ define build_and_push
         -t $(REGISTRY_IMAGE):$(1)_$(ARCH) \
         -f $(3) \
         ..;
+endef
+
+# Function to build and push using local cache
+define build_and_push_local
+    @docker buildx build --platform $(PLATFORM) \
+        --cache-from=type=local,src=$(CURDIR)/cache/cache_$(1)_$(ARCH) \
+        --cache-to=type=local,dest=$(CURDIR)/cache/cache_$(1)_$(ARCH),mode=max \
+        $(2) \
+        --push \
+        -t $(REGISTRY_IMAGE):$(1)_$(ARCH) \
+        -f $(3) \
+        ..;
+endef
+
+# Function to select the caching strategy based on CACHE_TYPE
+define build_and_push
+    ifeq ($(CACHE_TYPE),registry)
+        $(call build_and_push_registry,$(1),$(2),$(3))
+    else
+        $(call build_and_push_local,$(1),$(2),$(3))
+    endif
 endef
 
 # Specific build targets using the common function
@@ -80,7 +102,7 @@ telecom:
 	$(call build_and_push,telecom,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices_$(ARCH),$(CURDIR)/telecom.docker)
 
 deeptempest:
-	$(call build_and_push,sdr_deeptemptest_beta,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light_$(ARCH),$$(CURDIR)/SDR/sdr_deeptemptest_beta.docker)
+	$(call build_and_push,sdr_deeptemptest_beta,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light_$(ARCH),$(CURDIR)/SDR/sdr_deeptemptest_beta.docker)
 
 build: common sdrsadevices sdrlight sdrfull sdrsadevicesantsdr sdrsadevicesrtlsdrv4 rfid telecom bluetooth wifi automotive reversing
 	@echo "Done!"

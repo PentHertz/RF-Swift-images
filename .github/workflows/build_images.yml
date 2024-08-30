@@ -35,7 +35,7 @@ jobs:
       - name: Build and push corebuild image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make common
+          CACHE_TYPE=registry ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make common
 
   sdrsa_devices:
     runs-on: ubuntu-latest
@@ -58,7 +58,7 @@ jobs:
       - name: Build and push sdrsa_devices image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} \
+          CACHE_TYPE=registry ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} \
           REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=uhd RTLSDR_BASE=rtlsdr make sdrsadevices 
 
   sdrsa_devices_antsdr:
@@ -82,7 +82,7 @@ jobs:
       - name: Build and push sdrsa_devices_antsdr image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} \
+          CACHE_TYPE=registry ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} \
           REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=antsdr_uhd RTLSDR_BASE=rtlsdr make sdrsadevices 
 
   sdr_devices_rtlsdrv4:
@@ -106,7 +106,7 @@ jobs:
       - name: Build and push sdr_light_rtlsdrv4 image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} \
+          CACHE_TYPE=registry ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} \
           REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=uhd RTLSDR_BASE=rtlsdrv4 make sdrsadevices 
 
   sdr_light:
@@ -130,7 +130,7 @@ jobs:
       - name: Build and push sdr_light image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} \
+          CACHE_TYPE=registry ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} \
           REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrlight 
 
   extraoot1:
@@ -154,7 +154,7 @@ jobs:
       - name: Build and push sdr_full image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrfull1
+          CACHE_TYPE=registry ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrfull1
 
   extraoot2:
     runs-on: ubuntu-latest
@@ -177,7 +177,7 @@ jobs:
       - name: Build and push sdr_full image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrfull2
+          CACHE_TYPE=registry ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrfull2
 
   extrasoft:
     runs-on: ubuntu-latest
@@ -200,7 +200,7 @@ jobs:
       - name: Build and push sdr_full image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrfull3
+          CACHE_TYPE=registry ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrfull3
 
   mldlsofts:
     runs-on: ubuntu-latest
@@ -223,7 +223,7 @@ jobs:
       - name: Build and push sdr_full image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrfull4
+          CACHE_TYPE=registry ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrfull4
 
   telecom:
     runs-on: ubuntu-latest
@@ -246,7 +246,7 @@ jobs:
       - name: Build and push sdr_full image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} \
+          CACHE_TYPE=registry ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} \
           REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make telecom
 
   wifi:
@@ -270,7 +270,7 @@ jobs:
       - name: Build and push wifi image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} \
+          CACHE_TYPE=registry ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} \
           REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make wifi
 
   bluetooth:
@@ -296,7 +296,7 @@ jobs:
           AWS_EC2_METADATA_DISABLED: true
         run: |
           cd Dockerfiles
-          ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} \
+          CACHE_TYPE=registry ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} \
           REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make bluetooth
 
   rfid:
@@ -320,7 +320,7 @@ jobs:
       - name: Build and push rfid image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} \
+          CACHE_TYPE=registry ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} \
           REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make rfid
 
   automotive:
@@ -344,7 +344,7 @@ jobs:
       - name: Build and push automotive image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} \
+          CACHE_TYPE=registry ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} \
           REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make automotive
 
   reversing:
@@ -368,5 +368,5 @@ jobs:
       - name: Build and push reversing image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} \
+          CACHE_TYPE=registry ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} \
           REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make reversing
