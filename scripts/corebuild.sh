@@ -37,7 +37,7 @@ function docker_preinstall() {
         libreadline-dev automake qtdeclarative5-dev libqt5serialport5-dev
         libqt5serialbus5-dev qttools5-dev golang-go python3-matplotlib
         pulseaudio-utils libasound2-dev libavahi-client-dev task-lxqt-desktop
-        language-pack-en
+        language-pack-en libqwt-qt5-dev python3-click-plugins
     )
 
     # Install apt-fast and all other packages with apt-fast
