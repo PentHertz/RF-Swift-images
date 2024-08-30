@@ -76,9 +76,9 @@ jobs:
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@sha256:$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@sha256:$arch_digest_arm64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@sha256:$arch_digest_riscv64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64 \
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   sdrsa_devices:
     runs-on: ubuntu-latest
@@ -144,9 +144,9 @@ jobs:
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@sha256:$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@sha256:$arch_digest_arm64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@sha256:$arch_digest_riscv64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64 \
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   sdrsa_devices_antsdr:
     runs-on: ubuntu-latest
@@ -212,9 +212,9 @@ jobs:
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@sha256:$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@sha256:$arch_digest_arm64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@sha256:$arch_digest_riscv64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64 \
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   sdrsa_devices_rtlsdrv4:
     runs-on: ubuntu-latest
@@ -280,9 +280,9 @@ jobs:
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@sha256:$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@sha256:$arch_digest_arm64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@sha256:$arch_digest_riscv64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64 \
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
 
   sdr_light:
@@ -349,9 +349,9 @@ jobs:
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@sha256:$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@sha256:$arch_digest_arm64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@sha256:$arch_digest_riscv64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64 \
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   extraoot1:
     runs-on: ubuntu-latest
@@ -519,8 +519,8 @@ jobs:
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@sha256:$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@sha256:$arch_digest_arm64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
 
   wifi:
     runs-on: ubuntu-latest
@@ -586,9 +586,9 @@ jobs:
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@sha256:$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@sha256:$arch_digest_arm64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@sha256:$arch_digest_riscv64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64 \
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   bluetooth:
     runs-on: ubuntu-latest
@@ -654,9 +654,9 @@ jobs:
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@sha256:$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@sha256:$arch_digest_arm64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@sha256:$arch_digest_riscv64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64 \
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   rfid:
     runs-on: ubuntu-latest
@@ -722,9 +722,9 @@ jobs:
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@sha256:$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@sha256:$arch_digest_arm64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@sha256:$arch_digest_riscv64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64 \
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   automotive:
     runs-on: ubuntu-latest
@@ -789,8 +789,8 @@ jobs:
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@sha256:$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@sha256:$arch_digest_arm64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
 
   reversing:
     runs-on: ubuntu-latest
@@ -855,5 +855,5 @@ jobs:
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@sha256:$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@sha256:$arch_digest_arm64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
