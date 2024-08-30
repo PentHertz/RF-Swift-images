@@ -25,25 +25,9 @@ define build_and_push
         --cache-to=type=registry,ref=$(CACHE_REPO):cache_$(1)$(ARCH),mode=max \
         $(2) \
         --push \
-        -t $(REGISTRY_IMAGE):$(1) \
+        -t $(REGISTRY_IMAGE):$(1)_$(ARCH) \
         -f $(3) \
         ..; \
-    output=$$(docker buildx imagetools inspect $(REGISTRY_IMAGE):$(1)); \
-    if [ -z "$$output" ]; then \
-        echo "Failed to retrieve image details. Please check the image name and tag."; \
-        exit 1; \
-    fi; \
-    echo "Output from imagetools inspect:"; \
-    echo "$$output"; \
-    arch_digest=$$(echo "$$output" | grep -A 2 "linux/$(ARCH)" | grep "sha256:" | head -n 1 | awk -F 'sha256:' '{print $$2}' | awk '{print $$1}'); \
-    if [ -z "$$arch_digest" ]; then \
-        echo "Failed to extract architecture digest. Please check the awk command."; \
-        exit 1; \
-    fi; \
-    echo "Extracted architecture digest: $$arch_digest"; \
-    docker buildx imagetools create \
-        --tag $(REGISTRY_IMAGE):$(1) \
-        $(REGISTRY_IMAGE)@$$arch_digest
 endef
 
 # Specific build targets using the common function

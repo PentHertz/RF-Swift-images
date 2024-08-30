@@ -36,7 +36,49 @@ jobs:
       - name: Build and push corebuild image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }}${{ matrix.platform }} make common
+          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make common
+
+  corebuild-manifest:
+    runs-on: ubuntu-latest
+    needs: corebuild
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+          version: latest
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Create and push multi-arch manifest for corebuild
+        run: |
+          tagname=corebuild
+
+          # Inspect images for different architectures
+          output_amd64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_amd64)
+          output_arm64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_arm64)
+          output_riscv64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_riscv64)
+
+          # Extract the digests
+          arch_digest_amd64=$(echo "$output_amd64" | grep "Digest:" | awk '{print $2}')
+          arch_digest_arm64=$(echo "$output_arm64" | grep "Digest:" | awk '{print $2}')
+          arch_digest_riscv64=$(echo "$output_riscv64" | grep "Digest:" | awk '{print $2}')
+
+          # Debug: Print the extracted digests
+          echo "amd64 digest: $arch_digest_amd64"
+          echo "arm64 digest: $arch_digest_arm64"
+          echo "riscv64 digest: $arch_digest_riscv64"
+
+          # Create and push the multi-arch manifest
+          docker buildx imagetools create \
+            --tag ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:$tagname \
+            ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:${tagname}_amd64@sha256:$arch_digest_amd64 \
+            ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:${tagname}_arm64@sha256:$arch_digest_arm64 \
+            ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:${tagname}_riscv64@sha256:$arch_digest_riscv64
 
   sdrsa_devices:
     runs-on: ubuntu-latest
@@ -62,7 +104,49 @@ jobs:
       - name: Build and push sdr_light image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }}${{ matrix.platform }} UHD_BASE=uhd RTLSDR_BASE=rtlsdr make sdrsadevices
+          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=uhd RTLSDR_BASE=rtlsdr make sdrsadevices
+
+  sdrsa_devices-manifest:
+    runs-on: ubuntu-latest
+    needs: sdrsa_devices
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+          version: latest
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Create and push multi-arch manifest for sdrsa_devices
+        run: |
+          tagname=sdrsa_devices
+
+          # Inspect images for different architectures
+          output_amd64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_amd64)
+          output_arm64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_arm64)
+          output_riscv64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_riscv64)
+
+          # Extract the digests
+          arch_digest_amd64=$(echo "$output_amd64" | grep "Digest:" | awk '{print $2}')
+          arch_digest_arm64=$(echo "$output_arm64" | grep "Digest:" | awk '{print $2}')
+          arch_digest_riscv64=$(echo "$output_riscv64" | grep "Digest:" | awk '{print $2}')
+
+          # Debug: Print the extracted digests
+          echo "amd64 digest: $arch_digest_amd64"
+          echo "arm64 digest: $arch_digest_arm64"
+          echo "riscv64 digest: $arch_digest_riscv64"
+
+          # Create and push the multi-arch manifest
+          docker buildx imagetools create \
+            --tag ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:$tagname \
+            ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:${tagname}_amd64@sha256:$arch_digest_amd64 \
+            ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:${tagname}_arm64@sha256:$arch_digest_arm64 \
+            ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:${tagname}_riscv64@sha256:$arch_digest_riscv64
 
   sdrsa_devices_antsdr:
     runs-on: ubuntu-latest
@@ -88,7 +172,49 @@ jobs:
       - name: Build and push sdr_light image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }}${{ matrix.platform }} UHD_BASE=antsdr_uhd RTLSDR_BASE=rtlsdr make sdrsadevices
+          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=antsdr_uhd RTLSDR_BASE=rtlsdr make sdrsadevices
+
+  sdrsa_devices_antsdr-manifest:
+    runs-on: ubuntu-latest
+    needs: sdrsa_devices_antsdr
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+          version: latest
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Create and push multi-arch manifest for sdrsa_devices_antsdr
+        run: |
+          tagname=sdrsa_devices_antsdr
+
+          # Inspect images for different architectures
+          output_amd64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_amd64)
+          output_arm64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_arm64)
+          output_riscv64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_riscv64)
+
+          # Extract the digests
+          arch_digest_amd64=$(echo "$output_amd64" | grep "Digest:" | awk '{print $2}')
+          arch_digest_arm64=$(echo "$output_arm64" | grep "Digest:" | awk '{print $2}')
+          arch_digest_riscv64=$(echo "$output_riscv64" | grep "Digest:" | awk '{print $2}')
+
+          # Debug: Print the extracted digests
+          echo "amd64 digest: $arch_digest_amd64"
+          echo "arm64 digest: $arch_digest_arm64"
+          echo "riscv64 digest: $arch_digest_riscv64"
+
+          # Create and push the multi-arch manifest
+          docker buildx imagetools create \
+            --tag ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:$tagname \
+            ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:${tagname}_amd64@sha256:$arch_digest_amd64 \
+            ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:${tagname}_arm64@sha256:$arch_digest_arm64 \
+            ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:${tagname}_riscv64@sha256:$arch_digest_riscv64
 
   sdrsa_devices_rtlsdrv4:
     runs-on: ubuntu-latest
@@ -114,7 +240,50 @@ jobs:
       - name: Build and push sdr_light image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }}${{ matrix.platform }} UHD_BASE=uhd RTLSDR_BASE=rtlsdrv4 make sdrsadevices
+          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=uhd RTLSDR_BASE=rtlsdrv4 make sdrsadevices
+
+  sdrsa_devices_rtlsdrv4-manifest:
+    runs-on: ubuntu-latest
+    needs: sdrsa_devices_rtlsdrv4
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+          version: latest
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Create and push multi-arch manifest for sdrsa_devices_rtlsdrv4
+        run: |
+          tagname=sdrsa_devices_rtlsdrv4
+
+          # Inspect images for different architectures
+          output_amd64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_amd64)
+          output_arm64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_arm64)
+          output_riscv64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_riscv64)
+
+          # Extract the digests
+          arch_digest_amd64=$(echo "$output_amd64" | grep "Digest:" | awk '{print $2}')
+          arch_digest_arm64=$(echo "$output_arm64" | grep "Digest:" | awk '{print $2}')
+          arch_digest_riscv64=$(echo "$output_riscv64" | grep "Digest:" | awk '{print $2}')
+
+          # Debug: Print the extracted digests
+          echo "amd64 digest: $arch_digest_amd64"
+          echo "arm64 digest: $arch_digest_arm64"
+          echo "riscv64 digest: $arch_digest_riscv64"
+
+          # Create and push the multi-arch manifest
+          docker buildx imagetools create \
+            --tag ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:$tagname \
+            ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:${tagname}_amd64@sha256:$arch_digest_amd64 \
+            ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:${tagname}_arm64@sha256:$arch_digest_arm64 \
+            ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:${tagname}_riscv64@sha256:$arch_digest_riscv64
+
 
   sdr_light:
     runs-on: ubuntu-latest
@@ -140,7 +309,49 @@ jobs:
       - name: Build and push sdr_light image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }}${{ matrix.platform }} make sdrlight
+          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrlight
+
+  sdr_light-manifest:
+    runs-on: ubuntu-latest
+    needs: sdr_light
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+          version: latest
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Create and push multi-arch manifest for sdr_light
+        run: |
+          tagname=sdr_light
+
+          # Inspect images for different architectures
+          output_amd64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_amd64)
+          output_arm64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_arm64)
+          output_riscv64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_riscv64)
+
+          # Extract the digests
+          arch_digest_amd64=$(echo "$output_amd64" | grep "Digest:" | awk '{print $2}')
+          arch_digest_arm64=$(echo "$output_arm64" | grep "Digest:" | awk '{print $2}')
+          arch_digest_riscv64=$(echo "$output_riscv64" | grep "Digest:" | awk '{print $2}')
+
+          # Debug: Print the extracted digests
+          echo "amd64 digest: $arch_digest_amd64"
+          echo "arm64 digest: $arch_digest_arm64"
+          echo "riscv64 digest: $arch_digest_riscv64"
+
+          # Create and push the multi-arch manifest
+          docker buildx imagetools create \
+            --tag ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:$tagname \
+            ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:${tagname}_amd64@sha256:$arch_digest_amd64 \
+            ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:${tagname}_arm64@sha256:$arch_digest_arm64 \
+            ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:${tagname}_riscv64@sha256:$arch_digest_riscv64
 
   extraoot1:
     runs-on: ubuntu-latest
@@ -166,7 +377,7 @@ jobs:
       - name: Build and push sdr_full extraoot1 image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }}${{ matrix.platform }} make sdrfull1
+          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrfull1
 
   extraoot2:
     runs-on: ubuntu-latest
@@ -192,7 +403,7 @@ jobs:
       - name: Build and push sdr_full extraoot2 image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }}${{ matrix.platform }} make sdrfull2
+          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrfull2
 
   extrasoft:
     runs-on: ubuntu-latest
@@ -218,7 +429,7 @@ jobs:
       - name: Build and push sdr_full extrasoft image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }}${{ matrix.platform }} make sdrfull3
+          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrfull3
 
   mldlsofts:
     runs-on: ubuntu-latest
@@ -244,7 +455,7 @@ jobs:
       - name: Build and push sdr_full mldlsofts image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }}${{ matrix.platform }} make sdrfull4
+          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrfull4
 
   telecom:
     runs-on: ubuntu-latest
@@ -270,7 +481,46 @@ jobs:
       - name: Build and push telecom image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }}${{ matrix.platform }} make telecom
+          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make telecom
+
+  telecom-manifest:
+    runs-on: ubuntu-latest
+    needs: telecom
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+          version: latest
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Create and push multi-arch manifest for telecom
+        run: |
+          tagname=telecom
+
+          # Inspect images for different architectures
+          output_amd64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_amd64)
+          output_arm64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_arm64)
+
+          # Extract the digests
+          arch_digest_amd64=$(echo "$output_amd64" | grep "Digest:" | awk '{print $2}')
+          arch_digest_arm64=$(echo "$output_arm64" | grep "Digest:" | awk '{print $2}')
+
+          # Debug: Print the extracted digests
+          echo "amd64 digest: $arch_digest_amd64"
+          echo "arm64 digest: $arch_digest_arm64"
+          echo "riscv64 digest: $arch_digest_riscv64"
+
+          # Create and push the multi-arch manifest
+          docker buildx imagetools create \
+            --tag ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:$tagname \
+            ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:${tagname}_amd64@sha256:$arch_digest_amd64 \
+            ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:${tagname}_arm64@sha256:$arch_digest_arm64
 
   wifi:
     runs-on: ubuntu-latest
@@ -296,7 +546,49 @@ jobs:
       - name: Build and push wifi image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }}${{ matrix.platform }} make wifi
+          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make wifi
+
+  wifi-manifest:
+    runs-on: ubuntu-latest
+    needs: wifi
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+          version: latest
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Create and push multi-arch manifest for wifi
+        run: |
+          tagname=wifi
+
+          # Inspect images for different architectures
+          output_amd64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_amd64)
+          output_arm64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_arm64)
+          output_riscv64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_riscv64)
+
+          # Extract the digests
+          arch_digest_amd64=$(echo "$output_amd64" | grep "Digest:" | awk '{print $2}')
+          arch_digest_arm64=$(echo "$output_arm64" | grep "Digest:" | awk '{print $2}')
+          arch_digest_riscv64=$(echo "$output_riscv64" | grep "Digest:" | awk '{print $2}')
+
+          # Debug: Print the extracted digests
+          echo "amd64 digest: $arch_digest_amd64"
+          echo "arm64 digest: $arch_digest_arm64"
+          echo "riscv64 digest: $arch_digest_riscv64"
+
+          # Create and push the multi-arch manifest
+          docker buildx imagetools create \
+            --tag ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:$tagname \
+            ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:${tagname}_amd64@sha256:$arch_digest_amd64 \
+            ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:${tagname}_arm64@sha256:$arch_digest_arm64 \
+            ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:${tagname}_riscv64@sha256:$arch_digest_riscv64
 
   bluetooth:
     runs-on: ubuntu-latest
@@ -322,7 +614,49 @@ jobs:
       - name: Build and push bluetooth image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }}${{ matrix.platform }} make bluetooth
+          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make bluetooth
+
+  bluetooth-manifest:
+    runs-on: ubuntu-latest
+    needs: bluetooth
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+          version: latest
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Create and push multi-arch manifest for bluetooth
+        run: |
+          tagname=bluetooth
+
+          # Inspect images for different architectures
+          output_amd64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_amd64)
+          output_arm64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_arm64)
+          output_riscv64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_riscv64)
+
+          # Extract the digests
+          arch_digest_amd64=$(echo "$output_amd64" | grep "Digest:" | awk '{print $2}')
+          arch_digest_arm64=$(echo "$output_arm64" | grep "Digest:" | awk '{print $2}')
+          arch_digest_riscv64=$(echo "$output_riscv64" | grep "Digest:" | awk '{print $2}')
+
+          # Debug: Print the extracted digests
+          echo "amd64 digest: $arch_digest_amd64"
+          echo "arm64 digest: $arch_digest_arm64"
+          echo "riscv64 digest: $arch_digest_riscv64"
+
+          # Create and push the multi-arch manifest
+          docker buildx imagetools create \
+            --tag ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:$tagname \
+            ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:${tagname}_amd64@sha256:$arch_digest_amd64 \
+            ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:${tagname}_arm64@sha256:$arch_digest_arm64 \
+            ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:${tagname}_riscv64@sha256:$arch_digest_riscv64
 
   rfid:
     runs-on: ubuntu-latest
@@ -348,7 +682,49 @@ jobs:
       - name: Build and push rfid image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }}${{ matrix.platform }} make rfid
+          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make rfid
+
+  rfid-manifest:
+    runs-on: ubuntu-latest
+    needs: rfid
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+          version: latest
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Create and push multi-arch manifest for rfid
+        run: |
+          tagname=rfid
+
+          # Inspect images for different architectures
+          output_amd64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_amd64)
+          output_arm64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_arm64)
+          output_riscv64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_riscv64)
+
+          # Extract the digests
+          arch_digest_amd64=$(echo "$output_amd64" | grep "Digest:" | awk '{print $2}')
+          arch_digest_arm64=$(echo "$output_arm64" | grep "Digest:" | awk '{print $2}')
+          arch_digest_riscv64=$(echo "$output_riscv64" | grep "Digest:" | awk '{print $2}')
+
+          # Debug: Print the extracted digests
+          echo "amd64 digest: $arch_digest_amd64"
+          echo "arm64 digest: $arch_digest_arm64"
+          echo "riscv64 digest: $arch_digest_riscv64"
+
+          # Create and push the multi-arch manifest
+          docker buildx imagetools create \
+            --tag ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:$tagname \
+            ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:${tagname}_amd64@sha256:$arch_digest_amd64 \
+            ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:${tagname}_arm64@sha256:$arch_digest_arm64 \
+            ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:${tagname}_riscv64@sha256:$arch_digest_riscv64
 
   automotive:
     runs-on: ubuntu-latest
@@ -374,7 +750,47 @@ jobs:
       - name: Build and push automotive image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }}${{ matrix.platform }} make automotive
+          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make automotive
+
+  automotive-manifest:
+    runs-on: ubuntu-latest
+    needs: automotive
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+          version: latest
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Create and push multi-arch manifest for automotive
+        run: |
+          tagname=automotive
+
+          # Inspect images for different architectures
+          output_amd64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_amd64)
+          output_arm64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_arm64)
+
+          # Extract the digests
+          arch_digest_amd64=$(echo "$output_amd64" | grep "Digest:" | awk '{print $2}')
+          arch_digest_arm64=$(echo "$output_arm64" | grep "Digest:" | awk '{print $2}')
+          arch_digest_riscv64=$(echo "$output_riscv64" | grep "Digest:" | awk '{print $2}')
+
+          # Debug: Print the extracted digests
+          echo "amd64 digest: $arch_digest_amd64"
+          echo "arm64 digest: $arch_digest_arm64"
+          echo "riscv64 digest: $arch_digest_riscv64"
+
+          # Create and push the multi-arch manifest
+          docker buildx imagetools create \
+            --tag ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:$tagname \
+            ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:${tagname}_amd64@sha256:$arch_digest_amd64 \
+            ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:${tagname}_arm64@sha256:$arch_digest_arm64
 
   reversing:
     runs-on: ubuntu-latest
@@ -400,4 +816,44 @@ jobs:
       - name: Build and push reversing image with caching
         run: |
           cd Dockerfiles
-          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }}${{ matrix.platform }} make reversing
+          ARCH=${{ matrix.platform }} CACHE_REPO=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make reversing
+
+  reversing-manifest:
+    runs-on: ubuntu-latest
+    needs: reversing
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+          version: latest
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Create and push multi-arch manifest for reversing
+        run: |
+          tagname=reversing
+
+          # Inspect images for different architectures
+          output_amd64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_amd64)
+          output_arm64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_arm64)
+
+          # Extract the digests
+          arch_digest_amd64=$(echo "$output_amd64" | grep "Digest:" | awk '{print $2}')
+          arch_digest_arm64=$(echo "$output_arm64" | grep "Digest:" | awk '{print $2}')
+          arch_digest_riscv64=$(echo "$output_riscv64" | grep "Digest:" | awk '{print $2}')
+
+          # Debug: Print the extracted digests
+          echo "amd64 digest: $arch_digest_amd64"
+          echo "arm64 digest: $arch_digest_arm64"
+          echo "riscv64 digest: $arch_digest_riscv64"
+
+          # Create and push the multi-arch manifest
+          docker buildx imagetools create \
+            --tag ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:$tagname \
+            ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:${tagname}_amd64@sha256:$arch_digest_amd64 \
+            ${{ secrets.DOCKERHUB_USERNAME }}/rfswiftdev:${tagname}_arm64@sha256:$arch_digest_arm64
