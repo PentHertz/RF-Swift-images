@@ -1,7 +1,7 @@
 name: All Dockerfiles - AMD64-Platform Docker Build with Caching
 
 env:
-  REGISTRY_IMAGE: penthertz/rfswiftdevgh
+  REGISTRY_IMAGE: penthertz/rfswiftdevghm
   BUILD_PLATFORMS: amd64
   CACHE_PLATFORMS: linux_amd64-linux_arm64
   CACHE_REPO: penthertz/rfswiftdevgh
