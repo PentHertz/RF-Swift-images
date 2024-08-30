@@ -2,7 +2,7 @@
 ARCH ?= amd64
 CACHE_REPO ?= penthertz/rfswiftdev
 REGISTRY_IMAGE ?= penthertz/rfswiftdev
-CACHE_TYPE ?= local  # Set to "registry" to use registry-based caching
+STORAGE_TYPE ?= local  # Set to "registry" to use registry-based caching
 
 # Drivers
 UHD_BASE ?= uhd
@@ -37,14 +37,14 @@ define build_and_push_local
         --cache-from=type=local,src=$(CURDIR)/cache/cache_$(1)_$(ARCH) \
         --cache-to=type=local,dest=$(CURDIR)/cache/cache_$(1)_$(ARCH),mode=max \
         $(2) \
-        --push \
+        --load \
         -t $(REGISTRY_IMAGE):$(1)_$(ARCH) \
         -f $(3) \
         ..;
 endef
 
-# Choose the build function based on CACHE_TYPE
-ifeq ($(CACHE_TYPE),registry)
+# Choose the build function based on STORAGE_TYPE
+ifeq ($(STORAGE_TYPE),registry)
     build_and_push = $(build_and_push_registry)
 else
     build_and_push = $(build_and_push_local)
