@@ -36,7 +36,7 @@ define build_and_push
     arch_digest=$$(echo "$$output" | awk '/linux\/$(ARCH)/{getline; getline; print $$2}'); \
     docker buildx imagetools create \
         --tag $(REGISTRY_IMAGE):$(1) \
-        $(REGISTRY_IMAGE)@$$arch_digest
+        $(REGISTRY_IMAGE):$(1)@sha256:$$arch_digest
 endef
 
 # Specific build targets using the common function
