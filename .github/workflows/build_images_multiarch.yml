@@ -59,9 +59,9 @@ jobs:
           tagname=corebuild
 
           # Inspect images for different architectures
-          output_amd64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_arm64)
-          output_riscv64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_riscv64)
+          output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
+          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "Digest:" | awk '{print $2}')
@@ -127,9 +127,9 @@ jobs:
           tagname=sdrsa_devices
 
           # Inspect images for different architectures
-          output_amd64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_arm64)
-          output_riscv64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_riscv64)
+          output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
+          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "Digest:" | awk '{print $2}')
@@ -195,9 +195,9 @@ jobs:
           tagname=sdrsa_devices_antsdr
 
           # Inspect images for different architectures
-          output_amd64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_arm64)
-          output_riscv64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_riscv64)
+          output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
+          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "Digest:" | awk '{print $2}')
@@ -263,9 +263,9 @@ jobs:
           tagname=sdrsa_devices_rtlsdrv4
 
           # Inspect images for different architectures
-          output_amd64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_arm64)
-          output_riscv64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_riscv64)
+          output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
+          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "Digest:" | awk '{print $2}')
@@ -332,9 +332,9 @@ jobs:
           tagname=sdr_light
 
           # Inspect images for different architectures
-          output_amd64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_arm64)
-          output_riscv64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_riscv64)
+          output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
+          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "Digest:" | awk '{print $2}')
@@ -504,8 +504,8 @@ jobs:
           tagname=telecom
 
           # Inspect images for different architectures
-          output_amd64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_arm64)
+          output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
+          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "Digest:" | awk '{print $2}')
@@ -569,9 +569,9 @@ jobs:
           tagname=wifi
 
           # Inspect images for different architectures
-          output_amd64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_arm64)
-          output_riscv64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_riscv64)
+          output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
+          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "Digest:" | awk '{print $2}')
@@ -637,9 +637,9 @@ jobs:
           tagname=bluetooth
 
           # Inspect images for different architectures
-          output_amd64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_arm64)
-          output_riscv64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_riscv64)
+          output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
+          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "Digest:" | awk '{print $2}')
@@ -705,9 +705,9 @@ jobs:
           tagname=rfid
 
           # Inspect images for different architectures
-          output_amd64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_arm64)
-          output_riscv64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_riscv64)
+          output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
+          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "Digest:" | awk '{print $2}')
@@ -773,8 +773,8 @@ jobs:
           tagname=automotive
 
           # Inspect images for different architectures
-          output_amd64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_arm64)
+          output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
+          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "Digest:" | awk '{print $2}')
@@ -839,8 +839,8 @@ jobs:
           tagname=reversing
 
           # Inspect images for different architectures
-          output_amd64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect penthertz/rfswiftdev:${tagname}_arm64)
+          output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
+          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "Digest:" | awk '{print $2}')
