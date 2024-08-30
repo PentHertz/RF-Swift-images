@@ -20,200 +20,80 @@ else
     $(error Unsupported architecture: $(ARCH). Supported values are amd64, arm64, riscv64, all)
 endif
 
+# Common build and push function
+define build_and_push
+    @docker buildx build --platform $(PLATFORM) \
+        --cache-from=type=registry,ref=$(CACHE_REPO):cache_$(1)$(ARCH) \
+        --cache-to=type=registry,ref=$(CACHE_REPO):cache_$(1)$(ARCH),mode=max \
+        $(2) \
+        --push \
+        -t $(REGISTRY_IMAGE):$(1) \
+        -f $(3) \
+        ..; \
+    output=$$(docker buildx imagetools inspect $(REGISTRY_IMAGE):$(1)); \
+    if [ -z "$$output" ]; then \
+        echo "Failed to retrieve image details. Please check the image name and tag."; \
+        exit 1; \
+    fi; \
+    amd64_digest=$$(echo "$$output" | awk '/linux\/amd64/{getline; getline; print $$2}'); \
+    arm64_digest=$$(echo "$$output" | awk '/linux\/arm64/{getline; getline; print $$2}'); \
+    docker buildx imagetools create \
+        --tag $(REGISTRY_IMAGE):$(1) \
+        $(REGISTRY_IMAGE):$(1)@$$amd64_digest \
+        $(REGISTRY_IMAGE):$(1)@$$arm64_digest
+endef
+
+# Specific build targets using the common function
 common:
-	docker buildx build --platform $(PLATFORM) \
-            --cache-from=type=registry,ref=$(CACHE_REPO):cache_corebuild \
-            --cache-to=type=registry,ref=$(CACHE_REPO):cache_corebuild,mode=max \
-            --push \
-            -t $(REGISTRY_IMAGE):corebuild \
-            -f corebuild.docker \
-            ..
+	$(call build_and_push,corebuild,,$(CURDIR)/corebuild.docker)
 
 sdrsadevices:
-	docker buildx build --platform $(PLATFORM) \
-            --cache-from=type=registry,ref=$(CACHE_REPO):cache_sdrsadevices \
-            --cache-to=type=registry,ref=$(CACHE_REPO):cache_sdrsadevices,mode=max \
-            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild \
-            --build-arg UHD_BASE=$(UHD_BASE) \
-            --build-arg RTLSDR_BASE=$(RTLSDR_BASE) \
-            --push \
-            -t $(REGISTRY_IMAGE):sdrsa_devices \
-            -f SDR/sdrsa_devices.docker \
-            ..
+	$(call build_and_push,sdrsa_devices,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild --build-arg UHD_BASE=$(UHD_BASE) --build-arg RTLSDR_BASE=$(RTLSDR_BASE),$(CURDIR)/SDR/sdrsa_devices.docker)
 
 sdrsadevicesantsdr:
-	docker buildx build --platform $(PLATFORM) \
-            --cache-from=type=registry,ref=$(CACHE_REPO):cache_sdr_devices_antsdr \
-            --cache-to=type=registry,ref=$(CACHE_REPO):cache_sdr_devices_antsdr,mode=max \
-            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild \
-            --build-arg UHD_BASE=antsdr_uhd \
-            --build-arg RTLSDR_BASE=$(RTLSDR_BASE) \
-            --push \
-            -t $(REGISTRY_IMAGE):sdrsa_devices_antsdr \
-            -f SDR/sdrsa_devices.docker \
-            ..
+	$(call build_and_push,sdrsa_devices_antsdr,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild --build-arg UHD_BASE=antsdr_uhd --build-arg RTLSDR_BASE=$(RTLSDR_BASE),$(CURDIR)/SDR/sdrsa_devices.docker)
 
 sdrsadevicesrtlsdrv4:
-	docker buildx build --platform $(PLATFORM) \
-            --cache-from=type=registry,ref=$(CACHE_REPO):cache_sdrsa_devices_rtlsdrv4 \
-            --cache-to=type=registry,ref=$(CACHE_REPO):cache_sdrsa_devices_rtlsdrv4,mode=max \
-            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild \
-            --build-arg UHD_BASE=$(UHD_BASE) \
-            --build-arg RTLSDR_BASE=rtlsdrv4 \
-            --push \
-            -t $(REGISTRY_IMAGE):sdrsa_devices_rtlsdrv4 \
-            -f SDR/sdrsa_devices.docker \
-            ..
+	$(call build_and_push,sdrsa_devices_rtlsdrv4,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild --build-arg UHD_BASE=$(UHD_BASE) --build-arg RTLSDR_BASE=rtlsdrv4,$(CURDIR)/SDR/sdrsa_devices.docker)
 
 sdrlight:
-	docker buildx build --platform $(PLATFORM) \
-            --cache-from=type=registry,ref=$(CACHE_REPO):cache_sdr_light \
-            --cache-to=type=registry,ref=$(CACHE_REPO):cache_sdr_light,mode=max \
-            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices \
-            --push \
-            -t $(REGISTRY_IMAGE):sdr_light \
-            -f SDR/sdr_light.docker \
-            ..
+	$(call build_and_push,sdr_light,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices,$(CURDIR)/SDR/sdr_light.docker)
 
 sdrfull1:
-	docker buildx build --platform $(PLATFORM) \
-            --cache-from=type=registry,ref=$(CACHE_REPO):cache_extraoot1 \
-            --cache-to=type=registry,ref=$(CACHE_REPO):cache_extraoot1,mode=max \
-            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light \
-            --build-arg JMPSTAGE1=begin \
-            --build-arg JMPSTAGE2=begin \
-            --build-arg JMPSTAGE3=begin \
-            --build-arg JMPSTAGE4=begin \
-            --push \
-            -t $(REGISTRY_IMAGE):extraoot1 \
-            --target extraoot1 \
-            -f SDR/sdr_full.docker \
-            ..
+	$(call build_and_push,extraoot1,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light --build-arg JMPSTAGE1=begin --build-arg JMPSTAGE2=begin --build-arg JMPSTAGE3=begin --build-arg JMPSTAGE4=begin --target extraoot1,$(CURDIR)/SDR/sdr_full.docker)
 
 sdrfull2:
-	docker buildx build --platform $(PLATFORM) \
-            --cache-from=type=registry,ref=$(CACHE_REPO):cache_extraoot2 \
-            --cache-to=type=registry,ref=$(CACHE_REPO):cache_extraoot2,mode=max \
-            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light \
-            --build-arg JMPSTAGE1=begin \
-            --build-arg JMPSTAGE2=begin \
-            --build-arg JMPSTAGE3=begin \
-            --build-arg JMPSTAGE4=begin \
-            --push \
-            -t $(REGISTRY_IMAGE):extraoot2 \
-            --target extraoot2 \
-            -f SDR/sdr_full.docker \
-            ..
+	$(call build_and_push,extraoot2,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light --build-arg JMPSTAGE1=begin --build-arg JMPSTAGE2=begin --build-arg JMPSTAGE3=begin --build-arg JMPSTAGE4=begin --target extraoot2,$(CURDIR)/SDR/sdr_full.docker)
 
 sdrfull3:
-	docker buildx build --platform $(PLATFORM) \
-            --cache-from=type=registry,ref=$(CACHE_REPO):cache_extrasofts \
-            --cache-to=type=registry,ref=$(CACHE_REPO):cache_extrasofts,mode=max \
-            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light \
-            --build-arg JMPSTAGE1=begin \
-            --build-arg JMPSTAGE2=begin \
-            --build-arg JMPSTAGE3=begin \
-            --build-arg JMPSTAGE4=begin \
-            --push \
-            -t $(REGISTRY_IMAGE):extrasofts \
-            --target extrasofts \
-            -f SDR/sdr_full.docker \
-            ..
+	$(call build_and_push,extrasofts,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light --build-arg JMPSTAGE1=begin --build-arg JMPSTAGE2=begin --build-arg JMPSTAGE3=begin --build-arg JMPSTAGE4=begin --target extrasofts,$(CURDIR)/SDR/sdr_full.docker)
 
 sdrfull4:
-	docker buildx build --platform $(PLATFORM) \
-            --cache-from=type=registry,ref=$(CACHE_REPO):cache_mldlsofts \
-            --cache-to=type=registry,ref=$(CACHE_REPO):cache_mldlsofts,mode=max \
-            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light \
-            --build-arg JMPSTAGE1=begin \
-            --build-arg JMPSTAGE2=begin \
-            --build-arg JMPSTAGE3=begin \
-            --build-arg JMPSTAGE4=begin \
-            --push \
-            -t $(REGISTRY_IMAGE):mldlsofts \
-            --target mldlsofts \
-            -f SDR/sdr_full.docker \
-            ..
+	$(call build_and_push,mldlsofts,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light --build-arg JMPSTAGE1=begin --build-arg JMPSTAGE2=begin --build-arg JMPSTAGE3=begin --build-arg JMPSTAGE4=begin --target mldlsofts,$(CURDIR)/SDR/sdr_full.docker)
 
 sdrfull:
-	docker buildx build --platform $(PLATFORM) \
-            --cache-from=type=registry,ref=$(CACHE_REPO):cache_sdr_full \
-            --cache-to=type=registry,ref=$(CACHE_REPO):cache_sdr_full,mode=max \
-            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light \
-            --push \
-            -t $(REGISTRY_IMAGE):sdr_full \
-            -f SDR/sdr_full.docker \
-            ..
+	$(call build_and_push,sdr_full,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light,$(CURDIR)/SDR/sdr_full.docker)
 
 rfid:
-	docker buildx build --platform $(PLATFORM) \
-            --cache-from=type=registry,ref=$(CACHE_REPO):cache_rfid \
-            --cache-to=type=registry,ref=$(CACHE_REPO):cache_rfid,mode=max \
-            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild \
-            --push \
-            -t $(REGISTRY_IMAGE):rfid \
-            -f rfid.docker \
-            ..
+	$(call build_and_push,rfid,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild,$(CURDIR)/rfid.docker)
 
 wifi:
-	docker buildx build --platform $(PLATFORM) \
-            --cache-from=type=registry,ref=$(CACHE_REPO):cache_wifi \
-            --cache-to=type=registry,ref=$(CACHE_REPO):cache_wifi,mode=max \
-            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices \
-            --push \
-            -t $(REGISTRY_IMAGE):wifi \
-            -f wifi.docker \
-            ..
+	$(call build_and_push,wifi,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices,$(CURDIR)/wifi.docker)
 
 bluetooth:
-	docker buildx build --platform $(PLATFORM) \
-            --cache-from=type=registry,ref=$(CACHE_REPO):cache_bluetooth \
-            --cache-to=type=registry,ref=$(CACHE_REPO):cache_bluetooth,mode=max \
-            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices \
-            --push \
-            -t $(REGISTRY_IMAGE):bluetooth \
-            -f bluetooth.docker \
-            ..
+	$(call build_and_push,bluetooth,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices,$(CURDIR)/bluetooth.docker)
 
 reversing:
-	docker buildx build --platform $(PLATFORM) \
-            --cache-from=type=registry,ref=$(CACHE_REPO):cache_reversing \
-            --cache-to=type=registry,ref=$(CACHE_REPO):cache_reversing,mode=max \
-            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild \
-            --push \
-            -t $(REGISTRY_IMAGE):reversing \
-            -f reversing.docker \
-            ..
+	$(call build_and_push,reversing,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild,$(CURDIR)/reversing.docker)
 
 automotive:
-	docker buildx build --platform $(PLATFORM) \
-            --cache-from=type=registry,ref=$(CACHE_REPO):cache_automotive \
-            --cache-to=type=registry,ref=$(CACHE_REPO):cache_automotive,mode=max \
-            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild \
-            --push \
-            -t $(REGISTRY_IMAGE):automotive \
-            -f automotive.docker \
-            ..
+	$(call build_and_push,automotive,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild,$(CURDIR)/automotive.docker)
 
 telecom:
-	docker buildx build --platform $(PLATFORM) \
-            --cache-from=type=registry,ref=$(CACHE_REPO):cache_telecom \
-            --cache-to=type=registry,ref=$(CACHE_REPO):cache_telecom,mode=max \
-            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices \
-            --push \
-            -t $(REGISTRY_IMAGE):telecom \
-            -f telecom.docker \
-            ..
+	$(call build_and_push,telecom,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices,$(CURDIR)/telecom.docker)
 
 deeptempest:
-	docker buildx build --platform $(PLATFORM) \
-            --cache-from=type=registry,ref=$(CACHE_REPO):cache_sdr_deeptemptest_beta \
-            --cache-to=type=registry,ref=$(CACHE_REPO):cache_sdr_deeptemptest_beta,mode=max \
-            --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light \
-            --push \
-            -t $(REGISTRY_IMAGE):sdr_deeptemptest_beta \
-            -f SDR/sdr_deeptemptest_beta.docker \
-            ..
+	$(call build_and_push,sdr_deeptemptest_beta,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light,$(CURDIR)/SDR/sdr_deeptemptest_beta.docker)
 
 build: common sdrsadevices sdrlight sdrfull sdrsadevicesantsdr sdrsadevicesrtlsdrv4 rfid telecom bluetooth wifi automotive reversing
-	echo "Done!"
+	@echo "Done!"
