@@ -82,6 +82,7 @@ function harogic_sa_device() {
 	goodecho "[+] Installing htraapi"
 	installfromnet "wget https://github.com/PentHertz/rfswift_harogic_install/releases/download/v05.23.17/Install_HTRA_SDK.zip"
     unzip Install_HTRA_SDK.zip
+    rm Install_HTRA_SDK.zip
     cd Install_HTRA_SDK/
     cp htraapi/configs/htrausb.conf /etc/
     cp htraapi/configs/htra-cyusb.rules /etc/udev/rules.d/
@@ -113,5 +114,6 @@ function harogic_sa_device() {
     esac
     cd "/opt/htraapi/lib/$sdkarch"
     cp libhtraapi.so* /usr/lib
+    cp libliquid.so /usr/lib
 	colorecho "[+] Note: you'll have to put your calibration data after!"
 }
