@@ -64,9 +64,9 @@ jobs:
           output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
-          arch_digest_amd64=$(echo "$output_amd64" | grep "Digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "Digest:" | awk '{print $2}')
-          arch_digest_riscv64=$(echo "$output_riscv64" | grep "Digest:" | awk '{print $2}')
+          arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
@@ -132,9 +132,9 @@ jobs:
           output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
-          arch_digest_amd64=$(echo "$output_amd64" | grep "Digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "Digest:" | awk '{print $2}')
-          arch_digest_riscv64=$(echo "$output_riscv64" | grep "Digest:" | awk '{print $2}')
+          arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
@@ -200,9 +200,9 @@ jobs:
           output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
-          arch_digest_amd64=$(echo "$output_amd64" | grep "Digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "Digest:" | awk '{print $2}')
-          arch_digest_riscv64=$(echo "$output_riscv64" | grep "Digest:" | awk '{print $2}')
+          arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
@@ -268,9 +268,9 @@ jobs:
           output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
-          arch_digest_amd64=$(echo "$output_amd64" | grep "Digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "Digest:" | awk '{print $2}')
-          arch_digest_riscv64=$(echo "$output_riscv64" | grep "Digest:" | awk '{print $2}')
+          arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
@@ -337,9 +337,9 @@ jobs:
           output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
-          arch_digest_amd64=$(echo "$output_amd64" | grep "Digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "Digest:" | awk '{print $2}')
-          arch_digest_riscv64=$(echo "$output_riscv64" | grep "Digest:" | awk '{print $2}')
+          arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
@@ -508,8 +508,8 @@ jobs:
           output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
 
           # Extract the digests
-          arch_digest_amd64=$(echo "$output_amd64" | grep "Digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "Digest:" | awk '{print $2}')
+          arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
@@ -574,9 +574,9 @@ jobs:
           output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
-          arch_digest_amd64=$(echo "$output_amd64" | grep "Digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "Digest:" | awk '{print $2}')
-          arch_digest_riscv64=$(echo "$output_riscv64" | grep "Digest:" | awk '{print $2}')
+          arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
@@ -642,9 +642,9 @@ jobs:
           output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
-          arch_digest_amd64=$(echo "$output_amd64" | grep "Digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "Digest:" | awk '{print $2}')
-          arch_digest_riscv64=$(echo "$output_riscv64" | grep "Digest:" | awk '{print $2}')
+          arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
@@ -710,9 +710,9 @@ jobs:
           output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
-          arch_digest_amd64=$(echo "$output_amd64" | grep "Digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "Digest:" | awk '{print $2}')
-          arch_digest_riscv64=$(echo "$output_riscv64" | grep "Digest:" | awk '{print $2}')
+          arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
@@ -777,9 +777,9 @@ jobs:
           output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
 
           # Extract the digests
-          arch_digest_amd64=$(echo "$output_amd64" | grep "Digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "Digest:" | awk '{print $2}')
-          arch_digest_riscv64=$(echo "$output_riscv64" | grep "Digest:" | awk '{print $2}')
+          arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
@@ -843,9 +843,9 @@ jobs:
           output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
 
           # Extract the digests
-          arch_digest_amd64=$(echo "$output_amd64" | grep "Digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "Digest:" | awk '{print $2}')
-          arch_digest_riscv64=$(echo "$output_riscv64" | grep "Digest:" | awk '{print $2}')
+          arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
