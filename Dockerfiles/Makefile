@@ -35,12 +35,10 @@ define build_and_push
         echo "Failed to retrieve image details. Please check the image name and tag."; \
         exit 1; \
     fi; \
-    amd64_digest=$$(echo "$$output" | awk '/linux\/amd64/{getline; getline; print $$2}'); \
-    arm64_digest=$$(echo "$$output" | awk '/linux\/arm64/{getline; getline; print $$2}'); \
+    arch_digest=$$(echo "$$output" | awk '/linux\/$(ARCH)/{getline; getline; print $$2}'); \
     docker buildx imagetools create \
         --tag $(REGISTRY_IMAGE):$(1) \
-        $(REGISTRY_IMAGE):$(1)@$$amd64_digest \
-        $(REGISTRY_IMAGE):$(1)@$$arm64_digest
+        $(REGISTRY_IMAGE):$(1)@$$arch_digest
 endef
 
 # Specific build targets using the common function
