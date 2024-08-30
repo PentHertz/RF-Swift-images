@@ -1,5 +1,5 @@
 # Set default architecture to all if ARCH is not provided
-ARCH ?= all
+ARCH ?= amd64
 CACHE_REPO ?= penthertz/rfswiftdev
 REGISTRY_IMAGE ?= penthertz/rfswiftdev
 
@@ -14,10 +14,8 @@ else ifeq ($(ARCH),arm64)
     PLATFORM=linux/arm64/v8
 else ifeq ($(ARCH),riscv64)
     PLATFORM=linux/riscv64
-else ifeq ($(ARCH),all)
-    PLATFORM=linux/amd64,linux/arm64/v8,linux/riscv64
 else
-    $(error Unsupported architecture: $(ARCH). Supported values are amd64, arm64, riscv64, all)
+    $(error Unsupported architecture: $(ARCH). Supported values are amd64, arm64, riscv64)
 endif
 
 # Common build and push function
@@ -91,7 +89,7 @@ telecom:
 	$(call build_and_push,telecom,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices,$(CURDIR)/telecom.docker)
 
 deeptempest:
-	$(call build_and_push,sdr_deeptemptest_beta,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light,$(CURDIR)/SDR/sdr_deeptemptest_beta.docker)
+	$(call build_and_push,sdr_deeptemptest_beta,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light,$$(CURDIR)/SDR/sdr_deeptemptest_beta.docker)
 
 build: common sdrsadevices sdrlight sdrfull sdrsadevicesantsdr sdrsadevicesrtlsdrv4 rfid telecom bluetooth wifi automotive reversing
 	@echo "Done!"
