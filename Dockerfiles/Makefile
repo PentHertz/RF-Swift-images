@@ -33,11 +33,12 @@ define build_and_push
         echo "Failed to retrieve image details. Please check the image name and tag."; \
         exit 1; \
     fi; \
-    arch_digest=$$(echo "$$output" | awk '/linux\/$(ARCH)/{getline; getline; print $$2}'); \
+    arch_digest=$$(echo "$$output" | awk -F\" '/"sha256:/ { print $$4 }' | head -n 1); \
     docker buildx imagetools create \
         --tag $(REGISTRY_IMAGE):$(1) \
         $(REGISTRY_IMAGE):$(1)@sha256:$$arch_digest
 endef
+
 
 # Specific build targets using the common function
 common:
