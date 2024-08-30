@@ -33,12 +33,18 @@ define build_and_push
         echo "Failed to retrieve image details. Please check the image name and tag."; \
         exit 1; \
     fi; \
-    arch_digest=$$(echo "$$output" | awk -F\" '/"sha256:/ { print $$4 }' | head -n 1); \
+    echo "Output from imagetools inspect:"; \
+    echo "$$output"; \
+    arch_digest=$$(echo "$$output" | awk -F\" '/"digest": "sha256:/ { print $$4 }'); \
+    if [ -z "$$arch_digest" ]; then \
+        echo "Failed to extract architecture digest. Please check the awk command."; \
+        exit 1; \
+    fi; \
+    echo "Extracted architecture digest: $$arch_digest"; \
     docker buildx imagetools create \
         --tag $(REGISTRY_IMAGE):$(1) \
-        $(REGISTRY_IMAGE):$(1)@sha256:$$arch_digest
+        $(REGISTRY_IMAGE)@$$arch_digest
 endef
-
 
 # Specific build targets using the common function
 common:
