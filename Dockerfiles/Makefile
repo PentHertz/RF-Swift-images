@@ -110,10 +110,10 @@ sdrfull3:
             --cache-from=type=registry,ref=$(CACHE_REPO):cache_extrasofts \
             --cache-to=type=registry,ref=$(CACHE_REPO):cache_extrasofts,mode=max \
             --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light \
-            --build-arg JMPSTAGE1=extraoot \
-            --build-arg JMPSTAGE2=extraoot \
-            --build-arg JMPSTAGE3=extraoot \
-            --build-arg JMPSTAGE4=extraoot \
+            --build-arg JMPSTAGE1=begin \
+            --build-arg JMPSTAGE2=begin \
+            --build-arg JMPSTAGE3=begin \
+            --build-arg JMPSTAGE4=begin \
             --push \
             -t $(REGISTRY_IMAGE):extrasofts \
             --target extrasofts \
