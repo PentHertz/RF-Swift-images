@@ -43,18 +43,16 @@ define build_and_push_local
         ..;
 endef
 
-# Function to select the caching strategy based on CACHE_TYPE
-define build_and_push
-    ifeq ($(CACHE_TYPE),registry)
-        $(call build_and_push_registry,$(1),$(2),$(3))
-    else
-        $(call build_and_push_local,$(1),$(2),$(3))
-    endif
-endef
+# Choose the build function based on CACHE_TYPE
+ifeq ($(CACHE_TYPE),registry)
+    build_and_push = $(build_and_push_registry)
+else
+    build_and_push = $(build_and_push_local)
+endif
 
-# Specific build targets using the common function
+# Specific build targets using the chosen function
 common:
-	$(call build_and_push,corebuild,,$(CURDIR)/corebuild.docker_$(ARCH)
+	$(call build_and_push,corebuild,,$(CURDIR)/corebuild.docker)
 
 sdrsadevices:
 	$(call build_and_push,sdrsa_devices,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild_$(ARCH) --build-arg UHD_BASE=$(UHD_BASE) --build-arg RTLSDR_BASE=$(RTLSDR_BASE),$(CURDIR)/SDR/sdrsa_devices.docker)
