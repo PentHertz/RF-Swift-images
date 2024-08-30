@@ -35,7 +35,7 @@ define build_and_push
     fi; \
     echo "Output from imagetools inspect:"; \
     echo "$$output"; \
-    arch_digest=$$(echo "$$output" | awk -F\" '/"digest": "sha256:/ { print $$4 }'); \
+    arch_digest=$$(echo "$$output" | grep -A 2 "linux/$(ARCH)" | grep "sha256:" | head -n 1 | awk -F 'sha256:' '{print $$2}' | awk '{print $$1}'); \
     if [ -z "$$arch_digest" ]; then \
         echo "Failed to extract architecture digest. Please check the awk command."; \
         exit 1; \
