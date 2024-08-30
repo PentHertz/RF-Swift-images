@@ -54,7 +54,7 @@ endef
 
 # Specific build targets using the common function
 common:
-	$(call build_and_push,corebuild,,$(CURDIR)/corebuild.docker)
+	$(call build_and_push,corebuild,,$(CURDIR)/corebuild.docker_$(ARCH)
 
 sdrsadevices:
 	$(call build_and_push,sdrsa_devices,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild_$(ARCH) --build-arg UHD_BASE=$(UHD_BASE) --build-arg RTLSDR_BASE=$(RTLSDR_BASE),$(CURDIR)/SDR/sdrsa_devices.docker)
