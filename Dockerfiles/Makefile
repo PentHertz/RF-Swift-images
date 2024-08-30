@@ -34,8 +34,6 @@ endef
 # Function to build and push using local cache
 define build_and_push_local
     @docker buildx build --platform $(PLATFORM) \
-        --cache-from=type=local,src=$(CURDIR)/cache/cache_$(1)_$(ARCH) \
-        --cache-to=type=local,dest=$(CURDIR)/cache/cache_$(1)_$(ARCH),mode=max \
         $(2) \
         --load \
         -t $(REGISTRY_IMAGE):$(1)_$(ARCH) \
