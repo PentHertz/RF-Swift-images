@@ -27,7 +27,7 @@ define build_and_push
         --push \
         -t $(REGISTRY_IMAGE):$(1)_$(ARCH) \
         -f $(3) \
-        ..; \
+        ..;
 endef
 
 # Specific build targets using the common function
