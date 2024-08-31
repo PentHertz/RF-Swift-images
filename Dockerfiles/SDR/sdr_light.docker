@@ -4,7 +4,8 @@
 # website: penthertz.com
 
 ARG BASE_IMAGE=sdrsa_devices
-FROM ${BASE_IMAGE}
+ARG STAGE1=stage1
+FROM ${BASE_IMAGE} AS stage1
 
 LABEL "org.container.project"="rfswift"
 LABEL "org.container.author"="Sébastien Dudek"
@@ -29,13 +30,16 @@ RUN ./entrypoint.sh gnuradio_soft_install && \
 	./entrypoint.sh kc908_sa_device
 
 # Installing extra software
-RUN ./entrypoint.sh jupiter_soft_install && \
-	./entrypoint.sh sdrpp_soft_fromsource_install && \
-	./entrypoint.sh sdrangel_soft_fromsource_install && \
+RUN ./entrypoint.sh jupyter_soft_install && \
 	./entrypoint.sh gqrx_soft_install && \
 	./entrypoint.sh multimon_ng_soft_install && \
 	./entrypoint.sh urh_soft_install && \
 	./entrypoint.sh rtl_433_soft_install
+
+RUN ./entrypoint.sh sdrpp_soft_fromsource_install
+
+FROM ${STAGE1} AS stage2
+RUN ./entrypoint.sh sdrangel_soft_fromsource_install
 
 RUN mkdir -p /sdrtools/
 COPY run /sdrtools/run

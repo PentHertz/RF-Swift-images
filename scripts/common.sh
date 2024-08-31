@@ -181,10 +181,9 @@ function cmake_clone_and_build() {
         cmake "${cmake_args[@]}" ../
         make -j$(nproc)
         sudo make install
+        cd ..
+        rm -rf build/ # Cleaning build directory
     fi
-
-    # Return to original or base directory
-    cd ../..
 }
 
 function check_and_install_lib() {
