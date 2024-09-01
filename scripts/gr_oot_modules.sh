@@ -156,6 +156,7 @@ function grfosphor_grmod_install() {
 }
 
 function grdroineid_grmod_install() { # TODO: for turbofec RISCV64:  gcc: error: '-march=native': ISA string must begin with rv32 or rv64 
+    install_dependencies "libtool"
     # Check the system architecture
     ARCH=$(uname -m)
 
