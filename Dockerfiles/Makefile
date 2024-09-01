@@ -61,8 +61,11 @@ sdrsadevicesantsdr:
 sdrsadevicesrtlsdrv4:
 	$(call build_and_push,sdrsa_devices_rtlsdrv4,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild_$(ARCH) --build-arg UHD_BASE=$(UHD_BASE) --build-arg RTLSDR_BASE=rtlsdrv4,$(CURDIR)/SDR/sdrsa_devices.docker)
 
+sdrlight_stage1:
+	$(call build_and_push,sdrlight_stage1,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices_$(ARCH),$(CURDIR)/SDR/sdr_light.docker)
+
 sdrlight:
-	$(call build_and_push,sdr_light,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices_$(ARCH),$(CURDIR)/SDR/sdr_light.docker)
+	$(call build_and_push,sdr_light,--target stage2 --build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrlight_stage1_$(ARCH),$(CURDIR)/SDR/sdr_light.docker)
 
 sdrfull1:
 	$(call build_and_push,extraoot1,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light_$(ARCH) --build-arg JMPSTAGE1=begin --build-arg JMPSTAGE2=begin --build-arg JMPSTAGE3=begin --build-arg JMPSTAGE4=begin --target extraoot1,$(CURDIR)/SDR/sdr_full.docker)
