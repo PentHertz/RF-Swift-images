@@ -111,7 +111,7 @@ jobs:
 
   sdr_light:
     runs-on: ubuntu-latest
-    needs: sdr_devices
+    needs: sdrsa_devices
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
