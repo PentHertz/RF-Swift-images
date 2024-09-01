@@ -309,7 +309,7 @@ jobs:
       - name: Build and push sdr_light image with caching
         run: |
           cd Dockerfiles
-          STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrlight
+          STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrlight_stage1
 
 
   sdr_light:
