@@ -284,37 +284,9 @@ jobs:
             ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64 \
             ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
-
-  sdr_light_stage1:
-    runs-on: ubuntu-latest
-    needs: sdrsa_devices
-    strategy:
-      matrix:
-        platform: [amd64, arm64, riscv64]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-        with:
-          install: true
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build and push sdr_light image with caching
-        run: |
-          cd Dockerfiles
-          STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrlight_stage1
-
-
   sdr_light:
     runs-on: ubuntu-latest
-    needs: sdr_light_stage1
+    needs: sdrsa_devices
     strategy:
       matrix:
         platform: [amd64, arm64, riscv64]
