@@ -115,6 +115,5 @@ function harogic_sa_device() {
     cd "/opt/htraapi/lib/$sdkarch"
     cp libhtraapi.so* /usr/lib
     cp libliquid.so /usr/lib
-    ln -s CalFile /usr/bin
 	colorecho "[+] Note: you'll have to put your calibration data after!"
 }
