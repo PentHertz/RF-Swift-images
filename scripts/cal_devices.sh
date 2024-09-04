@@ -40,6 +40,8 @@ function NanoVNASaver_cal_device() {
 }
 
 function NanoVNASaver_cal_device_call() {
+	set +e # TODO: debug that function
+    set +o pipefail
 	goodecho "[+] Installing dependencies for NanoVNASaver"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
@@ -50,6 +52,8 @@ function NanoVNASaver_cal_device_call() {
 	installfromnet "pip3 install -U setuptools setuptools_scm wheel"
 	installfromnet "pip3 install -r requirements.txt"
 	python3 setup.py install
+	set -e
+    set -o pipefail
 }
 
 function NanoVNA_QT_cal_device() {
