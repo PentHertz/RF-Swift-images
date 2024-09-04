@@ -169,7 +169,7 @@ function Pyrit_soft_install() {
 function eaphammer_soft_install() {
 	goodecho "[+] Installing eaphammer"
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
-	cd /root/thirdparty
+	cd /rftools/wifi
 	installfromnet "git clone https://github.com/s0lst1c3/eaphammer.git"
 	cd eaphammer/
 	./ubuntu-unattended-setup
