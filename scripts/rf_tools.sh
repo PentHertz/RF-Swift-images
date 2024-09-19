@@ -190,3 +190,14 @@ function wifite2_soft_install () {
 	installfromnet "git clone https://github.com/derv82/wifite2.git"
 	cd wifite2/
 }
+
+function artemis_soft_install () {
+	goodecho "[+] Installing Artemis"
+	[ -d /rftools/docs ] || mkdir -p /rftools/docs
+	cd /rftools/docs
+	gitinstall "https://github.com/AresValley/Artemis.git" "artemis_soft_install"
+	cd Artemis
+	pip3 install -r requirements.txt
+	sed -i '1s|^|#!/bin/env python3\n|' app.py
+	ln -s $(pwd)/app.py /usr/sbin/Artemis
+}
