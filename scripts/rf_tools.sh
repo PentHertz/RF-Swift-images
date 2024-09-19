@@ -192,12 +192,19 @@ function wifite2_soft_install () {
 }
 
 function artemis_soft_install () {
-	goodecho "[+] Installing Artemis"
-	[ -d /rftools/docs ] || mkdir -p /rftools/docs
-	cd /rftools/docs
-	gitinstall "https://github.com/AresValley/Artemis.git" "artemis_soft_install"
-	cd Artemis
-	pip3 install -r requirements.txt
-	sed -i '1s|^|#!/bin/env python3\n|' app.py
-	ln -s $(pwd)/app.py /usr/sbin/Artemis
+    # Check system architecture
+    ARCH=$(uname -m)
+    if [[ "$ARCH" != "x86_64" && "$ARCH" != "amd64" && "$ARCH" != "aarch64" && "$ARCH" != "arm64" ]]; then
+        echo "[-] Unsupported architecture: $ARCH"
+        exit 1
+    fi
+
+    goodecho "[+] Installing Artemis"
+    [ -d /rftools/docs ] || mkdir -p /rftools/docs
+    cd /rftools/docs
+    gitinstall "https://github.com/AresValley/Artemis.git" "artemis_soft_install"
+    cd Artemis
+    pip3 install -r requirements.txt
+    sed -i '1s|^|#!/bin/env python3\n|' app.py
+    ln -s $(pwd)/app.py /usr/sbin/Artemis
 }
