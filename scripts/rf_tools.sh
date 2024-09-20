@@ -206,5 +206,6 @@ function artemis_soft_install () {
     cd Artemis
     pip3 install -r requirements.txt
     sed -i '1s|^|#!/bin/env python3\n|' app.py
+    chmod +x app.py
     ln -s $(pwd)/app.py /usr/sbin/Artemis
 }
