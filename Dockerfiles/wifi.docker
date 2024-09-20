@@ -35,10 +35,14 @@ RUN ./entrypoint.sh common_nettools && \
 	./entrypoint.sh wifite2_soft_install
 
 FROM ${JMPSTAGE1} as wifi_middle
+WORKDIR /root/scripts/
+RUN chmod +x entrypoint.sh
 # General monitoring software
 RUN ./entrypoint.sh kismet_soft_install
 
 FROM ${JMPSTAGE2} as wifi_full
+WORKDIR /root/scripts/
+RUN chmod +x entrypoint.sh
 # Installing bettecap tool
 RUN ./entrypoint.sh bettercap_soft_install
 
