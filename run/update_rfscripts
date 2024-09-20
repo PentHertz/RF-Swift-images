@@ -29,7 +29,7 @@ curl -sL "$REPO_URL/tarball/main" | tar -xz --strip=2 --wildcards "*/$SCRIPTS_DI
 
 # Copy the scripts to the target directory
 echo -e "${BLUE}Updating scripts in $TARGET_DIR${NC}"
-rsync -av --delete "$TEMP_DIR/$SCRIPTS_DIR/" "$TARGET_DIR/" || { echo -e "${RED}Failed to sync files${NC}"; exit 1; }
+rsync -av --delete "$TEMP_DIR/" "$TARGET_DIR/" || { echo -e "${RED}Failed to sync files${NC}"; exit 1; }
 
 # Cleanup
 echo -e "${BLUE}Cleaning up temporary files${NC}"
