@@ -89,7 +89,7 @@ wifi_middle:
 	$(call build_and_push,wifi_middle,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):wifi_light_$(ARCH) --build-arg JMPSTAGE1=$(REGISTRY_IMAGE):wifi_light_$(ARCH) --target wifi_middle,$(CURDIR)/wifi.docker)
 
 wifi_full:
-	$(call build_and_push,wifi_full,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):wifi_full_$(ARCH) --build-arg JMPSTAGE2=$(REGISTRY_IMAGE):wifi_full_$(ARCH) --target wifi_full,$(CURDIR)/wifi.docker)
+	$(call build_and_push,wifi_full,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):wifi_middle_$(ARCH) --build-arg JMPSTAGE2=$(REGISTRY_IMAGE):wifi_full_$(ARCH) --target wifi_full,$(CURDIR)/wifi.docker)
 
 bluetooth:
 	$(call build_and_push,bluetooth,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices_$(ARCH),$(CURDIR)/bluetooth.docker)

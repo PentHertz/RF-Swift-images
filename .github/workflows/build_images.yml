@@ -4,7 +4,7 @@ env:
   REGISTRY_IMAGE: penthertz/rfswiftdevghm
   BUILD_PLATFORMS: amd64
   CACHE_PLATFORMS: linux_amd64-linux_arm64
-  CACHE_REPO: penthertz/rfswiftdevgh
+  CACHE_REPO: penthertz/rfswiftdevghm
   DO_SPACES_ENDPOINT: ${{ secrets.BUCKET_URL }}
   DO_SPACES_REGION: ${{ secrets.BUCKET_REGION }}
 
