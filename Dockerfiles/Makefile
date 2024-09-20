@@ -83,7 +83,7 @@ rfid:
 	$(call build_and_push,rfid,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild_$(ARCH),$(CURDIR)/rfid.docker)
 
 wifi_light:
-	$(call build_and_push,wifi,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light_$(ARCH),$(CURDIR)/wifi.docker)
+	$(call build_and_push,wifi_light,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light_$(ARCH),$(CURDIR)/wifi.docker)
 
 wifi_middle:
 	$(call build_and_push,wifi_middle,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):wifi_light_$(ARCH) --build-arg JMPSTAGE1=$(REGISTRY_IMAGE):wifi_light_$(ARCH) --target wifi_middle,$(CURDIR)/wifi.docker)
