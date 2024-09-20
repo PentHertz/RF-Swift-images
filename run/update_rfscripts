@@ -8,7 +8,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Set the GitHub repository and the directory you want to synchronize
-REPO_URL="https://github.com/PentHertz/RF-Swift"
+REPO_URL="https://github.com/PentHertz/RF-Swift-images"
 SCRIPTS_DIR="scripts"
 cd ~
 TARGET_DIR="$(pwd)/scripts"  # Use current working directory
