@@ -275,7 +275,7 @@ jobs:
 
   wifi_middle:
     runs-on: ubuntu-latest
-    needs: sdrsa_devices
+    needs: wifi_light
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -299,7 +299,7 @@ jobs:
 
   wifi_full:
     runs-on: ubuntu-latest
-    needs: sdrsa_devices
+    needs: wifi_middle
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
