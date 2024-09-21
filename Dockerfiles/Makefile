@@ -83,7 +83,7 @@ rfid:
 	$(call build_and_push,rfid,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild_$(ARCH),$(CURDIR)/rfid.docker)
 
 wifi:
-	$(call build_and_push,wifi,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_$(ARCH),$(CURDIR)/wifi.docker)
+	$(call build_and_push,wifi,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices_$(ARCH),$(CURDIR)/wifi.docker)
 
 bluetooth:
 	$(call build_and_push,bluetooth,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices_$(ARCH),$(CURDIR)/bluetooth.docker)
