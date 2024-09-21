@@ -4,9 +4,6 @@
 # website: penthertz.com
 
 ARG BASE_IMAGE=sdr_light
-ARG JMPSTAGE1=wifi_light
-ARG JMPSTAGE2=wifi_middle
-ARG JMPSTAGE3=wifi_full
 FROM ${BASE_IMAGE} as wifi_light
 
 LABEL "org.container.project"="rfswift"
@@ -34,15 +31,9 @@ RUN ./entrypoint.sh common_nettools && \
 	./entrypoint.sh airgeddon_soft_install && \
 	./entrypoint.sh wifite2_soft_install
 
-FROM ${JMPSTAGE1} as wifi_middle
-WORKDIR /root/scripts/
-RUN chmod +x entrypoint.sh
 # General monitoring software
 RUN ./entrypoint.sh kismet_soft_install
 
-FROM ${JMPSTAGE2} as wifi_full
-WORKDIR /root/scripts/
-RUN chmod +x entrypoint.sh
 # Installing bettecap tool
 RUN ./entrypoint.sh bettercap_soft_install
 

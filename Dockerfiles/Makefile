@@ -82,14 +82,8 @@ sdrfull:
 rfid:
 	$(call build_and_push,rfid,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild_$(ARCH),$(CURDIR)/rfid.docker)
 
-wifi_light:
-	$(call build_and_push,wifi_light,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light_$(ARCH),$(CURDIR)/wifi.docker)
-
-wifi_middle:
-	$(call build_and_push,wifi_middle,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):wifi_light_$(ARCH) --build-arg JMPSTAGE1=$(REGISTRY_IMAGE):wifi_light_$(ARCH) --target wifi_middle,$(CURDIR)/wifi.docker)
-
-wifi_full:
-	$(call build_and_push,wifi_full,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):wifi_middle_$(ARCH) --build-arg JMPSTAGE2=$(REGISTRY_IMAGE):wifi_middle_$(ARCH) --target wifi_full,$(CURDIR)/wifi.docker)
+wifi:
+	$(call build_and_push,wifi,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_$(ARCH),$(CURDIR)/wifi.docker)
 
 bluetooth:
 	$(call build_and_push,bluetooth,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices_$(ARCH),$(CURDIR)/bluetooth.docker)
@@ -106,5 +100,5 @@ telecom:
 deeptempest:
 	$(call build_and_push,sdr_deeptemptest_beta,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light_$(ARCH),$(CURDIR)/SDR/sdr_deeptemptest_beta.docker)
 
-build: common sdrsadevices sdrlight sdrfull sdrsadevicesantsdr sdrsadevicesrtlsdrv4 rfid telecom bluetooth wifi_light wifi_middle wifi_full automotive reversing
+build: common sdrsadevices sdrlight sdrfull sdrsadevicesantsdr sdrsadevicesrtlsdrv4 rfid telecom bluetooth wifi automotive reversing
 	@echo "Done!"
