@@ -36,7 +36,7 @@ RUN ./entrypoint.sh LLVM_install && \
 	./entrypoint.sh cppcheck_install && \
 	./entrypoint.sh clang_static_analyzer_install
 
-#RUN ./entrypoint.sh cutter_soft_install #TODO: fix install
+RUN ./entrypoint.sh cutter_soft_install
 #RUN ./entrypoint.sh qiling_soft_install # TODO: resolve some debconf
 
 # Cleaning and quitting

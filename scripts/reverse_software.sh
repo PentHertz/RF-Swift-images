@@ -93,7 +93,7 @@ function ghidra_soft_install() {
 	installfromnet "wget https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_${ghidra_version}_build/${prog}.zip"
 	unzip "$prog"
 	cd "ghidra_${ghidra_version}_PUBLIC"
-	ln -s ghidraRun /usr/sbin/ghidraRun
+	ln -s $(pwd)/ghidraRun /usr/sbin/ghidraRun
 	cd ..
 	rm "$prog.zip"
 }
@@ -107,6 +107,15 @@ function qiling_soft_install() {
 	git clone -b dev https://github.com/qilingframework/qiling.git
 	cd qiling && git submodule update --init --recursive
 	pip3 install .
+}
+
+function emba_soft_install() {
+	goodecho "[+] Cloning and installing Qiling"
+	[ -d /reverse ] || mkdir /reverse
+	cd /reverse
+	gitinstall "https://github.com/e-m-b-a/emba.git" "emba_soft_install"
+	cd emba
+	sudo ./installer.sh -d
 }
 
 ### TODO: more More!
