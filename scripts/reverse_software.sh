@@ -50,6 +50,18 @@ function radare2_soft_install() {
 	cd radare2 ; sys/install.sh
 }
 
+function binwalkv3_soft_install() {
+	goodecho "[+] Installing Binwalk v3 dependencies"
+	install_dependencies "p7zip-full zstd unzip tar sleuthkit cabextract lz4 lzop device-tree-compiler unrar"
+	[ -d /reverse ] || mkdir -p /reverse
+	cd /reverse
+	goodecho "[+] Installing Binwalk v3"
+	gitinstall "https://github.com/ReFirmLabs/binwalk.git" "binwalkv3_soft_install" "binwalkv3"
+	cd binwalk
+	cargo build --release
+	ln -s $(pwd)/target/release/binwalk /usr/bin/binwalkv3
+}
+
 function binwalk_soft_install() {
 	goodecho "[+] Installing Binwalk"
 	installfromnet "apt-fast install -y binwalk"
@@ -57,9 +69,9 @@ function binwalk_soft_install() {
 
 function cutter_soft_install() { # TODO: fix installation
 	goodecho "[+] Installing Cutter dependencies"
-	installfromnet "apt-fast install -y build-essential cmake meson libzip-dev zlib1g-dev qt5-default libqt5svg5-dev qttools5-dev qttools5-dev-tools libkf5syntaxhighlighting-dev libgraphviz-dev libshiboken2-dev libpyside2-dev  qtdeclarative5-dev"
+	install_dependencies "cmake meson pkgconf libzip-dev zlib1g-dev qt6-base-dev qt6-tools-dev qt6-tools-dev-tools libqt6svg6-dev libqt6core5compat6-dev libqt6svgwidgets6 qt6-l10n-tools libqt6opengl6-dev"
 	goodecho "[+] Cloning Cutter"
-	[ -d /reverse ] || mkdir /reverse
+	[ -d /reverse ] || mkdir -p /reverse
 	cd /reverse
 	installfromnet "git clone --recurse-submodules https://github.com/rizinorg/cutter"
 	cd cutter
