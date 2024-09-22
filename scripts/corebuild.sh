@@ -59,3 +59,10 @@ function audio_tools () {
     goodecho "[+] Installing audio tools from package manager"
     installfromnet "apt-fast install -y audacity sox"
 }
+
+function rust_tools () {
+    goodecho "[+] Installing RUST tools"
+    installfromnet "apt-fast install -y cargo"
+    curl --proto '=https' --tlsv1.3 https://sh.rustup.rs -sSf | sh -s -- -y
+    source $HOME/.cargo/env
+}
