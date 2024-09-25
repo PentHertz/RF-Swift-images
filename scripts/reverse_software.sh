@@ -118,4 +118,22 @@ function emba_soft_install() {
 	sudo ./installer.sh -d
 }
 
+function imhex_soft_install() {
+	goodecho "[+] Cloning and installing ImHex"
+	[ -d /reverse ] || mkdir /reverse
+	cd /reverse
+	gitinstall "https://github.com/WerWolv/ImHex" "imhex_soft_install"
+	cd ImHex
+	chmod +x dist/get_deps_debian.sh
+	goodecho "[+] Installing ImHex dependencies"
+	installfromnet "sh -c ./dist/get_deps_debian.sh"
+	mkdir -p build
+	cd build
+	cmake -G "Ninja"                              \
+	    -DCMAKE_BUILD_TYPE=Release                \
+	    -DCMAKE_INSTALL_PREFIX="/usr"             \
+	    ..
+	ninja install
+}
+
 ### TODO: more More!
