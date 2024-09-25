@@ -129,6 +129,7 @@ function imhex_soft_install() {
 	installfromnet "sh -c ./dist/get_deps_debian.sh"
 	mkdir -p build
 	cd build
+	CC=gcc-12 CXX=g++-12                          \
 	cmake -G "Ninja"                              \
 	    -DCMAKE_BUILD_TYPE=Release                \
 	    -DCMAKE_INSTALL_PREFIX="/usr"             \
