@@ -32,9 +32,9 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job::true"
+            echo "::set-output name=run_job_corebuild::true"
           else
-            echo "::set-output name=run_job::false"
+            echo "::set-output name=run_job_corebuild::false"
           fi
 
       - name: Set up Docker Buildx
@@ -50,7 +50,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push corebuild image with caching
-        if: steps.file_check.outputs.run_job == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true'
         run: |
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make common
@@ -72,7 +72,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Create and push multi-arch manifest for corebuild
-        if: steps.file_check.outputs.run_job == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true'
         run: |
           tagname=corebuild
 
