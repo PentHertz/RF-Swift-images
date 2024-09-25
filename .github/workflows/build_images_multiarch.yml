@@ -119,6 +119,12 @@ jobs:
           git fetch origin
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
+            echo "::set-output name=run_job_corebuild::true"
+          else
+            echo "::set-output name=run_job_corebuild::false"
+          fi
+
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
             echo "::set-output name=run_job_sdrsa_devices::true"
           else
@@ -207,6 +213,17 @@ jobs:
           git fetch origin
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
+            echo "::set-output name=run_job_corebuild::true"
+          else
+            echo "::set-output name=run_job_corebuild::false"
+          fi
+
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "::set-output name=run_job_sdrsa_devices::true"
+          else
+            echo "::set-output name=run_job_sdrsa_devices::false"
+          fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light_antsdr.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
             echo "::set-output name=run_job_sdrsa_antsdr_devices::true"
           else
@@ -295,6 +312,17 @@ jobs:
           git fetch origin
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
+            echo "::set-output name=run_job_corebuild::true"
+          else
+            echo "::set-output name=run_job_corebuild::false"
+          fi
+
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "::set-output name=run_job_sdrsa_devices::true"
+          else
+            echo "::set-output name=run_job_sdrsa_devices::false"
+          fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light_rtlsdrv4.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
             echo "::set-output name=run_job_sdrsa_rtlsdrv4_devices::true"
           else
@@ -383,7 +411,18 @@ jobs:
           git fetch origin
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
-          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light_rtlsdrv4.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
+            echo "::set-output name=run_job_corebuild::true"
+          else
+            echo "::set-output name=run_job_corebuild::false"
+          fi
+          
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "::set-output name=run_job_sdrsa_devices::true"
+          else
+            echo "::set-output name=run_job_sdrsa_devices::false"
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
             echo "::set-output name=run_job_sdr_light::true"
           else
             echo "::set-output name=run_job_sdr_light::false"
@@ -471,6 +510,22 @@ jobs:
           git fetch origin
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
+            echo "::set-output name=run_job_corebuild::true"
+          else
+            echo "::set-output name=run_job_corebuild::false"
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "::set-output name=run_job_sdrsa_devices::true"
+          else
+            echo "::set-output name=run_job_sdrsa_devices::false"
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "::set-output name=run_job_sdr_light::true"
+          else
+            echo "::set-output name=run_job_sdr_light::false"
+          fi
+
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light_intelgpu.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || steps.file_check.outputs.run_job_sdr_light == 'true' || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
             echo "::set-output name=run_job_sdr_light_intelgpu::true"
           else
@@ -514,6 +569,22 @@ jobs:
           git fetch origin
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
+            echo "::set-output name=run_job_corebuild::true"
+          else
+            echo "::set-output name=run_job_corebuild::false"
+          fi
+          
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "::set-output name=run_job_sdrsa_devices::true"
+          else
+            echo "::set-output name=run_job_sdrsa_devices::false"
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "::set-output name=run_job_sdr_light::true"
+          else
+            echo "::set-output name=run_job_sdr_light::false"
+          fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light_nvidiagpu.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || steps.file_check.outputs.run_job_sdr_light == 'true' || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
             echo "::set-output name=run_job_sdr_light_nvidiagpu::true"
           else
@@ -557,6 +628,22 @@ jobs:
           git fetch origin
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
+            echo "::set-output name=run_job_corebuild::true"
+          else
+            echo "::set-output name=run_job_corebuild::false"
+          fi
+          
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "::set-output name=run_job_sdrsa_devices::true"
+          else
+            echo "::set-output name=run_job_sdrsa_devices::false"
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "::set-output name=run_job_sdr_light::true"
+          else
+            echo "::set-output name=run_job_sdr_light::false"
+          fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR_full.docker"* || "$MODIFIED_FILES" == *"scripts/sdr_softwares.sh"* || "$MODIFIED_FILES" == *"scripts/gr_oot_modules.sh"* ]]; then
             echo "::set-output name=run_job_sdrfull::true"
           else
@@ -645,6 +732,27 @@ jobs:
           git fetch origin
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
+            echo "::set-output name=run_job_corebuild::true"
+          else
+            echo "::set-output name=run_job_corebuild::false"
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "::set-output name=run_job_sdrsa_devices::true"
+          else
+            echo "::set-output name=run_job_sdrsa_devices::false"
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "::set-output name=run_job_sdr_light::true"
+          else
+            echo "::set-output name=run_job_sdr_light::false"
+          fi
+
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light_intelgpu.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || steps.file_check.outputs.run_job_sdr_light == 'true' || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "::set-output name=run_job_sdr_light_intelgpu::true"
+          else
+            echo "::set-output name=run_job_sdr_light_intelgpu::false"
+          fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR_full.docker"* || "$MODIFIED_FILES" == *"scripts/sdr_softwares.sh"* || "$MODIFIED_FILES" == *"scripts/gr_oot_modules.sh"* ]]; then
             echo "::set-output name=run_job_sdrfull_intelgpu::true"
           else
@@ -688,6 +796,27 @@ jobs:
           git fetch origin
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
+            echo "::set-output name=run_job_corebuild::true"
+          else
+            echo "::set-output name=run_job_corebuild::false"
+          fi
+          
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "::set-output name=run_job_sdrsa_devices::true"
+          else
+            echo "::set-output name=run_job_sdrsa_devices::false"
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light_rtlsdrv4.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "::set-output name=run_job_sdr_light::true"
+          else
+            echo "::set-output name=run_job_sdr_light::false"
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light_nvidiagpu.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || steps.file_check.outputs.run_job_sdr_light == 'true' || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "::set-output name=run_job_sdr_light_nvidiagpu::true"
+          else
+            echo "::set-output name=run_job_sdr_light_nvidiagpu::false"
+          fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR_full.docker"* || "$MODIFIED_FILES" == *"scripts/sdr_softwares.sh"* || "$MODIFIED_FILES" == *"scripts/gr_oot_modules.sh"* ]]; then
             echo "::set-output name=run_job_sdrfull_nvidiagpu::true"
           else
@@ -731,6 +860,17 @@ jobs:
           git fetch origin
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
+            echo "::set-output name=run_job_corebuild::true"
+          else
+            echo "::set-output name=run_job_corebuild::false"
+          fi
+
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "::set-output name=run_job_sdrsa_devices::true"
+          else
+            echo "::set-output name=run_job_sdrsa_devices::false"
+          fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
             echo "::set-output name=run_job_telecom::true"
           else
@@ -816,6 +956,17 @@ jobs:
           git fetch origin
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
+            echo "::set-output name=run_job_corebuild::true"
+          else
+            echo "::set-output name=run_job_corebuild::false"
+          fi
+
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "::set-output name=run_job_sdrsa_devices::true"
+          else
+            echo "::set-output name=run_job_sdrsa_devices::false"
+          fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/wifi.docker"* || "$MODIFIED_FILES" == *"scripts/rf_tools.sh"* ]]; then
             echo "::set-output name=run_job_wifi::true"
           else
@@ -904,6 +1055,17 @@ jobs:
           git fetch origin
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
+            echo "::set-output name=run_job_corebuild::true"
+          else
+            echo "::set-output name=run_job_corebuild::false"
+          fi
+
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "::set-output name=run_job_sdrsa_devices::true"
+          else
+            echo "::set-output name=run_job_sdrsa_devices::false"
+          fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/bluetooth.docker"* || "$MODIFIED_FILES" == *"scripts/rf_tools.sh"* ]]; then
             echo "::set-output name=run_job_bt::true"
           else
@@ -992,6 +1154,11 @@ jobs:
           git fetch origin
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
+            echo "::set-output name=run_job_corebuild::true"
+          else
+            echo "::set-output name=run_job_corebuild::false"
+          fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/rfid.docker"* || "$MODIFIED_FILES" == *"scripts/rf_tools.sh"* ]]; then
             echo "::set-output name=run_job_rfid::true"
           else
@@ -1080,6 +1247,11 @@ jobs:
           git fetch origin
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
+            echo "::set-output name=run_job_corebuild::true"
+          else
+            echo "::set-output name=run_job_corebuild::false"
+          fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/automotive.docker"* || "$MODIFIED_FILES" == *"scripts/automotive_software.sh"* ]]; then
             echo "::set-output name=run_job_automotive::true"
           else
@@ -1166,6 +1338,11 @@ jobs:
           git fetch origin
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
+            echo "::set-output name=run_job_corebuild::true"
+          else
+            echo "::set-output name=run_job_corebuild::false"
+          fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/reversing.docker"* || "$MODIFIED_FILES" == *"scripts/reverse_software.sh"* || "$MODIFIED_FILES" == *"scripts/sast_software.sh"* ]]; then
             echo "::set-output name=run_job_reversing::true"
           else
