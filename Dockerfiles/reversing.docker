@@ -36,10 +36,10 @@ RUN ./entrypoint.sh LLVM_install && \
 	./entrypoint.sh cppcheck_install && \
 	./entrypoint.sh clang_static_analyzer_install
 
-RUN ./entrypoint.sh cutter_soft_install
+RUN ./entrypoint.sh cutter_soft_install \
+	./entrypoint.sh imhex_soft_install
 #RUN ./entrypoint.sh qiling_soft_install # TODO: resolve some debconf
 #RUN ./entrypoint.sh emba_soft_install # TODO: takes lot of time
-RUN ./entrypoint.sh imhex_soft_install
 
 # Cleaning and quitting
 WORKDIR /root/

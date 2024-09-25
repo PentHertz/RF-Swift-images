@@ -1,0 +1,42 @@
+# This DockerFile is part of the RFSwift project
+# Install type: SDR full
+# Author(s): Sébastien Dudek (@FlUxIuS) @Penthertz
+# website: penthertz.com
+
+ARG BASE_IMAGE=sdr_light
+FROM ${BASE_IMAGE}
+
+LABEL "org.container.project"="rfswift"
+LABEL "org.container.author"="Sébastien Dudek (FlUxIuS)"
+
+RUN echo 'APT::Install-Suggests "0";' >> /etc/apt/apt.conf.d/00-docker
+RUN echo 'APT::Install-Recommends "0";' >> /etc/apt/apt.conf.d/00-docker
+
+RUN apt-fast update
+
+COPY scripts /root/scripts/
+COPY rules /root/rules/
+COPY config /root/config/
+
+WORKDIR /root/scripts/
+RUN chmod +x entrypoint.sh
+
+# Installing OpenCL
+## NVidia drivers
+RUN apt-fast install -y nvidia-opencl-dev nvidia-modprobe
+
+# Installing gr-fosphor with OpenCL
+RUN ./entrypoint.sh grfosphor_grmod_install
+
+# Reinstalling SDRPP with GPU support
+RUN ./entrypoint.sh sdrpp_soft_fromsource_install
+
+RUN mkdir -p /sdrtools/
+COPY run /sdrtools/run
+
+# Cleaning and quitting
+WORKDIR /root/
+RUN rm -rf /root/thirdparty
+RUN rm -rf /root/rules/
+RUN apt-fast clean
+RUN DEBIAN_FRONTEND=noninteractive rm -rf /var/lib/apt/lists/*

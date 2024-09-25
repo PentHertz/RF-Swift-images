@@ -64,6 +64,12 @@ sdrsadevicesrtlsdrv4:
 sdrlight:
 	$(call build_and_push,sdr_light,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices_$(ARCH),$(CURDIR)/SDR/sdr_light.docker)
 
+sdrlight_intelgpu:
+	$(call build_and_push,sdr_light_intelgpu,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices_$(ARCH),$(CURDIR)/SDR/sdr_light_intelgpu.docker)
+
+sdrlight_nvidiagpu:
+	$(call build_and_push,sdr_light_nvidiagpu,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices_$(ARCH),$(CURDIR)/SDR/sdr_light_nvidiagpu.docker)
+
 sdrfull1:
 	$(call build_and_push,extraoot1,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light_$(ARCH) --build-arg JMPSTAGE1=begin --build-arg JMPSTAGE2=begin --build-arg JMPSTAGE3=begin --build-arg JMPSTAGE4=begin --target extraoot1,$(CURDIR)/SDR/sdr_full.docker)
 
