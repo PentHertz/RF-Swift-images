@@ -17,7 +17,6 @@ COPY rules /root/rules/
 COPY config /root/config/
 COPY run/update_rfscripts /usr/sbin
 
-
 WORKDIR /root/scripts/
 RUN chmod +x entrypoint.sh
 
