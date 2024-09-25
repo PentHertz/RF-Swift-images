@@ -17,6 +17,7 @@ jobs:
     strategy:
       matrix:
         platform: [amd64, arm64, riscv64]
+    if: contains(github.event.head_commit.message, 'Dockerfiles/Makefile') || contains(github.event.head_commit.message, 'config/') || contains(github.event.head_commit.message, 'rules/') || contains(github.event.head_commit.message, 'run/') || contains(github.event.head_commit.message, 'Dockerfiles/corebuild.docker') || contains(github.event.head_commit.message, 'scripts/common.sh') || contains(github.event.head_commit.message, 'scripts/entrypoint.sh') || contains(github.event.head_commit.message, 'scripts/corebuild.sh')
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -41,6 +42,7 @@ jobs:
   corebuild-manifest:
     runs-on: ubuntu-latest
     needs: corebuild
+    if: contains(github.event.head_commit.message, 'Dockerfiles/Makefile') || contains(github.event.head_commit.message, 'config/') || contains(github.event.head_commit.message, 'rules/') || contains(github.event.head_commit.message, 'run/') || contains(github.event.head_commit.message, 'Dockerfiles/corebuild.docker') || contains(github.event.head_commit.message, 'scripts/common.sh') || contains(github.event.head_commit.message, 'scripts/entrypoint.sh') || contains(github.event.head_commit.message, 'scripts/corebuild.sh')
     steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -86,6 +88,7 @@ jobs:
     strategy:
       matrix:
         platform: [amd64, arm64, riscv64]
+    if: contains(github.event.head_commit.message, 'Dockerfiles/Makefile') || contains(github.event.head_commit.message, 'config/') || contains(github.event.head_commit.message, 'rules/') || contains(github.event.head_commit.message, 'run/') || contains(github.event.head_commit.message, 'Dockerfiles/sdrsa_devices.docker') || contains(github.event.head_commit.message, 'scripts/common.sh') || contains(github.event.head_commit.message, 'scripts/entrypoint.sh') || contains(github.event.head_commit.message, 'scripts/sa_devices.sh') || contains(github.event.head_commit.message, 'scripts/sdr_peripherals.sh')
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -109,6 +112,7 @@ jobs:
   sdrsa_devices-manifest:
     runs-on: ubuntu-latest
     needs: sdrsa_devices
+    if: contains(github.event.head_commit.message, 'Dockerfiles/Makefile') || contains(github.event.head_commit.message, 'config/') || contains(github.event.head_commit.message, 'rules/') || contains(github.event.head_commit.message, 'run/') || contains(github.event.head_commit.message, 'Dockerfiles/sdrsa_devices.docker') || contains(github.event.head_commit.message, 'scripts/common.sh') || contains(github.event.head_commit.message, 'scripts/entrypoint.sh') || contains(github.event.head_commit.message, 'scripts/sa_devices.sh') || contains(github.event.head_commit.message, 'scripts/sdr_peripherals.sh')
     steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -154,6 +158,7 @@ jobs:
     strategy:
       matrix:
         platform: [amd64, arm64, riscv64]
+    if: contains(github.event.head_commit.message, 'Dockerfiles/Makefile') || contains(github.event.head_commit.message, 'config/') || contains(github.event.head_commit.message, 'rules/') || contains(github.event.head_commit.message, 'run/') || contains(github.event.head_commit.message, 'Dockerfiles/sdr_light_antsdr.docker') || contains(github.event.head_commit.message, 'scripts/common.sh') || contains(github.event.head_commit.message, 'scripts/entrypoint.sh') || contains(github.event.head_commit.message, 'scripts/sa_devices.sh') || contains(github.event.head_commit.message, 'scripts/sdr_peripherals.sh')
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -177,6 +182,7 @@ jobs:
   sdrsa_devices_antsdr-manifest:
     runs-on: ubuntu-latest
     needs: sdrsa_devices_antsdr
+    if: contains(github.event.head_commit.message, 'Dockerfiles/Makefile') || contains(github.event.head_commit.message, 'config/') || contains(github.event.head_commit.message, 'rules/') || contains(github.event.head_commit.message, 'run/') || contains(github.event.head_commit.message, 'Dockerfiles/sdr_light_antsdr.docker') || contains(github.event.head_commit.message, 'scripts/common.sh') || contains(github.event.head_commit.message, 'scripts/entrypoint.sh') || contains(github.event.head_commit.message, 'scripts/sa_devices.sh') || contains(github.event.head_commit.message, 'scripts/sdr_peripherals.sh')
     steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -222,6 +228,7 @@ jobs:
     strategy:
       matrix:
         platform: [amd64, arm64, riscv64]
+    if: contains(github.event.head_commit.message, 'Dockerfiles/Makefile') || contains(github.event.head_commit.message, 'config/') || contains(github.event.head_commit.message, 'rules/') || contains(github.event.head_commit.message, 'run/') || contains(github.event.head_commit.message, 'Dockerfiles/sdr_light_rtlsdrv4.docker') || contains(github.event.head_commit.message, 'scripts/common.sh') || contains(github.event.head_commit.message, 'scripts/entrypoint.sh') || contains(github.event.head_commit.message, 'scripts/sa_devices.sh') || contains(github.event.head_commit.message, 'scripts/sdr_peripherals.sh')
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -245,6 +252,7 @@ jobs:
   sdrsa_devices_rtlsdrv4-manifest:
     runs-on: ubuntu-latest
     needs: sdrsa_devices_rtlsdrv4
+    if: contains(github.event.head_commit.message, 'Dockerfiles/Makefile') || contains(github.event.head_commit.message, 'config/') || contains(github.event.head_commit.message, 'rules/') || contains(github.event.head_commit.message, 'run/') || contains(github.event.head_commit.message, 'Dockerfiles/sdr_light_rtlsdrv4.docker') || contains(github.event.head_commit.message, 'scripts/common.sh') || contains(github.event.head_commit.message, 'scripts/entrypoint.sh') || contains(github.event.head_commit.message, 'scripts/sa_devices.sh') || contains(github.event.head_commit.message, 'scripts/sdr_peripherals.sh')
     steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -290,6 +298,7 @@ jobs:
     strategy:
       matrix:
         platform: [amd64, arm64, riscv64]
+    if: contains(github.event.head_commit.message, 'Dockerfiles/Makefile') || contains(github.event.head_commit.message, 'config/') || contains(github.event.head_commit.message, 'rules/') || contains(github.event.head_commit.message, 'run/') || contains(github.event.head_commit.message, 'Dockerfiles/sdr_light.docker') || contains(github.event.head_commit.message, 'scripts/common.sh') || contains(github.event.head_commit.message, 'scripts/entrypoint.sh') || contains(github.event.head_commit.message, 'scripts/cal_devices.sh') || contains(github.event.head_commit.message, 'scripts/sdr_softwares.sh')
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -313,6 +322,7 @@ jobs:
   sdr_light-manifest:
     runs-on: ubuntu-latest
     needs: sdr_light
+    if: contains(github.event.head_commit.message, 'Dockerfiles/Makefile') || contains(github.event.head_commit.message, 'config/') || contains(github.event.head_commit.message, 'rules/') || contains(github.event.head_commit.message, 'run/') || contains(github.event.head_commit.message, 'Dockerfiles/sdr_light.docker') || contains(github.event.head_commit.message, 'scripts/common.sh') || contains(github.event.head_commit.message, 'scripts/entrypoint.sh') || contains(github.event.head_commit.message, 'scripts/cal_devices.sh') || contains(github.event.head_commit.message, 'scripts/sdr_softwares.sh')
     steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -358,6 +368,7 @@ jobs:
     strategy:
       matrix:
         platform: [amd64, arm64, riscv64]
+    if: contains(github.event.head_commit.message, 'Dockerfiles/Makefile') || contains(github.event.head_commit.message, 'config/') || contains(github.event.head_commit.message, 'rules/') || contains(github.event.head_commit.message, 'run/') || contains(github.event.head_commit.message, 'Dockerfiles/sdr_light.docker') || contains(github.event.head_commit.message, 'scripts/common.sh') || contains(github.event.head_commit.message, 'scripts/entrypoint.sh') || contains(github.event.head_commit.message, 'scripts/gr_oot_modules.sh') || contains(github.event.head_commit.message, 'scripts/cal_devices.sh') || contains(github.event.head_commit.message, 'scripts/sdr_softwares.sh')
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -384,6 +395,7 @@ jobs:
     strategy:
       matrix:
         platform: [amd64, arm64, riscv64]
+    if: contains(github.event.head_commit.message, 'Dockerfiles/Makefile') || contains(github.event.head_commit.message, 'config/') || contains(github.event.head_commit.message, 'rules/') || contains(github.event.head_commit.message, 'run/') || contains(github.event.head_commit.message, 'Dockerfiles/sdr_light.docker') || contains(github.event.head_commit.message, 'scripts/common.sh') || contains(github.event.head_commit.message, 'scripts/entrypoint.sh') || contains(github.event.head_commit.message, 'scripts/gr_oot_modules.sh') || contains(github.event.head_commit.message, 'scripts/cal_devices.sh') || contains(github.event.head_commit.message, 'scripts/sdr_softwares.sh')
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -410,6 +422,7 @@ jobs:
     strategy:
       matrix:
         platform: [amd64, arm64, riscv64]
+    if: contains(github.event.head_commit.message, 'Dockerfiles/Makefile') || contains(github.event.head_commit.message, 'config/') || contains(github.event.head_commit.message, 'rules/') || contains(github.event.head_commit.message, 'run/') || contains(github.event.head_commit.message, 'Dockerfiles/sdr_full.docker') || contains(github.event.head_commit.message, 'scripts/common.sh') || contains(github.event.head_commit.message, 'scripts/entrypoint.sh') || contains(github.event.head_commit.message, 'scripts/gr_oot_modules.sh') || contains(github.event.head_commit.message, 'scripts/cal_devices.sh') || contains(github.event.head_commit.message, 'scripts/sdr_softwares.sh')
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -436,6 +449,7 @@ jobs:
     strategy:
       matrix:
         platform: [amd64, arm64, riscv64]
+    if: contains(github.event.head_commit.message, 'Dockerfiles/Makefile') || contains(github.event.head_commit.message, 'config/') || contains(github.event.head_commit.message, 'rules/') || contains(github.event.head_commit.message, 'run/') || contains(github.event.head_commit.message, 'Dockerfiles/sdr_full.docker') || contains(github.event.head_commit.message, 'scripts/common.sh') || contains(github.event.head_commit.message, 'scripts/entrypoint.sh') || contains(github.event.head_commit.message, 'scripts/gr_oot_modules.sh') || contains(github.event.head_commit.message, 'scripts/cal_devices.sh') || contains(github.event.head_commit.message, 'scripts/sdr_softwares.sh') || contains(github.event.head_commit.message, 'scripts/lab_software.sh')
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -462,6 +476,7 @@ jobs:
     strategy:
       matrix:
         platform: [amd64, arm64]
+    if: contains(github.event.head_commit.message, 'Dockerfiles/Makefile') || contains(github.event.head_commit.message, 'config/') || contains(github.event.head_commit.message, 'rules/') || contains(github.event.head_commit.message, 'run/') || contains(github.event.head_commit.message, 'Dockerfiles/telecom.docker') || contains(github.event.head_commit.message, 'scripts/common.sh') || contains(github.event.head_commit.message, 'scripts/entrypoint.sh') || contains(github.event.head_commit.message, 'scripts/telecom_software.sh')
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -485,6 +500,7 @@ jobs:
   telecom-manifest:
     runs-on: ubuntu-latest
     needs: telecom
+    if: contains(github.event.head_commit.message, 'Dockerfiles/Makefile') || contains(github.event.head_commit.message, 'config/') || contains(github.event.head_commit.message, 'rules/') || contains(github.event.head_commit.message, 'run/') || contains(github.event.head_commit.message, 'Dockerfiles/telecom.docker') || contains(github.event.head_commit.message, 'scripts/common.sh') || contains(github.event.head_commit.message, 'scripts/entrypoint.sh') || contains(github.event.head_commit.message, 'scripts/telecom_software.sh')
     steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -527,6 +543,7 @@ jobs:
     strategy:
       matrix:
         platform: [amd64, arm64, riscv64]
+    if: contains(github.event.head_commit.message, 'Dockerfiles/Makefile') || contains(github.event.head_commit.message, 'config/') || contains(github.event.head_commit.message, 'rules/') || contains(github.event.head_commit.message, 'run/') || contains(github.event.head_commit.message, 'Dockerfiles/wifi.docker') || contains(github.event.head_commit.message, 'scripts/common.sh') || contains(github.event.head_commit.message, 'scripts/entrypoint.sh') || contains(github.event.head_commit.message, 'scripts/rf_tools.sh')
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -550,6 +567,7 @@ jobs:
   wifi-manifest:
     runs-on: ubuntu-latest
     needs: wifi
+    if: contains(github.event.head_commit.message, 'Dockerfiles/Makefile') || contains(github.event.head_commit.message, 'config/') || contains(github.event.head_commit.message, 'rules/') || contains(github.event.head_commit.message, 'run/') || contains(github.event.head_commit.message, 'Dockerfiles/wifi.docker') || contains(github.event.head_commit.message, 'scripts/common.sh') || contains(github.event.head_commit.message, 'scripts/entrypoint.sh') || contains(github.event.head_commit.message, 'scripts/rf_tools.sh')
     steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -595,6 +613,7 @@ jobs:
     strategy:
       matrix:
         platform: [amd64, arm64, riscv64]
+    if: contains(github.event.head_commit.message, 'Dockerfiles/Makefile') || contains(github.event.head_commit.message, 'config/') || contains(github.event.head_commit.message, 'rules/') || contains(github.event.head_commit.message, 'run/') || contains(github.event.head_commit.message, 'Dockerfiles/bluetooth.docker') || contains(github.event.head_commit.message, 'scripts/common.sh') || contains(github.event.head_commit.message, 'scripts/entrypoint.sh') || contains(github.event.head_commit.message, 'scripts/rf_tools.sh')
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -618,6 +637,7 @@ jobs:
   bluetooth-manifest:
     runs-on: ubuntu-latest
     needs: bluetooth
+    if: contains(github.event.head_commit.message, 'Dockerfiles/Makefile') || contains(github.event.head_commit.message, 'config/') || contains(github.event.head_commit.message, 'rules/') || contains(github.event.head_commit.message, 'run/') || contains(github.event.head_commit.message, 'Dockerfiles/bluetooth.docker') || contains(github.event.head_commit.message, 'scripts/common.sh') || contains(github.event.head_commit.message, 'scripts/entrypoint.sh') || contains(github.event.head_commit.message, 'scripts/rf_tools.sh')
     steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -663,6 +683,7 @@ jobs:
     strategy:
       matrix:
         platform: [amd64, arm64, riscv64]
+    if: contains(github.event.head_commit.message, 'Dockerfiles/Makefile') || contains(github.event.head_commit.message, 'config/') || contains(github.event.head_commit.message, 'rules/') || contains(github.event.head_commit.message, 'run/') || contains(github.event.head_commit.message, 'Dockerfiles/rfid.docker') || contains(github.event.head_commit.message, 'scripts/common.sh') || contains(github.event.head_commit.message, 'scripts/entrypoint.sh') || contains(github.event.head_commit.message, 'scripts/rf_tools.sh')
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -686,6 +707,7 @@ jobs:
   rfid-manifest:
     runs-on: ubuntu-latest
     needs: rfid
+    if: contains(github.event.head_commit.message, 'Dockerfiles/Makefile') || contains(github.event.head_commit.message, 'config/') || contains(github.event.head_commit.message, 'rules/') || contains(github.event.head_commit.message, 'run/') || contains(github.event.head_commit.message, 'Dockerfiles/rfid.docker') || contains(github.event.head_commit.message, 'scripts/common.sh') || contains(github.event.head_commit.message, 'scripts/entrypoint.sh') || contains(github.event.head_commit.message, 'scripts/rf_tools.sh')
     steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -731,6 +753,7 @@ jobs:
     strategy:
       matrix:
         platform: [amd64, arm64]
+    if: contains(github.event.head_commit.message, 'Dockerfiles/Makefile') || contains(github.event.head_commit.message, 'config/') || contains(github.event.head_commit.message, 'rules/') || contains(github.event.head_commit.message, 'run/') || contains(github.event.head_commit.message, 'Dockerfiles/automotive.docker') || contains(github.event.head_commit.message, 'scripts/common.sh') || contains(github.event.head_commit.message, 'scripts/entrypoint.sh') || contains(github.event.head_commit.message, 'scripts/automotive_software.sh')
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -754,6 +777,7 @@ jobs:
   automotive-manifest:
     runs-on: ubuntu-latest
     needs: automotive
+    if: contains(github.event.head_commit.message, 'Dockerfiles/Makefile') || contains(github.event.head_commit.message, 'config/') || contains(github.event.head_commit.message, 'rules/') || contains(github.event.head_commit.message, 'run/') || contains(github.event.head_commit.message, 'Dockerfiles/automotive.docker') || contains(github.event.head_commit.message, 'scripts/common.sh') || contains(github.event.head_commit.message, 'scripts/entrypoint.sh') || contains(github.event.head_commit.message, 'scripts/automotive_software.sh')
     steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -797,6 +821,7 @@ jobs:
     strategy:
       matrix:
         platform: [amd64, arm64]
+    if: contains(github.event.head_commit.message, 'Dockerfiles/Makefile') || contains(github.event.head_commit.message, 'config/') || contains(github.event.head_commit.message, 'rules/') || contains(github.event.head_commit.message, 'run/') || contains(github.event.head_commit.message, 'Dockerfiles/reversing.docker') || contains(github.event.head_commit.message, 'scripts/common.sh') || contains(github.event.head_commit.message, 'scripts/entrypoint.sh') || contains(github.event.head_commit.message, 'scripts/reverse_software.sh')
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -820,6 +845,7 @@ jobs:
   reversing-manifest:
     runs-on: ubuntu-latest
     needs: reversing
+    if: contains(github.event.head_commit.message, 'Dockerfiles/Makefile') || contains(github.event.head_commit.message, 'config/') || contains(github.event.head_commit.message, 'rules/') || contains(github.event.head_commit.message, 'run/') || contains(github.event.head_commit.message, 'Dockerfiles/reversing.docker') || contains(github.event.head_commit.message, 'scripts/common.sh') || contains(github.event.head_commit.message, 'scripts/entrypoint.sh') || contains(github.event.head_commit.message, 'scripts/reverse_software.sh')
     steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
