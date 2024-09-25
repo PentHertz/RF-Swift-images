@@ -31,7 +31,7 @@ jobs:
           git fetch origin
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
-          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
+          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "::set-output name=run_job_corebuild::true"
           else
             echo "::set-output name=run_job_corebuild::false"
@@ -191,6 +191,20 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
+
+      - name: Check for modified files
+        id: file_check
+        run: |
+          git fetch origin
+          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light_antsdr.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "::set-output name=run_job_sdrsa_antsdr_devices::true"
+          else
+            echo "::set-output name=run_job_sdrsa_antsdr_devices::false"
+          fi
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -204,6 +218,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push sdr_light image with caching
+        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_antsdr_devices == 'true'
         run: |
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=antsdr_uhd RTLSDR_BASE=rtlsdr make sdrsadevicesantsdr
@@ -225,6 +240,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Create and push multi-arch manifest for sdrsa_devices_antsdr
+        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_antsdr_devices == 'true'
         run: |
           tagname=sdrsa_devices_antsdr
 
@@ -259,6 +275,20 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
+
+      - name: Check for modified files
+        id: file_check
+        run: |
+          git fetch origin
+          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light_rtlsdrv4.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "::set-output name=run_job_sdrsa_rtlsdrv4_devices::true"
+          else
+            echo "::set-output name=run_job_sdrsa_rtlsdrv4_devices::false"
+          fi
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -272,6 +302,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push sdr_light image with caching
+        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_rtlsdrv4_devices == 'true'
         run: |
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=uhd RTLSDR_BASE=rtlsdrv4 make sdrsadevicesrtlsdrv4
@@ -293,6 +324,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Create and push multi-arch manifest for sdrsa_devices_rtlsdrv4
+        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_rtlsdrv4_devices == 'true'
         run: |
           tagname=sdrsa_devices_rtlsdrv4
 
@@ -327,6 +359,20 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
+
+      - name: Check for modified files
+        id: file_check
+        run: |
+          git fetch origin
+          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light_rtlsdrv4.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "::set-output name=run_job_sdr_light::true"
+          else
+            echo "::set-output name=run_job_sdr_light::false"
+          fi
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -340,6 +386,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push sdr_light image with caching
+        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_devices == 'true' && steps.file_check.outputs.run_job_sdr_light == 'true'
         run: |
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrlight
@@ -361,6 +408,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Create and push multi-arch manifest for sdr_light
+        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_devices == 'true' && steps.file_check.outputs.run_job_sdr_light == 'true'
         run: |
           tagname=sdr_light
 
@@ -499,6 +547,20 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
+
+      - name: Check for modified files
+        id: file_check
+        run: |
+          git fetch origin
+          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
+            echo "::set-output name=run_job_telecom::true"
+          else
+            echo "::set-output name=run_job_telecom::false"
+          fi
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -512,6 +574,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push telecom image with caching
+        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_devices == 'true' && steps.file_check.outputs.run_job_telecom == 'true'
         run: |
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make telecom
@@ -533,6 +596,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Create and push multi-arch manifest for telecom
+        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_devices == 'true' && steps.file_check.outputs.run_job_telecom == 'true'
         run: |
           tagname=telecom
 
@@ -564,6 +628,20 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
+
+      - name: Check for modified files
+        id: file_check
+        run: |
+          git fetch origin
+          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/wifi.docker"* || "$MODIFIED_FILES" == *"scripts/rf_tools.sh"* ]]; then
+            echo "::set-output name=run_job_wifi::true"
+          else
+            echo "::set-output name=run_job_wifi::false"
+          fi
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -577,6 +655,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push wifi image with caching
+        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_devices == 'true' && steps.file_check.outputs.run_job_wifi == 'true'
         run: |
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make wifi
@@ -598,6 +677,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Create and push multi-arch manifest for wifi
+        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_devices == 'true' && steps.file_check.outputs.run_job_wifi == 'true'
         run: |
           tagname=wifi_light
 
@@ -632,6 +712,20 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
+
+      - name: Check for modified files
+        id: file_check
+        run: |
+          git fetch origin
+          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/bluetooth.docker"* || "$MODIFIED_FILES" == *"scripts/rf_tools.sh"* ]]; then
+            echo "::set-output name=run_job_bt::true"
+          else
+            echo "::set-output name=run_job_bt::false"
+          fi
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -645,6 +739,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push bluetooth image with caching
+        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_devices == 'true' && steps.file_check.outputs.run_job_bt == 'true'
         run: |
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make bluetooth
@@ -666,6 +761,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Create and push multi-arch manifest for bluetooth
+        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_devices == 'true' && steps.file_check.outputs.run_job_bt == 'true'
         run: |
           tagname=bluetooth
 
@@ -700,6 +796,20 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
+
+      - name: Check for modified files
+        id: file_check
+        run: |
+          git fetch origin
+          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/rfid.docker"* || "$MODIFIED_FILES" == *"scripts/rf_tools.sh"* ]]; then
+            echo "::set-output name=run_job_rfid::true"
+          else
+            echo "::set-output name=run_job_rfid::false"
+          fi
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -713,6 +823,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push rfid image with caching
+        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_devices == 'true' && steps.file_check.outputs.run_job_rfid == 'true'
         run: |
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make rfid
@@ -734,6 +845,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Create and push multi-arch manifest for rfid
+        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_devices == 'true' && steps.file_check.outputs.run_job_rfid == 'true'
         run: |
           tagname=rfid
 
@@ -768,6 +880,20 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
+
+      - name: Check for modified files
+        id: file_check
+        run: |
+          git fetch origin
+          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/automotive.docker"* || "$MODIFIED_FILES" == *"scripts/automotive_software.sh"* ]]; then
+            echo "::set-output name=run_job_automotive::true"
+          else
+            echo "::set-output name=run_job_automotive::false"
+          fi
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -781,6 +907,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push automotive image with caching
+        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_devices == 'true' && steps.file_check.outputs.run_job_automotive == 'true'
         run: |
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make automotive
@@ -802,6 +929,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Create and push multi-arch manifest for automotive
+        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_devices == 'true' && steps.file_check.outputs.run_job_automotive == 'true'
         run: |
           tagname=automotive
 
@@ -834,6 +962,20 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
+
+      - name: Check for modified files
+        id: file_check
+        run: |
+          git fetch origin
+          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/reversing.docker"* || "$MODIFIED_FILES" == *"scripts/reverse_software.sh"* || "$MODIFIED_FILES" == *"scripts/sast_software.sh"* ]]; then
+            echo "::set-output name=run_job_reversing::true"
+          else
+            echo "::set-output name=run_job_reversing::false"
+          fi
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -847,6 +989,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push reversing image with caching
+        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_devices == 'true' && steps.file_check.outputs.run_job_reversing == 'true'
         run: |
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make reversing
@@ -868,6 +1011,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Create and push multi-arch manifest for reversing
+        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_devices == 'true' && steps.file_check.outputs.run_job_reversing == 'true'
         run: |
           tagname=reversing
 
