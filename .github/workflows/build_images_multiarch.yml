@@ -107,6 +107,20 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
+
+      - name: Check for modified files
+        id: file_check
+        run: |
+          git fetch origin
+          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "::set-output name=run_job_sdrsa_devices::true"
+          else
+            echo "::set-output name=run_job_sdrsa_devices::false"
+          fi
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -120,6 +134,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push sdr_light image with caching
+        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_devices == 'true'
         run: |
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=uhd RTLSDR_BASE=rtlsdr make sdrsadevices
@@ -141,6 +156,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Create and push multi-arch manifest for sdrsa_devices
+        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_devices == 'true'
         run: |
           tagname=sdrsa_devices
 
