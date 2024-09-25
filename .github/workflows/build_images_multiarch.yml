@@ -134,7 +134,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push sdr_light image with caching
-        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_devices == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true'
         run: |
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=uhd RTLSDR_BASE=rtlsdr make sdrsadevices
@@ -156,7 +156,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Create and push multi-arch manifest for sdrsa_devices
-        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_devices == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true'
         run: |
           tagname=sdrsa_devices
 
@@ -218,7 +218,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push sdr_light image with caching
-        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_antsdr_devices == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_antsdr_devices == 'true'
         run: |
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=antsdr_uhd RTLSDR_BASE=rtlsdr make sdrsadevicesantsdr
@@ -240,7 +240,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Create and push multi-arch manifest for sdrsa_devices_antsdr
-        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_antsdr_devices == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_antsdr_devices == 'true'
         run: |
           tagname=sdrsa_devices_antsdr
 
@@ -302,7 +302,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push sdr_light image with caching
-        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_rtlsdrv4_devices == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_rtlsdrv4_devices == 'true'
         run: |
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=uhd RTLSDR_BASE=rtlsdrv4 make sdrsadevicesrtlsdrv4
@@ -324,7 +324,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Create and push multi-arch manifest for sdrsa_devices_rtlsdrv4
-        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_rtlsdrv4_devices == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_rtlsdrv4_devices == 'true'
         run: |
           tagname=sdrsa_devices_rtlsdrv4
 
@@ -386,7 +386,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push sdr_light image with caching
-        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_devices == 'true' && steps.file_check.outputs.run_job_sdr_light == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true'
         run: |
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrlight
@@ -408,7 +408,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Create and push multi-arch manifest for sdr_light
-        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_devices == 'true' && steps.file_check.outputs.run_job_sdr_light == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true'
         run: |
           tagname=sdr_light
 
@@ -574,7 +574,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push telecom image with caching
-        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_devices == 'true' && steps.file_check.outputs.run_job_telecom == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true'
         run: |
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make telecom
@@ -596,7 +596,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Create and push multi-arch manifest for telecom
-        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_devices == 'true' && steps.file_check.outputs.run_job_telecom == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true'
         run: |
           tagname=telecom
 
@@ -655,7 +655,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push wifi image with caching
-        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_devices == 'true' && steps.file_check.outputs.run_job_wifi == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_wifi == 'true'
         run: |
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make wifi
@@ -677,7 +677,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Create and push multi-arch manifest for wifi
-        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_devices == 'true' && steps.file_check.outputs.run_job_wifi == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_wifi == 'true'
         run: |
           tagname=wifi_light
 
@@ -739,7 +739,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push bluetooth image with caching
-        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_devices == 'true' && steps.file_check.outputs.run_job_bt == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_bt == 'true'
         run: |
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make bluetooth
@@ -761,7 +761,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Create and push multi-arch manifest for bluetooth
-        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_devices == 'true' && steps.file_check.outputs.run_job_bt == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_bt == 'true'
         run: |
           tagname=bluetooth
 
@@ -823,7 +823,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push rfid image with caching
-        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_devices == 'true' && steps.file_check.outputs.run_job_rfid == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_rfid == 'true'
         run: |
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make rfid
@@ -845,7 +845,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Create and push multi-arch manifest for rfid
-        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_devices == 'true' && steps.file_check.outputs.run_job_rfid == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_rfid == 'true'
         run: |
           tagname=rfid
 
@@ -907,7 +907,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push automotive image with caching
-        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_devices == 'true' && steps.file_check.outputs.run_job_automotive == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_automotive == 'true'
         run: |
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make automotive
@@ -929,7 +929,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Create and push multi-arch manifest for automotive
-        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_devices == 'true' && steps.file_check.outputs.run_job_automotive == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_automotive == 'true'
         run: |
           tagname=automotive
 
@@ -989,7 +989,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push reversing image with caching
-        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_devices == 'true' && steps.file_check.outputs.run_job_reversing == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_reversing == 'true'
         run: |
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make reversing
@@ -1011,7 +1011,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Create and push multi-arch manifest for reversing
-        if: steps.file_check.outputs.run_job_corebuild == 'true' && steps.file_check.outputs.run_job_sdrsa_devices == 'true' && steps.file_check.outputs.run_job_reversing == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_reversing == 'true'
         run: |
           tagname=reversing
 
