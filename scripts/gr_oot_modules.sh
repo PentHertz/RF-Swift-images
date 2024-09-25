@@ -20,7 +20,7 @@ function grlorasdr_grmod_install() {
 
 function grinspector_grmod_install() {
     install_dependencies "libqwt-qt5-dev libspdlog-dev"
-    grclone_and_build "https://github.com/gnuradio/gr-inspector.git" "" "grinspector_grmod_install"
+    grclone_and_build "https://github.com/gnuradio/gr-inspector.git" "" "grinspector_grmod_install" -b "maint-3.10"
 }
 
 function griridium_grmod_install() {
