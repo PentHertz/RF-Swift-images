@@ -549,7 +549,7 @@ jobs:
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true' || steps.file_check.outputs.run_job_sdr_light_intelgpu == 'true'
         run: |
           cd Dockerfiles
-          STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrlight
+          STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrlight_intelgpu
 
   sdr_light_nvidiagpu:
     runs-on: ubuntu-latest
@@ -608,7 +608,7 @@ jobs:
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true' || steps.file_check.outputs.run_job_sdr_light_nvidiagpu == 'true'
         run: |
           cd Dockerfiles
-          STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrlight
+          STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrlight_nvidiagpu
 
   sdr_full:
     runs-on: Linux
