@@ -370,3 +370,10 @@ function wavingz_sdr_soft_install () {
 	cmake .. -DCMAKE_BUILD_TYPE=Release
 	cmake --build .
 }
+
+function gqrxscanner_sdr_soft_install () {
+	[ -d /rftools/sdr ] || mkdir -p /rftools/sdr
+	cd /rftools/sdr
+	goodecho "[+] Cloning and installing gqrx-scanner"
+	cmake_clone_and_build "https://github.com/neural75/gqrx-scanner.git" "build" "" "" "gqrxscanner_sdr_soft_install"
+}

@@ -256,3 +256,37 @@ function grbb60_Receiver_grmod_install() {
     # Clone and build the gr-bb60 repository
     grclone_and_build "https://github.com/SignalHound/gr-bb60.git" "" "grbb60_Receiver_grmod_install"
 }
+
+function grm17_grmod_install() {
+    grclone_and_build "https://github.com/M17-Project/gr-m17.git" "" "grm17_grmod_install"
+}
+
+function grgrnet_grmod_install() {
+    grclone_and_build "https://github.com/ghostop14/gr-grnet.git" "" "grgrnet_grmod_install"
+}
+
+function graoa_grmod_install() {
+    grclone_and_build "https://github.com/MarcinWachowiak/gr-aoa.git" "" "graoa_grmod_install"
+}
+
+function grcorrectiq_grmod_install() {
+    grclone_and_build "https://github.com/ghostop14/gr-correctiq.git" "" "grcorrectiq_grmod_install"
+}
+
+function grdsd_grmod_install() {
+    install_dependencies "libitpp-dev"
+    grclone_and_build "https://github.com/argilo/gr-dsd.git" "" "grdsd_grmod_install"
+}
+
+function grnrsc5_grmod_install() {
+    install_dependencies  "libgsl-dev"
+    grclone_and_build "https://github.com/argilo/gr-nrsc5.git" "" "grnrsc5_grmod_install"
+}
+
+function grntscrc_grmod_install() {
+    grclone_and_build "https://github.com/FlUxIuS/gr-ntsc-rc.git" "" "grntscrc_grmod_install"
+}
+
+function grnfc_grmod_install() {
+    grclone_and_build "https://github.com/FlUxIuS/gr-nfc.git" "" "grnfc_grmod_install"
+}

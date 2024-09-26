@@ -29,7 +29,8 @@ RUN ./entrypoint.sh common_nettools && \
 	./entrypoint.sh Pyrit_soft_install && \
 	./entrypoint.sh eaphammer_soft_install && \
 	./entrypoint.sh airgeddon_soft_install && \
-	./entrypoint.sh wifite2_soft_install
+	./entrypoint.sh wifite2_soft_install && \
+	./entrypoint.sh sparrowwifi_sdr_soft_install
 
 # General monitoring software
 RUN ./entrypoint.sh kismet_soft_install

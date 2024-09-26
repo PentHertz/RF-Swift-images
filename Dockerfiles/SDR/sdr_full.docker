@@ -61,7 +61,16 @@ RUN ./entrypoint.sh grrds_grmod_install && \
 	./entrypoint.sh gr_DCF77_Receiver_grmod_install && \
 	./entrypoint.sh grj2497_grmod_install && \
 	./entrypoint.sh grairmodes_grmod_install && \
-	./entrypoint.sh grbb60_Receiver_grmod_install
+	./entrypoint.sh grbb60_Receiver_grmod_install && \
+	./entrypoint.sh grm17_grmod_install && \
+	./entrypoint.sh grgrnet_grmod_install && \
+	./entrypoint.sh graoa_grmod_install && \
+	./entrypoint.sh grcorrectiq_grmod_install && \
+	./entrypoint.sh grdsd_grmod_install && \
+	./entrypoint.sh grnrsc5_grmod_install && \
+	./entrypoint.sh grntscrc_grmod_install && \
+	./entrypoint.sh grnfc_grmod_install
+
 #RUN ./entrypoint.sh grccsds_move_rtsa_grmod_install #TODO: fix problem with strtod_l dependency
 #RUN ./entrypoint.sh deeptempest_grmod_install
 ## TODO: More more!

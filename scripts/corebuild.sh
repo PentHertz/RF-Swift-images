@@ -38,6 +38,7 @@ function docker_preinstall() {
         libqt5serialbus5-dev qttools5-dev golang-go python3-matplotlib
         pulseaudio-utils libasound2-dev libavahi-client-dev task-lxqt-desktop
         language-pack-en libqwt-qt5-dev python3-click-plugins python3-zmq rsync
+        iw wireless-tools usbutils bluetooth bluez bluez-tools rfkill
     )
 
     # Install apt-fast and all other packages with apt-fast

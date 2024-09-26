@@ -209,3 +209,14 @@ function artemis_soft_install () {
     chmod +x app.py
     ln -s $(pwd)/app.py /usr/sbin/Artemis
 }
+
+function sparrowwifi_sdr_soft_install () { # TODO: to debug
+	[ -d /rftools/wifi ] || mkdir -p /rftools/wifi
+	cd /rftools/wifi
+	goodecho "[+] Cloning and installing sparrow-wifi"
+	gitinstall "https://github.com/ghostop14/sparrow-wifi.git" "sparrowwifi"
+	cd sparrow-wifi
+	install_dependencies "python3-pip gpsd gpsd-clients python3-tk python3-setuptools"
+	installfromnet "pip3 install QScintilla PyQtChart gps3 dronekit manuf python-dateutil numpy matplotlib"
+	installfromnet "pip3 install --upgrade manuf"
+}
