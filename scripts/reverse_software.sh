@@ -78,6 +78,7 @@ function cutter_soft_install() { # TODO: fix installation
 	mkdir build && cd build
 	cmake ..
 	cmake --build .
+	make install
 }
 
 function ghidra_soft_install() {
