@@ -90,7 +90,7 @@ sdrfull_intelgpu:
 	$(call build_and_push,sdr_full_intelgpu,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light_intelgpu_$(ARCH),$(CURDIR)/SDR/sdr_full.docker)
 
 sdrfull_nvidiagpu:
-	$(call build_and_push,sdr_full_nvidiagpu,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrlight_nvidiagpu_$(ARCH),$(CURDIR)/SDR/sdr_full.docker)
+	$(call build_and_push,sdr_full_nvidiagpu,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light_nvidiagpu_$(ARCH),$(CURDIR)/SDR/sdr_full.docker)
 
 rfid:
 	$(call build_and_push,rfid,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild_$(ARCH),$(CURDIR)/rfid.docker)
