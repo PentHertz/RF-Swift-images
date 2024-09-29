@@ -40,6 +40,7 @@ RUN ./entrypoint.sh sdrpp_soft_fromsource_install
 # Calibration tools
 RUN ./entrypoint.sh jupyter_soft_install && \
 	./entrypoint.sh leobodnarv1_cal_device && \
+	./entrypoint.sh leobodnarv2_cal_device && \
 	./entrypoint.sh KCSDI_cal_device && \
 	./entrypoint.sh NanoVNASaver_cal_device_call && \
 	./entrypoint.sh NanoVNA_QT_cal_device

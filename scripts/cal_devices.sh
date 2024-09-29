@@ -10,6 +10,16 @@ function leobodnarv1_cal_device() {
 	cd /root/
 }
 
+function leobodnarv2_cal_device() {
+	goodecho "[+] Installing dependencies for Leobodnar LBE-142x GPSDO"
+	[ -d /rftools/calibration ] || mkdir -p /rftools/calibration
+	cd /rftools/calibration
+	gitinstall "https://github.com/bvernoux/lbe-142x.git" "leobodnarv2_cal_device"
+	mkdir build && cd build
+	cmake ..
+	#usermod -aG plugdev $(whoami)
+}
+
 function KCSDI_cal_device() {
 	goodecho "[+] Installing dependencies for KCSDI"
 	[ -d /rftools/calibration ] || mkdir -p /rftools/calibration
