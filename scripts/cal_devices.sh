@@ -11,14 +11,27 @@ function leobodnarv1_cal_device() {
 }
 
 function leobodnarv2_cal_device() {
-	goodecho "[+] Installing dependencies for Leobodnar LBE-142x GPSDO"
+	goodecho "[+] Installing Leobodnar LBE-142x GPSDO"
 	[ -d /rftools/calibration ] || mkdir -p /rftools/calibration
 	cd /rftools/calibration
 	gitinstall "https://github.com/bvernoux/lbe-142x.git" "leobodnarv2_cal_device"
 	cd lbe-142x
 	mkdir build && cd build
 	cmake ..
+	ln -s $(pwd)/lbe-142x /usr/bin/lbe-142x
 	#usermod -aG plugdev $(whoami)
+}
+
+function gnsslogger_cal_device() {
+	goodecho "[+] Installing dependencies for gnsslogger"
+	[ -d /rftools/calibration ] || mkdir -p /rftools/calibration
+	cd /rftools/calibration
+	gitinstall "https://github.com/bvernoux/gnsslogger.git" "gnsslogger_cal_device"
+	cd gnsslogger
+	mkdir build && cd build
+	cmake -DBUILD_TESTS=ON ..
+	cmake -DBUILD_TESTS=OFF -DCMAKE_BUILD_TYPE=Release ..
+	ln -s $(pwd)/gnsslogger /usr/bin/gnsslogger
 }
 
 function KCSDI_cal_device() {
