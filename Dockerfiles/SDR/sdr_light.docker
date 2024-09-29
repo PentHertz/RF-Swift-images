@@ -51,6 +51,7 @@ RUN ./entrypoint.sh artemis_soft_install && \
 RUN mkdir -p /sdrtools/
 COPY run /sdrtools/run
 
+
 # Cleaning and quitting
 WORKDIR /root/
 RUN rm -rf /root/thirdparty && \
