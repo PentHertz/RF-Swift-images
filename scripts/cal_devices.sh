@@ -15,6 +15,7 @@ function leobodnarv2_cal_device() {
 	[ -d /rftools/calibration ] || mkdir -p /rftools/calibration
 	cd /rftools/calibration
 	gitinstall "https://github.com/bvernoux/lbe-142x.git" "leobodnarv2_cal_device"
+	cd lbe-142x
 	mkdir build && cd build
 	cmake ..
 	#usermod -aG plugdev $(whoami)
