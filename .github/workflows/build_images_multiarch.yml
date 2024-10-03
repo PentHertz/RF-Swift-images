@@ -1135,7 +1135,7 @@ jobs:
 
   telecom_utils-manifest:
     runs-on: ubuntu-latest
-    needs: telecom
+    needs: telecom_utils
     steps:
       - name: Check for modified files
         id: file_check
