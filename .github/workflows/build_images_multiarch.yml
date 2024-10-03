@@ -784,38 +784,6 @@ jobs:
           else
             echo "::set-output name=run_job_corebuild::false"
           fi
-          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdrsa_devices::true"
-          else
-            echo "::set-output name=run_job_sdrsa_devices::false"
-          fi
-          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdr_light::true"
-          else
-            echo "::set-output name=run_job_sdr_light::false"
-          fi
-
-          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light_intelgpu.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || steps.file_check.outputs.run_job_sdr_light == 'true' || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdr_light_intelgpu::true"
-          else
-            echo "::set-output name=run_job_sdr_light_intelgpu::false"
-          fi
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 2 
-
-      - name: Check for modified files
-        id: file_check
-        run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
-          echo "Modified files: $MODIFIED_FILES"
-          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
-          else
-            echo "::set-output name=run_job_corebuild::false"
-          fi
           
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
             echo "::set-output name=run_job_sdrsa_devices::true"
