@@ -102,7 +102,10 @@ function grtempest_grmod_install() {
 function deeptempest_grmod_install() {
     grclone_and_build "https://github.com/PentHertz/deep-tempest.git" "gr-tempest" "deeptempest_grmod_install"
     cd examples
-    grcc *.grc
+    grcc FFT_autocorrelate.grc
+    grcc FFT_crosscorrelate.grc
+    grcc Keep_1_in_N_frames.grc
+    grcc binary_serializer.grc
     mkdir -p /root/.grc_gnuradio
     cp *.block.yml /root/.grc_gnuradio
     cd ../..
@@ -262,7 +265,11 @@ function grm17_grmod_install() {
 }
 
 function grgrnet_grmod_install() {
-    grclone_and_build "https://github.com/ghostop14/gr-grnet.git" "" "grgrnet_grmod_install"
+    ARCH=$(uname -m)
+    if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ] || [ "$ARCH" = "arm64" ] || [ "$ARCH" = "aarch64" ]; then
+        install_dependencies "libpthread-dev libpthread-stubs0-dev"
+        grclone_and_build "https://github.com/ghostop14/gr-grnet.git" "" "grgrnet_grmod_install"
+    fi
 }
 
 function graoa_grmod_install() {
