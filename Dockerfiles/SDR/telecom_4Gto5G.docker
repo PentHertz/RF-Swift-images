@@ -1,10 +1,11 @@
+
 # This DockerFile is part of the RFSwift project
-# Install type: Wi-Fi
+# Install type: Telecom
 # Author(s): Sébastien Dudek (@FlUxIuS) @Penthertz
 # website: penthertz.com
 
-ARG BASE_IMAGE=sdr_light
-FROM ${BASE_IMAGE} AS wifi_light
+ARG BASE_IMAGE=sdrsa_devices
+FROM ${BASE_IMAGE}
 
 LABEL "org.container.project"="rfswift"
 LABEL "org.container.author"="Sébastien Dudek (FlUxIuS)"
@@ -16,27 +17,16 @@ RUN apt-fast update
 
 COPY scripts /root/scripts/
 COPY rules /root/rules/
+COPY config /root/config
 
 WORKDIR /root/scripts/
 RUN chmod +x entrypoint.sh
 
-# Tools for Wi-Fi
-RUN ./entrypoint.sh common_nettools && \
-	./entrypoint.sh aircrack_soft_install && \
-	./entrypoint.sh reaver_soft_install && \
-	./entrypoint.sh bully_soft_install && \
-	./entrypoint.sh pixiewps_soft_install && \
-	./entrypoint.sh Pyrit_soft_install && \
-	./entrypoint.sh eaphammer_soft_install && \
-	./entrypoint.sh airgeddon_soft_install && \
-	./entrypoint.sh wifite2_soft_install && \
-	./entrypoint.sh sparrowwifi_sdr_soft_install
-
-# General monitoring software
-RUN ./entrypoint.sh kismet_soft_install
-
-# Installing bettecap tool
-RUN ./entrypoint.sh bettercap_soft_install
+# Tools for Telecom
+RUN ./entrypoint.sh srsran4G_5GNSA_soft_install && \
+	./entrypoint.sh srsran5GSA_soft_install && \
+	./entrypoint.sh Open5GS_soft_install
+# More to come!
 
 RUN mkdir -p /sdrtools/
 COPY run /sdrtools/run

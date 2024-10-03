@@ -8,7 +8,7 @@ ARG JMPSTAGE1=begin
 ARG JMPSTAGE2=extraoot1
 ARG JMPSTAGE3=extraoot2
 ARG JMPSTAGE4=extrasofts
-FROM ${BASE_IMAGE} as begin
+FROM ${BASE_IMAGE} AS begin
 
 LABEL "org.container.project"="rfswift"
 LABEL "org.container.author"="Sébastien Dudek (FlUxIuS)"
@@ -82,17 +82,7 @@ RUN ./entrypoint.sh grpdu_utils_grmod_install && \
 	./entrypoint.sh grfhss_utils_grmod_install 
 # depends on 'grpdu_utils_grmod_install' and 'grtiming_utils_grmod_install' and 'grsandia_utils_grmod_install'
 
-#FROM extraoot2 as gpumods
-# Installing OpenCL
-## NVidia drivers
-#RUN apt-fast install -y nvidia-opencl-dev nvidia-modprobe
-## Installing Intel's OpenCL
-#RUN apt-fast install -y intel-opencl-icd ocl-icd-dev ocl-icd-opencl-dev
-#
-# Installing gr-fosphor with OpenCL
-#RUN ./entrypoint.sh grfosphor_grmod_install
-
-FROM ${JMPSTAGE3} as extrasofts
+FROM ${JMPSTAGE3} AS extrasofts
 # Installing CyberEther
 RUN ./entrypoint.sh cyberther_soft_install # Enabe OpenCL for better exp
 

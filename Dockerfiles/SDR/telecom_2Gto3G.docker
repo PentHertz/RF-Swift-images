@@ -1,10 +1,10 @@
 # This DockerFile is part of the RFSwift project
-# Install type: SDR full
+# Install type: Telecom
 # Author(s): Sébastien Dudek (@FlUxIuS) @Penthertz
 # website: penthertz.com
 
-ARG BASE_IMAGE=sdr_light
-FROM ${BASE_IMAGE} AS extraoot
+ARG BASE_IMAGE=sdrsa_devices
+FROM ${BASE_IMAGE}
 
 LABEL "org.container.project"="rfswift"
 LABEL "org.container.author"="Sébastien Dudek (FlUxIuS)"
@@ -16,25 +16,25 @@ RUN apt-fast update
 
 COPY scripts /root/scripts/
 COPY rules /root/rules/
-COPY config /root/config/
+COPY config /root/config
 
 WORKDIR /root/scripts/
 RUN chmod +x entrypoint.sh
 
-# Installing GNU Radio + extra OOT modules
-RUN ./entrypoint.sh grgsm_grmod_install
-RUN ./entrypoint.sh grdroineid_grmod_install
-
-FROM extraoot AS mldlsofts
-# Installing extra software
-RUN ./entrypoint.sh ml_and_dl_soft_install
+# Tools for Telecom
+RUN ./entrypoint.sh yatebts_blade2_soft_install && \
+	./entrypoint.sh openbts_uhd_soft_install && \
+	./entrypoint.sh openbts_umts_soft_install && \
+	./entrypoint.sh osmobts_suite_soft_install
+# More to come!
 
 RUN mkdir -p /sdrtools/
 COPY run /sdrtools/run
 
 # Cleaning and quitting
 WORKDIR /root/
-RUN rm -rf /root/thirdparty
+#RUN rm -rf /root/scripts/
 RUN rm -rf /root/rules/
+RUN rm -rf /root/thirdparty
 RUN apt-fast clean
 RUN DEBIAN_FRONTEND=noninteractive rm -rf /var/lib/apt/lists/*

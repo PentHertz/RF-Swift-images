@@ -109,6 +109,30 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} \
           REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=uhd RTLSDR_BASE=rtlsdrv4 make sdrsadevicesrtlsdrv4 
 
+  deeptempest:
+    runs-on: ubuntu-latest
+    needs: sdrsa_devices
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push deeptempest image with caching
+        run: |
+          cd Dockerfiles
+          STORAGE_TYPE=registry ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} \
+          REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make deeptempest 
+
   sdr_light:
     runs-on: ubuntu-latest
     needs: sdrsa_devices
@@ -225,7 +249,7 @@ jobs:
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrfull4
 
-  telecom:
+  telecom_utils:
     runs-on: ubuntu-latest
     needs: sdrsa_devices
     steps:
@@ -243,11 +267,59 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push sdr_full image with caching
+      - name: Build and push telecom_utils image with caching
         run: |
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} \
-          REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make telecom
+          REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make telecom_utils
+
+  telecom_2Gto3G:
+    runs-on: ubuntu-latest
+    needs: telecom_utils
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push telecom_2Gto3G image with caching
+        run: |
+          cd Dockerfiles
+          STORAGE_TYPE=registry ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} \
+          REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make telecom_2Gto3G
+
+  telecom_4Gto5G:
+    runs-on: ubuntu-latest
+    needs: telecom_utils
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push telecom_4Gto5G image with caching
+        run: |
+          cd Dockerfiles
+          STORAGE_TYPE=registry ARCH=${{ env.BUILD_PLATFORMS }} CACHE_REPO=${{ env.CACHE_REPO }} \
+          REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make telecom_4Gto5G
 
   wifi:
     runs-on: ubuntu-latest
