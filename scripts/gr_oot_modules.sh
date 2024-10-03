@@ -101,7 +101,7 @@ function grtempest_grmod_install() {
 
 function deeptempest_grmod_install() {
     grclone_and_build "https://github.com/PentHertz/deep-tempest.git" "gr-tempest" "deeptempest_grmod_install"
-    cd gr-tempest/examples
+    cd examples
     grcc *.grc
     mkdir -p /root/.grc_gnuradio
     cp *.block.yml /root/.grc_gnuradio
