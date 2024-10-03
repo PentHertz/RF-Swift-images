@@ -61,6 +61,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: corebuild
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
       - name: Check for modified files
         id: file_check
         run: |
@@ -165,6 +169,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: sdrsa_devices
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
       - name: Check for modified files
         id: file_check
         run: |
@@ -281,6 +289,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: sdrsa_devices_antsdr
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
       - name: Check for modified files
         id: file_check
         run: |
@@ -402,6 +414,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: sdrsa_devices_rtlsdrv4
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
       - name: Check for modified files
         id: file_check
         run: |
@@ -523,6 +539,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: sdr_light
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
       - name: Check for modified files
         id: file_check
         run: |
@@ -644,6 +664,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: deeptempest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
       - name: Check for modified files
         id: file_check
         run: |
@@ -883,6 +907,10 @@ jobs:
     runs-on: Linux
     needs: sdr_full
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
       - name: Check for modified files
         id: file_check
         run: |
@@ -1137,6 +1165,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: telecom_utils
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
       - name: Check for modified files
         id: file_check
         run: |
@@ -1255,6 +1287,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: telecom_2Gto3G
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
       - name: Check for modified files
         id: file_check
         run: |
@@ -1373,6 +1409,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: telecom_4Gto5G
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
       - name: Check for modified files
         id: file_check
         run: |
@@ -1491,6 +1531,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: wifi
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
       - name: Check for modified files
         id: file_check
         run: |
@@ -1612,6 +1656,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: bluetooth
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
       - name: Check for modified files
         id: file_check
         run: |
@@ -1727,6 +1775,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: rfid
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
       - name: Check for modified files
         id: file_check
         run: |
@@ -1836,6 +1888,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: automotive
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
       - name: Check for modified files
         id: file_check
         run: |
@@ -1943,6 +1999,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: reversing
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
       - name: Check for modified files
         id: file_check
         run: |
