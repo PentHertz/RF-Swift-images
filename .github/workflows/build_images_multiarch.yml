@@ -640,7 +640,7 @@ jobs:
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make deeptempest
 
-  sdr_light-manifest:
+  deeptempest-manifest:
     runs-on: ubuntu-latest
     needs: deeptempest
     steps:
