@@ -62,7 +62,7 @@ function signalhound_vsg60_sa_device() {
         cd /rftools/generators
         installfromnet "wget https://signalhound.com/sigdownloads/VSG60/VSG60(Ubuntu22.04x64)_1_0_15.zip"
         unzip VSG60\(Ubuntu22.04x64\)_1_0_15.zip
-        rm VSG60\(Ubuntu22.04x64\)_1_0_15
+        rm VSG60\(Ubuntu22.04x64\)_1_0_15.zip
         cd VSG60\(Ubuntu22.04x64\)_1_0_15
         chmod +x setup.sh
         sh -c ./setup.sh
