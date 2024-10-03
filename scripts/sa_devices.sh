@@ -34,11 +34,11 @@ function kc908_sa_device() {
     fi
 }
 
-function signalhound_sa_device() {
+function signalhound_spike_sa_device() {
     ARCH=$(uname -m)
     if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then
         colorecho "[+] Architecture is $ARCH, proceeding with installation"
-        colorecho "[+] Downloading bin from SignalHound"
+        colorecho "[+] Downloading Spike bin from SignalHound"
         [ -d /rftools/analysers ] || mkdir -p /rftools/analysers
         cd /rftools/analysers
         installfromnet "wget https://signalhound.com/sigdownloads/Spike/Spike(Ubuntu22.04x64)_3_9_7.zip"
@@ -47,7 +47,26 @@ function signalhound_sa_device() {
         cd Spike\(Ubuntu22.04x64\)_3_9_7/
         chmod +x setup.sh
         sh -c ./setup.sh
-        ln -s Spike /usr/bin/Spike
+        ln -s $(pwd)/Spike /usr/bin/Spike
+    else
+        criticalecho-noexit "[!] Architecture is not amd64 or x86_64. Skipping installation."
+    fi
+}
+
+function signalhound_vsg60_sa_device() {
+    ARCH=$(uname -m)
+    if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then
+        colorecho "[+] Architecture is $ARCH, proceeding with installation"
+        colorecho "[+] Downloading VSG60 bin from SignalHound"
+        [ -d /rftools/generators ] || mkdir -p /rftools/generators
+        cd /rftools/generators
+        installfromnet "wget https://signalhound.com/sigdownloads/VSG60/VSG60(Ubuntu22.04x64)_1_0_15.zip"
+        unzip VSG60\(Ubuntu22.04x64\)_1_0_15.zip
+        rm VSG60\(Ubuntu22.04x64\)_1_0_15
+        cd VSG60\(Ubuntu22.04x64\)_1_0_15
+        chmod +x setup.sh
+        sh -c ./setup.sh
+        ln -s $(pwd)/vsg60 /usr/bin/vsg60
     else
         criticalecho-noexit "[!] Architecture is not amd64 or x86_64. Skipping installation."
     fi
