@@ -3,7 +3,7 @@
 # Author(s): Sébastien Dudek (@FlUxIuS) @Penthertz
 # website: penthertz.com
 
-ARG BASE_IMAGE=sdr_light
+ARG BASE_IMAGE=sdrsa_devices
 FROM ${BASE_IMAGE} as extraoot
 
 LABEL "org.container.project"="rfswift"
@@ -22,6 +22,11 @@ WORKDIR /root/scripts/
 RUN chmod +x entrypoint.sh
 
 # Installing GNU Radio + extra OOT modules
+RUN ./entrypoint.sh gnuradio_soft_install && \ 
+	./entrypoint.sh common_sources_and_sinks && \
+	./entrypoint.sh install_soapy_modules && \
+	./entrypoint.sh install_soapyPlutoSDR_modules
+
 RUN ./entrypoint.sh deeptempest_grmod_install
 
 FROM extraoot as gpumods

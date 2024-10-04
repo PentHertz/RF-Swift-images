@@ -117,7 +117,7 @@ telecom_4Gto5G:
 	$(call build_and_push,telecom_4Gto5G,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):telecom_utils_$(ARCH),$(CURDIR)/telecom/telecom_4Gto5G.docker)
 
 deeptempest:
-	$(call build_and_push,sdr_deeptemptest_beta,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light_$(ARCH),$(CURDIR)/SDR/sdr_deeptemptest_beta.docker)
+	$(call build_and_push,sdr_deeptemptest_beta,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices_$(ARCH),$(CURDIR)/SDR/sdr_deeptemptest_beta.docker)
 
 build: common sdrsadevices sdrlight sdrfull sdrsadevicesantsdr sdrsadevicesrtlsdrv4 rfid telecom_utils telecom_2Gto3G telecom_4Gto5G bluetooth wifi automotive reversing
 	@echo "Done!"
