@@ -29,7 +29,7 @@ RUN ./entrypoint.sh fzf_soft_install && \
 	./entrypoint.sh zsh_tools_install && \
 	./entrypoint.sh arsenal_soft_install && \
 	./entrypoint.sh audio_tools && \
-	./entrypoint.sh audio_tools atuin_soft_install
+	./entrypoint.sh atuin_soft_install
 
 RUN ./entrypoint.sh rust_tools
 
