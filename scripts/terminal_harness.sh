@@ -41,6 +41,7 @@ atuin_soft_install() {
             ;;
         *)
             criticalecho-noexit "[-] Unsupported architecture: $ARCH"
+            exit 0
             ;;
     esac
 
