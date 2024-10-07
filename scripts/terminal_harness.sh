@@ -30,6 +30,6 @@ function arsenal_soft_install() {
 function atuin_soft_install() {
 	goodecho "[+] Installing atuin"
 	cd /opt
-	installfromnet "curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh"
+	curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh
 	echo 'eval "$(atuin init zsh)"' >> ~/.zshrc
 }
