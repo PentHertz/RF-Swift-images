@@ -27,9 +27,26 @@ function arsenal_soft_install() {
 	echo "alias a='/opt/arsenal/run'" >> ~/.bashrc
 }
 
-function atuin_soft_install() {
-	goodecho "[+] Installing atuin"
-	cd /opt
-	curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh
-	echo 'eval "$(atuin init zsh)"' >> ~/.zshrc
+atuin_soft_install() {
+    ARCH=$(uname -m)
+
+    case "$ARCH" in
+        x86_64|amd64)
+            goodecho "[+] Architecture: x86_64"
+            goodecho "[+] Installing atuin for x86_64"
+            ;;
+        aarch64|arm64)
+            goodecho "[+] Architecture: aarch64"
+            goodecho "[+] Installing atuin for aarch64"
+            ;;
+        *)
+            criticalecho-noexit "[-] Unsupported architecture: $ARCH"
+            ;;
+    esac
+
+    goodecho "[+] Proceeding with atuin installation"
+    cd /opt || exit  # Fail the script if /opt is inaccessible
+    curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh
+    echo 'eval "$(atuin init zsh)"' >> ~/.zshrc
+    goodecho "[+] atuin installed and initialized in zshrc"
 }

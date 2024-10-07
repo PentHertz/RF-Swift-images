@@ -17,7 +17,6 @@ COPY rules /root/rules/
 COPY config /root/config/
 COPY run/update_rfscripts /usr/sbin
 
-
 WORKDIR /root/scripts/
 RUN chmod +x entrypoint.sh
 
@@ -30,7 +29,6 @@ RUN ./entrypoint.sh fzf_soft_install && \
 	./entrypoint.sh arsenal_soft_install && \
 	./entrypoint.sh audio_tools && \
 	./entrypoint.sh atuin_soft_install
-
 
 RUN ./entrypoint.sh rust_tools
 
