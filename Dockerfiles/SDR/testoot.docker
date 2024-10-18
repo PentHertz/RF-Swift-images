@@ -1,0 +1,74 @@
+# This DockerFile is part of the RFSwift project
+# Install type: SDR full
+# Author(s): Sébastien Dudek (@FlUxIuS) @Penthertz
+# website: penthertz.com
+
+ARG BASE_IMAGE=sdr_light
+ARG JMPSTAGE1=begin
+ARG JMPSTAGE2=extraoot1
+ARG JMPSTAGE3=extraoot2
+ARG JMPSTAGE4=extrasofts
+FROM ${BASE_IMAGE} AS begin
+
+LABEL "org.container.project"="rfswift"
+LABEL "org.container.author"="Sébastien Dudek (FlUxIuS)"
+
+RUN echo 'APT::Install-Suggests "0";' >> /etc/apt/apt.conf.d/00-docker
+RUN echo 'APT::Install-Recommends "0";' >> /etc/apt/apt.conf.d/00-docker
+
+RUN apt-fast update
+
+COPY scripts /root/scripts/
+COPY rules /root/rules/
+COPY config /root/config/
+
+WORKDIR /root/scripts/
+RUN chmod +x entrypoint.sh
+
+# Installing GNU Radio + extra OOT modules
+RUN ./entrypoint.sh grgrnet_grmod_install && \
+	./entrypoint.sh graoa_grmod_install && \
+	./entrypoint.sh grcorrectiq_grmod_install && \
+	./entrypoint.sh grdsd_grmod_install && \
+	./entrypoint.sh grnrsc5_grmod_install && \
+	./entrypoint.sh grntscrc_grmod_install && \
+	./entrypoint.sh grnfc_grmod_install
+
+#RUN ./entrypoint.sh grccsds_move_rtsa_grmod_install #TODO: fix problem with strtod_l dependency
+#RUN ./entrypoint.sh deeptempest_grmod_install
+## TODO: More more!
+
+# Installing OOT modules from sandia
+RUN ./entrypoint.sh grpdu_utils_grmod_install && \
+	./entrypoint.sh grsandia_utils_grmod_install && \ 
+	./entrypoint.sh grtiming_utils_grmod_install && \
+	./entrypoint.sh grfhss_utils_grmod_install 
+# depends on 'grpdu_utils_grmod_install' and 'grtiming_utils_grmod_install' and 'grsandia_utils_grmod_install'
+
+# Installing CyberEther
+RUN ./entrypoint.sh cyberther_soft_install # Enabe OpenCL for better exp
+
+# Installing softwares
+RUN	./entrypoint.sh sigdigger_soft_install && \
+	./entrypoint.sh qsstv_soft_install && \
+	./entrypoint.sh nfclaboratory_soft_install && \
+	./entrypoint.sh ice9_bluetooth_soft_install && \
+	./entrypoint.sh meshtastic_sdr_soft_install && \
+	./entrypoint.sh gps_sdr_sim_soft_install && \
+	./entrypoint.sh gpredict_sdr_soft_install && \
+	./entrypoint.sh v2verifier_sdr_soft_install && \
+	./entrypoint.sh wavingz_sdr_soft_install
+RUN ./entrypoint.sh sdrangel_soft_fromsource_install
+
+# Installing extra software
+RUN ./entrypoint.sh ml_and_dl_soft_install
+
+RUN mkdir -p /sdrtools/
+COPY run /sdrtools/run
+
+# Cleaning and quitting
+WORKDIR /root/
+RUN rm -rf /root/thirdparty
+RUN rm -rf /root/rules/
+RUN apt-fast clean
+RUN DEBIAN_FRONTEND=noninteractive rm -rf /var/lib/apt/lists/*
