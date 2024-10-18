@@ -47,7 +47,6 @@ function signalhound_spike_sa_device() {
         cd Spike\(Ubuntu22.04x64\)_3_9_7/
         chmod +x setup.sh
         sh -c ./setup.sh
-        ln -s $(pwd)/Spike /usr/bin/Spike
     else
         criticalecho-noexit "[!] Architecture is not amd64 or x86_64. Skipping installation."
     fi

@@ -297,3 +297,7 @@ function grntscrc_grmod_install() {
 function grnfc_grmod_install() {
     grclone_and_build "https://github.com/FlUxIuS/gr-nfc.git" "" "grnfc_grmod_install"
 }
+
+function soapyrfnm_grmod_install() {
+    grclone_and_build "https://github.com/rfnm/soapy-rfnm.git" "" "soapyrfnm_grmod_install"
+}

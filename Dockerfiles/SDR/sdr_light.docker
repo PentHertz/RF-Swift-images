@@ -25,8 +25,9 @@ RUN chmod +x entrypoint.sh
 RUN ./entrypoint.sh gnuradio_soft_install && \ 
 	./entrypoint.sh common_sources_and_sinks && \
 	./entrypoint.sh install_soapy_modules && \
-	./entrypoint.sh install_soapyPlutoSDR_modules \
-	./entrypoint.sh kc908_sa_device
+	./entrypoint.sh install_soapyPlutoSDR_modules && \
+	./entrypoint.sh kc908_sa_device && \
+	./entrypoint.sh soapyrfnm_grmod_install
 
 # Installing extra software
 RUN	./entrypoint.sh gqrx_soft_install && \

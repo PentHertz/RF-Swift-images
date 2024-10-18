@@ -33,7 +33,8 @@ RUN ./entrypoint.sh ad_devices_install && \
 	./entrypoint.sh limesdr_devices_install && \
 	./entrypoint.sh osmofl2k_devices_install && \
 	./entrypoint.sh xtrx_devices_install && \
-	./entrypoint.sh funcube_devices_install
+	./entrypoint.sh funcube_devices_install && \
+	./entrypoint.sh rfnm_devices_install
 
 ## Installing peripherals with optional drivers
 RUN ./entrypoint.sh ${UHD_BASE}_devices_install && \

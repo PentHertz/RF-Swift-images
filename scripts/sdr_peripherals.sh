@@ -203,3 +203,8 @@ function funcube_devices_install() {
 	goodecho "[+] Installing funcube from package manager"
 	installfromnet "apt-fast install -y gr-funcube libgnuradio-funcube1.0.0 qthid-fcd-controller"
 }
+
+function rfnm_devices_install() {
+	goodecho "[+] Installing RFNM libs"
+	cmake_clone_and_build "https://github.com/rfnm/librfnm.git" "build" "" "" "rfnm_devices_install"
+}
