@@ -207,5 +207,7 @@ function funcube_devices_install() {
 function rfnm_devices_install() {
 	install_dependencies "libspdlog-dev"
 	goodecho "[+] Installing RFNM libs"
-	cmake_clone_and_build "https://github.com/rfnm/librfnm.git" "build" "" "" "rfnm_devices_install"
+	[ -d /root/thirdparty ] || mkdir /root/thirdparty
+    cd /root/thirdparty
+	cmake_clone_and_build "https://github.com/rfnm/librfnm.git" "build" "" "" "rfnm_devices_install" "-DCMAKE_INSTALL_PREFIX=/usr"
 }
