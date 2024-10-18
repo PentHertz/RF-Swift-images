@@ -33,6 +33,7 @@ RUN ./entrypoint.sh gnuradio_soft_install && \
 RUN	./entrypoint.sh gqrx_soft_install && \
 	./entrypoint.sh multimon_ng_soft_install && \
 	./entrypoint.sh urh_soft_install && \
+	./entrypoint.sh inspectrum_soft_install && \
 	./entrypoint.sh rtl_433_soft_install && \
 	./entrypoint.sh retrogram_soapysdr_soft_install
 
