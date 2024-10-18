@@ -301,3 +301,7 @@ function grnfc_grmod_install() {
 function soapyrfnm_grmod_install() {
     grclone_and_build "https://github.com/rfnm/soapy-rfnm.git" "" "soapyrfnm_grmod_install"
 }
+
+function grmer_grmod_install() {
+    grclone_and_build "https://github.com/git-artes/gr-mer.git" "" "grmer_grmod_install"
+}
