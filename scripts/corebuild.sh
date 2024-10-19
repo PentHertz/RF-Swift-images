@@ -54,6 +54,8 @@ function docker_preinstall() {
 
     # Installing Cython
     installfromnet "pip3 install cython"
+
+    pip3 install "numpy<2.0" 
 }
 
 function audio_tools () {
