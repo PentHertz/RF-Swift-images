@@ -11,3 +11,4 @@ plugins=(
 source $ZSH/oh-my-zsh.sh
 
 alias a='/opt/arsenal/run'
+source $HOME/.atuin/bin/env
