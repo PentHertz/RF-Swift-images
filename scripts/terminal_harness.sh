@@ -27,7 +27,7 @@ function arsenal_soft_install() {
 	echo "alias a='/opt/arsenal/run'" >> ~/.bashrc
 }
 
-atuin_soft_install() {
+function atuin_soft_install() {
     ARCH=$(uname -m)
 
     case "$ARCH" in
