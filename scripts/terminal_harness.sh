@@ -48,6 +48,7 @@ function atuin_soft_install() {
     goodecho "[+] Proceeding with atuin installation"
     cd /opt || exit  # Fail the script if /opt is inaccessible
     curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh
+    echo 'source $HOME/.atuin/bin/env' >> ~/.zshrc
     echo 'eval "$(atuin init zsh)"' >> ~/.zshrc
     goodecho "[+] atuin installed and initialized in zshrc"
 }
