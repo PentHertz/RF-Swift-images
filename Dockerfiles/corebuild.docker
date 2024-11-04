@@ -20,6 +20,10 @@ COPY run/update_rfscripts /usr/sbin
 WORKDIR /root/scripts/
 RUN chmod +x entrypoint.sh
 
+# Forcing upgrade for the base image
+RUN apt-fast -y update \
+	apt-fast -y upgrade
+
 # Pre-installation tools
 RUN ./entrypoint.sh docker_preinstall
 

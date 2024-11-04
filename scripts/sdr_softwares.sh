@@ -377,3 +377,20 @@ function gqrxscanner_sdr_soft_install () {
 	goodecho "[+] Cloning and installing gqrx-scanner"
 	cmake_clone_and_build "https://github.com/neural75/gqrx-scanner.git" "build" "" "" "gqrxscanner_sdr_soft_install"
 }
+
+function satdump_sdr_soft_install () {
+	[ -d /rftools/sdr ] || mkdir -p /rftools/sdr
+	cd /rftools/sdr
+	goodecho "[+] installing dependencies for SatDump"
+	install_dependencies "libvolk2-dev git build-essential cmake g++ pkgconf libfftw3-dev libpng-dev libtiff-dev libjemalloc-dev libcurl4-openssl-dev libnng-dev libglfw3-dev zenity portaudio19-dev libhdf5-dev libomp-dev ocl-icd-opencl-dev"
+	goodecho "[+] Cloning and installing SatDump"
+	gitinstall "https://github.com/SatDump/SatDump.git" "SatDump"
+	cd SatDump
+	mkdir build && cd build
+	cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr ..
+	make -j`nproc`
+	ln -s ../pipelines .
+	ln -s ../resources .
+	ln -s ../satdump_cfg.json .
+	make install
+}

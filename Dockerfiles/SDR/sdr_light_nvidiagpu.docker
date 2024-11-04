@@ -23,7 +23,7 @@ RUN chmod +x entrypoint.sh
 
 # Installing OpenCL
 ## NVidia drivers
-RUN apt-fast install -y nvidia-opencl-dev nvidia-modprobe
+RUN ./entrypoint.sh install_GPU_nvidia
 
 # Installing gr-fosphor with OpenCL
 RUN ./entrypoint.sh grfosphor_grmod_install

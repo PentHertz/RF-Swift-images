@@ -23,7 +23,7 @@ RUN chmod +x entrypoint.sh
 
 # Installing OpenCL
 ## Installing Intel's OpenCL
-RUN apt-fast install -y intel-opencl-icd ocl-icd-dev ocl-icd-opencl-dev
+RUN ./entrypoint.sh install_GPU_Intel
 
 # Installing gr-fosphor with OpenCL
 RUN ./entrypoint.sh grfosphor_grmod_install
