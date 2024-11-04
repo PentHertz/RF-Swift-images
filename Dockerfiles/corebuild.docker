@@ -21,7 +21,7 @@ WORKDIR /root/scripts/
 RUN chmod +x entrypoint.sh
 
 # Forcing upgrade for the base image
-RUN apt-fast -y update \
+RUN apt-fast -y update && \
 	apt-fast -y upgrade
 
 # Pre-installation tools
