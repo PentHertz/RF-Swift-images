@@ -43,14 +43,6 @@ function mirage_soft_install() {
 function bettercap_soft_install() {
 	goodecho "[+] Installing bettercap"
 	installfromnet "apt-fast install -y libnetfilter-queue-dev"
-	cd /tmp
-	ln -s /root/go/bin/bettercap /usr/bin/bettercap
-}
-
-
-function bettercap_soft_install() {
-	goodecho "[+] Installing bettercap"
-	installfromnet "apt-fast install -y libnetfilter-queue-dev"
 	[ -d /rftools/bluetooth ] || mkdir -p /rftools/bluetooth
 	cd /rftools/bluetooth
 	gitinstall "https://github.com/bettercap/bettercap.git"
