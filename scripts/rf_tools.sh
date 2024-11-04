@@ -42,6 +42,7 @@ function mirage_soft_install() {
 
 function bettercap_soft_install() {
 	goodecho "[+] Installing bettercap"
+	export GOPROXY=direct
 	installfromnet "apt-fast install -y libnetfilter-queue-dev"
 	[ -d /rftools/bluetooth ] || mkdir -p /rftools/bluetooth
 	cd /rftools/bluetooth

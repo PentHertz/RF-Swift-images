@@ -122,6 +122,7 @@ install_go() {
         sudo tar -C /usr --strip-components=1 -xzf /tmp/$GO_TAR go/bin go/pkg go/src
         rm /tmp/$GO_TAR
         echo "Go $GO_VERSION installed successfully in /usr/bin."
+        echo 'export GOPROXY=direct' >> /root/.bashrc
     else
         echo "Download failed. Falling back to package manager."
         install_dependencies "golang-go"
