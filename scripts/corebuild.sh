@@ -118,13 +118,11 @@ install_go() {
     wget $GO_URL -O /tmp/$GO_TAR
 
     if [ $? -eq 0 ]; then
-        sudo tar -C /usr/local -xzf /tmp/$GO_TAR
+        sudo tar -C /usr -xzf /tmp/$GO_TAR
         rm /tmp/$GO_TAR
         echo "Go $GO_VERSION installed successfully in /usr/local/go."
 
-        # Add Go to PATH
-        echo "export PATH=\$PATH:/usr/local/go/bin" >> ~/.profile
-        source ~/.profile
+        ldconfig
     else
         echo "Download failed. Falling back to package manager."
         install_dependencies "golang-go"
