@@ -89,7 +89,7 @@ install_go() {
     ARCH=$(uname -m)
     
     # Define URL and version
-    GO_VERSION="1.23.2" # To change with latest version
+    GO_VERSION="1.22.8" # Replace with the latest version if needed
     BASE_URL="https://golang.org/dl/"
 
     case "$ARCH" in
@@ -118,11 +118,17 @@ install_go() {
     wget $GO_URL -O /tmp/$GO_TAR
 
     if [ $? -eq 0 ]; then
-        sudo tar -C /usr -xzf /tmp/$GO_TAR
+        # Extract and move Go to /usr/bin/go
+        sudo tar -C /usr/bin --strip-components=1 -xzf /tmp/$GO_TAR go/bin go/pkg go/src
         rm /tmp/$GO_TAR
-        echo "Go $GO_VERSION installed successfully in /usr/local/go."
+        echo "Go $GO_VERSION installed successfully in /usr/bin."
 
-        ldconfig
+        # Make sure Go is accessible from /usr/bin
+        if ! command -v go &> /dev/null; then
+            echo "Go executable not found in PATH. Adding /usr/bin to PATH."
+            echo "export PATH=\$PATH:/usr/bin" >> ~/.profile
+            source ~/.profile
+        fi
     else
         echo "Download failed. Falling back to package manager."
         install_dependencies "golang-go"
