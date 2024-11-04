@@ -27,6 +27,9 @@ RUN apt update -y && \
 # Pre-installation tools
 RUN ./entrypoint.sh docker_preinstall
 
+# Install a newer version of Go than from PKG manager
+RUN ./entrypoint.sh install_go
+
 # Installing Terminal harnesses
 RUN ./entrypoint.sh fzf_soft_install && \
 	./entrypoint.sh zsh_tools_install && \

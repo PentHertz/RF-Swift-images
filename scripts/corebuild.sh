@@ -35,7 +35,7 @@ function docker_preinstall() {
         qtbase5-dev qtbase5-private-dev libqt5opengl5-dev libqt5svg5-dev
         libcanberra-gtk-module libcanberra-gtk3-module unity-tweak-tool libhdf5-dev
         libreadline-dev automake qtdeclarative5-dev libqt5serialport5-dev
-        libqt5serialbus5-dev qttools5-dev golang-go python3-matplotlib
+        libqt5serialbus5-dev qttools5-dev python3-matplotlib
         pulseaudio-utils libasound2-dev libavahi-client-dev task-lxqt-desktop
         language-pack-en libqwt-qt5-dev python3-click-plugins python3-zmq rsync
         iw wireless-tools usbutils bluetooth bluez bluez-tools rfkill avahi-daemon
@@ -67,4 +67,66 @@ function rust_tools () {
     curl --proto '=https' --tlsv1.3 https://sh.rustup.rs -sSf | sh -s -- -y
     source $HOME/.cargo/env
     [[ "$SHELL" =~ "zsh" ]] && { grep -qxF '. "$HOME/.cargo/env"' ~/.zshrc || echo '. "$HOME/.cargo/env"' >> ~/.zshrc; } || { grep -qxF '. "$HOME/.cargo/env"' ~/.bashrc || echo '. "$HOME/.cargo/env"' >> ~/.bashrc; }
+}
+
+function install_GPU_nvidia () {
+    goodecho "[+] Installing Nvidia libs and drivers"
+    install_dependencies "nvidia-opencl-dev nvidia-modprobe"
+}
+
+function install_GPU_Intel() {
+    goodecho "[+] Installing Intel GPU libs and drivers"
+    install_dependencies "intel-opencl-icd ocl-icd-dev ocl-icd-opencl-dev"
+}
+
+function install_GPU_Radeon_until5000() {
+    goodecho "[+] Installing Intel GPU libs and drivers"
+    install_dependencies "mesa-opencl-icd"
+}
+
+install_go() {
+    # Detect system architecture
+    ARCH=$(uname -m)
+    
+    # Define URL and version
+    GO_VERSION="1.23.2" # To change with latest version
+    BASE_URL="https://golang.org/dl/"
+
+    case "$ARCH" in
+        "x86_64"|"amd64")
+            ARCH_DL="amd64"
+            ;;
+        "aarch64"|"arm64")
+            ARCH_DL="arm64"
+            ;;
+        "riscv64")
+            ARCH_DL="riscv64"
+            ;;
+        *)
+            echo "Architecture $ARCH is not recognized. Using package manager to install Go."
+            install_dependencies "golang-go"
+            return
+            ;;
+    esac
+
+    # Construct the download URL
+    GO_TAR="go${GO_VERSION}.linux-${ARCH_DL}.tar.gz"
+    GO_URL="${BASE_URL}${GO_TAR}"
+
+    # Download and install Go
+    echo "Downloading Go $GO_VERSION for $ARCH..."
+    wget $GO_URL -O /tmp/$GO_TAR
+
+    if [ $? -eq 0 ]; then
+        sudo tar -C /usr/local -xzf /tmp/$GO_TAR
+        rm /tmp/$GO_TAR
+        echo "Go $GO_VERSION installed successfully in /usr/local/go."
+
+        # Add Go to PATH
+        echo "export PATH=\$PATH:/usr/local/go/bin" >> ~/.profile
+        source ~/.profile
+    else
+        echo "Download failed. Falling back to package manager."
+        install_dependencies "golang-go"
+    fi
 }
