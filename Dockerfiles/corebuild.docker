@@ -21,8 +21,8 @@ WORKDIR /root/scripts/
 RUN chmod +x entrypoint.sh
 
 # Forcing upgrade for the base image
-RUN apt-fast -y update && \
-	apt-fast -y upgrade
+RUN apt update -y && \
+	apt upgrade -y
 
 # Pre-installation tools
 RUN ./entrypoint.sh docker_preinstall
