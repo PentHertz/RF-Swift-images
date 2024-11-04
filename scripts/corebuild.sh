@@ -119,16 +119,9 @@ install_go() {
 
     if [ $? -eq 0 ]; then
         # Extract and move Go to /usr/bin/go
-        sudo tar -C /usr/bin --strip-components=1 -xzf /tmp/$GO_TAR go/bin go/pkg go/src
+        sudo tar -C /usr --strip-components=1 -xzf /tmp/$GO_TAR go/bin go/pkg go/src
         rm /tmp/$GO_TAR
         echo "Go $GO_VERSION installed successfully in /usr/bin."
-
-        # Make sure Go is accessible from /usr/bin
-        if ! command -v go &> /dev/null; then
-            echo "Go executable not found in PATH. Adding /usr/bin to PATH."
-            echo "export PATH=\$PATH:/usr/bin" >> ~/.profile
-            source ~/.profile
-        fi
     else
         echo "Download failed. Falling back to package manager."
         install_dependencies "golang-go"
