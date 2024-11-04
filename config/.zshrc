@@ -13,3 +13,4 @@ source $ZSH/oh-my-zsh.sh
 alias a='/opt/arsenal/run'
 source $HOME/.atuin/bin/env
 eval "$(atuin init zsh)"
+export GOPROXY=direct

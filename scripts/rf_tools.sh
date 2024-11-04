@@ -43,9 +43,23 @@ function mirage_soft_install() {
 function bettercap_soft_install() {
 	goodecho "[+] Installing bettercap"
 	installfromnet "apt-fast install -y libnetfilter-queue-dev"
-	go install github.com/bettercap/bettercap@latest 
+	cd /tmp
 	ln -s /root/go/bin/bettercap /usr/bin/bettercap
 }
+
+
+function bettercap_soft_install() {
+	goodecho "[+] Installing bettercap"
+	installfromnet "apt-fast install -y libnetfilter-queue-dev"
+	[ -d /rftools/bluetooth ] || mkdir -p /rftools/bluetooth
+	cd /rftools/bluetooth
+	gitinstall "https://github.com/bettercap/bettercap.git"
+	cd bettercap
+	make build
+	make install
+	ln -s /rftools/bluetoot/bettercap/bettercap /usr/bin/bettercap
+}
+
 
 function sniffle_soft_install() {
 	goodecho "[+] Installing Sniffle with OpenDroneID decoder/encoder"
