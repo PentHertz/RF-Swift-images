@@ -1114,7 +1114,7 @@ jobs:
     needs: sdrsa_devices
     strategy:
       matrix:
-        platform: [amd64, arm64]
+        platform: [amd64, arm64, riscv64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -1215,10 +1215,12 @@ jobs:
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
           output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
           arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
@@ -1229,7 +1231,8 @@ jobs:
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
             ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64 \
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   telecom_2Gto3G:
     runs-on: ubuntu-latest
