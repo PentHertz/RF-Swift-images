@@ -139,6 +139,17 @@ function mfread_soft_install() {
 	installfromnet "git clone https://github.com/zhovner/mfdread.git"
 }
 
+function rfidler_soft_install() {
+	goodecho "[+] Installing rfidler dependencies"
+	cd tmp
+	gitinstall "https://github.com/AdamLaurie/mphidflash.git" "mphidflash"
+	cd mphidflash
+	sudo make install64
+	[ -d /rftools/rfid ] || mkdir -p /rftools/rfid
+	cd /rftools/rfid
+	gitinstall "https://github.com/AdamLaurie/RFIDler.git" "RFIDler"
+}
+
 # Wi-Fi Package
 function common_nettools() {
 	installfromnet "apt-fast install -y iproute2"

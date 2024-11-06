@@ -273,6 +273,7 @@ function grgrnet_grmod_install() {
 }
 
 function graoa_grmod_install() {
+    install_dependencies "libeigen3-dev"
     grclone_and_build "https://github.com/MarcinWachowiak/gr-aoa.git" "" "graoa_grmod_install"
 }
 
