@@ -308,5 +308,6 @@ function grmer_grmod_install() {
 }
 
 function grclenabled_grmod_install() {
+    install_dependencies "libclfft-dev"
     grclone_and_build "https://github.com/ghostop14/gr-clenabled.git" "" "grclenabled_grmod_install"
 }
