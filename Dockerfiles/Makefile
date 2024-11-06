@@ -41,6 +41,7 @@ define build_and_push_local
         ..;
 endef
 
+
 # Choose the build function based on STORAGE_TYPE
 ifeq ($(STORAGE_TYPE),registry)
     build_and_push = $(build_and_push_registry)
@@ -125,5 +126,5 @@ telecom_5G:
 deeptempest:
 	$(call build_and_push,sdr_deeptemptest_beta,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices_$(ARCH),$(CURDIR)/SDR/sdr_deeptemptest_beta.docker)
 
-build: common sdrsadevices sdrlight sdrfull sdrsadevicesantsdr sdrsadevicesrtlsdrv4 rfid telecom_utils telecom_2Gto3G telecom_4Gto5G bluetooth wifi automotive reversing
+build: common sdrsadevices sdrlight sdrfull sdrsadevicesantsdr sdrsadevicesrtlsdrv4 rfid telecom_utils telecom_2Gto3G telecom_4G_5GNSA telecom_5G  bluetooth wifi automotive reversing
 	@echo "Done!"

@@ -1534,7 +1534,7 @@ jobs:
 
   telecom_5G-manifest:
     runs-on: ubuntu-latest
-    needs: telecom_4G_5GNSA
+    needs: telecom_5G
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
