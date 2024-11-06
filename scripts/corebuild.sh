@@ -35,7 +35,7 @@ function docker_preinstall() {
         qtbase5-dev qtbase5-private-dev libqt5opengl5-dev libqt5svg5-dev
         libcanberra-gtk-module libcanberra-gtk3-module unity-tweak-tool libhdf5-dev
         libreadline-dev automake qtdeclarative5-dev libqt5serialport5-dev
-        libqt5serialbus5-dev qttools5-dev python3-matplotlib
+        libqt5serialbus5-dev qttools5-dev python3-matplotlib libtalloc-dev
         pulseaudio-utils libasound2-dev libavahi-client-dev task-lxqt-desktop
         language-pack-en libqwt-qt5-dev python3-click-plugins python3-zmq rsync
         iw wireless-tools usbutils bluetooth bluez bluez-tools rfkill avahi-daemon
