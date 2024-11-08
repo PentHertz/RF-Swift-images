@@ -1658,7 +1658,7 @@ jobs:
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_wifi == 'true'
         run: |
           cd Dockerfiles
-          STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make wifi
+          STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make wifi_basic
 
   wifi_basic-manifest:
     runs-on: Linux
@@ -1783,7 +1783,7 @@ jobs:
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_wifi == 'true'
         run: |
           cd Dockerfiles
-          STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make wifi
+          STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make wifi_full
 
   wifi_full-manifest:
     runs-on: Linux
@@ -1832,7 +1832,7 @@ jobs:
       - name: Create and push multi-arch manifest for wifi_full
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_wifi == 'true'
         run: |
-          tagname=wifi
+          tagname=wifi_full
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
