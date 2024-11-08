@@ -1787,7 +1787,7 @@ jobs:
 
   wifi_full-manifest:
     runs-on: Linux
-    needs: wifi_basic
+    needs: wifi_full
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
