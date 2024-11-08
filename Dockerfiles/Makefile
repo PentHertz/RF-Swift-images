@@ -95,8 +95,11 @@ sdrfull_nvidiagpu:
 rfid:
 	$(call build_and_push,rfid,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild_$(ARCH),$(CURDIR)/rfid.docker)
 
-wifi:
-	$(call build_and_push,wifi,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices_$(ARCH),$(CURDIR)/wifi.docker)
+wifi_basic:
+	$(call build_and_push,wifi_basic,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices_$(ARCH),$(CURDIR)/wifi_basic.docker)
+
+wifi_full:
+	$(call build_and_push,wifi_full,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices_$(ARCH),$(CURDIR)/wifi_full.docker)
 
 bluetooth:
 	$(call build_and_push,bluetooth,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices_$(ARCH),$(CURDIR)/bluetooth.docker)
@@ -123,7 +126,7 @@ telecom_5G:
 	$(call build_and_push,telecom_5G,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):telecom_utils_$(ARCH),$(CURDIR)/telecom/telecom_5G.docker)
 
 deeptempest:
-	$(call build_and_push,deeptemptest,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices_$(ARCH),$(CURDIR)/SDR/sdr_deeptemptest_beta.docker)
+	$(call build_and_push,deeptempest,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices_$(ARCH),$(CURDIR)/SDR/sdr_deeptemptest_beta.docker)
 
-build: common sdrsadevices sdrlight sdrfull sdrsadevicesantsdr sdrsadevicesrtlsdrv4 rfid telecom_utils telecom_2Gto3G telecom_4G_5GNSA telecom_5G  bluetooth wifi automotive reversing
+build: common sdrsadevices sdrlight sdrfull sdrsadevicesantsdr sdrsadevicesrtlsdrv4 rfid telecom_utils telecom_2Gto3G telecom_4G_5GNSA telecom_5G  bluetooth wifi_basic wifi_full automotive reversing
 	@echo "Done!"

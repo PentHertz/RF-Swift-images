@@ -29,7 +29,7 @@ RUN ./entrypoint.sh install_GPU_Intel
 RUN ./entrypoint.sh grfosphor_grmod_install
 
 # Installing gr-clenable
-RUN ./entrypoint.sh grclenabled_grmod_install
+#RUN ./entrypoint.sh grclenabled_grmod_install
 
 # Reinstalling SDRPP with GPU support
 RUN ./entrypoint.sh sdrpp_soft_fromsource_install
