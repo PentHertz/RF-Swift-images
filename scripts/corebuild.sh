@@ -71,7 +71,7 @@ function rust_tools () {
 
 function install_GPU_nvidia () {
     goodecho "[+] Installing Nvidia libs and drivers"
-    install_dependencies "nvidia-opencl-dev nvidia-modprobe"
+    install_dependencies "nvidia-opencl-dev nvidia-modprobe nvidia-cuda-dev"
 }
 
 function install_GPU_Intel() {
