@@ -243,4 +243,14 @@ function osmobts_suite_soft_install() {
     cp /root/config/osmobts/nitb/* .
 }
 
+function UERANSIM_soft_install() {
+	install_dependencies "libsctp-dev lksctp-tools iproute2"
+	[ -d /telecom ] || mkdir -p /telecom
+	cd /telecom
+	goodecho "[+] Cloninig and installing UERANSIM"
+	gitinstall "https://github.com/aligungr/UERANSIM" "UERANSIM"
+	cd UERANSIM
+	python3 setup.py install
+}
+
 ### TODO: more More!

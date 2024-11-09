@@ -24,7 +24,8 @@ RUN chmod +x entrypoint.sh
 
 # Tools for Telecom
 RUN ./entrypoint.sh srsran5GSA_soft_install && \
-	./entrypoint.sh Open5GS_soft_install
+	./entrypoint.sh Open5GS_soft_install && \
+	./entrypoint.sh UERANSIM_soft_install
 # More to come!
 
 RUN mkdir -p /sdrtools/
