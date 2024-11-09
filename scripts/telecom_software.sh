@@ -245,8 +245,8 @@ function osmobts_suite_soft_install() {
 
 function UERANSIM_soft_install() {
 	install_dependencies "libsctp-dev lksctp-tools iproute2"
-	[ -d /telecom ] || mkdir -p /telecom
-	cd /telecom
+	[ -d /telecom/5G ] || mkdir -p /telecom/5G
+	cd /telecom/5G
 	goodecho "[+] Cloninig and installing UERANSIM"
 	gitinstall "https://github.com/aligungr/UERANSIM" "UERANSIM"
 	cd UERANSIM
@@ -255,8 +255,8 @@ function UERANSIM_soft_install() {
 
 function pysim_soft_install() {
 	install_dependencies "pcscd libpcsclite-dev python3-setuptools python3-pycryptodome python3-pyscard python3-pip"
-	[ -d /telecom ] || mkdir -p /telecom
-	cd /telecom
+	[ -d /telecom/SIM ] || mkdir -p /telecom/SIM
+	cd /telecom/SIM
 	goodecho "[+] Cloninig and installing PySIM"
 	gitinstall "https://github.com/osmocom/pysim.git" "pysim"
 	cd pysim
@@ -265,10 +265,34 @@ function pysim_soft_install() {
 
 function sysmoUSIM_soft_install() {
 	install_dependencies "python-pyscard pcscd systemctl start pcscd"
-	[ -d /telecom ] || mkdir -p /telecom
-	cd /telecom
+	[ -d /telecom/SIM ] || mkdir -p /telecom/SIM
+	cd /telecom/SIM
 	goodecho "[+] Cloninig and installing sysmo-usim-tool"
 	gitinstall "https://github.com/sysmocom/sysmo-usim-tool.git" "sysmo-usim-tool"
 }
 
+function jss7_soft_install() {
+	install_dependencies "maven"
+	[ -d /telecom/2G ] || mkdir -p /telecom/2G
+	cd /telecom/2G
+	goodecho "[+] Cloninig and installing jSS7"
+	gitinstall "https://github.com/PentHertz/jss7.git" "jss7"
+	cd jss7
+	maven install
+}
+
+function SCAT_soft_install() {
+	[ -d /telecom ] || mkdir -p /telecom
+	cd /telecom
+	goodecho "[+] Installing SCAT"
+	installfromnet "pip install 'scat[fastcrc] @ git+https://github.com/fgsect/scat'"
+}
+
+function SigPloit_soft_install() {
+	[ -d /telecom/2G ] || mkdir -p /telecom/2G
+	cd /telecom/2G
+	goodecho "[+] Cloninig and installing SigPloit"
+	gitinstall "https://github.com/FlUxIuS/SigPloit.git" "SigPloit"
+	installfromnet "pip install -r requirements.txt"
+}
 ### TODO: more More!
