@@ -161,7 +161,7 @@ function srsran5GSA_soft_install() {
 function Open5GS_soft_install() {
 	goodecho "[+] Installing Open5GS dependencies"
 	install_dependencies "ca-certificates curl gnupg"
-	install_dependencies "meson libmongoc-1.0-0 libmongoc-dev"
+	install_dependencies "meson libmongoc-1.0-0 libmongoc-dev nodejs npm"
 	install_dependencies "python3-pip python3-setuptools python3-wheel ninja-build build-essential flex bison git cmake libsctp-dev libgnutls28-dev libgcrypt-dev libssl-dev libidn11-dev libmongoc-dev libbson-dev libyaml-dev libnghttp2-dev libmicrohttpd-dev libcurl4-gnutls-dev libnghttp2-dev libtins-dev libtalloc-dev meson"
 	ldconfig
 	curl -fsSL https://pgp.mongodb.com/server-6.0.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-6.0.gpg --dearmor
