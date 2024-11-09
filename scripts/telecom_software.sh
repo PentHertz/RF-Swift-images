@@ -278,7 +278,7 @@ function jss7_soft_install() {
 	goodecho "[+] Cloninig and installing jSS7"
 	gitinstall "https://github.com/PentHertz/jss7.git" "jss7"
 	cd jss7
-	maven install
+	mvn install
 }
 
 function SCAT_soft_install() {
