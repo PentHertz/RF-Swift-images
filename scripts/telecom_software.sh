@@ -253,4 +253,22 @@ function UERANSIM_soft_install() {
 	python3 setup.py install
 }
 
+function pysim_soft_install() {
+	install_dependencies "pcscd libpcsclite-dev python3-setuptools python3-pycryptodome python3-pyscard python3-pip"
+	[ -d /telecom ] || mkdir -p /telecom
+	cd /telecom
+	goodecho "[+] Cloninig and installing PySIM"
+	gitinstall "https://github.com/osmocom/pysim.git" "pysim"
+	cd pysim
+	installfromnet "pip3 install -r requirements.txt"
+}
+
+function sysmoUSIM_soft_install() {
+	install_dependencies "python-pyscard pcscd systemctl start pcscd"
+	[ -d /telecom ] || mkdir -p /telecom
+	cd /telecom
+	goodecho "[+] Cloninig and installing sysmo-usim-tool"
+	gitinstall "https://github.com/sysmocom/sysmo-usim-tool.git" "sysmo-usim-tool"
+}
+
 ### TODO: more More!

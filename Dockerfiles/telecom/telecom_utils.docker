@@ -22,7 +22,9 @@ WORKDIR /root/scripts/
 RUN chmod +x entrypoint.sh
 
 # Tools for Telecom
-RUN ./entrypoint.sh pycrate_soft_install
+RUN ./entrypoint.sh pycrate_soft_install && \
+	./entrypoint.sh pysim_soft_install && \
+	./entrypoint.sh sysmoUSIM_soft_install
 # More to come!
 
 RUN mkdir -p /sdrtools/
