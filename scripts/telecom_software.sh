@@ -264,7 +264,7 @@ function pysim_soft_install() {
 }
 
 function sysmoUSIM_soft_install() {
-	install_dependencies "python-pyscard pcscd systemctl start pcscd"
+	install_dependencies "python3-pyscard pcscd systemctl start pcscd"
 	[ -d /telecom/SIM ] || mkdir -p /telecom/SIM
 	cd /telecom/SIM
 	goodecho "[+] Cloninig and installing sysmo-usim-tool"
