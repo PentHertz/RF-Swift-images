@@ -272,13 +272,19 @@ function sysmoUSIM_soft_install() {
 }
 
 function jss7_soft_install() {
-	install_dependencies "maven"
-	[ -d /telecom/2G ] || mkdir -p /telecom/2G
-	cd /telecom/2G
-	goodecho "[+] Cloninig and installing jSS7"
-	gitinstall "https://github.com/PentHertz/jss7.git" "jss7"
-	cd jss7
-	mvn install
+    # Check if the architecture is amd64 or x86_64
+    arch=$(uname -m)
+    if [[ "$arch" == "amd64" || "$arch" == "x86_64" ]]; then
+        install_dependencies "maven"
+        [ -d /telecom/2G ] || mkdir -p /telecom/2G
+        cd /telecom/2G
+        goodecho "[+] Cloning and installing jSS7"
+        gitinstall "https://github.com/PentHertz/jss7.git" "jss7"
+        cd jss7
+        mvn install
+    else
+        goodecho "[!] Unsupported architecture: $arch. jSS7 installation aborted."
+    fi
 }
 
 function SCAT_soft_install() {
