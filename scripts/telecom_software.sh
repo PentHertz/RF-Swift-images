@@ -250,7 +250,7 @@ function UERANSIM_soft_install() {
 	goodecho "[+] Cloninig and installing UERANSIM"
 	gitinstall "https://github.com/aligungr/UERANSIM" "UERANSIM"
 	cd UERANSIM
-	python3 setup.py install
+	make
 }
 
 function pysim_soft_install() {
