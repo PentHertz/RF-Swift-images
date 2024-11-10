@@ -287,6 +287,7 @@ function jss7_soft_install() {
     fi
 }
 
+
 function SCAT_soft_install() {
 	[ -d /telecom ] || mkdir -p /telecom
 	cd /telecom
