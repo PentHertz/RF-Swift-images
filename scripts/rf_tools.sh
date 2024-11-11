@@ -141,7 +141,7 @@ function mfread_soft_install() {
 
 function rfidler_soft_install() {
 	goodecho "[+] Installing rfidler dependencies"
-	cd tmp
+	cd /tmp
 	gitinstall "https://github.com/AdamLaurie/mphidflash.git" "mphidflash"
 	cd mphidflash
 	sudo make install64
