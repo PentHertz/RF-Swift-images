@@ -183,6 +183,15 @@ function miLazyCracker_soft_install() {
     tar Jxvf ../craptev1-v1.1.tar.xz
     mkdir crapto1-v3.3
     tar Jxvf ../crapto1-v3.3.tar.xz -C crapto1-v3.3
+    # Replace the original CFLAGS line with conditional statements for different architectures
+	sed -i '/^CFLAGS =/c\
+	ifeq ($(shell uname -m), riscv64)\n\
+	    CFLAGS = -std=gnu99 -O3 -march=rv64gc\n\
+	else ifeq ($(shell uname -m), aarch64)\n\
+	    CFLAGS = -std=gnu99 -O3 -march=armv8-a\n\
+	else\n\
+	    CFLAGS = -std=gnu99 -O3 -march=native\n\
+	endif' Makefile
     make
     sudo cp -a libnfc_crypto1_crack /usr/local/bin
 }
