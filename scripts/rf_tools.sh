@@ -140,14 +140,23 @@ function mfread_soft_install() {
 }
 
 function rfidler_soft_install() {
-	goodecho "[+] Installing rfidler dependencies"
-	cd /tmp
-	gitinstall "https://github.com/AdamLaurie/mphidflash.git" "mphidflash"
-	cd mphidflash
-	sudo make install64
-	[ -d /rftools/rfid ] || mkdir -p /rftools/rfid
-	cd /rftools/rfid
-	gitinstall "https://github.com/AdamLaurie/RFIDler.git" "RFIDler"
+    # Check if architecture is x86_64 or amd64
+    if [[ "$(uname -m)" == "x86_64" || "$(uname -m)" == "amd64" ]]; then
+        echo "[+] Installing rfidler dependencies"
+        
+        cd /tmp
+        gitinstall "https://github.com/AdamLaurie/mphidflash.git" "mphidflash"
+        
+        cd mphidflash
+        sudo make install64
+        
+        [ -d /rftools/rfid ] || mkdir -p /rftools/rfid
+        
+        cd /rftools/rfid
+        gitinstall "https://github.com/AdamLaurie/RFIDler.git" "RFIDler"
+    else
+        echo "This function is only supported on x86_64/amd64 architectures. Skipping installation."
+    fi
 }
 
 function miLazyCracker_soft_install() {
