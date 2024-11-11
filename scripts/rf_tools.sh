@@ -165,7 +165,12 @@ function miLazyCracker_soft_install() {
 	git reset --hard
     git clean -dfx
     # patch initially done against commit 89de1ba5:
-    patch -p1 < ../crypto1_bs.diff
+    if patch -p1 < ../crypto1_bs.diff; then
+    echo "Patch applied successfully."
+	else
+	    echo "Patch failed? Continuing with the script..."
+	    # Optionally, log more details about the failure or handle it specifically
+	fi
     tar Jxvf ../craptev1-v1.1.tar.xz
     mkdir crapto1-v3.3
     tar Jxvf ../crapto1-v3.3.tar.xz -C crapto1-v3.3
