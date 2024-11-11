@@ -150,6 +150,23 @@ function rfidler_soft_install() {
 	gitinstall "https://github.com/AdamLaurie/RFIDler.git" "RFIDler"
 }
 
+function miLazyCracker_soft_install() {
+	goodecho "[+] Installing crypto1_bs"
+	[ -d /rftools/rfid ] || mkdir -p /rftools/rfid
+	cd /rftools/rfid
+	gitinstall "https://github.com/aczid/crypto1_bs" "crypto1_bs"
+	cd crypto1_bs
+	git reset --hard
+    git clean -dfx
+    # patch initially done against commit 89de1ba5:
+    patch -p1 < ../crypto1_bs.diff
+    tar Jxvf ../craptev1-v1.1.tar.xz
+    mkdir crapto1-v3.3
+    tar Jxvf ../crapto1-v3.3.tar.xz -C crapto1-v3.3
+    make
+    sudo cp -a libnfc_crypto1_crack /usr/local/bin
+}
+
 # Wi-Fi Package
 function common_nettools() {
 	installfromnet "apt-fast install -y iproute2"

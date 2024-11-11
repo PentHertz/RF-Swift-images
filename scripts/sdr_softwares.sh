@@ -382,7 +382,29 @@ function satdump_sdr_soft_install () {
 	[ -d /rftools/sdr ] || mkdir -p /rftools/sdr
 	cd /rftools/sdr
 	goodecho "[+] installing dependencies for SatDump"
-	install_dependencies "libvolk2-dev git build-essential cmake g++ pkgconf libfftw3-dev libpng-dev libtiff-dev libjemalloc-dev libcurl4-openssl-dev libnng-dev libglfw3-dev zenity portaudio19-dev libhdf5-dev libomp-dev ocl-icd-opencl-dev"
+	install_dependencies "libvolk2-dev git build-essential cmake g++ pkgconf libfftw3-dev libpng-dev libtiff-dev libcurl4-openssl-dev libglfw3-dev zenity portaudio19-dev libhdf5-dev libomp-dev ocl-icd-opencl-dev"
+	# Check system architecture
+	ARCH=$(uname -m)
+
+	if [[ "$ARCH" == "x86_64" || "$ARCH" == "amd64" ]]; then
+	    goodecho "Architecture is $ARCH. Installing jemalloc from package manager..."
+	    install_dependencies "libjemalloc-dev"
+	else
+	    goodecho "Architecture is $ARCH. Installing jemalloc from source..."
+	    # Clone and build jemalloc
+	    git clone https://github.com/jemalloc/jemalloc.git
+	    cd jemalloc
+	    ./autogen.sh
+	    ./configure --prefix=/usr
+	    make
+	    sudo make install
+	    # Clean up
+	    cd ..
+	    rm -rf jemalloc
+	    goodecho "[+] jemalloc installed from source."
+	fi
+
+	cmake_clone_and_build "https://github.com/nanomsg/nng.git" "build" "" "" "satdump_sdr_soft_install" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr
 	goodecho "[+] Cloning and installing SatDump"
 	gitinstall "https://github.com/SatDump/SatDump.git" "SatDump"
 	cd SatDump
