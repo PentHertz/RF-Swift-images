@@ -26,6 +26,7 @@ RUN ./entrypoint.sh proxmark3_soft_install && \
 	./entrypoint.sh mfoc_soft_install && \
 	./entrypoint.sh mfcuk_soft_install && \
 	./entrypoint.sh mfread_soft_install && \
+	./entrypoint.sh rfidler_soft_install && \
 	./entrypoint.sh miLazyCracker_soft_install
 
 RUN mkdir -p /sdrtools/

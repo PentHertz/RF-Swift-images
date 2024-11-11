@@ -121,12 +121,12 @@ function libnfc_soft_install() {
 
 function mfoc_soft_install() {
 	goodecho "[+] Installing mfoc"
-	installfromnet "apt-fast install -y mfoc"
+	install_dependencies "mfoc"
 }
 
 function mfcuk_soft_install() {
 	goodecho "[+] Installing mfcuk"
-	installfromnet "apt-fast install -y mfcuk"
+	install_dependencies "mfcuk"
 }
 
 function mfread_soft_install() {
@@ -151,9 +151,15 @@ function rfidler_soft_install() {
 }
 
 function miLazyCracker_soft_install() {
-	goodecho "[+] Installing crypto1_bs"
+	install_dependencies "mfoc"
 	[ -d /rftools/rfid ] || mkdir -p /rftools/rfid
 	cd /rftools/rfid
+	goodecho "[+] Cloning miLazyCracker repo"
+	gitinstall "https://github.com/nfc-tools/miLazyCracker.git" "miLazyCracker"
+	cd miLazyCracker
+	[ -f craptev1-v1.1.tar.xz ] || wget https://web.archive.org/web/20190221140220if_/https://www2.vaneay.fr/mifare/craptev1-v1.1.tar.xz
+	[ -f crapto1-v3.3.tar.xz ] || wget https://web.archive.org/web/20190221140255if_/https://www2.vaneay.fr/mifare/crapto1-v3.3.tar.xz
+	goodecho "[+] Installing crypto1_bs for miLazyCracker"
 	gitinstall "https://github.com/aczid/crypto1_bs" "crypto1_bs"
 	cd crypto1_bs
 	git reset --hard
