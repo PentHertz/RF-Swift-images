@@ -41,10 +41,10 @@ function signalhound_spike_sa_device() {
         colorecho "[+] Downloading Spike bin from SignalHound"
         [ -d /rftools/analysers ] || mkdir -p /rftools/analysers
         cd /rftools/analysers
-        installfromnet "wget https://signalhound.com/sigdownloads/Spike/Spike(Ubuntu22.04x64)_3_9_7.zip"
-        unzip Spike\(Ubuntu22.04x64\)_3_9_7.zip
-        rm Spike\(Ubuntu22.04x64\)_3_9_7.zip
-        cd Spike\(Ubuntu22.04x64\)_3_9_7/
+        installfromnet "wget https://signalhound.com/sigdownloads/Spike/Spike(Ubuntu22.04x64)_4_0_0.zip"
+        unzip Spike\(Ubuntu22.04x64\)_4_0_0.zip
+        rm Spike\(Ubuntu22.04x64\)_4_0_0.zip
+        cd Spike\(Ubuntu22.04x64\)_4_0_0/
         chmod +x setup.sh
         sh -c ./setup.sh
     else
