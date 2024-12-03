@@ -416,3 +416,13 @@ function satdump_sdr_soft_install () {
 	ln -s ../satdump_cfg.json .
 	make install
 }
+
+function pyspecsdr_sdr_soft_install () {
+	[ -d /rftools/sdr ] || mkdir -p /rftools/sdr
+	cd /rftools/sdr
+	goodecho "[+] Cloning and installing PySpecSDR"
+	gitinstall "https://github.com/xqtr/PySpecSDR.git" "PySpecSDR"
+	goodecho "[+] Installing Python dependencies"
+	installfromnet "pip3 install pyrtlsdr"
+	installfromnet "pip3 install sounddevice"
+}
