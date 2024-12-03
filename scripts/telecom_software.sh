@@ -224,8 +224,8 @@ function osmobts_suite_soft_install() {
     osmo_src=$(pwd)/tmp/osmo/src
 
     install_lib "https://gitea.osmocom.org/osmocom/libosmocore.git" "libosmocore"
-    install_lib "https://gitea.osmocom.org/osmocom/libosmo-abis.git" "libosmo-abis"
     install_lib "https://gitea.osmocom.org/osmocom/libosmo-netif.git" "libosmo-netif"
+    install_lib "https://gitea.osmocom.org/osmocom/libosmo-abis.git" "libosmo-abis"
     install_lib "https://gitea.osmocom.org/osmocom/libosmo-sccp.git" "libosmo-sccp"
     install_lib "https://gitea.osmocom.org/osmocom/libosmo-sigtran.git" "libosmo-sigtran"
     install_lib "https://gitea.osmocom.org/cellular-infrastructure/libsmpp34.git" "libsmpp34"
