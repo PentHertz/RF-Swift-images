@@ -96,7 +96,8 @@ RUN	./entrypoint.sh sigdigger_soft_install && \
 	./entrypoint.sh gps_sdr_sim_soft_install && \
 	./entrypoint.sh gpredict_sdr_soft_install && \
 	./entrypoint.sh v2verifier_sdr_soft_install && \
-	./entrypoint.sh wavingz_sdr_soft_install
+	./entrypoint.sh wavingz_sdr_soft_install && \
+	./entrypoint.sh pyspecsdr_sdr_soft_install
 RUN ./entrypoint.sh sdrangel_soft_fromsource_install
 RUN ./entrypoint.sh satdump_sdr_soft_install
 
