@@ -74,7 +74,7 @@ function NanoVNASaver_cal_device_call() {
 	gitinstall "https://github.com/NanoVNA-Saver/nanovna-saver.git"
 	cd nanovna-saver
 	installfromnet "pip3 install -U setuptools setuptools_scm wheel"
-	sed -i 's/numpy==2.1.2/numpy<2/' requirements.txt
+	sed -i 's/numpy==2.1.3/numpy<2/' requirements.txt
 	installfromnet "pip3 install -r requirements.txt"
 	python3 setup.py install
 	set -e
