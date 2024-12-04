@@ -278,12 +278,14 @@ function nfclaboratory_soft_install () {
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
 	gitinstall "https://github.com/josevcm/nfc-laboratory.git" "nfclaboratory_soft_install"
-	cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_SYSTEM_PROCESSOR=$(uname -m) -S nfc-laboratory -B cmake-build-release
-	cmake --build cmake-build-release --target nfc-lab -- -j $(nproc)
-	cp nfc-laboratory/dat/config/nfc-lab.conf /root
-	[ -d /rftools/sdr ] || mkdir /rftools/sdr
-	cp ./cmake-build-release/src/nfc-app/app-qt/nfc-lab /rftools/sdr/
-	ln -s /rftools/sdr/nfc-lab /usr/bin/nfc-lab
+	cmake -DCMAKE_BUILD_TYPE=Release -S nfc-laboratory -B build
+	cmake --build build --target nfc-spy -- -j$(nproc)
+	cp -r nfc-laboratory/dat/firmware build/src/nfc-app/app-qt/
+	[ -d /rftools/sdr ] || mkdir -p /rftools/sdr
+	mkdir nfc-lab
+	cd nfc-lab
+	cp -r /root/thirdparty/build/src/nfc-app/app-qt/ .
+	ln -s /rftools/sdr/nfc-lab/app-qt/nfc-spy /usr/bin/nfc-spy
 }
 
 function retrogram_soapysdr_soft_install () {
