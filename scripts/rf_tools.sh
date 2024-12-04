@@ -166,8 +166,8 @@ function miLazyCracker_soft_install() {
 	goodecho "[+] Cloning miLazyCracker repo"
 	gitinstall "https://github.com/nfc-tools/miLazyCracker.git" "miLazyCracker"
 	cd miLazyCracker
-	[ -f craptev1-v1.1.tar.xz ] || wget https://web.archive.org/web/20190221140220if_/https://www2.vaneay.fr/mifare/craptev1-v1.1.tar.xz
-	[ -f crapto1-v3.3.tar.xz ] || wget https://web.archive.org/web/20190221140255if_/https://www2.vaneay.fr/mifare/crapto1-v3.3.tar.xz
+	[ -f craptev1-v1.1.tar.xz ] || installfromnet "wget https://web.archive.org/web/20190221140220if_/https://www2.vaneay.fr/mifare/craptev1-v1.1.tar.xz"
+	[ -f crapto1-v3.3.tar.xz ] || installfromnet "wget https://web.archive.org/web/20190221140255if_/https://www2.vaneay.fr/mifare/crapto1-v3.3.tar.xz"
 	goodecho "[+] Installing crypto1_bs for miLazyCracker"
 	gitinstall "https://github.com/aczid/crypto1_bs" "crypto1_bs"
 	cd crypto1_bs
