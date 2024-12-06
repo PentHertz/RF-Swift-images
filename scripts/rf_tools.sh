@@ -284,3 +284,8 @@ function sparrowwifi_sdr_soft_install () { # TODO: to debug
 	installfromnet "pip3 install QScintilla PyQtChart gps3 dronekit manuf python-dateutil numpy matplotlib"
 	installfromnet "pip3 install --upgrade manuf"
 }
+
+function whad_soft_install () {
+	goodecho "[+] Installing WHAD from PIP"
+	installfromnet "pip3 install whad"
+}
