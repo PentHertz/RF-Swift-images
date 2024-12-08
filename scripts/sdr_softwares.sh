@@ -282,6 +282,7 @@ function nfclaboratory_soft_install () {
 	cmake --build build --target nfc-spy -- -j$(nproc)
 	cp -r nfc-laboratory/dat/firmware build/src/nfc-app/app-qt/
 	[ -d /rftools/sdr ] || mkdir -p /rftools/sdr
+	cd /rftools/sdr
 	mkdir nfc-lab
 	cd nfc-lab
 	cp -r /root/thirdparty/build/src/nfc-app/app-qt/ .
@@ -297,7 +298,7 @@ function retrogram_soapysdr_soft_install () {
 	gitinstall "https://github.com/r4d10n/retrogram-soapysdr.git" "retrogram_soapysdr_soft_install"
 	cd retrogram-soapysdr
 	make -j$(nproc)
-	ln -s /rftool/sdr/retrogram-soapysdr/retrogram-soapysdr /usr/bin/retrogram-soapysdr
+	ln -s /rftools/sdr/retrogram-soapysdr/retrogram-soapysdr /usr/bin/retrogram-soapysdr
 }
 
 function gps_sdr_sim_soft_install () {
@@ -307,7 +308,8 @@ function gps_sdr_sim_soft_install () {
 	gitinstall "https://github.com/osqzss/gps-sdr-sim.git" "gps_sdr_sim_soft_install"
 	cd gps-sdr-sim
 	gcc gpssim.c -lm -O3 -o gps-sdr-sim
-	ln -s /rftool/sdr/gps-sdr-sim/gps-sdr-sim /usr/bin/gps-sdr-sim
+	ln -s /rftools/sdr/gps-sdr-sim/gps-sdr-sim /usr/bin/gps-sdr-sim
+	ln -s /rftools/sdr/gps-sdr-sim/gps-sdr-sim-uhd.py /usr/bin/gps-sdr-sim-uhd.py
 }
 
 function acarsdec_soft_install () {
