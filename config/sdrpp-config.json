@@ -154,6 +154,10 @@
         "Harogic Source": {
             "enabled": true,
             "module": "harogic_source"
+        },
+        "USRP Source": {
+            "enabled": true,
+            "module": "usrp_source"
         }
     },
     "modules": [],
