@@ -4,12 +4,12 @@ source common.sh
 
 function ad_devices_install() {
 	goodecho "[+] Installing AD libs and tools from package manager"
-	installfromnet "apt-fast install -y libad9361-dev libiio-utils libiio-dev"
+	install_dependencies "libad9361-dev libiio-utils libiio-dev"
 }
 
 function uhd_devices_install() {
 	goodecho "[+] Installing UHD's libs and tools from package manager"
-	installfromnet "apt-fast install -y libuhd4.1.0 libuhd-dev uhd-host"
+	install_dependencies "libuhd4.1.0 libuhd-dev uhd-host"
 	goodecho "[+] Copying rules sets"
 	cp /root/rules/uhd-usrp.rules  /etc/udev/rules.d/
 	goodecho "[+] Downloading Hardware Driver firmware/FPGA"
@@ -26,7 +26,7 @@ function check_neon() {
 
 function uhd_devices_fromsource_install() {
 	goodecho "[+] Installing UHD's dependencies"
-	installfromnet "apt-fast install -y dpdk dpdk-dev autoconf automake build-essential ccache cmake cpufrequtils doxygen ethtool g++ git inetutils-tools libboost-all-dev libncurses5 libncurses5-dev libusb-1.0-0 libusb-1.0-0-dev libusb-dev python3-dev python3-mako python3-numpy python3-requests python3-scipy python3-setuptools \
+	install_dependencies "dpdk dpdk-dev autoconf automake build-essential ccache cmake cpufrequtils doxygen ethtool g++ git inetutils-tools libboost-all-dev libncurses5 libncurses5-dev libusb-1.0-0 libusb-1.0-0-dev libusb-dev python3-dev python3-mako python3-numpy python3-requests python3-scipy python3-setuptools \
 python3-ruamel.yaml"
 	goodecho "[+] Copying rules sets"
 	cp /root/rules/uhd-usrp.rules  /etc/udev/rules.d/
@@ -210,4 +210,14 @@ function rfnm_devices_install() {
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
     cd /root/thirdparty
 	cmake_clone_and_build "https://github.com/rfnm/librfnm.git" "build" "" "" "rfnm_devices_install" "-DCMAKE_INSTALL_PREFIX=/usr"
+}
+
+function libresdr_b2x0_devices_install() {
+	[ -d /rftools/sdr ] || mkdir -p /rftools/sdr
+    cd /rftools/sdr
+    mkdir -p libresdr
+    cd libresdr
+	goodecho "[+] Downloading LibreSDR B2x0 FPGA firmwares"
+	installfromnet "wget https://github.com/FlUxIuS/libresdr-b2xx/releases/download/2024.1/libresdr_b210.bin"
+	installfromnet "wget https://github.com/FlUxIuS/libresdr-b2xx/releases/download/2024.1/libresdr_b220.bin"
 }
