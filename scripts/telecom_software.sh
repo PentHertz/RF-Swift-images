@@ -210,6 +210,15 @@ function cryptomobile_soft_install() {
 	python3 setup.py install
 }
 
+function pysctp_soft_install() {
+	[ -d /telecom ] || mkdir -p /telecom
+	cd /telecom
+	goodecho "[+] Cloninig and installing pysctp"
+	installfromnet "git clone https://github.com/FlUxIuS/pysctp.git"
+	cd pysctp
+	python3 setup.py install
+}
+
 function osmobts_suite_soft_install() {
 	set -e
     goodecho "[+] Installing OsmoBTS suite dependencies"
