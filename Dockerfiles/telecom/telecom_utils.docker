@@ -23,6 +23,7 @@ RUN chmod +x entrypoint.sh
 
 # Tools for Telecom
 RUN ./entrypoint.sh pycrate_soft_install && \
+	./entrypoint.sh cryptomobile_soft_install && \
 	./entrypoint.sh pysim_soft_install && \
 	./entrypoint.sh sysmoUSIM_soft_install && \
 	./entrypoint.sh jss7_soft_install && \

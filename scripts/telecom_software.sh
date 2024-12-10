@@ -194,6 +194,20 @@ function pycrate_soft_install() {
 	installfromnet "git clone https://github.com/pycrate-org/pycrate.git"
 	cd pycrate
 	python3 setup.py install
+	goodecho "[+] Installing pycrate further dependencies"
+	pip3 install pysctp
+	pip3 install lxml
+	pip3 install crc32c
+	pip3 install crcmod
+}
+
+function cryptomobile_soft_install() {
+	[ -d /telecom ] || mkdir -p /telecom
+	cd /telecom
+	goodecho "[+] Cloninig and installing cryptomobile"
+	installfromnet "git clone https://github.com/mitshell/CryptoMobile.git"
+	cd CryptoMobile
+	python3 setup.py install
 }
 
 function osmobts_suite_soft_install() {
