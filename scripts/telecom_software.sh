@@ -195,7 +195,6 @@ function pycrate_soft_install() {
 	cd pycrate
 	python3 setup.py install
 	goodecho "[+] Installing pycrate further dependencies"
-	pip3 install pysctp
 	pip3 install lxml
 	pip3 install crc32c
 	pip3 install crcmod
@@ -216,6 +215,7 @@ function pysctp_soft_install() {
 	goodecho "[+] Cloninig and installing pysctp"
 	installfromnet "git clone https://github.com/FlUxIuS/pysctp.git"
 	cd pysctp
+	install_dependencies "libsctp-dev"
 	python3 setup.py install
 }
 
