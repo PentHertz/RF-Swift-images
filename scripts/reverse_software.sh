@@ -123,7 +123,7 @@ function imhex_soft_install() {
 	goodecho "[+] Cloning and installing ImHex"
 	[ -d /reverse ] || mkdir /reverse
 	cd /reverse
-	gitinstall "https://github.com/WerWolv/ImHex" "imhex_soft_install"
+	gitinstall "https://github.com/FlUxIuS/ImHex.git" "imhex_soft_install"
 	cd ImHex
 	chmod +x dist/get_deps_debian.sh
 	goodecho "[+] Installing ImHex dependencies"
