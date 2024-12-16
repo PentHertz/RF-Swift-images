@@ -312,3 +312,7 @@ function grclenabled_grmod_install() {
     ldconfig
     grclone_and_build "https://github.com/ghostop14/gr-clenabled.git" "" "grclenabled_grmod_install"
 }
+
+function grflarm_grmod_install() {
+    grclone_and_build "https://github.com/argilo/gr-flarm.git" "" "grflarm_grmod_install"
+}
