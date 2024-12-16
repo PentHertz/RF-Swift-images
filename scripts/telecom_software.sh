@@ -203,6 +203,8 @@ function pycrate_soft_install() {
 function cryptomobile_soft_install() {
 	[ -d /telecom ] || mkdir -p /telecom
 	cd /telecom
+	goodecho "[+] Installing cryptomobile's dependencies"
+	installfromnet "pip3 install pycryptodome"
 	goodecho "[+] Cloninig and installing cryptomobile"
 	installfromnet "git clone https://github.com/mitshell/CryptoMobile.git"
 	cd CryptoMobile

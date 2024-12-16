@@ -80,14 +80,14 @@ function harogic_sa_device() {
     sdkarch=""
 	case "$arch" in
   		x86_64|amd64)
-    		prog="SAStudio4_x86_64_05_23_17_06";;
+    		prog="SAStudio4_4.3.55.2_x86_64";;
   		aarch64|unknown|arm64) # We asume unknwon would be RPi 5 for now...?
-    		prog="SAStudio4_aarch64_05_22_17_41";;
+    		prog="SAStudio4_4.3.55.2_aarch64";;
   		*)
     		printf 'Unsupported architecture: "%s"!\n' "$arch" >&2; exit 0;;
 	esac
-	installfromnet "wget https://github.com/PentHertz/rfswift_harogic_install/releases/download/v05.23.17/$prog.zip"
-	unzip "$prog"
+	installfromnet "wget https://github.com/PentHertz/rfswift_harogic_install/releases/download/0.55.53/$prog.zip"
+	unzip "$prog.zip"
 	rm "$prog.zip"
 	cd "$prog"
 	currentpath=$(pwd)
@@ -98,7 +98,7 @@ function harogic_sa_device() {
 	esac
 	ln -s /usr/local/bin/sastudio/.sastudio.sh /usr/sbin/sastudio
 	goodecho "[+] Installing htraapi"
-	installfromnet "wget https://github.com/PentHertz/rfswift_harogic_install/releases/download/v05.23.17/Install_HTRA_SDK.zip"
+	installfromnet "wget https://github.com/PentHertz/rfswift_harogic_install/releases/download/0.55.53/Install_HTRA_SDK.zip"
     unzip Install_HTRA_SDK.zip
     rm Install_HTRA_SDK.zip
     cd Install_HTRA_SDK/
