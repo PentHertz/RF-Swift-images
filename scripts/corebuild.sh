@@ -55,10 +55,6 @@ function docker_preinstall() {
 
     # Installing Cython
     installfromnet "pip3 install cython"
-
-    # Installing Jupyter
-    installfromnet "pip3 install jupyterlab"
-    installfromnet "pip3 install notebook"
 }
 
 function audio_tools () {
