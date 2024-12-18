@@ -100,3 +100,23 @@ function NanoVNA_QT_cal_device() {
 	qmake
 	make -j$(nproc)
 }
+
+function pocketvna_sa_device() {
+    ARCH=$(uname -m)
+    if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then
+        colorecho "[+] Architecture is $ARCH, proceeding with installation"
+        colorecho "[+] Downloading lastest pocketVNA install script from GitHub"
+        [ -d /rftools/calibration ] || mkdir -p /rftools/calibration
+		cd /rftools/calibration
+        mkdir pocketVNA
+        cd pocketVNA
+        installfromnet "wget https://github.com/PentHertz/rfswift_unofficial_pocketvna/releases/download/latest/pocketVna1.m96-New_x86_64.run.2.tar.gz"
+        unzip pocketVna1.m96-New_x86_64.run.2.tar.gz
+        rm pocketVna1.m96-New_x86_64.run.2.tar.gz
+        chmod +x pocketVna1.m96-New_x86_64.run
+        sh -c ./pocketVna1.m96-New_x86_64.run
+        ln -s $(pwd)/pocketVna1.m96-New_x86_64.run /usr/sbin/pocketVNA
+    else
+        criticalecho-noexit "[!] Architecture is not amd64 or x86_64. Skipping installation."
+    fi
+}
