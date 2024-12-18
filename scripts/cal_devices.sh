@@ -111,10 +111,9 @@ function pocketvna_sa_device() {
         mkdir pocketVNA
         cd pocketVNA
         installfromnet "wget https://github.com/PentHertz/rfswift_unofficial_pocketvna/releases/download/latest/pocketVna1.m96-New_x86_64.run.2.tar.gz"
-        unzip pocketVna1.m96-New_x86_64.run.2.tar.gz
+        tar xvzf pocketVna1.m96-New_x86_64.run.2.tar.gz
         rm pocketVna1.m96-New_x86_64.run.2.tar.gz
         chmod +x pocketVna1.m96-New_x86_64.run
-        sh -c ./pocketVna1.m96-New_x86_64.run
         ln -s $(pwd)/pocketVna1.m96-New_x86_64.run /usr/sbin/pocketVNA
     else
         criticalecho-noexit "[!] Architecture is not amd64 or x86_64. Skipping installation."
