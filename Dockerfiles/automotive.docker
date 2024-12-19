@@ -28,6 +28,7 @@ RUN ./entrypoint.sh canutils_soft_install && \
 	./entrypoint.sh gallia_soft_install && \
 	./entrypoint.sh v2ginjector_soft_install
 
+
 # Cleaning and quitting
 WORKDIR /root/
 #RUN rm -rf /root/scripts/
