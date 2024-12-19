@@ -36,8 +36,8 @@ RUN ./entrypoint.sh fzf_soft_install && \
 	./entrypoint.sh zsh_tools_install && \
 	./entrypoint.sh arsenal_soft_install && \
 	./entrypoint.sh audio_tools && \
-	./entrypoint.sh atuin_soft_install
-	./entrypoint.sh rust_tools && \
+	./entrypoint.sh atuin_soft_install && \
+	./entrypoint.sh rust_tools
 
 COPY config/.zshrc /root/.zshrc 
 
