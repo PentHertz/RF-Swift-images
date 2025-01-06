@@ -23,7 +23,7 @@ function leobodnarv2_cal_device() {
 }
 
 function gnsslogger_cal_device() {
-	goodecho "[+] Installing dependencies for gnsslogger"
+	goodecho "[+] Installing gnsslogger"
 	[ -d /rftools/calibration ] || mkdir -p /rftools/calibration
 	cd /rftools/calibration
 	gitinstall "https://github.com/bvernoux/gnsslogger.git" "gnsslogger_cal_device"
@@ -118,4 +118,28 @@ function pocketvna_sa_device() {
     else
         criticalecho-noexit "[!] Architecture is not amd64 or x86_64. Skipping installation."
     fi
+}
+
+function librevna_cal_device() {
+	goodecho "[+] Installing dependencies for LibreVNA"
+	install_dependencies "qt6-base-dev libqt6svg6 libusb-1.0-0-dev"
+	[ -d /rftools/calibration ] || mkdir -p /rftools/calibration
+	cd /rftools/calibration
+	gitinstall "https://github.com/jankae/LibreVNA.git" "librevna_cal_device"
+	cd LibreVNA
+	cd Software/PC_Application/LibreVNA-GUI
+	qmake6 LibreVNA-GUI.pro
+	make -j$(nproc)
+	ln -s "$(pwd)/LibreVNA-GUI" /usr/bin/LibreVNA-GUI
+}
+
+function xnec2c_cal_device() {
+	goodecho "[+] Installing dependencies for xnec2c"
+	install_dependencies "gettext autopoint"
+	[ -d /rftools/calibration ] || mkdir -p /rftools/calibration
+	cd /rftools/calibration
+	gitinstall "https://github.com/KJ7LNW/xnec2c.git" "xnec2c_cal_device"
+	cd xnec2c
+	./autogen.sh
+	make && make install
 }

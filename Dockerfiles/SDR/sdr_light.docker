@@ -46,7 +46,9 @@ RUN ./entrypoint.sh jupyter_soft_install && \
 	./entrypoint.sh KCSDI_cal_device && \
 	./entrypoint.sh NanoVNASaver_cal_device_call && \
 	./entrypoint.sh NanoVNA_QT_cal_device && \
-	./entrypoint.sh gnsslogger_cal_device
+	./entrypoint.sh gnsslogger_cal_device && \
+	./entrypoint.sh librevna_cal_device && \
+	./entrypoint.sh xnec2c_cal_device
 
 RUN ./entrypoint.sh artemis_soft_install && \
 	./entrypoint.sh gqrxscanner_sdr_soft_install
