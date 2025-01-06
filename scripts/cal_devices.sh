@@ -141,5 +141,6 @@ function xnec2c_cal_device() {
 	gitinstall "https://github.com/KJ7LNW/xnec2c.git" "xnec2c_cal_device"
 	cd xnec2c
 	./autogen.sh
+	./configure
 	make && make install
 }
