@@ -1,15 +1,15 @@
 name: Full build - Multi-Platform Docker Build with Caching
 
 env:
-  REGISTRY_IMAGE: penthertz/rfswift
-  CACHE_REPO: penthertz/rfswift
+  REGISTRY_IMAGE: penthertz/rfswift_alpha
+  CACHE_REPO: penthertz/rfswift_alpha
   DO_SPACES_ENDPOINT: ${{ secrets.BUCKET_URL }}
   DO_SPACES_REGION: ${{ secrets.BUCKET_REGION }}
 
 on:
   push:
     branches:
-      - main
+      - ubuntu_24.04
     paths:
       - '**'
 
