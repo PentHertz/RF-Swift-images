@@ -807,7 +807,7 @@ jobs:
           else
             echo "run_job_sdr_light=false" >> $GITHUB_OUTPUT
           fi
-          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light_intelgpu.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || steps.file_check.outputs.run_job_sdr_light == 'true' || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light_nvidiagpu.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || steps.file_check.outputs.run_job_sdr_light == 'true' || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
             echo "run_job_sdr_light_nvidiagpu=true" >> $GITHUB_OUTPUT
           else
             echo "run_job_sdr_light_nvidiagpu=false" >> $GITHUB_OUTPUT
@@ -1063,7 +1063,7 @@ jobs:
           else
             echo "run_job_sdr_light=false" >> $GITHUB_OUTPUT
           fi
-          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light_intelgpu.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || steps.file_check.outputs.run_job_sdr_light == 'true' || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light_nvidiagpu.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || steps.file_check.outputs.run_job_sdr_light == 'true' || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
             echo "run_job_sdr_light_nvidiagpu=true" >> $GITHUB_OUTPUT
           else
             echo "run_job_sdr_light_nvidiagpu=false" >> $GITHUB_OUTPUT
