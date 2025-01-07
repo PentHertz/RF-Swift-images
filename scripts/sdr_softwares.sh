@@ -2,22 +2,22 @@
 
 function gnuradio_soft_install() {
 	goodecho "[+] GNU Radio tools"
-	installfromnet "apt-fast install -y gnuradio gnuradio-dev"
+	install_dependencies "gnuradio gnuradio-dev"
 }
 
 function sdrangel_soft_install() {
 	goodecho "[+] Installing dependencies"
 	installfromnet "apt-fast update"
-	installfromnet "apt-fast install -y git cmake g++ pkg-config autoconf automake libtool libfftw3-dev libusb-1.0-0-dev libusb-dev libhidapi-dev libopengl-dev"
-	installfromnet "apt-fast install -y qtbase5-dev qtchooser libqt5multimedia5-plugins qtmultimedia5-dev libqt5websockets5-dev"
-	installfromnet "apt-fast install -y qttools5-dev qttools5-dev-tools libqt5opengl5-dev libqt5quick5 libqt5charts5-dev"
-	installfromnet "apt-fast install -y qml-module-qtlocation  qml-module-qtpositioning qml-module-qtquick-window2"
-	installfromnet "apt-fast install -y qml-module-qtquick-dialogs qml-module-qtquick-controls qml-module-qtquick-controls2 qml-module-qtquick-layouts"
-	installfromnet "apt-fast install -y libqt5serialport5-dev qtdeclarative5-dev qtpositioning5-dev qtlocation5-dev libqt5texttospeech5-dev"
-	installfromnet "apt-fast install -y qtwebengine5-dev qtbase5-private-dev libqt5gamepad5-dev libqt5svg5-dev"
-	installfromnet "apt-fast install -y libfaad-dev zlib1g-dev libboost-all-dev libasound2-dev pulseaudio libopencv-dev libxml2-dev bison flex"
-	installfromnet "apt-fast install -y ffmpeg libavcodec-dev libavformat-dev libopus-dev doxygen graphviz"
-	installfromnet "apt-fast install -y libhamlib4 libgl1-mesa-glx qtspeech5-speechd-plugin gstreamer1.0-libav libairspy0"
+	install_dependencies "git cmake g++ pkg-config autoconf automake libtool libfftw3-dev libusb-1.0-0-dev libusb-dev libhidapi-dev libopengl-dev"
+	install_dependencies "qtbase5-dev qtchooser libqt5multimedia5-plugins qtmultimedia5-dev libqt5websockets5-dev"
+	install_dependencies "qttools5-dev qttools5-dev-tools libqt5opengl5-dev libqt5quick5 libqt5charts5-dev"
+	install_dependencies "qml-module-qtlocation  qml-module-qtpositioning qml-module-qtquick-window2"
+	install_dependencies "qml-module-qtquick-dialogs qml-module-qtquick-controls qml-module-qtquick-controls2 qml-module-qtquick-layouts"
+	install_dependencies "libqt5serialport5-dev qtdeclarative5-dev qtpositioning5-dev qtlocation5-dev libqt5texttospeech5-dev"
+	install_dependencies "qtwebengine5-dev qtbase5-private-dev libqt5gamepad5-dev libqt5svg5-dev"
+	install_dependencies "libfaad-dev zlib1g-dev libboost-all-dev libasound2-dev pulseaudio libopencv-dev libxml2-dev bison flex"
+	install_dependencies "ffmpeg libavcodec-dev libavformat-dev libopus-dev doxygen graphviz"
+	install_dependencies "libhamlib4 libgl1-mesa-glx qtspeech5-speechd-plugin gstreamer1.0-libav libairspy0"
 
 	goodecho "[+] Downloading and unpacking SDR Angel"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
@@ -39,7 +39,7 @@ function sdrangel_soft_fromsource_install() {
     
 	goodecho "[+] Installing dependencies"
 	installfromnet "apt-fast update"
-	installfromnet "apt-fast install -y libsndfile-dev git cmake g++ pkg-config autoconf automake libtool libfftw3-dev libusb-1.0-0-dev libusb-dev libhidapi-dev libopengl-dev qtbase5-dev qtchooser libqt5multimedia5-plugins qtmultimedia5-dev libqt5websockets5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev libqt5quick5 libqt5charts5-dev qml-module-qtlocation qml-module-qtpositioning qml-module-qtquick-window2 qml-module-qtquick-dialogs qml-module-qtquick-controls qml-module-qtquick-controls2 qml-module-qtquick-layouts libqt5serialport5-dev qtdeclarative5-dev qtpositioning5-dev qtlocation5-dev libqt5texttospeech5-dev qtwebengine5-dev qtbase5-private-dev libqt5gamepad5-dev libqt5svg5-dev libfaad-dev zlib1g-dev libboost-all-dev libasound2-dev pulseaudio libopencv-dev libxml2-dev bison flex ffmpeg libavcodec-dev libavformat-dev libopus-dev doxygen graphviz"
+	install_dependencies "libsndfile-dev git cmake g++ pkg-config autoconf automake libtool libfftw3-dev libusb-1.0-0-dev libusb-dev libhidapi-dev libopengl-dev qtbase5-dev qtchooser libqt5multimedia5-plugins qtmultimedia5-dev libqt5websockets5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev libqt5quick5 libqt5charts5-dev qml-module-qtlocation qml-module-qtpositioning qml-module-qtquick-window2 qml-module-qtquick-dialogs qml-module-qtquick-controls qml-module-qtquick-controls2 qml-module-qtquick-layouts libqt5serialport5-dev qtdeclarative5-dev qtpositioning5-dev qtlocation5-dev libqt5texttospeech5-dev qtwebengine5-dev qtbase5-private-dev libqt5gamepad5-dev libqt5svg5-dev libfaad-dev zlib1g-dev libboost-all-dev libasound2-dev pulseaudio libopencv-dev libxml2-dev bison flex ffmpeg libavcodec-dev libavformat-dev libopus-dev doxygen graphviz"
 	goodecho "[+] APT"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
@@ -76,7 +76,7 @@ function sdrangel_soft_fromsource_install() {
 	goodecho "[+] Codec2"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	installfromnet "apt-fast -y install libspeexdsp-dev libsamplerate0-dev"
+	install_dependencies "libspeexdsp-dev libsamplerate0-dev"
 	cmake_clone_and_build "https://github.com/drowe67/codec2-dev.git" "build" "" "v1.0.3" "sdrangel_soft_fromsource_install"
 
 	goodecho "[+] SGP4"
@@ -117,7 +117,7 @@ function sdrangel_soft_fromsource_install() {
 function sdrpp_soft_fromsource_install () {
     # Beta test, but should work on almost all platforms
     goodecho "[+] Installing dependencies"
-    installfromnet "apt-fast install libfftw3-dev libglfw3-dev libvolk2-dev libzstd-dev libairspyhf-dev libiio-dev libad9361-dev librtaudio-dev libhackrf-dev portaudio19-dev libcodec2-dev -y"
+    install_dependencies "libfftw3-dev libglfw3-dev libvolk2-dev libzstd-dev libairspyhf-dev libiio-dev libad9361-dev librtaudio-dev libhackrf-dev portaudio19-dev libcodec2-dev -y"
     
     goodecho "[+] Installing SDR++"
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
@@ -144,7 +144,7 @@ function sdrpp_soft_fromsource_install () {
 
 function sdrpp_soft_install () { # Working but not compatible with aarch64
 	goodecho "[+] Installing dependencies"
-	installfromnet "apt-fast install libfftw3-dev libglfw3-dev libvolk2-dev libzstd-dev libairspyhf-dev libiio-dev libad9361-dev librtaudio-dev libhackrf-dev -y"
+	install_dependencies "libfftw3-dev libglfw3-dev libvolk2-dev libzstd-dev libairspyhf-dev libiio-dev libad9361-dev librtaudio-dev libhackrf-dev -y"
 	goodecho "[+] Installing SDR++"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
@@ -165,7 +165,7 @@ function sdrpp_soft_install () { # Working but not compatible with aarch64
 
 function sigdigger_soft_install () {
 	goodecho "[+] Installing dependencies"
-	installfromnet "apt-fast install -y libxml2-dev libxml2-utils libfftw3-dev libasound-dev"
+	install_dependencies "libxml2-dev libxml2-utils libfftw3-dev libasound-dev"
 	goodecho "[+] Downloading and launching auto-script"
 	[ -d /rftools/sdr ] || mkdir -p /rftools/sdr
 	cd /rftools/sdr
@@ -185,16 +185,16 @@ function cyberther_soft_install() {
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
 	goodecho "[CyberEther][+] Installing core dependencies"
-	installfromnet "apt-fast install -y git build-essential cmake pkg-config ninja-build meson git zenity curl"
+	install_dependencies "git build-essential cmake pkg-config ninja-build meson git zenity curl"
 	goodecho "[CyberEther][+] Installing graphical dependencies"
-	installfromnet "apt-fast install -y spirv-cross glslang-tools libglfw3-dev"
+	install_dependencies "spirv-cross glslang-tools libglfw3-dev"
 	goodecho "[CyberEther][+] Installing backend dependencies"
-	installfromnet "apt-fast install -y mesa-vulkan-drivers libvulkan-dev vulkan-validationlayers cargo"
+	install_dependencies "mesa-vulkan-drivers libvulkan-dev vulkan-validationlayers cargo"
 	goodecho "[CyberEther][+] Installing remote caps"
-	installfromnet "apt-fast install -y gstreamer1.0-plugins-base libgstreamer-plugins-bad1.0-dev"
-	installfromnet "apt-fast install -y libgstreamer-plugins-base1.0-dev libgstreamer-plugins-good1.0-dev"
-	installfromnet "apt-fast install -y gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly"
-	installfromnet "apt-fast install -y python3-yaml"
+	install_dependencies "gstreamer1.0-plugins-base libgstreamer-plugins-bad1.0-dev"
+	install_dependencies "libgstreamer-plugins-base1.0-dev libgstreamer-plugins-good1.0-dev"
+	install_dependencies "gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly"
+	install_dependencies "python3-yaml"
 	goodecho "[CyberEther][+] Cloning GitHub repository"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
@@ -206,17 +206,17 @@ function cyberther_soft_install() {
 
 function inspectrum_soft_install () {
 	goodecho "[+] Installing inspectrum"
-	installfromnet "apt-fast install -y inspectrum"
+	install_dependencies "inspectrum"
 }
 
 function gqrx_soft_install () {
 	goodecho "[+] Installing GQRX"
-	installfromnet "apt-fast install -y gqrx-sdr"
+	install_dependencies "gqrx-sdr"
 }
 
 function multimon_ng_soft_install () {
 	goodecho "[+] Installing multimon-ng"
-	installfromnet "apt-fast install -y multimon-ng"
+	install_dependencies "multimon-ng"
 }
 
 function urh_soft_install () {
@@ -233,7 +233,7 @@ function rtl_433_soft_install () {
 
 function qsstv_soft_install () {
 	goodecho "[+] Installing dependencies for qsstv_soft_install"
-	installfromnet "apt-fast install -y pkg-config g++ libfftw3-dev qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libhamlib++-dev libasound2-dev libpulse-dev libopenjp2-7 libopenjp2-7-dev libv4l-dev build-essential doxygen libqwt-qt5-dev"
+	install_dependencies "pkg-config g++ libfftw3-dev qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libhamlib++-dev libasound2-dev libpulse-dev libopenjp2-7 libopenjp2-7-dev libv4l-dev build-essential doxygen libqwt-qt5-dev"
 	goodecho "[+] Cloning QSSTV"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
@@ -264,7 +264,7 @@ function ice9_bluetooth_soft_install() {
 
 function ice9_bluetooth_soft_install_call () {
 	goodecho "[+] Installing dependencies for ice9_bluetooth"
-	installfromnet "apt-fast install -y libliquid-dev libhackrf-dev libbladerf-dev libuhd-dev libfftw3-dev"
+	install_dependencies "libliquid-dev libhackrf-dev libbladerf-dev libuhd-dev libfftw3-dev"
 	goodecho "[+] Cloning ice9-bluetooth-sniffer"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
@@ -273,7 +273,7 @@ function ice9_bluetooth_soft_install_call () {
 
 function nfclaboratory_soft_install () {
 	goodecho "[+] Installing dependencies for nfc-laboratory"
-	installfromnet "apt-fast install -y libusb-1.0-0"
+	install_dependencies "libusb-1.0-0"
 	goodecho "[+] Installing nfc-laboratory"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
@@ -291,7 +291,7 @@ function nfclaboratory_soft_install () {
 
 function retrogram_soapysdr_soft_install () {
 	goodecho "[+] Installing dependencies for retrogram"
-	installfromnet "apt-fast install -y libsoapysdr-dev libncurses5-dev libboost-program-options-dev"
+	install_dependencies "libsoapysdr-dev libncurses5-dev libboost-program-options-dev"
 	goodecho "[+] Installing retrogram_soapysdr"
 	[ -d /rftools/sdr ] || mkdir -p /rftools/sdr
 	cd /rftools/sdr
@@ -316,7 +316,7 @@ function acarsdec_soft_install () {
 	goodecho "[+] Installing acarsdec dependencies"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	installfromnet "apt-fast install -y zlib1g-dev libjansson-dev libxml2-dev"
+	install_dependencies "zlib1g-dev libjansson-dev libxml2-dev"
 	cmake_clone_and_build "https://github.com/szpajder/libacars.git" "build"
 	ldconfig
 
@@ -337,7 +337,7 @@ function meshtastic_sdr_soft_install () {
 
 function gpredict_sdr_soft_install () {
 	goodecho "[+] Installing GPredict dependencies"
-	installfromnet "apt-fast install -y libtool intltool autoconf automake libcurl4-openssl-dev pkg-config libglib2.0-dev libgtk-3-dev libgoocanvas-2.0-dev"
+	install_dependencies "libtool intltool autoconf automake libcurl4-openssl-dev pkg-config libglib2.0-dev libgtk-3-dev libgoocanvas-2.0-dev"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
 	goodecho "[+] Cloning Meshtastic_SDR"
@@ -351,7 +351,7 @@ function gpredict_sdr_soft_install () {
 
 function v2verifier_sdr_soft_install () {
 	goodecho "[+] Installing v2verifier dependencies"
-	installfromnet "apt-fast install -y swig libgmp3-dev python3-pip python3-tk python3-pil libssl-dev python3-pil.imagetk"
+	install_dependencies "swig libgmp3-dev python3-pip python3-tk python3-pil libssl-dev python3-pil.imagetk"
 	[ -d /rftools/sdr ] || mkdir -p /rftools/sdr
 	cd /rftools/sdr
 	goodecho "[+] Cloning v2verifier"

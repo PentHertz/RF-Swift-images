@@ -6,7 +6,7 @@ function kismet_soft_install() {
 	[ -d /rftools ] || mkdir -p /rftools
 	cd /rftools
 	check_and_install_lib "librtlsdr-dev librtlsdr0" "librtlsdr"
-	installfromnet "apt-fast install -y ubertooth libprelude-dev build-essential git libwebsockets-dev pkg-config zlib1g-dev libnl-3-dev libnl-genl-3-dev libcap-dev libpcap-dev libnm-dev libdw-dev libsqlite3-dev libprotobuf-dev libprotobuf-c-dev protobuf-compiler protobuf-c-compiler libsensors4-dev libusb-1.0-0-dev python3 python3-setuptools python3-protobuf python3-requests python3-numpy python3-serial python3-usb python3-dev python3-websockets libubertooth-dev libbtbb-dev libmosquitto-dev"
+	install_dependencies "ubertooth libprelude-dev build-essential git libwebsockets-dev pkg-config zlib1g-dev libnl-3-dev libnl-genl-3-dev libcap-dev libpcap-dev libnm-dev libdw-dev libsqlite3-dev libprotobuf-dev libprotobuf-c-dev protobuf-compiler protobuf-c-compiler libsensors4-dev libusb-1.0-0-dev python3 python3-setuptools python3-protobuf python3-requests python3-numpy python3-serial python3-usb python3-dev python3-websockets libubertooth-dev libbtbb-dev libmosquitto-dev"
 	goodecho "[+] Installing Kismet"
 	installfromnet "git clone https://www.kismetwireless.net/git/kismet.git"
 	cd kismet
@@ -21,7 +21,7 @@ function kismet_soft_install() {
 # Bluetooth Classic and LE
 function blueztools_soft_install() {
 	goodecho "[+] Installing bluez tools"
-	installfromnet "apt-fast install -y bluez bluez-tools bluez-hcidump bluez-btsco bluez-obexd libbluetooth-dev"
+	install_dependencies "bluez bluez-tools bluez-hcidump bluez-btsco bluez-obexd libbluetooth-dev"
 }
 
 function mirage_soft_install() {
@@ -30,7 +30,7 @@ function mirage_soft_install() {
 	echo apt-fast keyboard-configuration/layout string "English (US)" | debconf-set-selections
 	echo apt-fast console-setup/codeset47 string "Guess optimal character set" | debconf-set-selections
 	echo apt-fast console-setup/charmap47 string "UTF-8" | debconf-set-selections
-	installfromnet "apt-fast install -y libpcsclite-dev pcsc-tools kmod kbd"
+	install_dependencies "libpcsclite-dev pcsc-tools kmod kbd"
 	installfromnet "pip3 install keyboard"
 	goodecho "[+] Installing Mirage"
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
@@ -43,7 +43,7 @@ function mirage_soft_install() {
 function bettercap_soft_install() {
 	goodecho "[+] Installing bettercap"
 	export GOPROXY=direct
-	installfromnet "apt-fast install -y libnetfilter-queue-dev"
+	install_dependencies "libnetfilter-queue-dev"
 	[ -d /rftools/bluetooth ] || mkdir -p /rftools/bluetooth
 	cd /rftools/bluetooth
 	gitinstall "https://github.com/bettercap/bettercap.git"
@@ -68,7 +68,7 @@ function bluing_soft_install() {
     
     # Update package lists and install Python 3.10 along with necessary packages
     sudo apt-get update
-    sudo apt-get -y install python3.10 python3.10-venv python3.10-dev libgirepository1.0-dev
+    install_dependencies "python3.10 python3.10-venv python3.10-dev libgirepository1.0-dev"
 
     # Create directories
     [ -d /rftools/bluetooth/bluing ] || mkdir -p /rftools/bluetooth/bluing
@@ -99,8 +99,8 @@ function proxmark3_soft_install() {
 	set +e # TODO: debug that function
     set +o pipefail
 	goodecho "[+] Installing proxmark3 dependencies"
-	installfromnet "apt-fast install -y --no-install-recommends git ca-certificates build-essential pkg-config libreadline-dev"
-	installfromnet "apt-fast install -y  gcc-arm-none-eabi libnewlib-dev qtbase5-dev libbz2-dev liblz4-dev libbluetooth-dev libpython3-dev libssl-dev libgd-dev"
+	install_dependencies "git ca-certificates build-essential pkg-config libreadline-dev"
+	install_dependencies "gcc-arm-none-eabi libnewlib-dev qtbase5-dev libbz2-dev liblz4-dev libbluetooth-dev libpython3-dev libssl-dev libgd-dev"
 	goodecho "[+] Installing proxmark3"
 	[ -d /rftools/rfid ] || mkdir -p /rftools/rfid
 	cd /rftools/rfid
@@ -114,9 +114,9 @@ function proxmark3_soft_install() {
 
 function libnfc_soft_install() {
 	goodecho "[+] Installing libnfc dependencies"
-	installfromnet "apt-fast install -y autoconf libtool libusb-dev libpcsclite-dev build-essential pcsc-tools"
+	install_dependencies "autoconf libtool libusb-dev libpcsclite-dev build-essential pcsc-tools"
 	goodecho "[+] Installing libnfc"
-	installfromnet "apt-fast install -y libnfc-dev libnfc-bin"
+	install_dependencies "libnfc-dev libnfc-bin"
 }
 
 function mfoc_soft_install() {
@@ -132,7 +132,7 @@ function mfcuk_soft_install() {
 function mfread_soft_install() {
 	goodecho "[+] Installing mfread dependencies"
 	installfromnet "pip3 install bitstring"
-	installfromnet "apt-fast install -y  gcc-arm-none-eabi libnewlib-dev qtbase5-dev libbz2-dev liblz4-dev libbluetooth-dev libpython3-dev libssl-dev libgd-dev"
+	install_dependencies "gcc-arm-none-eabi libnewlib-dev qtbase5-dev libbz2-dev liblz4-dev libbluetooth-dev libpython3-dev libssl-dev libgd-dev"
 	goodecho "[+] Installing mfdread"
 	[ -d /rftools/rfid ] || mkdir -p /rftools/rfid
 	cd /rftools/rfid
@@ -198,7 +198,7 @@ function miLazyCracker_soft_install() {
 
 # Wi-Fi Package
 function common_nettools() {
-	installfromnet "apt-fast install -y iproute2"
+	install_dependencies "iproute2"
 	echo apt-fast macchanger/automatically_run  boolean false | debconf-set-selections
 	installfromnet "apt-fast install -y -q macchanger"
 	echo apt-fast wireshark-common/install-setuid boolean true | debconf-set-selections
@@ -207,22 +207,22 @@ function common_nettools() {
 
 function aircrack_soft_install() {
 	goodecho "[+] Installing aircrack-ng"
-	installfromnet "apt-fast install -y aircrack-ng"
+	install_dependencies "aircrack-ng"
 }
 
 function reaver_soft_install() {
 	goodecho "[+] Installing reaver"
-	installfromnet "apt-fast install -y reaver"
+	install_dependencies "reaver"
 }
 
 function bully_soft_install() {
 	goodecho "[+] Installing bully"
-	installfromnet "apt-fast install -y bully"
+	install_dependencies "bully"
 }
 
 function pixiewps_soft_install() {
 	goodecho "[+] Installing pixiewps"
-	installfromnet "apt-fast install -y pixiewps"
+	install_dependencies "pixiewps"
 }
 
 function Pyrit_soft_install() {

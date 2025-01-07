@@ -64,7 +64,7 @@ function binwalkv3_soft_install() {
 
 function binwalk_soft_install() {
 	goodecho "[+] Installing Binwalk"
-	installfromnet "apt-fast install -y binwalk"
+	install_dependencies "binwalk"
 }
 
 function cutter_soft_install() { # TODO: fix installation
@@ -83,7 +83,7 @@ function cutter_soft_install() { # TODO: fix installation
 
 function ghidra_soft_install() {
 	goodecho "[+] Installing Ghidra dependencies"
-	installfromnet "apt-fast install -y openjdk-21-jdk"
+	install_dependencies "openjdk-21-jdk"
 	goodecho "[+] Downloading Ghidra"
 	[ -d /reverse ] || mkdir /reverse
 	cd /reverse
@@ -101,7 +101,7 @@ function ghidra_soft_install() {
 
 function qiling_soft_install() {
 	goodecho "[+] Installing Qiling's dependencies"
-	installfromnet "apt-fast install -y ack antlr3 aria2 asciidoc autoconf automake autopoint binutils bison build-essential bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool lrzsz mkisofs msmtp nano ninja-build p7zip p7zip-full patch pkgconf python2.7 python3 python3-pip libpython3-dev qemu-utils rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev"
+	install_dependencies "ack antlr3 aria2 asciidoc autoconf automake autopoint binutils bison build-essential bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool lrzsz mkisofs msmtp nano ninja-build p7zip p7zip-full patch pkgconf python2.7 python3 python3-pip libpython3-dev qemu-utils rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev"
 	goodecho "[+] Cloning and installing Qiling"
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
 	cd /root/thirdparty
@@ -123,9 +123,10 @@ function imhex_soft_install() {
 	goodecho "[+] Cloning and installing ImHex"
 	[ -d /reverse ] || mkdir /reverse
 	cd /reverse
-	gitinstall "https://github.com/FlUxIuS/ImHex.git" "imhex_soft_install"
+	gitinstall "https://github.com/WerWolv/ImHex.git" "imhex_soft_install" "releases/v1.36.X"
 	cd ImHex
 	chmod +x dist/get_deps_debian.sh
+	sed -i -e 's/g++-14/g++-12/g' -e 's/gcc-14/gcc-12/g' dist/get_deps_debian.sh
 	goodecho "[+] Installing ImHex dependencies"
 	installfromnet "sh -c ./dist/get_deps_debian.sh"
 	mkdir -p build

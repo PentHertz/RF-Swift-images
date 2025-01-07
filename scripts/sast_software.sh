@@ -30,13 +30,12 @@ function semgrep_install() {
 
 function cppcheck_install() {
     goodecho "[+] installing cppcheck"
-    installfromnet "apt-fast install -y cppcheck"
+    install_dependencies "cppcheck"
 }
 
 function AFL_install() {
     goodecho "[+] installing AFL++"
-
-    installfromnet "apt-fast install -y clang build-essential afl++"
+    install_dependencies "clang build-essential afl++"
 }
 
 function honggfuzz_install() {
@@ -52,7 +51,7 @@ function honggfuzz_install() {
 
     echo "[+] Installing honggfuzz"
 
-    installfromnet "apt-fast install -y binutils-dev libunwind-dev libblocksruntime-dev git"
+    install_dependencies "binutils-dev libunwind-dev libblocksruntime-dev git"
 
     [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
     cd /root/thirdparty
@@ -62,9 +61,7 @@ function honggfuzz_install() {
     cd honggfuzz && make && make install
 }
 
-
 function clang_static_analyzer_install() {
     echo "[+] installing clang-static-analyzer"
-
-    installfromnet "apt-fast install -y clang clang-tools"
+    install_dependencies "clang clang-tools"
 }
