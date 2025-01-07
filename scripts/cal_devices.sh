@@ -123,6 +123,10 @@ function pocketvna_sa_device() {
 function librevna_cal_device() {
 	goodecho "[+] Installing dependencies for LibreVNA"
 	install_dependencies "qt6-base-dev libqt6svg6 libusb-1.0-0-dev"
+	ARCH=$(uname -m)
+    if [ "$ARCH" = "arm64" ] || [ "$ARCH" = "aarch64" ]; then
+		echo 'QMAKE_CXX.COMPILER_MACROS = __aarch64__' >> /usr/lib/aarch64-linux-gnu/qt6/mkspecs/features/toolchain.prf
+	fi
 	[ -d /rftools/calibration ] || mkdir -p /rftools/calibration
 	cd /rftools/calibration
 	gitinstall "https://github.com/jankae/LibreVNA.git" "librevna_cal_device"
