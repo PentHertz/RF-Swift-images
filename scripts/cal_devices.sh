@@ -123,10 +123,6 @@ function pocketvna_sa_device() {
 function librevna_cal_device() {
 	goodecho "[+] Installing dependencies for LibreVNA"
 	install_dependencies "qt6-base-dev libqt6svg6 libusb-1.0-0-dev"
-	ARCH=$(uname -m)
-    if [ "$ARCH" = "arm64" ] || [ "$ARCH" = "aarch64" ]; then
-		echo 'QMAKE_CXX.COMPILER_MACROS = __aarch64__' >> /usr/lib/aarch64-linux-gnu/qt6/mkspecs/features/toolchain.prf
-	fi
 	[ -d /rftools/calibration ] || mkdir -p /rftools/calibration
 	cd /rftools/calibration
 	gitinstall "https://github.com/jankae/LibreVNA.git" "librevna_cal_device"
@@ -135,6 +131,16 @@ function librevna_cal_device() {
 	qmake6 LibreVNA-GUI.pro
 	make -j$(nproc)
 	ln -s "$(pwd)/LibreVNA-GUI" /usr/bin/LibreVNA-GUI
+}
+
+function librevna_cal_device_buildx() {
+    # Check architecture using uname
+    ARCH=$(uname -m)
+    if [ "$ARCH" = "x86_64" ]; then
+        librevna_cal_device
+    else
+        goodecho "[!] Skipping LibreVNA build for $ARCH architecture as Qmake fails to get context with buildx"
+    fi
 }
 
 function xnec2c_cal_device() {
