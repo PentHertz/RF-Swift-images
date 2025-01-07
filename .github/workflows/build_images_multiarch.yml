@@ -32,9 +32,9 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Set up Docker Buildx
@@ -72,9 +72,9 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true'
@@ -135,15 +135,15 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
 
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdrsa_devices::true"
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdrsa_devices::false"
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Set up Docker Buildx
@@ -180,15 +180,15 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
 
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdrsa_devices::true"
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdrsa_devices::false"
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true'
@@ -250,22 +250,21 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
 
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdrsa_devices::true"
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdrsa_devices::false"
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light_antsdr.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdrsa_antsdr_devices::true"
+            echo "run_job_sdrsa_antsdr_devices=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdrsa_antsdr_devices::false"
+            echo "run_job_sdrsa_antsdr_devices=false" >> $GITHUB_OUTPUT
           fi
-
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_antsdr_devices == 'true'
         uses: docker/setup-buildx-action@v3
@@ -300,20 +299,20 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
 
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdrsa_devices::true"
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdrsa_devices::false"
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light_antsdr.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdrsa_antsdr_devices::true"
+            echo "run_job_sdrsa_antsdr_devices=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdrsa_antsdr_devices::false"
+            echo "run_job_sdrsa_antsdr_devices=false" >> $GITHUB_OUTPUT
           fi
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_antsdr_devices == 'true'
@@ -375,22 +374,21 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
 
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdrsa_devices::true"
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdrsa_devices::false"
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light_rtlsdrv4.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdrsa_rtlsdrv4_devices::true"
+            echo "run_job_sdrsa_rtlsdrv4_devices=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdrsa_rtlsdrv4_devices::false"
+            echo "run_job_sdrsa_rtlsdrv4_devices=false" >> $GITHUB_OUTPUT
           fi
-
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_rtlsdrv4_devices == 'true'
         uses: docker/setup-buildx-action@v3
@@ -425,20 +423,20 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
 
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdrsa_devices::true"
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdrsa_devices::false"
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light_rtlsdrv4.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdrsa_rtlsdrv4_devices::true"
+            echo "run_job_sdrsa_rtlsdrv4_devices=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdrsa_rtlsdrv4_devices::false"
+            echo "run_job_sdrsa_rtlsdrv4_devices=false" >> $GITHUB_OUTPUT
           fi
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_rtlsdrv4_devices == 'true'
@@ -500,22 +498,21 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
-          fi
-          
-          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdrsa_devices::true"
-          else
-            echo "::set-output name=run_job_sdrsa_devices::false"
-          fi
-          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdr_light::true"
-          else
-            echo "::set-output name=run_job_sdr_light::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
 
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "run_job_sdr_light=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_sdr_light=false" >> $GITHUB_OUTPUT
+          fi
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true'
         uses: docker/setup-buildx-action@v3
@@ -550,20 +547,20 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
-          
+
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdrsa_devices::true"
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdrsa_devices::false"
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdr_light::true"
+            echo "run_job_sdr_light=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdr_light::false"
+            echo "run_job_sdr_light=false" >> $GITHUB_OUTPUT
           fi
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true'
@@ -624,36 +621,31 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
-          
+
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdrsa_devices::true"
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdrsa_devices::false"
-          fi
-          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdr_light::true"
-          else
-            echo "::set-output name=run_job_sdr_light::false"
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
       - name: Set up Docker Buildx
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' 
         uses: docker/setup-buildx-action@v3
         with:
           install: true
 
       - name: Log in to Docker Hub
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true'
         uses: docker/login-action@v3
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push sdr_light image with caching
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true'
         run: |
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make deeptempest
@@ -673,37 +665,32 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
-          
+
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdrsa_devices::true"
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdrsa_devices::false"
-          fi
-          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdr_light::true"
-          else
-            echo "::set-output name=run_job_sdr_light::false"
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
       - name: Set up Docker Buildx
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' 
         uses: docker/setup-buildx-action@v3
         with:
           install: true
           version: latest
 
       - name: Log in to Docker Hub
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' 
         uses: docker/login-action@v3
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Create and push multi-arch manifest for sdr_light
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' 
         run: |
           tagname=deeptempest
 
@@ -748,27 +735,26 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
+
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdrsa_devices::true"
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdrsa_devices::false"
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdr_light::true"
+            echo "run_job_sdr_light=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdr_light::false"
+            echo "run_job_sdr_light=false" >> $GITHUB_OUTPUT
           fi
-
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light_intelgpu.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || steps.file_check.outputs.run_job_sdr_light == 'true' || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdr_light_intelgpu::true"
+            echo "run_job_sdr_light_intelgpu=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdr_light_intelgpu::false"
+            echo "run_job_sdr_light_intelgpu=false" >> $GITHUB_OUTPUT
           fi
-
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true' || steps.file_check.outputs.run_job_sdr_light_intelgpu == 'true'
         uses: docker/setup-buildx-action@v3
@@ -806,27 +792,26 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
-          fi
-          
-          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdrsa_devices::true"
-          else
-            echo "::set-output name=run_job_sdrsa_devices::false"
-          fi
-          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdr_light::true"
-          else
-            echo "::set-output name=run_job_sdr_light::false"
-          fi
-          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light_nvidiagpu.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || steps.file_check.outputs.run_job_sdr_light == 'true' || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdr_light_nvidiagpu::true"
-          else
-            echo "::set-output name=run_job_sdr_light_nvidiagpu::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
 
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "run_job_sdr_light=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_sdr_light=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light_intelgpu.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || steps.file_check.outputs.run_job_sdr_light == 'true' || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "run_job_sdr_light_nvidiagpu=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_sdr_light_nvidiagpu=false" >> $GITHUB_OUTPUT
+          fi
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true' || steps.file_check.outputs.run_job_sdr_light_nvidiagpu == 'true'
         uses: docker/setup-buildx-action@v3
@@ -865,27 +850,26 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
-          fi
-          
-          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdrsa_devices::true"
-          else
-            echo "::set-output name=run_job_sdrsa_devices::false"
-          fi
-          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdr_light::true"
-          else
-            echo "::set-output name=run_job_sdr_light::false"
-          fi
-          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR_full.docker"* || "$MODIFIED_FILES" == *"scripts/sdr_softwares.sh"* || "$MODIFIED_FILES" == *"scripts/gr_oot_modules.sh"* ]]; then
-            echo "::set-output name=run_job_sdrfull::true"
-          else
-            echo "::set-output name=run_job_sdrfull::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
 
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "run_job_sdr_light=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_sdr_light=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR_full.docker"* || "$MODIFIED_FILES" == *"scripts/sdr_softwares.sh"* || "$MODIFIED_FILES" == *"scripts/gr_oot_modules.sh"* ]]; then
+            echo "run_job_sdrfull=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_sdrfull=false" >> $GITHUB_OUTPUT
+          fi
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true' || steps.file_check.outputs.run_job_sdrfull == 'true'
         uses: docker/setup-buildx-action@v3
@@ -920,25 +904,25 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
-          
+
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdrsa_devices::true"
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdrsa_devices::false"
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdr_light::true"
+            echo "run_job_sdr_light=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdr_light::false"
+            echo "run_job_sdr_light=false" >> $GITHUB_OUTPUT
           fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR_full.docker"* || "$MODIFIED_FILES" == *"scripts/sdr_softwares.sh"* || "$MODIFIED_FILES" == *"scripts/gr_oot_modules.sh"* ]]; then
-            echo "::set-output name=run_job_sdrfull::true"
+            echo "run_job_sdrfull=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdrfull::false"
+            echo "run_job_sdrfull=false" >> $GITHUB_OUTPUT
           fi
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true' || steps.file_check.outputs.run_job_sdrfull == 'true'
@@ -1000,30 +984,30 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
-          fi
-          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdrsa_devices::true"
-          else
-            echo "::set-output name=run_job_sdrsa_devices::false"
-          fi
-          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdr_light::true"
-          else
-            echo "::set-output name=run_job_sdr_light::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
 
-          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light_intelgpu.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || steps.file_check.outputs.run_job_sdr_light == 'true' || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdr_light_intelgpu::true"
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdr_light_intelgpu::false"
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "run_job_sdr_light=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_sdr_light=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light_intelgpu.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || steps.file_check.outputs.run_job_sdr_light == 'true' || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "run_job_sdr_light_intelgpu=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_sdr_light_intelgpu=false" >> $GITHUB_OUTPUT
           fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR_full.docker"* || "$MODIFIED_FILES" == *"scripts/sdr_softwares.sh"* || "$MODIFIED_FILES" == *"scripts/gr_oot_modules.sh"* ]]; then
-            echo "::set-output name=run_job_sdrfull_intelgpu::true"
+            echo "run_job_sdrfull_intelgpu=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdrfull_intelgpu::false"
+            echo "run_job_sdrfull_intelgpu=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Set up Docker Buildx
@@ -1064,30 +1048,30 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
-          
+
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdrsa_devices::true"
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdrsa_devices::false"
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
-          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light_rtlsdrv4.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdr_light::true"
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "run_job_sdr_light=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdr_light::false"
+            echo "run_job_sdr_light=false" >> $GITHUB_OUTPUT
           fi
-          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light_nvidiagpu.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || steps.file_check.outputs.run_job_sdr_light == 'true' || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdr_light_nvidiagpu::true"
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light_intelgpu.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || steps.file_check.outputs.run_job_sdr_light == 'true' || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "run_job_sdr_light_nvidiagpu=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdr_light_nvidiagpu::false"
+            echo "run_job_sdr_light_nvidiagpu=false" >> $GITHUB_OUTPUT
           fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR_full.docker"* || "$MODIFIED_FILES" == *"scripts/sdr_softwares.sh"* || "$MODIFIED_FILES" == *"scripts/gr_oot_modules.sh"* ]]; then
-            echo "::set-output name=run_job_sdrfull_nvidiagpu::true"
+            echo "run_job_sdrfull_nvidiagpu=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdrfull_nvidiagpu::false"
+            echo "run_job_sdrfull_nvidiagpu=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Set up Docker Buildx
@@ -1128,22 +1112,21 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
 
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdrsa_devices::true"
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdrsa_devices::false"
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_utils.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
-            echo "::set-output name=run_job_telecom::true"
+            echo "run_job_telecom=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_telecom::false"
+            echo "run_job_telecom=false" >> $GITHUB_OUTPUT
           fi
-
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true'
         uses: docker/setup-buildx-action@v3
@@ -1178,20 +1161,20 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
 
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdrsa_devices::true"
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdrsa_devices::false"
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_utils.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
-            echo "::set-output name=run_job_telecom::true"
+            echo "run_job_telecom=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_telecom::false"
+            echo "run_job_telecom=false" >> $GITHUB_OUTPUT
           fi
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true'
@@ -1253,37 +1236,41 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
 
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdrsa_devices::true"
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdrsa_devices::false"
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_utils.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
+            echo "run_job_telecom=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_telecom=false" >> $GITHUB_OUTPUT
           fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_2Gto3G.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
-            echo "::set-output name=run_job_telecom::true"
+            echo "run_job_telecom23G=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_telecom::false"
+            echo "run_job_telecom23G=false" >> $GITHUB_OUTPUT
           fi
-
       - name: Set up Docker Buildx
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom23G == 'true'
         uses: docker/setup-buildx-action@v3
         with:
           install: true
 
       - name: Log in to Docker Hub
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom23G == 'true'
         uses: docker/login-action@v3
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push telecom 2G to 3G image with caching
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom23G == 'true'
         run: |
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make telecom_2Gto3G
@@ -1303,37 +1290,42 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
 
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdrsa_devices::true"
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdrsa_devices::false"
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_utils.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
+            echo "run_job_telecom=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_telecom=false" >> $GITHUB_OUTPUT
           fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_2Gto3G.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
-            echo "::set-output name=run_job_telecom::true"
+            echo "run_job_telecom23G=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_telecom::false"
+            echo "run_job_telecom23G=false" >> $GITHUB_OUTPUT
           fi
       - name: Set up Docker Buildx
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom23G == 'true'
         uses: docker/setup-buildx-action@v3
         with:
           install: true
           version: latest
 
       - name: Log in to Docker Hub
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom23G == 'true'
         uses: docker/login-action@v3
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Create and push multi-arch manifest for telecom 2G to 3G
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom23G == 'true'
         run: |
           tagname=telecom_2Gto3G
 
@@ -1375,37 +1367,41 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
 
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdrsa_devices::true"
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdrsa_devices::false"
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_utils.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
+            echo "run_job_telecom=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_telecom=false" >> $GITHUB_OUTPUT
           fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_4G_5GNSA.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
-            echo "::set-output name=run_job_telecom::true"
+            echo "run_job_telecom4G5GNSA=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_telecom::false"
+            echo "run_job_telecom4G5GNSA=false" >> $GITHUB_OUTPUT
           fi
-
       - name: Set up Docker Buildx
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom4G5GNSA == 'true'
         uses: docker/setup-buildx-action@v3
         with:
           install: true
 
       - name: Log in to Docker Hub
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom4G5GNSA == 'true'
         uses: docker/login-action@v3
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push telecom 4G to 5G NSA image with caching
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom4G5GNSA == 'true'
         run: |
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make telecom_4G_5GNSA
@@ -1425,37 +1421,42 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
 
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdrsa_devices::true"
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdrsa_devices::false"
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_utils.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
+            echo "run_job_telecom=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_telecom=false" >> $GITHUB_OUTPUT
           fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_4G_5GNSA.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
-            echo "::set-output name=run_job_telecom::true"
+            echo "run_job_telecom4G5GNSA=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_telecom::false"
+            echo "run_job_telecom4G5GNSA=false" >> $GITHUB_OUTPUT
           fi
       - name: Set up Docker Buildx
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom4G5GNSA == 'true'
         uses: docker/setup-buildx-action@v3
         with:
           install: true
           version: latest
 
       - name: Log in to Docker Hub
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom4G5GNSA == 'true'
         uses: docker/login-action@v3
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Create and push multi-arch manifest for telecom 4G to 5G NSA
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom4G5GNSA == 'true'
         run: |
           tagname=telecom_4G_5GNSA
 
@@ -1496,37 +1497,41 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
 
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdrsa_devices::true"
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdrsa_devices::false"
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_utils.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
+            echo "run_job_telecom=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_telecom=false" >> $GITHUB_OUTPUT
           fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_5G.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
-            echo "::set-output name=run_job_telecom::true"
+            echo "run_job_telecom5GSA=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_telecom::false"
+            echo "run_job_telecom5GSA=false" >> $GITHUB_OUTPUT
           fi
-
       - name: Set up Docker Buildx
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom5GSA == 'true'
         uses: docker/setup-buildx-action@v3
         with:
           install: true
 
       - name: Log in to Docker Hub
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom5GSA == 'true'
         uses: docker/login-action@v3
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push telecom 4G to 5G NSA image with caching
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom5GSA == 'true'
         run: |
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make telecom_5G
@@ -1546,37 +1551,42 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
 
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdrsa_devices::true"
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdrsa_devices::false"
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_utils.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
+            echo "run_job_telecom=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_telecom=false" >> $GITHUB_OUTPUT
           fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_5G.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
-            echo "::set-output name=run_job_telecom::true"
+            echo "run_job_telecom5GSA=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_telecom::false"
+            echo "run_job_telecom5GSA=false" >> $GITHUB_OUTPUT
           fi
       - name: Set up Docker Buildx
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom5GSA == 'true'
         uses: docker/setup-buildx-action@v3
         with:
           install: true
           version: latest
 
       - name: Log in to Docker Hub
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom5GSA == 'true'
         uses: docker/login-action@v3
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Create and push multi-arch manifest for telecom 5G
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom5GSA == 'true'
         run: |
           tagname=telecom_5G
 
@@ -1617,22 +1627,21 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
 
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdrsa_devices::true"
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdrsa_devices::false"
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/wifi_basic.docker"* || "$MODIFIED_FILES" == *"scripts/rf_tools.sh"* ]]; then
-            echo "::set-output name=run_job_wifi::true"
+            echo "run_job_wifi=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_wifi::false"
+            echo "run_job_wifi=false" >> $GITHUB_OUTPUT
           fi
-
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_wifi == 'true'
         uses: docker/setup-buildx-action@v3
@@ -1667,20 +1676,20 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
 
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdrsa_devices::true"
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdrsa_devices::false"
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/wifi_basic.docker"* || "$MODIFIED_FILES" == *"scripts/rf_tools.sh"* ]]; then
-            echo "::set-output name=run_job_wifi::true"
+            echo "run_job_wifi=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_wifi::false"
+            echo "run_job_wifi=false" >> $GITHUB_OUTPUT
           fi
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_wifi == 'true'
@@ -1742,22 +1751,21 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
 
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdrsa_devices::true"
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdrsa_devices::false"
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/wifi_full.docker"* || "$MODIFIED_FILES" == *"scripts/rf_tools.sh"* ]]; then
-            echo "::set-output name=run_job_wifi::true"
+            echo "run_job_wifi=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_wifi::false"
+            echo "run_job_wifi=false" >> $GITHUB_OUTPUT
           fi
-
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_wifi == 'true'
         uses: docker/setup-buildx-action@v3
@@ -1792,20 +1800,20 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
 
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdrsa_devices::true"
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdrsa_devices::false"
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
-          if [[ "$MODIFIED_FILES" == *"Dockerfiles/wifi_full.docker"* || "$MODIFIED_FILES" == *"scripts/rf_tools.sh"* ]]; then
-            echo "::set-output name=run_job_wifi::true"
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/wifi_fll.docker"* || "$MODIFIED_FILES" == *"scripts/rf_tools.sh"* ]]; then
+            echo "run_job_wifi=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_wifi::false"
+            echo "run_job_wifi=false" >> $GITHUB_OUTPUT
           fi
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_wifi == 'true'
@@ -1867,22 +1875,21 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
 
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdrsa_devices::true"
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdrsa_devices::false"
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/bluetooth.docker"* || "$MODIFIED_FILES" == *"scripts/rf_tools.sh"* ]]; then
-            echo "::set-output name=run_job_bt::true"
+            echo "run_job_bt=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_bt::false"
+            echo "run_job_bt=false" >> $GITHUB_OUTPUT
           fi
-
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_bt == 'true'
         uses: docker/setup-buildx-action@v3
@@ -1917,20 +1924,20 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
 
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "::set-output name=run_job_sdrsa_devices::true"
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_sdrsa_devices::false"
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/bluetooth.docker"* || "$MODIFIED_FILES" == *"scripts/rf_tools.sh"* ]]; then
-            echo "::set-output name=run_job_bt::true"
+            echo "run_job_bt=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_bt::false"
+            echo "run_job_bt=false" >> $GITHUB_OUTPUT
           fi
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_bt == 'true'
@@ -1992,16 +1999,15 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/rfid.docker"* || "$MODIFIED_FILES" == *"scripts/rf_tools.sh"* ]]; then
-            echo "::set-output name=run_job_rfid::true"
+            echo "run_job_rfid=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_rfid::false"
+            echo "run_job_rfid=false" >> $GITHUB_OUTPUT
           fi
-
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_rfid == 'true'
         uses: docker/setup-buildx-action@v3
@@ -2036,14 +2042,14 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/rfid.docker"* || "$MODIFIED_FILES" == *"scripts/rf_tools.sh"* ]]; then
-            echo "::set-output name=run_job_rfid::true"
+            echo "run_job_rfid=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_rfid::false"
+            echo "run_job_rfid=false" >> $GITHUB_OUTPUT
           fi
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_rfid == 'true'
@@ -2105,16 +2111,15 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/automotive.docker"* || "$MODIFIED_FILES" == *"scripts/automotive_software.sh"* ]]; then
-            echo "::set-output name=run_job_automotive::true"
+            echo "run_job_automotive=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_automotive::false"
+            echo "run_job_automotive=false" >> $GITHUB_OUTPUT
           fi
-
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_automotive == 'true'
         uses: docker/setup-buildx-action@v3
@@ -2149,14 +2154,14 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/automotive.docker"* || "$MODIFIED_FILES" == *"scripts/automotive_software.sh"* ]]; then
-            echo "::set-output name=run_job_automotive::true"
+            echo "run_job_automotive=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_automotive::false"
+            echo "run_job_automotive=false" >> $GITHUB_OUTPUT
           fi
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_automotive == 'true'
@@ -2216,16 +2221,15 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/reversing.docker"* || "$MODIFIED_FILES" == *"scripts/reverse_software.sh"* || "$MODIFIED_FILES" == *"scripts/sast_software.sh"* ]]; then
-            echo "::set-output name=run_job_reversing::true"
+            echo "run_job_reversing=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_reversing::false"
+            echo "run_job_reversing=false" >> $GITHUB_OUTPUT
           fi
-
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_reversing == 'true'
         uses: docker/setup-buildx-action@v3
@@ -2260,14 +2264,14 @@ jobs:
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "::set-output name=run_job_corebuild::true"
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_corebuild::false"
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/reversing.docker"* || "$MODIFIED_FILES" == *"scripts/reverse_software.sh"* || "$MODIFIED_FILES" == *"scripts/sast_software.sh"* ]]; then
-            echo "::set-output name=run_job_reversing::true"
+            echo "run_job_reversing=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=run_job_reversing::false"
+            echo "run_job_reversing=false" >> $GITHUB_OUTPUT
           fi
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_reversing == 'true'
