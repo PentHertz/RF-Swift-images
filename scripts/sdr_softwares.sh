@@ -386,7 +386,7 @@ function satdump_sdr_soft_install () {
 	[ -d /rftools/sdr ] || mkdir -p /rftools/sdr
 	cd /rftools/sdr
 	goodecho "[+] installing dependencies for SatDump"
-	install_dependencies "libvolk2-dev git build-essential cmake g++ pkgconf libfftw3-dev libpng-dev libtiff-dev libcurl4-openssl-dev libglfw3-dev zenity portaudio19-dev libhdf5-dev libomp-dev ocl-icd-opencl-dev"
+	install_dependencies "libvolk2-dev libmbedtls-dev git build-essential cmake g++ pkgconf libfftw3-dev libpng-dev libtiff-dev libcurl4-openssl-dev libglfw3-dev zenity portaudio19-dev libhdf5-dev libomp-dev ocl-icd-opencl-dev"
 	# Check system architecture
 	ARCH=$(uname -m)
 
