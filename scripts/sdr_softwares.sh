@@ -408,7 +408,7 @@ function satdump_sdr_soft_install () {
 	    goodecho "[+] jemalloc installed from source."
 	fi
 
-	cmake_clone_and_build "https://github.com/nanomsg/nng.git" "build" "" "" "satdump_sdr_soft_install" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr
+	cmake_clone_and_build "https://github.com/nanomsg/nng.git" "build" "v1.9.0" "" "satdump_sdr_soft_install" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr
 	goodecho "[+] Cloning and installing SatDump"
 	gitinstall "https://github.com/SatDump/SatDump.git" "SatDump"
 	cd SatDump
