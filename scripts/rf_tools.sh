@@ -255,6 +255,36 @@ function wifite2_soft_install () {
 	cd wifite2/
 }
 
+function sparrowwifi_sdr_soft_install () { # TODO: to debug
+	[ -d /rftools/wifi ] || mkdir -p /rftools/wifi
+	cd /rftools/wifi
+	goodecho "[+] Cloning and installing sparrow-wifi"
+	gitinstall "https://github.com/ghostop14/sparrow-wifi.git" "sparrowwifi"
+	cd sparrow-wifi
+	install_dependencies "python3-pip gpsd gpsd-clients python3-tk python3-setuptools"
+	installfromnet "pip3 install QScintilla PyQtChart gps3 dronekit manuf python-dateutil numpy matplotlib"
+	installfromnet "pip3 install --upgrade manuf"
+}
+
+function krackattacks_script_soft_install () {
+	[ -d /rftools/wifi ] || mkdir -p /rftools/wifi
+	cd /rftools/wifi
+	install_dependencies "libnl-3-dev libnl-genl-3-dev pkg-config libssl-dev net-tools git sysfsutils python3-venv iw"
+	goodecho "[+] Cloning and installing krackattacks-scripts"
+	gitinstall "https://github.com/vanhoefm/krackattacks-scripts.git" "krackattacks-scripts.git"
+	cd krackattacks-scripts/krackattack
+	./build.sh
+	./pysetup.sh
+}
+
+
+## Other softs
+
+function whad_soft_install () {
+	goodecho "[+] Installing WHAD from PIP"
+	installfromnet "pip3 install whad"
+}
+
 function artemis_soft_install () {
     # Check system architecture
     ARCH=$(uname -m)
@@ -272,20 +302,4 @@ function artemis_soft_install () {
     sed -i '1s|^|#!/bin/env python3\n|' app.py
     chmod +x app.py
     ln -s $(pwd)/app.py /usr/sbin/Artemis
-}
-
-function sparrowwifi_sdr_soft_install () { # TODO: to debug
-	[ -d /rftools/wifi ] || mkdir -p /rftools/wifi
-	cd /rftools/wifi
-	goodecho "[+] Cloning and installing sparrow-wifi"
-	gitinstall "https://github.com/ghostop14/sparrow-wifi.git" "sparrowwifi"
-	cd sparrow-wifi
-	install_dependencies "python3-pip gpsd gpsd-clients python3-tk python3-setuptools"
-	installfromnet "pip3 install QScintilla PyQtChart gps3 dronekit manuf python-dateutil numpy matplotlib"
-	installfromnet "pip3 install --upgrade manuf"
-}
-
-function whad_soft_install () {
-	goodecho "[+] Installing WHAD from PIP"
-	installfromnet "pip3 install whad"
 }

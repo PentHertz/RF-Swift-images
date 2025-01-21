@@ -23,6 +23,9 @@ RUN chmod +x entrypoint.sh
 # General monitoring software
 RUN ./entrypoint.sh kismet_soft_install
 
+# Exploit PoCs
+RUN ./entrypoint.sh krackattacks_script_soft_install
+
 RUN mkdir -p /sdrtools/
 COPY run /sdrtools/run
 
