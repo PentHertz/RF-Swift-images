@@ -19,7 +19,7 @@ function unicorn_soft_install() {
 	make -j$(nproc)
 	make install
 	goodecho "[+] Installing Python bindings"
-	installfromnet "pip3 install unicorn"
+	pip3install "unicorn"
 }
 
 function keystone_soft_install() {
@@ -33,7 +33,7 @@ function keystone_soft_install() {
 	make -j$(nproc)
 	make install
 	goodecho "[+] Installing Python bindings"
-	installfromnet "pip3 install keystone-engine"
+	pip3install "keystone-engine"
 }
 
 function radare2_soft_install() {

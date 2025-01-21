@@ -31,7 +31,7 @@ function mirage_soft_install() {
 	echo apt-fast console-setup/codeset47 string "Guess optimal character set" | debconf-set-selections
 	echo apt-fast console-setup/charmap47 string "UTF-8" | debconf-set-selections
 	install_dependencies "libpcsclite-dev pcsc-tools kmod kbd"
-	installfromnet "pip3 install keyboard"
+	pip3install "keyboard"
 	goodecho "[+] Installing Mirage"
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
 	cd /root/thirdparty
@@ -60,7 +60,7 @@ function sniffle_soft_install() {
 	cd /rftools/bluetooth
 	installfromnet "git clone https://github.com/bkerler/Sniffle.git"
 	cd Sniffle/python_cli
-	installfromnet "pip3 install -r requirements.txt"
+	pip3install -r requirements.txt
 }
 
 function bluing_soft_install() {
@@ -131,7 +131,7 @@ function mfcuk_soft_install() {
 
 function mfread_soft_install() {
 	goodecho "[+] Installing mfread dependencies"
-	installfromnet "pip3 install bitstring"
+	pip3install "bitstring"
 	install_dependencies "gcc-arm-none-eabi libnewlib-dev qtbase5-dev libbz2-dev liblz4-dev libbluetooth-dev libpython3-dev libssl-dev libgd-dev"
 	goodecho "[+] Installing mfdread"
 	[ -d /rftools/rfid ] || mkdir -p /rftools/rfid
@@ -227,7 +227,7 @@ function pixiewps_soft_install() {
 
 function Pyrit_soft_install() {
 	goodecho "[+] Installing Pyrit"
-	installfromnet "pip3 install pyrit"
+	pip3install "pyrit"
 }
 
 function eaphammer_soft_install() {
@@ -262,8 +262,8 @@ function sparrowwifi_sdr_soft_install () { # TODO: to debug
 	gitinstall "https://github.com/ghostop14/sparrow-wifi.git" "sparrowwifi"
 	cd sparrow-wifi
 	install_dependencies "python3-pip gpsd gpsd-clients python3-tk python3-setuptools"
-	installfromnet "pip3 install QScintilla PyQtChart gps3 dronekit manuf python-dateutil numpy matplotlib"
-	installfromnet "pip3 install --upgrade manuf"
+	pip3install "QScintilla PyQtChart gps3 dronekit manuf python-dateutil numpy matplotlib"
+	pip3install --upgrade manuf
 }
 
 function krackattacks_script_soft_install () {
@@ -282,7 +282,7 @@ function krackattacks_script_soft_install () {
 
 function whad_soft_install () {
 	goodecho "[+] Installing WHAD from PIP"
-	installfromnet "pip3 install whad"
+	pip3install "whad"
 }
 
 function artemis_soft_install () {
@@ -298,7 +298,7 @@ function artemis_soft_install () {
     cd /rftools/docs
     gitinstall "https://github.com/AresValley/Artemis.git" "artemis_soft_install"
     cd Artemis
-    pip3 install -r requirements.txt
+    pip3install -r requirements.txt
     sed -i '1s|^|#!/bin/env python3\n|' app.py
     chmod +x app.py
     ln -s $(pwd)/app.py /usr/sbin/Artemis

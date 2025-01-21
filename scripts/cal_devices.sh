@@ -73,9 +73,9 @@ function NanoVNASaver_cal_device_call() {
 	goodecho "[+] Cloning and installing NanoVNASaver"
 	gitinstall "https://github.com/NanoVNA-Saver/nanovna-saver.git"
 	cd nanovna-saver
-	installfromnet "pip3 install -U setuptools setuptools_scm wheel"
+	pip3install "setuptools setuptools_scm wheel"
 	sed -i 's/numpy==2.1.3/numpy<2/' requirements.txt
-	installfromnet "pip3 install -r requirements.txt"
+	pip3install -r requirements.txt
 	python3 setup.py install
 	set -e
     set -o pipefail

@@ -111,7 +111,7 @@ function deeptempest_grmod_install() {
     cd ../..
     goodecho "[+] Installing requirements for deep-tempest"
     cd end-to-end/
-    installfromnet "pip3 install -r requirement.txt"
+    pip3install -r requirement.txt
 }
 
 function grfhss_utils_grmod_install() {
@@ -191,12 +191,12 @@ function grdroineid_grmod_install() { # TODO: for turbofec RISCV64:  gcc: error:
 
 function grsatellites_grmod_install() {
     install_dependencies "liborc-0.4-dev"
-    installfromnet "pip3 install --user --upgrade construct requests"
+    pip3install "construct requests"
     grclone_and_build "https://github.com/daniestevez/gr-satellites.git" "" "grsatellites_grmod_install"
 }
 
 function gradsb_grmod_install() {
-    installfromnet "pip3 install zmq flask flask-socketio gevent gevent-websocket"
+    pip3install "zmq flask flask-socketio gevent gevent-websocket"
     grclone_and_build "https://github.com/mhostetter/gr-adsb" "" "gradsb_grmod_install"
 }
 
