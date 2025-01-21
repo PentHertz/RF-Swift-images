@@ -208,3 +208,25 @@ function check_and_install_lib() {
         fi
     fi
 }
+
+function pip3install() {
+    local package_name=$1
+    local n=0
+    
+    goodecho "[+] Installing Python package: ${package_name}"
+    
+    # Try up to 5 times, similar to installfromnet function
+    until [ "$n" -ge 5 ]
+    do
+        colorecho "[pip3][Install] Try number: $n"
+        pip3 install --break-system-packages "$package_name" && {
+            goodecho "[+] Successfully installed ${package_name}"
+            return 0
+        }
+        n=$((n+1))
+        sleep 15
+    done
+    
+    criticalecho-noexit "[-] Failed to install Python package: ${package_name}"
+    return 1
+}
