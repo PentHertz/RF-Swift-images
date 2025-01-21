@@ -54,7 +54,7 @@ function docker_preinstall() {
     update-locale
 
     # Installing Cython
-    installfromnet "pip3 install cython"
+    pip3install "cython"
 }
 
 function audio_tools () {
