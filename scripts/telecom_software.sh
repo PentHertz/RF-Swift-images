@@ -302,7 +302,7 @@ function jss7_soft_install() {
         [ -d /telecom/2G ] || mkdir -p /telecom/2G
         cd /telecom/2G
         goodecho "[+] Cloning and installing jSS7"
-        gitinstall "https://github.com/PentHertz/jss7.git" "jss7"
+        gitinstall "https://github.com/PentHertz/jss7.git" "jss7" "ubuntu_24.04"
         cd jss7
         mvn install
     else
