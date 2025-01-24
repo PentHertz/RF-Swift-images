@@ -117,7 +117,7 @@ function sdrangel_soft_fromsource_install() {
 function sdrpp_soft_fromsource_install () {
     # Beta test, but should work on almost all platforms
     goodecho "[+] Installing dependencies"
-    install_dependencies "libglfw3-dev libfftw3-dev libvolk-dev libzstd-dev libairspyhf-dev libiio-dev libad9361-dev librtaudio-dev libhackrf-dev portaudio19-dev libcodec2-dev -y"
+    install_dependencies "libfftw3-dev libglfw3-dev libvolk2-dev libzstd-dev libairspyhf-dev libiio-dev libad9361-dev librtaudio-dev libhackrf-dev portaudio19-dev libcodec2-dev -y"
     
     goodecho "[+] Installing SDR++"
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
