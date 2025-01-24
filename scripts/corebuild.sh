@@ -43,7 +43,7 @@ function docker_preinstall() {
     )
 
     # creating a symblink for python3 for some requirements
-    sudo ln -s /usr/bin/python3 /usr/bin/python
+    ln -s /usr/bin/python3 /usr/bin/python
 
     # Install apt-fast and all other packages with apt-fast
     installfromnet "apt-get -y install apt-fast"
