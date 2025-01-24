@@ -42,6 +42,9 @@ function docker_preinstall() {
         qt6-base-dev qt6-base-dev-tools qt6-tools-dev qt6-tools-dev-tools
     )
 
+    # creating a symblink for python3 for some requirements
+    sudo ln -s /usr/bin/python3 /usr/bin/python
+
     # Install apt-fast and all other packages with apt-fast
     installfromnet "apt-get -y install apt-fast"
     installfromnet "apt-fast update"

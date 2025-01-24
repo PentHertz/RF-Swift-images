@@ -9,7 +9,7 @@ function ad_devices_install() {
 
 function uhd_devices_install() {
 	goodecho "[+] Installing UHD's libs and tools from package manager"
-	install_dependencies "libuhd4.1.0 libuhd-dev uhd-host"
+	install_dependencies "libuhd4.6.0t64 uhd-host libuhd-dev"
 	goodecho "[+] Copying rules sets"
 	cp /root/rules/uhd-usrp.rules  /etc/udev/rules.d/
 	goodecho "[+] Downloading Hardware Driver firmware/FPGA"
@@ -195,13 +195,13 @@ function osmofl2k_devices_install() {
 function xtrx_devices_install() {
 	goodecho "[+] Installing xtrx from package manager"
 	install_dependencies "libusb-1.0-0-dev cmake dkms python3 python3-pip gpsd gpsd-clients pps-tools libboost-all-dev git qtbase5-dev libqcustomplot-dev libqt5printsupport5 doxygen swig"
-	installfromnet "pip3 install cheetah3"
+	pip3install "cheetah3"
 	install_dependencies "soapysdr-module-xtrx xtrx-dkms xtrx-fft libxtrxll0 libxtrxll-dev libxtrxll-dev libxtrx-dev libxtrxdsp-dev"
 }
 
 function funcube_devices_install() {
 	goodecho "[+] Installing funcube from package manager"
-	install_dependencies "gr-funcube libgnuradio-funcube1.0.0 qthid-fcd-controller"
+	install_dependencies "gr-funcube libgnuradio-funcube3.10.0 qthid-fcd-controller"
 }
 
 function rfnm_devices_install() {
