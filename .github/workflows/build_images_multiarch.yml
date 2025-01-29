@@ -1218,7 +1218,7 @@ jobs:
             ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   telecom_2Gto3G:
-   runs-on: ubuntu-24.04
+    runs-on: ubuntu-24.04
     needs: telecom_utils
     strategy:
       matrix:
