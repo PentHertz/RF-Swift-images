@@ -67,15 +67,15 @@ function bluing_soft_install() {
     echo "[+] Installing necessary packages"
     
     # Update package lists and install Python 3.10 along with necessary packages
+    add-apt-repository ppa:deadsnakes/ppa
     sudo apt-get update
-    install_dependencies "python3.10 python3.10-venv python3.10-dev libgirepository1.0-dev"
+    install_dependencies "python3.10 python3.10-venv python3.10-dev libgirepository1.0-dev libbluetooth-dev"
 
     # Create directories
     [ -d /rftools/bluetooth/bluing ] || mkdir -p /rftools/bluetooth/bluing
     cd /rftools/bluetooth/bluing
 
     # Upgrade pip and set up the virtual environment
-    python3.10 -m pip install --upgrade pip
     python3.10 -m venv bluing
     source bluing/bin/activate
 
