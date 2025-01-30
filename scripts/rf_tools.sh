@@ -6,7 +6,7 @@ function kismet_soft_install() {
 	[ -d /rftools ] || mkdir -p /rftools
 	cd /rftools
 	check_and_install_lib "librtlsdr-dev librtlsdr0" "librtlsdr"
-	install_dependencies "libsqlite3-dev ubertooth libprelude-dev build-essential git libwebsockets-dev pkg-config zlib1g-dev libnl-3-dev libnl-genl-3-dev libcap-dev libpcap-dev libnm-dev libdw-dev libsqlite3-dev libprotobuf-dev libprotobuf-c-dev protobuf-compiler protobuf-c-compiler libsensors4-dev libusb-1.0-0-dev python3 python3-setuptools python3-protobuf python3-requests python3-numpy python3-serial python3-usb python3-dev python3-websockets libubertooth-dev libbtbb-dev libmosquitto-dev"
+	install_dependencies "libsqlite3-dev ubertooth libprelude-dev build-essential git libwebsockets-dev pkg-config zlib1g-dev libnl-3-dev libnl-genl-3-dev libcap-dev libpcap-dev libnm-dev libdw-dev libsqlite3-dev libprotobuf-dev libprotobuf-c-dev protobuf-compiler protobuf-c-compiler libsensors-dev libusb-1.0-0-dev python3 python3-setuptools python3-protobuf python3-requests python3-numpy python3-serial python3-usb python3-dev python3-websockets libubertooth-dev libbtbb-dev libmosquitto-dev"
 	goodecho "[+] Installing Kismet"
 	installfromnet "git clone https://www.kismetwireless.net/git/kismet.git"
 	cd kismet
@@ -226,8 +226,37 @@ function pixiewps_soft_install() {
 }
 
 function Pyrit_soft_install() {
-	goodecho "[+] Installing Pyrit"
-	pip3install "pyrit"
+    goodecho "[+] Installing Pyrit"
+    
+    # Create virtual environment
+    python3 -m venv pyrit_venv
+    
+    # Activate virtual environment (with error handling)
+    if [ -f "pyrit_venv/bin/activate" ]; then
+        source pyrit_venv/bin/activate
+    elif [ -f "pyrit_venv/Scripts/activate" ]; then
+        source pyrit_venv/Scripts/activate
+    else
+        goodecho "[-] Failed to create virtual environment"
+        return 1
+    fi
+    
+    # Upgrade pip
+    pip3 install --upgrade pip
+    
+    # Install dependencies first
+    pip3 install azure-cognitiveservices-speech>=1.36.0
+    
+    # Install Pyrit
+    if pip3 install pyrit; then
+        goodecho "[+] Pyrit installed successfully"
+        deactivate
+        return 0
+    else
+        goodecho "[-] Failed to install Pyrit"
+        deactivate
+        return 1
+    fi
 }
 
 function eaphammer_soft_install() {
