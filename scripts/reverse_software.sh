@@ -108,7 +108,7 @@ function qiling_soft_install() {
 	cd /root/thirdparty
 	git clone -b dev https://github.com/qilingframework/qiling.git
 	cd qiling && git submodule update --init --recursive
-	pip3 install .
+	pip3install .
 }
 
 function emba_soft_install() {
