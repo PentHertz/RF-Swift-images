@@ -2209,14 +2209,6 @@ jobs:
       matrix:
         platform: [amd64, arm64]
     steps:
-      - uses: actions/checkout@v3
-      - name: Increase swap space
-        run: |
-          sudo swapoff -a
-          sudo fallocate -l 8G /swapfile
-          sudo chmod 600 /swapfile
-          sudo mkswap /swapfile
-          sudo swapon /swapfile
       - name: Checkout code
         uses: actions/checkout@v3
         with:

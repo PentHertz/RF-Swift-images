@@ -20,7 +20,6 @@ function unicorn_soft_install() {
 	make install
 	goodecho "[+] Installing Python bindings"
 	installfromnet "pip3 install unicorn"
-	
 }
 
 function keystone_soft_install() {
