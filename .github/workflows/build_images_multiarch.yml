@@ -2203,7 +2203,7 @@ jobs:
             ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
 
   reversing:
-    runs-on: ubuntu-latest
+    runs-on: Linux
     needs: corebuild
     strategy:
       matrix:
