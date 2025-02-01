@@ -15,7 +15,7 @@ on:
 
 jobs:
   corebuild:
-    runs-on: ubuntu-24.04
+    runs-on: Linux
     strategy:
       matrix:
         platform: [amd64, arm64, riscv64]
@@ -117,7 +117,7 @@ jobs:
             ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   sdrsa_devices:
-    runs-on: ubuntu-24.04
+    runs-on: Linux
     needs: corebuild
     strategy:
       matrix:
@@ -232,7 +232,7 @@ jobs:
             ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   sdrsa_devices_antsdr:
-    runs-on: ubuntu-24.04
+    runs-on: Linux
     needs: corebuild
     strategy:
       matrix:
@@ -356,7 +356,7 @@ jobs:
             ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   sdrsa_devices_rtlsdrv4:
-    runs-on: ubuntu-24.04
+    runs-on: Linux
     needs: corebuild
     strategy:
       matrix:
@@ -480,7 +480,7 @@ jobs:
             ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   sdr_light:
-    runs-on: ubuntu-24.04
+    runs-on: Linux
     needs: sdrsa_devices
     strategy:
       matrix:
@@ -1094,7 +1094,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrfull_nvidiagpu
 
   telecom_utils:
-    runs-on: ubuntu-24.04
+    runs-on: Linux
     needs: sdrsa_devices
     strategy:
       matrix:
@@ -1218,7 +1218,7 @@ jobs:
             ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   telecom_2Gto3G:
-    runs-on: ubuntu-24.04
+    runs-on: Linux
     needs: telecom_utils
     strategy:
       matrix:
@@ -1349,7 +1349,7 @@ jobs:
             ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
 
   telecom_4G_5GNSA:
-    runs-on: ubuntu-24.04
+    runs-on: Linux
     needs: telecom_utils
     strategy:
       matrix:
@@ -1479,7 +1479,7 @@ jobs:
             ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
 
   telecom_5G:
-    runs-on: ubuntu-24.04
+    runs-on: Linux
     needs: telecom_utils
     strategy:
       matrix:
@@ -1857,7 +1857,7 @@ jobs:
             ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   bluetooth:
-    runs-on: ubuntu-24.04
+    runs-on: Linux
     needs: sdrsa_devices
     strategy:
       matrix:
@@ -2203,20 +2203,12 @@ jobs:
             ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
 
   reversing:
-    runs-on: ubuntu-24.04
+    runs-on: Linux
     needs: corebuild
     strategy:
       matrix:
         platform: [amd64, arm64]
     steps:
-      - uses: actions/checkout@v3
-      - name: Increase swap space
-        run: |
-          sudo swapoff -a
-          sudo fallocate -l 8G /swapfile
-          sudo chmod 600 /swapfile
-          sudo mkswap /swapfile
-          sudo swapon /swapfile
       - name: Checkout code
         uses: actions/checkout@v3
         with:
