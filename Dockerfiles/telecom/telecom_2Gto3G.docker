@@ -18,6 +18,7 @@ COPY scripts /root/scripts/
 COPY rules /root/rules/
 COPY config /root/config
 
+
 WORKDIR /root/scripts/
 RUN chmod +x entrypoint.sh
 

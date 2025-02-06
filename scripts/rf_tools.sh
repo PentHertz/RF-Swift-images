@@ -66,24 +66,34 @@ function sniffle_soft_install() {
 function bluing_soft_install() {
     echo "[+] Installing necessary packages"
     
-    # Update package lists and install Python 3.10 along with necessary packages
-    add-apt-repository ppa:deadsnakes/ppa
-    sudo apt-get update
-    install_dependencies "python3.10 python3.10-venv python3.10-dev libgirepository1.0-dev libbluetooth-dev"
+    if [ "$(uname -m)" = "riscv64" ]; then # TODO: Keep until supported on RISC-V repos
+    	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
+		cd /root/thirdparty
+        # RISC-V: Build Python 3.10 from source
+        sudo apt-get update
+        install_dependencies "build-essential libssl-dev zlib1g-dev libncurses5-dev libncursesw5-dev libreadline-dev libsqlite3-dev libgdbm-dev libdb5.3-dev libbz2-dev libexpat1-dev liblzma-dev libffi-dev libgirepository1.0-dev libbluetooth-dev"
+        wget https://www.python.org/ftp/python/3.10.13/Python-3.10.13.tgz
+        tar xzf Python-3.10.13.tgz
+        cd Python-3.10.13
+        ./configure --enable-optimizations
+        make -j $(nproc)
+        sudo make altinstall
+        cd ..
+        rm -rf Python-3.10.13*
+    else
+        # x86/ARM: Use package manager
+        add-apt-repository ppa:deadsnakes/ppa
+        sudo apt-get update
+        install_dependencies "python3.10 python3.10-venv python3.10-dev libgirepository1.0-dev libbluetooth-dev"
+    fi
 
-    # Create directories
     [ -d /rftools/bluetooth/bluing ] || mkdir -p /rftools/bluetooth/bluing
     cd /rftools/bluetooth/bluing
-
-    # Upgrade pip and set up the virtual environment
     python3.10 -m venv bluing
     source bluing/bin/activate
-
-    # Install necessary Python packages
     python3.10 -m pip install dbus-python==1.2.18
     python3.10 -m pip install --no-dependencies bluing PyGObject docopt btsm btatt bluepy configobj btl2cap pkginfo xpycommon halo pyserial bthci btgatt log_symbols colorama spinners six termcolor
 }
-
 
 function bdaddr_soft_install() {
 	goodecho "[+] Installing bluing"
@@ -305,7 +315,6 @@ function krackattacks_script_soft_install () {
 	./build.sh
 	./pysetup.sh
 }
-
 
 ## Other softs
 
