@@ -39,7 +39,7 @@ function mirage_soft_install() {
     cd mirage/
     python3 -m pip install --upgrade pip build
     python3 -m build
-    pip3 install dist/*.whl
+    pip3install dist/*.whl
 }
 
 function bettercap_soft_install() {
