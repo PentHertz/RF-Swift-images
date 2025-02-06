@@ -32,6 +32,7 @@ function mirage_soft_install() {
     echo apt-fast console-setup/charmap47 string "UTF-8" | debconf-set-selections
     install_dependencies "libpcsclite-dev pcsc-tools kmod kbd python3-pip python3-build"
     pip3install "keyboard"
+    pip3install pycryptodomex --no-use-pep517
     goodecho "[+] Installing Mirage"
     [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
     cd /root/thirdparty
