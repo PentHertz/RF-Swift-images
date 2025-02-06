@@ -37,9 +37,7 @@ function mirage_soft_install() {
     cd /root/thirdparty
     installfromnet "git clone https://github.com/RCayre/mirage"
     cd mirage/
-    python3 -m pip install --upgrade pip build
-    python3 -m build
-    pip3install dist/*.whl
+    python3 setup.py install
 }
 
 function bettercap_soft_install() {
