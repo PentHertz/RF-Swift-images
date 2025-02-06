@@ -25,19 +25,21 @@ function blueztools_soft_install() {
 }
 
 function mirage_soft_install() {
-	goodecho "[+] Installing bettercap dependencies"
-	echo apt-fast keyboard-configuration/variant string "English (US)" | debconf-set-selections
-	echo apt-fast keyboard-configuration/layout string "English (US)" | debconf-set-selections
-	echo apt-fast console-setup/codeset47 string "Guess optimal character set" | debconf-set-selections
-	echo apt-fast console-setup/charmap47 string "UTF-8" | debconf-set-selections
-	install_dependencies "libpcsclite-dev pcsc-tools kmod kbd"
-	pip3install "keyboard"
-	goodecho "[+] Installing Mirage"
-	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
-	cd /root/thirdparty
-	installfromnet "git clone https://github.com/RCayre/mirage"
-	cd mirage/
-	python3 setup.py install
+    goodecho "[+] Installing bettercap dependencies"
+    echo apt-fast keyboard-configuration/variant string "English (US)" | debconf-set-selections
+    echo apt-fast keyboard-configuration/layout string "English (US)" | debconf-set-selections
+    echo apt-fast console-setup/codeset47 string "Guess optimal character set" | debconf-set-selections
+    echo apt-fast console-setup/charmap47 string "UTF-8" | debconf-set-selections
+    install_dependencies "libpcsclite-dev pcsc-tools kmod kbd python3-pip python3-build"
+    pip3install "keyboard"
+    goodecho "[+] Installing Mirage"
+    [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
+    cd /root/thirdparty
+    installfromnet "git clone https://github.com/RCayre/mirage"
+    cd mirage/
+    python3 -m pip install --upgrade pip build
+    python3 -m build
+    pip3 install dist/*.whl
 }
 
 function bettercap_soft_install() {
