@@ -35,16 +35,22 @@ function gnsslogger_cal_device() {
 }
 
 function KCSDI_cal_device() {
-	goodecho "[+] Installing dependencies for KCSDI"
-	[ -d /rftools/calibration ] || mkdir -p /rftools/calibration
-	cd /rftools/calibration
-	mkdir Deepace
-	cd Deepace
-	install_dependencies "libnss3-dev libfuse-dev"
-	goodecho "[+] Downloading KCSDI from penthertz repo"
-	installfromnet "wget https://github.com/PentHertz/rfswift_deepace_install/releases/download/nightly/KCSDI-v0.4.5-45-linux-x86_64.AppImage"
-	chmod +x KCSDI-v0.4.5-45-linux-x86_64.AppImage
-	ln -s KCSDI-v0.4.5-45-linux-x86_64.AppImage /usr/bin/KCSDI
+   goodecho "[+] Installing dependencies for KCSDI"
+   [ -d /rftools/calibration/Deepace ] || mkdir -p /rftools/calibration/Deepace 
+   cd /rftools/calibration/Deepace
+
+   # Set image name based on architecture
+   if [ "$(uname -m)" = "aarch64" ]; then
+       image_name="KCSDI-v0.4.8-49-linux-arm64.appimage"
+   else
+       image_name="KCSDI-v0.4.8-49-linux-x86_64.appimage"
+   fi
+
+   install_dependencies "libnss3-dev libfuse-dev"
+   goodecho "[+] Downloading KCSDI from penthertz repo"
+   installfromnet "wget https://github.com/PentHertz/rfswift_deepace_install/releases/download/nightly/${image_name}"
+   chmod +x ${image_name}
+   ln -s ${image_name} /usr/bin/KCSDI
 }
 
 function NanoVNASaver_cal_device() {
@@ -131,6 +137,20 @@ function librevna_cal_device() {
 	qmake6 LibreVNA-GUI.pro
 	make -j$(nproc)
 	ln -s "$(pwd)/LibreVNA-GUI" /usr/bin/LibreVNA-GUI
+}
+
+function librecala_cal_device() {
+	goodecho "[+] Installing dependencies for LibreCAL A"
+	install_dependencies "qt6-base-dev libqt6svg6-dev libusb-1.0-0-dev libqt6charts6-dev libqt6opengl6-dev"
+	[ -d /rftools/calibration ] || mkdir -p /rftools/calibration
+	cd /rftools/calibration
+	gitinstall "https://github.com/jankae/LibreCAL.git" "librecala_cal_device"
+	cd LibreCAL
+	cd LibreCAL/Software/LibreCAL-GUI
+	qmake6 LibreCAL-GUI.pro
+	make -j$(nproc)
+	make install
+	ln -s "/opt/LibreCAL-GUI/bin/LibreCAL-GUI" /usr/bin/LibreCAL-GUI
 }
 
 function librevna_cal_device_buildx() {
