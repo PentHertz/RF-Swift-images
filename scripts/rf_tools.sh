@@ -236,40 +236,6 @@ function pixiewps_soft_install() {
 	install_dependencies "pixiewps"
 }
 
-function Pyrit_soft_install() {
-    goodecho "[+] Installing Pyrit"
-    
-    # Create virtual environment
-    python3 -m venv pyrit_venv
-    
-    # Activate virtual environment (with error handling)
-    if [ -f "pyrit_venv/bin/activate" ]; then
-        source pyrit_venv/bin/activate
-    elif [ -f "pyrit_venv/Scripts/activate" ]; then
-        source pyrit_venv/Scripts/activate
-    else
-        goodecho "[-] Failed to create virtual environment"
-        return 1
-    fi
-    
-    # Upgrade pip
-    pip3 install --upgrade pip
-    
-    # Install dependencies first
-    pip3 install azure-cognitiveservices-speech>=1.36.0
-    
-    # Install Pyrit
-    if pip3 install pyrit; then
-        goodecho "[+] Pyrit installed successfully"
-        deactivate
-        return 0
-    else
-        goodecho "[-] Failed to install Pyrit"
-        deactivate
-        return 1
-    fi
-}
-
 function eaphammer_soft_install() {
 	goodecho "[+] Installing eaphammer"
 	[ -d /rftools/wifi ] || mkdir -p /rftools/wifi
