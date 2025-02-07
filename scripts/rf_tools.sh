@@ -32,7 +32,7 @@ function mirage_soft_install() {
     echo apt-fast console-setup/charmap47 string "UTF-8" | debconf-set-selections
     install_dependencies "libpcsclite-dev pcsc-tools kmod kbd python3-pip python3-build"
     pip3install "keyboard"
-    pip3install pycryptodomex --no-use-pep517
+    pip3install "pycryptodomex"
     goodecho "[+] Installing Mirage"
     [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
     cd /root/thirdparty
@@ -97,7 +97,7 @@ function bluing_soft_install() {
 }
 
 function bdaddr_soft_install() {
-	goodecho "[+] Installing bluing"
+	goodecho "[+] Installing bdaddr"
 	[ -d /rftools/bluetooth ] || mkdir /rftools/bluetooth
 	cd /rftools/bluetooth
 	installfromnet "git clone https://github.com/thxomas/bdaddr"
