@@ -41,12 +41,34 @@ function signalhound_spike_sa_device() {
         colorecho "[+] Downloading Spike bin from SignalHound"
         [ -d /rftools/analysers ] || mkdir -p /rftools/analysers
         cd /rftools/analysers
-        installfromnet "wget https://signalhound.com/sigdownloads/Spike/Spike(Ubuntu22.04x64)_4_0_0.zip"
-        unzip Spike\(Ubuntu22.04x64\)_4_0_0.zip
-        rm Spike\(Ubuntu22.04x64\)_4_0_0.zip
-        cd Spike\(Ubuntu22.04x64\)_4_0_0/
+        filename="Spike(Ubuntu22.04x64)_4_0_0"
+        installfromnet "wget https://signalhound.com/sigdownloads/Spike/$filename.zip"
+        unzip ${filename}.zip
+        rm ${filename}.zip
+        cd ${filename}
         chmod +x setup.sh
         sh -c ./setup.sh
+        # Create the script content
+        local script_path="/usr/local/bin/Spike"
+        cat << 'EOF' | sudo tee "$script_path" > /dev/null
+#!/bin/sh
+
+# Set the fixed path
+BASE_DIR="/rftools/analysers/Spike(Ubuntu22.04x64)_4_0_0"
+APPNAME="Spike"
+
+# Set up the environment variables
+LD_LIBRARY_PATH="$BASE_DIR/lib"
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/MATLAB/MATLAB_Runtime/v911/runtime/glnxa64
+export LD_LIBRARY_PATH
+export QT_PLUGIN_PATH="$BASE_DIR/plugins"
+
+# Execute the binary
+"$BASE_DIR/bin/$APPNAME" "$@"
+EOF
+
+    # Make the script executable
+    sudo chmod +x "$script_path"
     else
         criticalecho-noexit "[!] Architecture is not amd64 or x86_64. Skipping installation."
     fi
@@ -59,13 +81,36 @@ function signalhound_vsg60_sa_device() {
         colorecho "[+] Downloading VSG60 bin from SignalHound"
         [ -d /rftools/generators ] || mkdir -p /rftools/generators
         cd /rftools/generators
-        installfromnet "wget https://signalhound.com/sigdownloads/VSG60/VSG60(Ubuntu22.04x64)_1_0_15.zip"
+        filename="VSG60(Ubuntu22.04x64)_1_0_15"
+        installfromnet "wget https://signalhound.com/sigdownloads/VSG60/$filename.zip"
         unzip VSG60\(Ubuntu22.04x64\)_1_0_15.zip
         rm VSG60\(Ubuntu22.04x64\)_1_0_15.zip
         cd VSG60\(Ubuntu22.04x64\)_1_0_15
         chmod +x setup.sh
         sh -c ./setup.sh
-        ln -s $(pwd)/vsg60 /usr/bin/vsg60
+        local script_path="/usr/sbin/vsg60"
+    
+        # Create the script content
+        cat << 'EOF' | sudo tee "$script_path" > /dev/null
+#!/bin/sh
+
+# Set the fixed path
+BASE_DIR="/rftools/generators/VSG60(Ubuntu22.04x64)_1_0_15"
+APPNAME="vsg60"
+
+# Set up the environment variables
+LD_LIBRARY_PATH="$BASE_DIR/lib"
+export LD_LIBRARY_PATH
+export QT_PLUGIN_PATH="$BASE_DIR/plugins"
+
+# Execute the binary
+"$BASE_DIR/bin/$APPNAME" "$@"
+EOF
+
+    # Make the script executable
+    sudo chmod +x "$script_path"
+    
+    echo "VSG60 script has been created at $script_path and made executable"
     else
         criticalecho-noexit "[!] Architecture is not amd64 or x86_64. Skipping installation."
     fi

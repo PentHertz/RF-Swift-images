@@ -7,6 +7,8 @@ function leobodnarv1_cal_device() {
 	install_dependencies "libhidapi-libusb0 libhidapi-hidraw0"
 	goodecho "[+] Cloning repository for Leobodnar v1 GPSDO"
 	gitinstall "https://github.com/hamarituc/lbgpsdo.git"
+	cd lbgpsdo
+	pip3 install -r requirements.txt
 	cd /root/
 }
 
@@ -14,7 +16,7 @@ function leobodnarv2_cal_device() {
 	goodecho "[+] Installing Leobodnar LBE-142x GPSDO"
 	[ -d /rftools/calibration ] || mkdir -p /rftools/calibration
 	cd /rftools/calibration
-	gitinstall "https://github.com/bvernoux/lbe-142x.git" "leobodnarv2_cal_device"
+	gitinstall "https://github.com/FlUxIuS/lbe-142x.git" "leobodnarv2_cal_device"
 	cd lbe-142x
 	mkdir build && cd build
 	cmake ..
