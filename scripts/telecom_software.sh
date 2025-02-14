@@ -71,6 +71,7 @@ function openbts_uhd_soft_install() {
         criticalecho-noexit "[-] Unsupported architecture: $ARCH"
         exit 0
     fi
+    install_dependencies "libzmq3-dev"
 	goodecho "[+] Feching OpenBTS from penthertz"
 	[ -d /telecom/2G ] || mkdir -p /telecom/2G
 	cd /telecom/2G

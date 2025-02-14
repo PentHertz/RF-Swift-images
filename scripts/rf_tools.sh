@@ -42,6 +42,7 @@ function mirage_soft_install() {
 
 function bettercap_soft_install() {
 	goodecho "[+] Installing bettercap"
+	rm -rf ~/.cache/go-build #TODO: trying to solve build exit for ARM on GitHub
 	export GOPROXY=direct
 	install_dependencies "libnetfilter-queue-dev"
 	[ -d /rftools/bluetooth ] || mkdir -p /rftools/bluetooth
