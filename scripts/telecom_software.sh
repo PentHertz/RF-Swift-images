@@ -316,7 +316,7 @@ function SCAT_soft_install() {
 	[ -d /telecom ] || mkdir -p /telecom
 	cd /telecom
 	goodecho "[+] Installing SCAT"
-	installfromnet "pip install 'scat[fastcrc] @ git+https://github.com/fgsect/scat'"
+	installfromnet "pip install \"scat[fastcrc] @ git+https://github.com/fgsect/scat\""
 }
 
 function SigPloit_soft_install() {
@@ -324,6 +324,7 @@ function SigPloit_soft_install() {
 	cd /telecom/2G
 	goodecho "[+] Cloninig and installing SigPloit"
 	gitinstall "https://github.com/FlUxIuS/SigPloit.git" "SigPloit"
+	cd SigPloit
 	installfromnet "pip install -r requirements.txt"
 }
 ### TODO: more More!
