@@ -63,7 +63,7 @@ python3-ruamel.yaml"
 
 function antsdr_uhd_devices_install() { # Is replacing original one for now
 	goodecho "[+] Installing dependencies for ANTSDR UHD"
-	install_dependencies "autoconf automake build-essential ccache cmake cpufrequtils doxygen ethtool"
+	install_dependencies "autoconf automake build-essential ccache cmake cpufrequtils doxygen ethtool libpthread-stubs0-dev"
 	install_dependencies "g++ git inetutils-tools libboost-all-dev libncurses5 libncurses5-dev libusb-1.0-0 libusb-1.0-0-dev"
 	install_dependencies "python3-dev python3-mako python3-numpy python3-requests python3-scipy python3-setuptools"
 	install_dependencies "python3-ruamel.yaml"
@@ -152,7 +152,7 @@ function rtlsdrv4_devices_install() {
 	goodecho "[+] Installing RTL-SDR v4's libs and tools from package manager"
 	apt purge -y ^librtlsdr
 	rm -rvf /usr/lib/librtlsdr* /usr/include/rtl-sdr* /usr/local/lib/librtlsdr* /usr/local/include/rtl-sdr* /usr/local/include/rtl_* /usr/local/bin/rtl_*
-	install_dependencies "libusb-1.0-0-dev git cmake pkg-config"
+	install_dependencies "libusb-1.0-0-dev git cmake pkg-config libpthread-stubs0-dev"
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
 	cd /root/thirdparty
 	installfromnet "git clone https://github.com/rtlsdrblog/rtl-sdr-blog"

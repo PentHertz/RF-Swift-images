@@ -2033,7 +2033,7 @@ jobs:
             ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   bluetooth:
-    runs-on: ubuntu-latest
+    runs-on: Linux
     needs: sdrsa_devices
     strategy:
       matrix:
