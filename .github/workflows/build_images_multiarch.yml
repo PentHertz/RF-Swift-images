@@ -37,6 +37,11 @@ jobs:
             echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true'
         uses: docker/setup-buildx-action@v3
@@ -76,6 +81,12 @@ jobs:
           else
             echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
+      
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true'
         uses: docker/setup-buildx-action@v3
@@ -146,6 +157,11 @@ jobs:
             echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true'
         uses: docker/setup-buildx-action@v3
@@ -190,6 +206,12 @@ jobs:
           else
             echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true'
         uses: docker/setup-buildx-action@v3
@@ -265,6 +287,12 @@ jobs:
           else
             echo "run_job_sdrsa_antsdr_devices=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_antsdr_devices == 'true'
         uses: docker/setup-buildx-action@v3
@@ -314,6 +342,12 @@ jobs:
           else
             echo "run_job_sdrsa_antsdr_devices=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_antsdr_devices == 'true'
         uses: docker/setup-buildx-action@v3
@@ -389,6 +423,12 @@ jobs:
           else
             echo "run_job_sdrsa_rtlsdrv4_devices=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_rtlsdrv4_devices == 'true'
         uses: docker/setup-buildx-action@v3
@@ -438,6 +478,12 @@ jobs:
           else
             echo "run_job_sdrsa_rtlsdrv4_devices=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_rtlsdrv4_devices == 'true'
         uses: docker/setup-buildx-action@v3
@@ -513,6 +559,12 @@ jobs:
           else
             echo "run_job_sdr_light=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true'
         uses: docker/setup-buildx-action@v3
@@ -562,6 +614,12 @@ jobs:
           else
             echo "run_job_sdr_light=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true'
         uses: docker/setup-buildx-action@v3
@@ -631,6 +689,12 @@ jobs:
           else
             echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' 
         uses: docker/setup-buildx-action@v3
@@ -675,6 +739,12 @@ jobs:
           else
             echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' 
         uses: docker/setup-buildx-action@v3
@@ -755,6 +825,12 @@ jobs:
           else
             echo "run_job_sdr_light_intelgpu=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true' || steps.file_check.outputs.run_job_sdr_light_intelgpu == 'true'
         uses: docker/setup-buildx-action@v3
@@ -812,6 +888,12 @@ jobs:
           else
             echo "run_job_sdr_light_nvidiagpu=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true' || steps.file_check.outputs.run_job_sdr_light_nvidiagpu == 'true'
         uses: docker/setup-buildx-action@v3
@@ -870,6 +952,12 @@ jobs:
           else
             echo "run_job_sdrfull=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true' || steps.file_check.outputs.run_job_sdrfull == 'true'
         uses: docker/setup-buildx-action@v3
@@ -924,6 +1012,12 @@ jobs:
           else
             echo "run_job_sdrfull=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true' || steps.file_check.outputs.run_job_sdrfull == 'true'
         uses: docker/setup-buildx-action@v3
@@ -1010,6 +1104,11 @@ jobs:
             echo "run_job_sdrfull_intelgpu=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true' || steps.file_check.outputs.run_job_sdrfull_intelgpu == 'true'
         uses: docker/setup-buildx-action@v3
@@ -1074,6 +1173,11 @@ jobs:
             echo "run_job_sdrfull_nvidiagpu=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true' || steps.file_check.outputs.run_job_sdrfull_nvidiagpu == 'true'
         uses: docker/setup-buildx-action@v3
@@ -1127,6 +1231,12 @@ jobs:
           else
             echo "run_job_telecom=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true'
         uses: docker/setup-buildx-action@v3
@@ -1176,6 +1286,12 @@ jobs:
           else
             echo "run_job_telecom=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true'
         uses: docker/setup-buildx-action@v3
@@ -1256,6 +1372,12 @@ jobs:
           else
             echo "run_job_telecom23G=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom23G == 'true'
         uses: docker/setup-buildx-action@v3
@@ -1310,6 +1432,12 @@ jobs:
           else
             echo "run_job_telecom23G=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom23G == 'true'
         uses: docker/setup-buildx-action@v3
@@ -1387,6 +1515,12 @@ jobs:
           else
             echo "run_job_telecom4G5GNSA=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom4G5GNSA == 'true'
         uses: docker/setup-buildx-action@v3
@@ -1441,6 +1575,12 @@ jobs:
           else
             echo "run_job_telecom4G5GNSA=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom4G5GNSA == 'true'
         uses: docker/setup-buildx-action@v3
@@ -1517,6 +1657,12 @@ jobs:
           else
             echo "run_job_telecom5GSA=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom5GSA == 'true'
         uses: docker/setup-buildx-action@v3
@@ -1571,6 +1717,12 @@ jobs:
           else
             echo "run_job_telecom5GSA=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom5GSA == 'true'
         uses: docker/setup-buildx-action@v3
@@ -1642,6 +1794,12 @@ jobs:
           else
             echo "run_job_wifi=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_wifi == 'true'
         uses: docker/setup-buildx-action@v3
@@ -1691,6 +1849,12 @@ jobs:
           else
             echo "run_job_wifi=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_wifi == 'true'
         uses: docker/setup-buildx-action@v3
@@ -1766,6 +1930,12 @@ jobs:
           else
             echo "run_job_wifi=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_wifi == 'true'
         uses: docker/setup-buildx-action@v3
@@ -1815,6 +1985,12 @@ jobs:
           else
             echo "run_job_wifi=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_wifi == 'true'
         uses: docker/setup-buildx-action@v3
@@ -1890,6 +2066,12 @@ jobs:
           else
             echo "run_job_bt=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_bt == 'true'
         uses: docker/setup-buildx-action@v3
@@ -1939,6 +2121,12 @@ jobs:
           else
             echo "run_job_bt=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_bt == 'true'
         uses: docker/setup-buildx-action@v3
@@ -2008,6 +2196,12 @@ jobs:
           else
             echo "run_job_rfid=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_rfid == 'true'
         uses: docker/setup-buildx-action@v3
@@ -2051,6 +2245,12 @@ jobs:
           else
             echo "run_job_rfid=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_rfid == 'true'
         uses: docker/setup-buildx-action@v3
@@ -2120,6 +2320,12 @@ jobs:
           else
             echo "run_job_automotive=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_automotive == 'true'
         uses: docker/setup-buildx-action@v3
@@ -2163,6 +2369,12 @@ jobs:
           else
             echo "run_job_automotive=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_automotive == 'true'
         uses: docker/setup-buildx-action@v3
@@ -2230,6 +2442,12 @@ jobs:
           else
             echo "run_job_reversing=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_reversing == 'true'
         uses: docker/setup-buildx-action@v3
@@ -2273,6 +2491,12 @@ jobs:
           else
             echo "run_job_reversing=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v9.2.0
+
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_reversing == 'true'
         uses: docker/setup-buildx-action@v3
