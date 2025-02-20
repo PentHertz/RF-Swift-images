@@ -15,7 +15,7 @@ on:
 
 jobs:
   corebuild:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         platform: [amd64, arm64, riscv64]
@@ -63,7 +63,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make common
 
   corebuild-manifest:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: corebuild
     steps:
       - name: Checkout code
@@ -128,7 +128,7 @@ jobs:
             ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   sdrsa_devices:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: corebuild
     strategy:
       matrix:
@@ -182,7 +182,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=uhd RTLSDR_BASE=rtlsdr make sdrsadevices
 
   sdrsa_devices-manifest:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: sdrsa_devices
     steps:
       - name: Checkout code
@@ -254,7 +254,7 @@ jobs:
             ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   sdrsa_devices_antsdr:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: corebuild
     strategy:
       matrix:
@@ -313,7 +313,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=antsdr_uhd RTLSDR_BASE=rtlsdr make sdrsadevicesantsdr
 
   sdrsa_devices_antsdr-manifest:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: sdrsa_devices_antsdr
     steps:
       - name: Checkout code
@@ -390,7 +390,7 @@ jobs:
             ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   sdrsa_devices_rtlsdrv4:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: corebuild
     strategy:
       matrix:
@@ -449,7 +449,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=uhd RTLSDR_BASE=rtlsdrv4 make sdrsadevicesrtlsdrv4
 
   sdrsa_devices_rtlsdrv4-manifest:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: sdrsa_devices_rtlsdrv4
     steps:
       - name: Checkout code
@@ -526,7 +526,7 @@ jobs:
             ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   sdr_light:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: sdrsa_devices
     strategy:
       matrix:
@@ -585,7 +585,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrlight
 
   sdr_light-manifest:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: sdr_light
     steps:
       - name: Checkout code
@@ -787,7 +787,7 @@ jobs:
             ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   sdr_light_intelgpu:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: sdr_light
     strategy:
       matrix:
@@ -851,7 +851,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrlight_intelgpu
 
   sdr_light_nvidiagpu:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: sdr_light
     strategy:
       matrix:
@@ -1198,7 +1198,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrfull_nvidiagpu
 
   telecom_utils:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: sdrsa_devices
     strategy:
       matrix:
@@ -1257,7 +1257,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make telecom_utils
 
   telecom_utils-manifest:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: telecom_utils
     steps:
       - name: Checkout code
@@ -1334,7 +1334,7 @@ jobs:
             ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   telecom_2Gto3G:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: telecom_utils
     strategy:
       matrix:
@@ -1398,7 +1398,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make telecom_2Gto3G
 
   telecom_2Gto3G-manifest:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: telecom_2Gto3G
     steps:
       - name: Checkout code
@@ -1477,7 +1477,7 @@ jobs:
             ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
 
   telecom_4G_5GNSA:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: telecom_utils
     strategy:
       matrix:
@@ -1541,7 +1541,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make telecom_4G_5GNSA
 
   telecom_4G_5GNSA-manifest:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: telecom_4G_5GNSA
     steps:
       - name: Checkout code
@@ -1619,7 +1619,7 @@ jobs:
             ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
 
   telecom_5G:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: telecom_utils
     strategy:
       matrix:
@@ -1683,7 +1683,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make telecom_5G
 
   telecom_5G-manifest:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: telecom_5G
     steps:
       - name: Checkout code
@@ -2092,7 +2092,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make bluetooth
 
   bluetooth-manifest:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: bluetooth
     steps:
       - name: Checkout code
@@ -2169,7 +2169,7 @@ jobs:
             ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   rfid:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: corebuild
     strategy:
       matrix:
@@ -2222,7 +2222,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make rfid
 
   rfid-manifest:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: rfid
     steps:
       - name: Checkout code
@@ -2293,7 +2293,7 @@ jobs:
             ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   automotive:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: corebuild
     strategy:
       matrix:
@@ -2346,7 +2346,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make automotive
 
   automotive-manifest:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: automotive
     steps:
       - name: Checkout code
@@ -2468,7 +2468,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make reversing
 
   reversing-manifest:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: reversing
     steps:
       - name: Checkout code
