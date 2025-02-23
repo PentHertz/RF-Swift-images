@@ -10,7 +10,7 @@ function kismet_soft_install() {
 	goodecho "[+] Installing Kismet"
 	installfromnet "git clone https://www.kismetwireless.net/git/kismet.git"
 	cd kismet
-	./configure --enable-bladerf --enable-wifi-coconut --enable-btgeiger --enable-prelude --enable-python
+	./configure --enable-bladerf --enable-wifi-coconut --enable-btgeiger --enable-prelude --enable_python_tools
 	make
 	make -j$(nproc)
 	make suidinstall

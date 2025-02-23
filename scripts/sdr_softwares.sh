@@ -272,7 +272,7 @@ function ice9_bluetooth_soft_install_call () {
 }
 
 function nfclaboratory_soft_install () {
-	goodecho "[+] Installing dependencies for NFC-laboratory"
+	goodecho "[+] Installing dependencies for nfc-laboratory"
 	install_dependencies "libusb-1.0-0"
 	goodecho "[+] Installing nfc-laboratory"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
