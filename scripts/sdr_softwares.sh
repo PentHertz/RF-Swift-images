@@ -286,7 +286,8 @@ function nfclaboratory_soft_install () {
 	mkdir nfc-lab
 	cd nfc-lab
 	cp -r /root/thirdparty/build/src/nfc-app/app-qt/ .
-	ln -s build/src/nfc-app/app-qt/nfc-lab nfc-lab
+	cp -r /root/thirdparty/nfc-laboratory/wav .
+	ln -s /rftools/sdr/nfc-lab/app-qt/nfc-lab /usr/bin/nfc-lab
 }
 
 function retrogram_soapysdr_soft_install () {

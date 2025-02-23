@@ -226,9 +226,17 @@ function pixiewps_soft_install() {
 	install_dependencies "pixiewps"
 }
 
-function Pyrit_soft_install() {
+function Pyrit_soft_install() { #TODO: tofix for total Python3 support
 	goodecho "[+] Installing Pyrit"
-	installfromnet "pip3 install pyrit"
+	[ -d /rftools/wifi ] || mkdir -p /rftools/wifi
+	cd /rftools/wifi
+	installfromnet "pip3 install psycopg2-binary"
+	install_dependencies "scapy"
+	gitinstall "https://github.com/JPaulMora/Pyrit.git" "Pyrit_soft_install"
+	cd Pyrit
+	python3 setup.py clean
+	python3 setup.py build
+	python3 setup.py install
 }
 
 function eaphammer_soft_install() {
