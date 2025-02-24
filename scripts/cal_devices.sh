@@ -72,21 +72,8 @@ function NanoVNASaver_cal_device() {
 }
 
 function NanoVNASaver_cal_device_call() {
-	set +e # TODO: debug that function
-    set +o pipefail
-	goodecho "[+] Installing dependencies for NanoVNASaver"
-	[ -d /root/thirdparty ] || mkdir /root/thirdparty
-	cd /root/thirdparty
-	install_dependencies "libxcb-cursor0 xcb"
-	goodecho "[+] Cloning and installing NanoVNASaver"
-	gitinstall "https://github.com/NanoVNA-Saver/nanovna-saver.git"
-	cd nanovna-saver
-	installfromnet "pip3 install -U setuptools setuptools_scm wheel"
-	sed -i 's/numpy==2.1.3/numpy<2/' requirements.txt
-	installfromnet "pip3 install -r requirements.txt"
-	python3 setup.py install
-	set -e
-    set -o pipefail
+	goodecho "[+] Installing NanoVNASaver with pip3"
+	pip3 install https://github.com/NanoVNA-Saver/nanovna-saver/archive/refs/tags/v0.5.5.tar.gz
 }
 
 function NanoVNA_QT_cal_device() {
