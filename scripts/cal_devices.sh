@@ -134,7 +134,6 @@ function librecala_cal_device() {
 	[ -d /rftools/calibration ] || mkdir -p /rftools/calibration
 	cd /rftools/calibration
 	gitinstall "https://github.com/jankae/LibreCAL.git" "librecala_cal_device"
-	cd LibreCAL
 	cd LibreCAL/Software/LibreCAL-GUI
 	qmake6 LibreCAL-GUI.pro
 	make -j$(nproc)
