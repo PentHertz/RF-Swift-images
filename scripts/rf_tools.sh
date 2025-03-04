@@ -239,7 +239,7 @@ function sparrowwifi_sdr_soft_install () { # TODO: to debug
 	goodecho "[+] Cloning and installing sparrow-wifi"
 	gitinstall "https://github.com/ghostop14/sparrow-wifi.git" "sparrowwifi"
 	cd sparrow-wifi
-	install_dependencies "python3-pip gpsd gpsd-clients python3-tk python3-setuptools"
+	install_dependencies "python3-pip gpsd gpsd-clients python3-tk python3-setuptools qt5-qmake qtbase5-dev python3-pyqt5 python3-pyqt5.qsci python3-pyqt5.qtsvg python3-sip-dev pyqt5-dev pyqt5-dev-tools"
 	pip3install "QScintilla PyQtChart gps3 dronekit manuf python-dateutil numpy matplotlib"
 	pip3install --upgrade manuf
 }
