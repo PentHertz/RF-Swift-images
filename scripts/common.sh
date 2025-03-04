@@ -221,13 +221,13 @@ function pip3install() {
         colorecho "[pip3][Install] Try number: $n"
         if [[ "$install_args" == *"-r "* ]] || [[ "$install_args" == *"--requirement "* ]]; then
             # Handle requirements file installation
-            pip3 install --ignore-installed --break-system-packages $install_args && {
+            pip3 install --ignore-installed $install_args && {
                 goodecho "[+] Successfully installed packages from requirements file"
                 return 0
             }
         else
             # Handle single package or other pip arguments
-            pip3 install --ignore-installed --break-system-packages $install_args && {
+            pip3 install --ignore-installed $install_args && {
                 goodecho "[+] Successfully installed ${install_args}"
                 return 0
             }
