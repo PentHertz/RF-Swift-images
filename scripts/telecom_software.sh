@@ -196,6 +196,7 @@ function pycrate_soft_install() {
 	cd pycrate
 	python3 setup.py install
 	goodecho "[+] Installing pycrate further dependencies"
+	install_dependencies "libxml2-dev libxslt1-dev"
 	pip3install "lxml crc32c crcmod"
 }
 

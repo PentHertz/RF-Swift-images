@@ -41,6 +41,7 @@ RUN ./entrypoint.sh fzf_soft_install && \
 
 COPY config/.zshrc /root/.zshrc 
 
+
 # Cleaning and quitting
 WORKDIR /root/
 RUN rm -rf /root/thirdparty && \
