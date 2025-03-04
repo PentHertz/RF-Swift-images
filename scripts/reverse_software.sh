@@ -19,7 +19,7 @@ function unicorn_soft_install() {
 	make -j$(nproc)
 	make install
 	goodecho "[+] Installing Python bindings"
-	installfromnet "pip3 install unicorn"
+	pip3install "unicorn"
 }
 
 function keystone_soft_install() {
@@ -33,7 +33,7 @@ function keystone_soft_install() {
 	make -j$(nproc)
 	make install
 	goodecho "[+] Installing Python bindings"
-	installfromnet "pip3 install keystone-engine"
+	pip3install "keystone-engine"
 }
 
 function radare2_soft_install() {
@@ -108,7 +108,7 @@ function qiling_soft_install() {
 	cd /root/thirdparty
 	git clone -b dev https://github.com/qilingframework/qiling.git
 	cd qiling && git submodule update --init --recursive
-	pip3 install .
+	pip3install .
 }
 
 function emba_soft_install() {

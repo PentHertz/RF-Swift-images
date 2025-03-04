@@ -6,7 +6,7 @@ function kismet_soft_install() {
 	[ -d /rftools ] || mkdir -p /rftools
 	cd /rftools
 	check_and_install_lib "librtlsdr-dev librtlsdr0" "librtlsdr"
-	install_dependencies "ubertooth libprelude-dev build-essential git libwebsockets-dev pkg-config zlib1g-dev libnl-3-dev libnl-genl-3-dev libcap-dev libpcap-dev libnm-dev libdw-dev libsqlite3-dev libprotobuf-dev libprotobuf-c-dev protobuf-compiler protobuf-c-compiler libsensors4-dev libusb-1.0-0-dev python3 python3-setuptools python3-protobuf python3-requests python3-numpy python3-serial python3-usb python3-dev python3-websockets libubertooth-dev libbtbb-dev libmosquitto-dev"
+	install_dependencies "libsqlite3-dev ubertooth libprelude-dev build-essential git libwebsockets-dev pkg-config zlib1g-dev libnl-3-dev libnl-genl-3-dev libcap-dev libpcap-dev libnm-dev libdw-dev libsqlite3-dev libprotobuf-dev libprotobuf-c-dev protobuf-compiler protobuf-c-compiler libsensors-dev libusb-1.0-0-dev python3 python3-setuptools python3-protobuf python3-requests python3-numpy python3-serial python3-usb python3-dev python3-websockets libubertooth-dev libbtbb-dev libmosquitto-dev"
 	goodecho "[+] Installing Kismet"
 	installfromnet "git clone https://www.kismetwireless.net/git/kismet.git"
 	cd kismet
@@ -25,19 +25,20 @@ function blueztools_soft_install() {
 }
 
 function mirage_soft_install() {
-	goodecho "[+] Installing bettercap dependencies"
-	echo apt-fast keyboard-configuration/variant string "English (US)" | debconf-set-selections
-	echo apt-fast keyboard-configuration/layout string "English (US)" | debconf-set-selections
-	echo apt-fast console-setup/codeset47 string "Guess optimal character set" | debconf-set-selections
-	echo apt-fast console-setup/charmap47 string "UTF-8" | debconf-set-selections
-	install_dependencies "libpcsclite-dev pcsc-tools kmod kbd"
-	installfromnet "pip3 install keyboard"
-	goodecho "[+] Installing Mirage"
-	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
-	cd /root/thirdparty
-	installfromnet "git clone https://github.com/RCayre/mirage"
-	cd mirage/
-	python3 setup.py install
+    goodecho "[+] Installing bettercap dependencies"
+    echo apt-fast keyboard-configuration/variant string "English (US)" | debconf-set-selections
+    echo apt-fast keyboard-configuration/layout string "English (US)" | debconf-set-selections
+    echo apt-fast console-setup/codeset47 string "Guess optimal character set" | debconf-set-selections
+    echo apt-fast console-setup/charmap47 string "UTF-8" | debconf-set-selections
+    install_dependencies "libpcsclite-dev pcsc-tools kmod kbd python3-pip python3-build"
+    pip3install "keyboard"
+    pip3install "pycryptodomex"
+    goodecho "[+] Installing Mirage"
+    [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
+    cd /root/thirdparty
+    installfromnet "git clone https://github.com/RCayre/mirage"
+    cd mirage/
+    python3 setup.py install
 }
 
 function bettercap_soft_install() {
@@ -61,7 +62,7 @@ function sniffle_soft_install() {
 	cd /rftools/bluetooth
 	installfromnet "git clone https://github.com/bkerler/Sniffle.git"
 	cd Sniffle/python_cli
-	installfromnet "pip3 install -r requirements.txt"
+	pip3install -r requirements.txt
 }
 
 function bluing_soft_install() {
@@ -87,8 +88,8 @@ function bluing_soft_install() {
 
 
 function bdaddr_soft_install() {
-	goodecho "[+] Installing bluing"
-	[ -d /rftools/bluetooth ] || mkdir /rftools/bluetooth
+	goodecho "[+] Installing bdaddr"
+	[ -d /rftools/bluetooth ] || mkdir /rftools/bluetooth 
 	cd /rftools/bluetooth
 	installfromnet "git clone https://github.com/thxomas/bdaddr"
 	cd bdaddr
@@ -132,7 +133,7 @@ function mfcuk_soft_install() {
 
 function mfread_soft_install() {
 	goodecho "[+] Installing mfread dependencies"
-	installfromnet "pip3 install bitstring"
+	pip3install "bitstring"
 	install_dependencies "gcc-arm-none-eabi libnewlib-dev qtbase5-dev libbz2-dev liblz4-dev libbluetooth-dev libpython3-dev libssl-dev libgd-dev"
 	goodecho "[+] Installing mfdread"
 	[ -d /rftools/rfid ] || mkdir -p /rftools/rfid
@@ -271,8 +272,8 @@ function sparrowwifi_sdr_soft_install () { # TODO: to debug
 	gitinstall "https://github.com/ghostop14/sparrow-wifi.git" "sparrowwifi"
 	cd sparrow-wifi
 	install_dependencies "python3-pip gpsd gpsd-clients python3-tk python3-setuptools"
-	installfromnet "pip3 install QScintilla PyQtChart gps3 dronekit manuf python-dateutil numpy matplotlib"
-	installfromnet "pip3 install --upgrade manuf"
+	pip3install "QScintilla PyQtChart gps3 dronekit manuf python-dateutil numpy matplotlib"
+	pip3install --upgrade manuf
 }
 
 function krackattacks_script_soft_install () {
@@ -286,12 +287,11 @@ function krackattacks_script_soft_install () {
 	./pysetup.sh
 }
 
-
 ## Other softs
 
 function whad_soft_install () {
 	goodecho "[+] Installing WHAD from PIP"
-	installfromnet "pip3 install whad"
+	pip3install "whad"
 }
 
 function artemis_soft_install () {
@@ -307,7 +307,7 @@ function artemis_soft_install () {
     cd /rftools/docs
     gitinstall "https://github.com/AresValley/Artemis.git" "artemis_soft_install"
     cd Artemis
-    pip3 install -r requirements.txt
+    pip3install -r requirements.txt
     sed -i '1s|^|#!/bin/env python3\n|' app.py
     chmod +x app.py
     ln -s $(pwd)/app.py /usr/sbin/Artemis

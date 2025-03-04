@@ -26,8 +26,8 @@ function docker_preinstall() {
 
     # List of all packages
     local packages=(
-        python3 python3-dev python3-pip tzdata wget curl sudo pulseaudio udev python3-packaging vim
-        autoconf build-essential cmake libsndfile-dev scapy screen tcpdump libtool
+        python3 python3-dev python3-pip python3-venv tzdata wget curl sudo pulseaudio udev python3-packaging vim
+        autoconf build-essential cmake libsndfile-dev scapy screen tcpdump libtool libzmq3-dev
         qt5-qmake qtbase5-dev xterm libusb-1.0-0-dev pkg-config git apt-utils
         libusb-1.0-0 libncurses5-dev libtecla1 libtecla-dev dialog procps unzip
         texlive liblog4cpp5-dev libcurl4-gnutls-dev libpcap-dev libgtk-3-dev
@@ -39,8 +39,11 @@ function docker_preinstall() {
         pulseaudio-utils libasound2-dev libavahi-client-dev task-lxqt-desktop
         language-pack-en libqwt-qt5-dev python3-click-plugins python3-zmq rsync
         iw wireless-tools usbutils bluetooth bluez bluez-tools rfkill avahi-daemon
-        qt6-base-dev qt6-base-dev-tools qt6-tools-dev qt6-tools-dev-tools
+        qt6-base-dev qt6-base-dev-tools qt6-tools-dev qt6-tools-dev-tools libc6-dev
     )
+
+    # creating a symblink for python3 for some requirements
+    ln -s /usr/bin/python3 /usr/bin/python
 
     # Install apt-fast and all other packages with apt-fast
     installfromnet "apt-get -y install apt-fast"
@@ -54,7 +57,7 @@ function docker_preinstall() {
     update-locale
 
     # Installing Cython
-    installfromnet "pip3 install cython"
+    pip3install "cython"
 }
 
 function audio_tools () {

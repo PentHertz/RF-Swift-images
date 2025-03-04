@@ -16,7 +16,7 @@ function leobodnarv2_cal_device() {
 	goodecho "[+] Installing Leobodnar LBE-142x GPSDO"
 	[ -d /rftools/calibration ] || mkdir -p /rftools/calibration
 	cd /rftools/calibration
-	gitinstall "https://github.com/FlUxIuS/lbe-142x.git" "leobodnarv2_cal_device"
+	gitinstall "https://github.com/bvernoux/lbe-142x.git" "leobodnarv2_cal_device"
 	cd lbe-142x
 	mkdir build && cd build
 	cmake ..
@@ -73,7 +73,7 @@ function NanoVNASaver_cal_device() {
 
 function NanoVNASaver_cal_device_call() {
 	goodecho "[+] Installing NanoVNASaver with pip3"
-	pip3 install https://github.com/NanoVNA-Saver/nanovna-saver/archive/refs/tags/v0.5.5.tar.gz
+	pip3install 'https://github.com/NanoVNA-Saver/nanovna-saver/archive/refs/tags/v0.5.5.tar.gz'
 }
 
 function NanoVNA_QT_cal_device() {

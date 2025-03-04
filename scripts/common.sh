@@ -208,3 +208,34 @@ function check_and_install_lib() {
         fi
     fi
 }
+
+function pip3install() {
+    local n=0
+    local install_args="$*"  # Capture all arguments passed to the function
+    
+    goodecho "[+] Installing Python package(s): ${install_args}"
+    
+    # Try up to 5 times
+    until [ "$n" -ge 5 ]
+    do
+        colorecho "[pip3][Install] Try number: $n"
+        if [[ "$install_args" == *"-r "* ]] || [[ "$install_args" == *"--requirement "* ]]; then
+            # Handle requirements file installation
+            pip3 install --ignore-installed --break-system-packages $install_args && {
+                goodecho "[+] Successfully installed packages from requirements file"
+                return 0
+            }
+        else
+            # Handle single package or other pip arguments
+            pip3 install --ignore-installed --break-system-packages $install_args && {
+                goodecho "[+] Successfully installed ${install_args}"
+                return 0
+            }
+        fi
+        n=$((n+1))
+        sleep 15
+    done
+    
+    criticalecho-noexit "[-] Failed to install Python package(s): ${install_args}"
+    return 1
+}

@@ -221,7 +221,7 @@ function multimon_ng_soft_install () {
 
 function urh_soft_install () {
 	goodecho "[+] Installing URH"
-	installfromnet "pip3 install urh"
+	pip3install "urh"
 }
 
 function rtl_433_soft_install () {
@@ -329,7 +329,7 @@ function acarsdec_soft_install () {
 
 function meshtastic_sdr_soft_install () {
 	goodecho "[+] Installing Meshtastic_SDR dependencies"
-	installfromnet "pip3 install meshtastic"
+	pip3install "meshtastic"
 	[ -d /rftools/sdr ] || mkdir -p /rftools/sdr
 	cd /rftools/sdr
 	goodecho "[+] Cloning Meshtastic_SDR"
@@ -428,6 +428,6 @@ function pyspecsdr_sdr_soft_install () {
 	goodecho "[+] Cloning and installing PySpecSDR"
 	gitinstall "https://github.com/xqtr/PySpecSDR.git" "PySpecSDR"
 	goodecho "[+] Installing Python dependencies"
-	installfromnet "pip3 install pyrtlsdr"
-	installfromnet "pip3 install sounddevice"
+	pip3install "pyrtlsdr"
+	pip3install "sounddevice"
 }

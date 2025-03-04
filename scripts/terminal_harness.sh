@@ -21,7 +21,7 @@ function arsenal_soft_install() {
 	cd /opt
 	installfromnet "git clone https://github.com/Orange-Cyberdefense/arsenal.git"
 	cd arsenal
-	installfromnet "python3 -m pip install -r requirements.txt"
+	pip3install -r requirements.txt
 	#./addalias.sh
 	echo "alias a='/opt/arsenal/run'" >> ~/.zshrc
 	echo "alias a='/opt/arsenal/run'" >> ~/.bashrc

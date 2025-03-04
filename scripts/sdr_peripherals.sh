@@ -195,7 +195,7 @@ function osmofl2k_devices_install() {
 function xtrx_devices_install() {
 	goodecho "[+] Installing xtrx from package manager"
 	install_dependencies "libusb-1.0-0-dev cmake dkms python3 python3-pip gpsd gpsd-clients pps-tools libboost-all-dev git qtbase5-dev libqcustomplot-dev libqt5printsupport5 doxygen swig"
-	installfromnet "pip3 install cheetah3"
+	pip3install "cheetah3"
 	install_dependencies "soapysdr-module-xtrx xtrx-dkms xtrx-fft libxtrxll0 libxtrxll-dev libxtrxll-dev libxtrx-dev libxtrxdsp-dev"
 }
 

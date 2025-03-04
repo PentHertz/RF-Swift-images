@@ -41,7 +41,7 @@ function savvycan_soft_install() {
 
 function gallia_soft_install() {
 	goodecho "[+] Installing Gallia"
-	installfromnet "pip3 install gallia"
+	pip3install "gallia"
 }
 
 function v2ginjector_soft_install() {

@@ -25,7 +25,7 @@ function LLVM_install() { # expects llvm version
 
 function semgrep_install() {
     goodecho "[+] installing AFL deps"
-    installfromnet "pip3 install semgrep"
+    pip3install "semgrep"
 }
 
 function cppcheck_install() {

@@ -196,16 +196,14 @@ function pycrate_soft_install() {
 	cd pycrate
 	python3 setup.py install
 	goodecho "[+] Installing pycrate further dependencies"
-	pip3 install lxml
-	pip3 install crc32c
-	pip3 install crcmod
+	pip3install "lxml crc32c crcmod"
 }
 
 function cryptomobile_soft_install() {
 	[ -d /telecom ] || mkdir -p /telecom
 	cd /telecom
 	goodecho "[+] Installing cryptomobile's dependencies"
-	installfromnet "pip3 install pycryptodome"
+	pip3install "pycryptodome"
 	goodecho "[+] Cloninig and installing cryptomobile"
 	installfromnet "git clone https://github.com/mitshell/CryptoMobile.git"
 	cd CryptoMobile
@@ -286,7 +284,7 @@ function pysim_soft_install() {
 	goodecho "[+] Cloninig and installing PySIM"
 	gitinstall "https://github.com/osmocom/pysim.git" "pysim"
 	cd pysim
-	installfromnet "pip3 install -r requirements.txt"
+	pip3install -r requirements.txt
 }
 
 function sysmoUSIM_soft_install() {
