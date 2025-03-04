@@ -1,10 +1,10 @@
 # This DockerFile is part of the RFSwift project
-# Install type: Bluetooth
+# Install type: Wi-Fi
 # Author(s): Sébastien Dudek (@FlUxIuS) @Penthertz
 # website: penthertz.com
 
-ARG BASE_IMAGE=sdr_light
-FROM ${BASE_IMAGE}
+ARG BASE_IMAGE=corebuild
+FROM ${BASE_IMAGE} AS general_network
 
 LABEL "org.container.project"="rfswift"
 LABEL "org.container.author"="Sébastien Dudek (FlUxIuS)"
@@ -20,15 +20,20 @@ COPY rules /root/rules/
 WORKDIR /root/scripts/
 RUN chmod +x entrypoint.sh
 
-# Tools for Bluetooth #TODO: more more!
-RUN ./entrypoint.sh blueztools_soft_install && \
-	./entrypoint.sh bluing_soft_install && \
-	./entrypoint.sh bdaddr_soft_install
+# General monitoring and audit software
+RUN ./entrypoint.sh nmap_soft_install && \
+	./entrypoint.sh wireshark_soft_install && \
+	./entrypoint.sh metasploit_soft_install && \
+	./entrypoint.sh tshark_soft_install && \
+	./entrypoint.sh impacket_soft_install && \
+	./entrypoint.sh autorecon_soft_install && \
+	./entrypoint.sh responder_soft_install
 
-# Tools for Bluetooth LE
-RUN ./entrypoint.sh mirage_soft_install && \
-	./entrypoint.sh sniffle_soft_install && \
-	./entrypoint.sh whad_soft_install
+RUN ./entrypoint.sh kismet_soft_install
+RUN ./entrypoint.sh bettercap_soft_install
+
+RUN mkdir -p /sdrtools/
+COPY run /sdrtools/run
 
 # Cleaning and quitting
 WORKDIR /root/

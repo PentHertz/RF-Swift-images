@@ -1,23 +1,5 @@
 #!/bin/bash
 
-# General monitoring tools
-function kismet_soft_install() {
-	goodecho "[+] Installing Kismet dependencies"
-	[ -d /rftools ] || mkdir -p /rftools
-	cd /rftools
-	check_and_install_lib "librtlsdr-dev librtlsdr0" "librtlsdr"
-	install_dependencies "libsqlite3-dev ubertooth libprelude-dev build-essential git libwebsockets-dev pkg-config zlib1g-dev libnl-3-dev libnl-genl-3-dev libcap-dev libpcap-dev libnm-dev libdw-dev libsqlite3-dev libprotobuf-dev libprotobuf-c-dev protobuf-compiler protobuf-c-compiler libsensors-dev libusb-1.0-0-dev python3 python3-setuptools python3-protobuf python3-requests python3-numpy python3-serial python3-usb python3-dev python3-websockets libubertooth-dev libbtbb-dev libmosquitto-dev"
-	goodecho "[+] Installing Kismet"
-	installfromnet "git clone https://www.kismetwireless.net/git/kismet.git"
-	cd kismet
-	./configure --enable-bladerf --enable-wifi-coconut --enable-btgeiger --enable-prelude --enable-python-tools
-	make
-	make -j$(nproc)
-	make suidinstall
-	make forceconfigs
-	make install
-}
-
 # Bluetooth Classic and LE
 function blueztools_soft_install() {
 	goodecho "[+] Installing bluez tools"
@@ -39,20 +21,6 @@ function mirage_soft_install() {
     installfromnet "git clone https://github.com/RCayre/mirage"
     cd mirage/
     python3 setup.py install
-}
-
-function bettercap_soft_install() {
-	goodecho "[+] Installing bettercap"
-	rm -rf ~/.cache/go-build #TODO: trying to solve build exit for ARM on GitHub
-	export GOPROXY=direct
-	install_dependencies "libnetfilter-queue-dev"
-	[ -d /rftools/bluetooth ] || mkdir -p /rftools/bluetooth
-	cd /rftools/bluetooth
-	gitinstall "https://github.com/bettercap/bettercap.git"
-	cd bettercap
-	make build
-	make install
-	ln -s /rftools/bluetoot/bettercap/bettercap /usr/bin/bettercap
 }
 
 

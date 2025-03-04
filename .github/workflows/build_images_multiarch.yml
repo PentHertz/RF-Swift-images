@@ -1760,7 +1760,7 @@ jobs:
             ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
             ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
 
-  wifi_basic:
+  wifi:
     runs-on: Linux
     needs: sdrsa_devices
     strategy:
@@ -1873,142 +1873,6 @@ jobs:
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_wifi == 'true'
         run: |
           tagname=wifi_basic
-
-          # Inspect images for different architectures
-          output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
-          output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
-
-          # Extract the digests
-          arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-
-          # Debug: Print the extracted digests
-          echo "amd64 digest: $arch_digest_amd64"
-          echo "arm64 digest: $arch_digest_arm64"
-          echo "riscv64 digest: $arch_digest_riscv64"
-
-          # Create and push the multi-arch manifest
-          docker buildx imagetools create \
-            --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
-
-  wifi_full:
-    runs-on: Linux
-    needs: wifi_basic
-    strategy:
-      matrix:
-        platform: [amd64, arm64, riscv64]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 2 
-
-      - name: Check for modified files
-        id: file_check
-        run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
-          echo "Modified files: $MODIFIED_FILES"
-          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
-          else
-            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
-          fi
-
-          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
-          else
-            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
-          fi
-          if [[ "$MODIFIED_FILES" == *"Dockerfiles/wifi_full.docker"* || "$MODIFIED_FILES" == *"scripts/rf_tools.sh"* ]]; then
-            echo "run_job_wifi=true" >> $GITHUB_OUTPUT
-          else
-            echo "run_job_wifi=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Setup QEMU
-        uses: docker/setup-qemu-action@v3
-        with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
-
-      - name: Set up Docker Buildx
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_wifi == 'true'
-        uses: docker/setup-buildx-action@v3
-        with:
-          install: true
-
-      - name: Log in to Docker Hub
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_wifi == 'true'
-        uses: docker/login-action@v3
-        with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build and push wifi_full image with caching
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_wifi == 'true'
-        run: |
-          cd Dockerfiles
-          STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make wifi_full
-
-  wifi_full-manifest:
-    runs-on: Linux
-    needs: wifi_full
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 2 
-      - name: Check for modified files
-        id: file_check
-        run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
-          echo "Modified files: $MODIFIED_FILES"
-          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
-            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
-          else
-            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
-          fi
-
-          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
-            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
-          else
-            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
-          fi
-          if [[ "$MODIFIED_FILES" == *"Dockerfiles/wifi_fll.docker"* || "$MODIFIED_FILES" == *"scripts/rf_tools.sh"* ]]; then
-            echo "run_job_wifi=true" >> $GITHUB_OUTPUT
-          else
-            echo "run_job_wifi=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Setup QEMU
-        uses: docker/setup-qemu-action@v3
-        with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
-
-      - name: Set up Docker Buildx
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_wifi == 'true'
-        uses: docker/setup-buildx-action@v3
-        with:
-          install: true
-          version: latest
-
-      - name: Log in to Docker Hub
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_wifi == 'true'
-        uses: docker/login-action@v3
-        with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Create and push multi-arch manifest for wifi_full
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_wifi == 'true'
-        run: |
-          tagname=wifi_full
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
@@ -2269,6 +2133,130 @@ jobs:
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_rfid == 'true'
         run: |
           tagname=rfid
+
+          # Inspect images for different architectures
+          output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
+          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
+
+          # Extract the digests
+          arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+
+          # Debug: Print the extracted digests
+          echo "amd64 digest: $arch_digest_amd64"
+          echo "arm64 digest: $arch_digest_arm64"
+          echo "riscv64 digest: $arch_digest_riscv64"
+
+          # Create and push the multi-arch manifest
+          docker buildx imagetools create \
+            --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64 \
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
+
+  network:
+    runs-on: ubuntu-22.04
+    needs: corebuild
+    strategy:
+      matrix:
+        platform: [amd64, arm64, riscv64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
+
+      - name: Check for modified files
+        id: file_check
+        run: |
+          git fetch origin
+          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/general_network.docker"* || "$MODIFIED_FILES" == *"scripts/network_common.sh"* ]]; then
+            echo "run_job_network=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_network=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v7.0.0-28
+
+      - name: Set up Docker Buildx
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_network == 'true'
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+
+      - name: Log in to Docker Hub
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_network == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push rfid image with caching
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_network == 'true'
+        run: |
+          cd Dockerfiles
+          STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make network
+
+  rfid-manifest:
+    runs-on: ubuntu-22.04
+    needs: rfid
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
+      - name: Check for modified files
+        id: file_check
+        run: |
+          git fetch origin
+          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/general_network.docker"* || "$MODIFIED_FILES" == *"scripts/network_common.sh"* ]]; then
+            echo "run_job_network=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_network=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v7.0.0-28
+
+      - name: Set up Docker Buildx
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_network == 'true'
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+          version: latest
+
+      - name: Log in to Docker Hub
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_network == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Create and push multi-arch manifest for rfid
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_network == 'true'
+        run: |
+          tagname=network
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
