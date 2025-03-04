@@ -2209,7 +2209,7 @@ jobs:
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make network
 
-  rfid-manifest:
+  network-manifest:
     runs-on: ubuntu-22.04
     needs: rfid
     steps:
