@@ -1,23 +1,5 @@
 #!/bin/bash
 
-# General monitoring tools
-function kismet_soft_install() {
-	goodecho "[+] Installing Kismet dependencies"
-	[ -d /rftools ] || mkdir -p /rftools
-	cd /rftools
-	check_and_install_lib "librtlsdr-dev librtlsdr0" "librtlsdr"
-	install_dependencies "libsqlite3-dev ubertooth libprelude-dev build-essential git libwebsockets-dev pkg-config zlib1g-dev libnl-3-dev libnl-genl-3-dev libcap-dev libpcap-dev libnm-dev libdw-dev libsqlite3-dev libprotobuf-dev libprotobuf-c-dev protobuf-compiler protobuf-c-compiler libsensors-dev libusb-1.0-0-dev python3 python3-setuptools python3-protobuf python3-requests python3-numpy python3-serial python3-usb python3-dev python3-websockets libubertooth-dev libbtbb-dev libmosquitto-dev"
-	goodecho "[+] Installing Kismet"
-	installfromnet "git clone https://www.kismetwireless.net/git/kismet.git"
-	cd kismet
-	./configure --enable-bladerf --enable-wifi-coconut --enable-btgeiger --enable-prelude
-	make
-	make -j$(nproc)
-	make suidinstall
-	make forceconfigs
-	make install
-}
-
 # Bluetooth Classic and LE
 function blueztools_soft_install() {
 	goodecho "[+] Installing bluez tools"
@@ -39,19 +21,6 @@ function mirage_soft_install() {
     installfromnet "git clone https://github.com/RCayre/mirage"
     cd mirage/
     python3 setup.py install
-}
-
-function bettercap_soft_install() {
-	goodecho "[+] Installing bettercap"
-	export GOPROXY=direct
-	install_dependencies "libnetfilter-queue-dev"
-	[ -d /rftools/bluetooth ] || mkdir -p /rftools/bluetooth
-	cd /rftools/bluetooth
-	gitinstall "https://github.com/bettercap/bettercap.git"
-	cd bettercap
-	make build
-	make install
-	ln -s /rftools/bluetoot/bettercap/bettercap /usr/bin/bettercap
 }
 
 
@@ -236,6 +205,19 @@ function pixiewps_soft_install() {
 	install_dependencies "pixiewps"
 }
 
+function Pyrit_soft_install() { #TODO: tofix for total Python3 support
+	goodecho "[+] Installing Pyrit"
+	[ -d /rftools/wifi ] || mkdir -p /rftools/wifi
+	cd /rftools/wifi
+	installfromnet "pip3 install psycopg2-binary"
+	install_dependencies "scapy"
+	gitinstall "https://github.com/JPaulMora/Pyrit.git" "Pyrit_soft_install"
+	cd Pyrit
+	python3 setup.py clean
+	python3 setup.py build
+	python3 setup.py install
+}
+
 function eaphammer_soft_install() {
 	goodecho "[+] Installing eaphammer"
 	[ -d /rftools/wifi ] || mkdir -p /rftools/wifi
@@ -267,7 +249,7 @@ function sparrowwifi_sdr_soft_install () { # TODO: to debug
 	goodecho "[+] Cloning and installing sparrow-wifi"
 	gitinstall "https://github.com/ghostop14/sparrow-wifi.git" "sparrowwifi"
 	cd sparrow-wifi
-	install_dependencies "python3-pip gpsd gpsd-clients python3-tk python3-setuptools"
+	install_dependencies "python3-pip gpsd gpsd-clients python3-tk python3-setuptools qt5-qmake qtbase5-dev python3-pyqt5 python3-pyqt5.qsci python3-pyqt5.qtsvg python3-sip-dev pyqt5-dev pyqt5-dev-tools"
 	pip3install "QScintilla PyQtChart gps3 dronekit manuf python-dateutil numpy matplotlib"
 	pip3install --upgrade manuf
 }

@@ -7,6 +7,8 @@ function leobodnarv1_cal_device() {
 	install_dependencies "libhidapi-libusb0 libhidapi-hidraw0"
 	goodecho "[+] Cloning repository for Leobodnar v1 GPSDO"
 	gitinstall "https://github.com/hamarituc/lbgpsdo.git"
+	cd lbgpsdo
+	pip3 install -r requirements.txt
 	cd /root/
 }
 
@@ -70,34 +72,27 @@ function NanoVNASaver_cal_device() {
 }
 
 function NanoVNASaver_cal_device_call() {
-	set +e # TODO: debug that function
-    set +o pipefail
-	goodecho "[+] Installing dependencies for NanoVNASaver"
-	[ -d /root/thirdparty ] || mkdir /root/thirdparty
-	cd /root/thirdparty
-	install_dependencies "libxcb-cursor0 xcb"
-	goodecho "[+] Cloning and installing NanoVNASaver"
-	gitinstall "https://github.com/NanoVNA-Saver/nanovna-saver.git"
-	cd nanovna-saver
-	pip3install "setuptools setuptools_scm wheel"
-	sed -i 's/numpy==2.1.3/numpy<2/' requirements.txt
-	pip3install -r requirements.txt
-	python3 setup.py install
-	set -e
-    set -o pipefail
+	goodecho "[+] Installing NanoVNASaver with pip3"
+	pip3install 'https://github.com/NanoVNA-Saver/nanovna-saver/archive/refs/tags/v0.5.5.tar.gz'
 }
 
 function NanoVNA_QT_cal_device() {
 	goodecho "[+] Installing dependencies for NanoVNA-QT"
 	[ -d /rftools/calibration ] || mkdir -p /rftools/calibration
 	cd /rftools/calibration
-	install_dependencies "automake libtool make g++ libeigen3-dev libfftw3-dev libqt6charts6-dev"
+	install_dependencies "automake libtool make g++ libeigen3-dev libfftw3-dev libqt5charts5-dev"
 	goodecho "[+] Cloning and installing NanoVNA-QT"
-	gitinstall "https://github.com/FlUxIuS/NanoVNA-QT.git"
+	gitinstall "https://github.com/nanovna-v2/NanoVNA-QT.git"
 	cd NanoVNA-QT
-	mkdir build
-	cd build
-	cmake ..
+	autoreconf --install
+	./configure
+	make -j$(nproc)
+	cd libxavna/xavna_mock_ui/
+	qmake
+ 	make -j$(nproc)
+ 	cd ../..
+ 	cd vna_qt
+	qmake
 	make -j$(nproc)
 }
 
@@ -133,6 +128,19 @@ function librevna_cal_device() {
 	ln -s "$(pwd)/LibreVNA-GUI" /usr/bin/LibreVNA-GUI
 }
 
+function librecala_cal_device() {
+	goodecho "[+] Installing dependencies for LibreCAL A"
+	install_dependencies "qt6-base-dev libqt6svg6-dev libusb-1.0-0-dev libqt6charts6-dev libqt6opengl6-dev"
+	[ -d /rftools/calibration ] || mkdir -p /rftools/calibration
+	cd /rftools/calibration
+	gitinstall "https://github.com/jankae/LibreCAL.git" "librecala_cal_device"
+	cd LibreCAL/Software/LibreCAL-GUI
+	qmake6 LibreCAL-GUI.pro
+	make -j$(nproc)
+	make install
+	ln -s "/opt/LibreCAL-GUI/bin/LibreCAL-GUI" /usr/bin/LibreCAL-GUI
+}
+
 function librevna_cal_device_buildx() {
     # Check architecture using uname
     ARCH=$(uname -m)
@@ -141,20 +149,6 @@ function librevna_cal_device_buildx() {
     else
         goodecho "[!] Skipping LibreVNA build for $ARCH architecture as Qmake fails to get context with buildx"
     fi
-}
-
-function librecala_cal_device() {
-	goodecho "[+] Installing dependencies for LibreCAL A"
-	install_dependencies "qt6-base-dev libqt6svg6-dev libusb-1.0-0-dev libqt6charts6-dev libqt6opengl6-dev"
-	[ -d /rftools/calibration ] || mkdir -p /rftools/calibration
-	cd /rftools/calibration
-	gitinstall "https://github.com/jankae/LibreCAL.git" "librecala_cal_device"
-	cd LibreCAL
-	cd LibreCAL/Software/LibreCAL-GUI
-	qmake6 LibreCAL-GUI.pro
-	make -j$(nproc)
-	make install
-	ln -s "/opt/LibreCAL-GUI/bin/LibreCAL-GUI" /usr/bin/LibreCAL-GUI
 }
 
 function xnec2c_cal_device() {
