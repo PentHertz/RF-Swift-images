@@ -21,7 +21,7 @@ function tshark_soft_install() {
 	install_dependencies "metasploit"
 }
 
-function tshark_soft_install() {
+function impacket_soft_install() {
 	goodecho "[+] Installing Impacket from package manager"
 	install_dependencies "python3-impacket"
 }
