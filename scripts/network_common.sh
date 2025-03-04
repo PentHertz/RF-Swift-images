@@ -7,6 +7,7 @@ function nmap_soft_install() {
 
 function wireshark_soft_install() {
 	goodecho "[+] Installing Wireshark from package manager"
+	echo "wireshark-common wireshark-common/install-setuid boolean true" | sudo debconf-set-selections
 	install_dependencies "wireshark"
 }
 
