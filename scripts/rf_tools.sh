@@ -57,7 +57,7 @@ function bluing_soft_install() {
 
 function bdaddr_soft_install() {
 	goodecho "[+] Installing bdaddr"
-	[ -d /rftools/bluetooth ] || mkdir /rftools/bluetooth 
+	[ -d /rftools/bluetooth ] || mkdir /rftools/bluetooth
 	cd /rftools/bluetooth
 	installfromnet "git clone https://github.com/thxomas/bdaddr"
 	cd bdaddr
