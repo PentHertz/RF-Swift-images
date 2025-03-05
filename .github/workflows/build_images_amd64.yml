@@ -1,4 +1,4 @@
-name: Full build - Multi-Platform Docker Build with Caching
+name: Full build - AMD64 Docker Build with Caching
 
 env:
   REGISTRY_IMAGE: penthertz/rfswift
@@ -9,7 +9,7 @@ env:
 on:
   push:
     branches:
-      - deactivated
+      - ubuntu_24.04
     paths:
       - '**'
 
@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        platform: [amd64, arm64, riscv64]
+        platform: [amd64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -40,7 +40,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true'
@@ -85,7 +85,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true'
@@ -107,32 +107,32 @@ jobs:
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
-          output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
+          #output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
-          echo "arm64 digest: $arch_digest_arm64"
-          echo "riscv64 digest: $arch_digest_riscv64"
+          #echo "arm64 digest: $arch_digest_arm64"
+          #echo "riscv64 digest: $arch_digest_riscv64"
 
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   sdrsa_devices:
     runs-on: ubuntu-22.04
     needs: corebuild
     strategy:
       matrix:
-        platform: [amd64, arm64, riscv64]
+        platform: [amd64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -160,7 +160,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true'
@@ -210,7 +210,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true'
@@ -233,32 +233,32 @@ jobs:
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
-          output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
+          #output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
-          echo "arm64 digest: $arch_digest_arm64"
-          echo "riscv64 digest: $arch_digest_riscv64"
+          #echo "arm64 digest: $arch_digest_arm64"
+          #echo "riscv64 digest: $arch_digest_riscv64"
 
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   sdrsa_devices_antsdr:
     runs-on: ubuntu-22.04
     needs: corebuild
     strategy:
       matrix:
-        platform: [amd64, arm64, riscv64]
+        platform: [amd64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -291,7 +291,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_antsdr_devices == 'true'
@@ -346,7 +346,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_antsdr_devices == 'true'
@@ -369,32 +369,32 @@ jobs:
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
-          output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
+          #output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
-          echo "arm64 digest: $arch_digest_arm64"
-          echo "riscv64 digest: $arch_digest_riscv64"
+          #echo "arm64 digest: $arch_digest_arm64"
+          #echo "riscv64 digest: $arch_digest_riscv64"
 
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   sdrsa_devices_rtlsdrv4:
     runs-on: ubuntu-22.04
     needs: corebuild
     strategy:
       matrix:
-        platform: [amd64, arm64, riscv64]
+        platform: [amd64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -427,7 +427,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_rtlsdrv4_devices == 'true'
@@ -482,7 +482,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_rtlsdrv4_devices == 'true'
@@ -505,32 +505,32 @@ jobs:
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
-          output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
+          #output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
-          echo "arm64 digest: $arch_digest_arm64"
-          echo "riscv64 digest: $arch_digest_riscv64"
+          #echo "arm64 digest: $arch_digest_arm64"
+          #echo "riscv64 digest: $arch_digest_riscv64"
 
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   sdr_light:
     runs-on: ubuntu-22.04
     needs: sdrsa_devices
     strategy:
       matrix:
-        platform: [amd64, arm64, riscv64]
+        platform: [amd64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -563,7 +563,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true'
@@ -618,7 +618,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true'
@@ -641,32 +641,32 @@ jobs:
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
-          output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
+          #output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
-          echo "arm64 digest: $arch_digest_arm64"
-          echo "riscv64 digest: $arch_digest_riscv64"
+          #echo "arm64 digest: $arch_digest_arm64"
+          #echo "riscv64 digest: $arch_digest_riscv64"
 
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   deeptempest:
     runs-on: Linux
     needs: sdrsa_devices
     strategy:
       matrix:
-        platform: [amd64, arm64, riscv64]
+        platform: [amd64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -693,7 +693,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' 
@@ -743,7 +743,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' 
@@ -766,25 +766,25 @@ jobs:
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
-          output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
+          #output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
-          echo "arm64 digest: $arch_digest_arm64"
-          echo "riscv64 digest: $arch_digest_riscv64"
+          #echo "arm64 digest: $arch_digest_arm64"
+          #echo "riscv64 digest: $arch_digest_riscv64"
 
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   sdr_light_intelgpu:
     runs-on: ubuntu-22.04
@@ -829,7 +829,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true' || steps.file_check.outputs.run_job_sdr_light_intelgpu == 'true'
@@ -892,7 +892,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true' || steps.file_check.outputs.run_job_sdr_light_nvidiagpu == 'true'
@@ -918,7 +918,7 @@ jobs:
     needs: sdr_light
     strategy:
       matrix:
-        platform: [amd64, arm64, riscv64]
+        platform: [amd64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -956,7 +956,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true' || steps.file_check.outputs.run_job_sdrfull == 'true'
@@ -1016,7 +1016,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true' || steps.file_check.outputs.run_job_sdrfull == 'true'
@@ -1039,25 +1039,25 @@ jobs:
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
-          output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
+          #output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
-          echo "arm64 digest: $arch_digest_arm64"
-          echo "riscv64 digest: $arch_digest_riscv64"
+          #echo "arm64 digest: $arch_digest_arm64"
+          #echo "riscv64 digest: $arch_digest_riscv64"
 
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   sdr_full_intelgpu:
     runs-on: Linux
@@ -1107,7 +1107,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true' || steps.file_check.outputs.run_job_sdrfull_intelgpu == 'true'
@@ -1176,7 +1176,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true' || steps.file_check.outputs.run_job_sdrfull_nvidiagpu == 'true'
@@ -1202,7 +1202,7 @@ jobs:
     needs: sdrsa_devices
     strategy:
       matrix:
-        platform: [amd64, arm64, riscv64]
+        platform: [amd64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -1235,7 +1235,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true'
@@ -1290,7 +1290,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true'
@@ -1313,32 +1313,32 @@ jobs:
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
-          output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
+          #output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
-          echo "arm64 digest: $arch_digest_arm64"
-          echo "riscv64 digest: $arch_digest_riscv64"
+          #echo "arm64 digest: $arch_digest_arm64"
+          #echo "riscv64 digest: $arch_digest_riscv64"
 
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   telecom_2Gto3G:
     runs-on: ubuntu-22.04
     needs: telecom_utils
     strategy:
       matrix:
-        platform: [amd64, arm64]
+        platform: [amd64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -1376,7 +1376,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom23G == 'true'
@@ -1436,7 +1436,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom23G == 'true'
@@ -1459,29 +1459,32 @@ jobs:
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
-          echo "arm64 digest: $arch_digest_arm64"
-          echo "riscv64 digest: $arch_digest_riscv64"
+          #echo "arm64 digest: $arch_digest_arm64"
+          #echo "riscv64 digest: $arch_digest_riscv64"
 
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   telecom_4G_5GNSA:
     runs-on: ubuntu-22.04
     needs: telecom_utils
     strategy:
       matrix:
-        platform: [amd64, arm64]
+        platform: [amd64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -1519,7 +1522,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom4G5GNSA == 'true'
@@ -1579,7 +1582,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom4G5GNSA == 'true'
@@ -1602,28 +1605,32 @@ jobs:
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
-          echo "arm64 digest: $arch_digest_arm64"
+          #echo "arm64 digest: $arch_digest_arm64"
+          #echo "riscv64 digest: $arch_digest_riscv64"
 
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   telecom_5G:
     runs-on: ubuntu-22.04
     needs: telecom_utils
     strategy:
       matrix:
-        platform: [amd64, arm64]
+        platform: [amd64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -1661,7 +1668,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom5GSA == 'true'
@@ -1721,7 +1728,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom5GSA == 'true'
@@ -1744,28 +1751,32 @@ jobs:
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
-          echo "arm64 digest: $arch_digest_arm64"
+          #echo "arm64 digest: $arch_digest_arm64"
+          #echo "riscv64 digest: $arch_digest_riscv64"
 
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   wifi:
     runs-on: Linux
     needs: sdrsa_devices
     strategy:
       matrix:
-        platform: [amd64, arm64, riscv64]
+        platform: [amd64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -1798,7 +1809,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_wifi == 'true'
@@ -1853,7 +1864,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_wifi == 'true'
@@ -1876,32 +1887,32 @@ jobs:
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
-          output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
+          #output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
-          echo "arm64 digest: $arch_digest_arm64"
-          echo "riscv64 digest: $arch_digest_riscv64"
+          #echo "arm64 digest: $arch_digest_arm64"
+          #echo "riscv64 digest: $arch_digest_riscv64"
 
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   bluetooth:
     runs-on: Linux
     needs: sdrsa_devices
     strategy:
       matrix:
-        platform: [amd64, arm64, riscv64]
+        platform: [amd64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -1934,7 +1945,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_bt == 'true'
@@ -1989,7 +2000,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_bt == 'true'
@@ -2012,32 +2023,32 @@ jobs:
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
-          output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
+          #output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
-          echo "arm64 digest: $arch_digest_arm64"
-          echo "riscv64 digest: $arch_digest_riscv64"
+          #echo "arm64 digest: $arch_digest_arm64"
+          #echo "riscv64 digest: $arch_digest_riscv64"
 
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   rfid:
     runs-on: ubuntu-22.04
     needs: corebuild
     strategy:
       matrix:
-        platform: [amd64, arm64, riscv64]
+        platform: [amd64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -2064,7 +2075,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_rfid == 'true'
@@ -2113,7 +2124,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_rfid == 'true'
@@ -2136,32 +2147,32 @@ jobs:
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
-          output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
+          #output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
-          echo "arm64 digest: $arch_digest_arm64"
-          echo "riscv64 digest: $arch_digest_riscv64"
+          #echo "arm64 digest: $arch_digest_arm64"
+          #echo "riscv64 digest: $arch_digest_riscv64"
 
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   network:
     runs-on: ubuntu-22.04
     needs: sdrsa_devices
     strategy:
       matrix:
-        platform: [amd64, arm64, riscv64]
+        platform: [amd64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -2188,7 +2199,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_network == 'true'
@@ -2237,7 +2248,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_network == 'true'
@@ -2260,32 +2271,32 @@ jobs:
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
-          output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
+          #output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
-          echo "arm64 digest: $arch_digest_arm64"
-          echo "riscv64 digest: $arch_digest_riscv64"
+          #echo "arm64 digest: $arch_digest_arm64"
+          #echo "riscv64 digest: $arch_digest_riscv64"
 
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   automotive:
     runs-on: ubuntu-22.04
     needs: corebuild
     strategy:
       matrix:
-        platform: [amd64, arm64]
+        platform: [amd64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -2312,7 +2323,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_automotive == 'true'
@@ -2361,7 +2372,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_automotive == 'true'
@@ -2384,30 +2395,32 @@ jobs:
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
-          echo "arm64 digest: $arch_digest_arm64"
-          echo "riscv64 digest: $arch_digest_riscv64"
+          #echo "arm64 digest: $arch_digest_arm64"
+          #echo "riscv64 digest: $arch_digest_riscv64"
 
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   reversing:
     runs-on: Linux
     needs: corebuild
     strategy:
       matrix:
-        platform: [amd64, arm64]
+        platform: [amd64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -2434,7 +2447,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_reversing == 'true'
@@ -2483,7 +2496,7 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_reversing == 'true'
@@ -2506,20 +2519,22 @@ jobs:
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
-          echo "arm64 digest: $arch_digest_arm64"
-          echo "riscv64 digest: $arch_digest_riscv64"
+          #echo "arm64 digest: $arch_digest_arm64"
+          #echo "riscv64 digest: $arch_digest_riscv64"
 
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
