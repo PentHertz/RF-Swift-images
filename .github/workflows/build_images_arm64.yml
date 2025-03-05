@@ -1,0 +1,993 @@
+name: Full build - AMD64 and ARM64 Docker Build with Caching
+
+env:
+  REGISTRY_IMAGE: penthertz/rfswift
+  CACHE_REPO: penthertz/rfswift
+  DO_SPACES_ENDPOINT: ${{ secrets.BUCKET_URL }}
+  DO_SPACES_REGION: ${{ secrets.BUCKET_REGION }}
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**'
+
+jobs:
+  corebuild:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        platform: [arm64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
+
+      - name: Check for modified files
+        id: file_check
+        run: |
+          git fetch origin
+          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:latest
+
+      - name: Set up Docker Buildx
+        if: steps.file_check.outputs.run_job_corebuild == 'true'
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+          version: latest
+
+      - name: Log in to Docker Hub
+        if: steps.file_check.outputs.run_job_corebuild == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push corebuild image with caching
+        if: steps.file_check.outputs.run_job_corebuild == 'true'
+        run: |
+          cd Dockerfiles
+          STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make common
+
+  sdrsa_devices:
+    runs-on: ubuntu-22.04
+    needs: corebuild
+    strategy:
+      matrix:
+        platform: [arm64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
+
+      - name: Check for modified files
+        id: file_check
+        run: |
+          git fetch origin
+          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
+          fi
+
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:latest
+
+      - name: Set up Docker Buildx
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true'
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+
+      - name: Log in to Docker Hub
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push sdr_light image with caching
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true'
+        run: |
+          cd Dockerfiles
+          STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=uhd RTLSDR_BASE=rtlsdr make sdrsadevices
+
+  sdrsa_devices_antsdr:
+    runs-on: ubuntu-22.04
+    needs: corebuild
+    strategy:
+      matrix:
+        platform: [arm64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
+
+      - name: Check for modified files
+        id: file_check
+        run: |
+          git fetch origin
+          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
+          fi
+
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light_antsdr.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "run_job_sdrsa_antsdr_devices=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_sdrsa_antsdr_devices=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:latest
+
+      - name: Set up Docker Buildx
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_antsdr_devices == 'true'
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+
+      - name: Log in to Docker Hub
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_antsdr_devices == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push sdr_light image with caching
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_antsdr_devices == 'true'
+        run: |
+          cd Dockerfiles
+          STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=antsdr_uhd RTLSDR_BASE=rtlsdr make sdrsadevicesantsdr
+
+
+  sdrsa_devices_rtlsdrv4:
+    runs-on: ubuntu-22.04
+    needs: corebuild
+    strategy:
+      matrix:
+        platform: [arm64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
+
+      - name: Check for modified files
+        id: file_check
+        run: |
+          git fetch origin
+          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
+          fi
+
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light_rtlsdrv4.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "run_job_sdrsa_rtlsdrv4_devices=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_sdrsa_rtlsdrv4_devices=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:latest
+
+      - name: Set up Docker Buildx
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_rtlsdrv4_devices == 'true'
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+
+      - name: Log in to Docker Hub
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_rtlsdrv4_devices == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push sdr_light image with caching
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_rtlsdrv4_devices == 'true'
+        run: |
+          cd Dockerfiles
+          STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=uhd RTLSDR_BASE=rtlsdrv4 make sdrsadevicesrtlsdrv4
+
+  sdr_light:
+    runs-on: ubuntu-22.04
+    needs: sdrsa_devices
+    strategy:
+      matrix:
+        platform: [arm64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
+
+      - name: Check for modified files
+        id: file_check
+        run: |
+          git fetch origin
+          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
+          fi
+
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "run_job_sdr_light=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_sdr_light=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:latest
+
+      - name: Set up Docker Buildx
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true'
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+
+      - name: Log in to Docker Hub
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push sdr_light image with caching
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true'
+        run: |
+          cd Dockerfiles
+          STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrlight
+
+  deeptempest:
+    runs-on: Linux
+    needs: sdrsa_devices
+    strategy:
+      matrix:
+        platform: [arm64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
+      - name: Check for modified files
+        id: file_check
+        run: |
+          git fetch origin
+          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
+          fi
+
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:latest
+
+      - name: Set up Docker Buildx
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' 
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+
+      - name: Log in to Docker Hub
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push sdr_light image with caching
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true'
+        run: |
+          cd Dockerfiles
+          STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make deeptempest
+
+  sdr_full:
+    runs-on: Linux
+    needs: sdr_light
+    strategy:
+      matrix:
+        platform: [arm64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
+
+      - name: Check for modified files
+        id: file_check
+        run: |
+          git fetch origin
+          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
+          fi
+
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "run_job_sdr_light=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_sdr_light=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR_full.docker"* || "$MODIFIED_FILES" == *"scripts/sdr_softwares.sh"* || "$MODIFIED_FILES" == *"scripts/gr_oot_modules.sh"* ]]; then
+            echo "run_job_sdrfull=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_sdrfull=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:latest
+
+      - name: Set up Docker Buildx
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true' || steps.file_check.outputs.run_job_sdrfull == 'true'
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+
+      - name: Log in to Docker Hub
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true' || steps.file_check.outputs.run_job_sdrfull == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push sdr_full image with caching
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true' || steps.file_check.outputs.run_job_sdrfull == 'true'
+        run: |
+          cd Dockerfiles
+          STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrfull
+
+  telecom_utils:
+    runs-on: ubuntu-22.04
+    needs: sdrsa_devices
+    strategy:
+      matrix:
+        platform: [arm64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
+
+      - name: Check for modified files
+        id: file_check
+        run: |
+          git fetch origin
+          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
+          fi
+
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_utils.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
+            echo "run_job_telecom=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_telecom=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:latest
+
+      - name: Set up Docker Buildx
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true'
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+
+      - name: Log in to Docker Hub
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push telecom utils with caching
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true'
+        run: |
+          cd Dockerfiles
+          STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make telecom_utils
+
+  telecom_2Gto3G:
+    runs-on: ubuntu-22.04
+    needs: telecom_utils
+    strategy:
+      matrix:
+        platform: [arm64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
+
+      - name: Check for modified files
+        id: file_check
+        run: |
+          git fetch origin
+          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
+          fi
+
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_utils.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
+            echo "run_job_telecom=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_telecom=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_2Gto3G.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
+            echo "run_job_telecom23G=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_telecom23G=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:latest
+
+      - name: Set up Docker Buildx
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom23G == 'true'
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+
+      - name: Log in to Docker Hub
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom23G == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push telecom 2G to 3G image with caching
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom23G == 'true'
+        run: |
+          cd Dockerfiles
+          STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make telecom_2Gto3G
+
+  telecom_4G_5GNSA:
+    runs-on: ubuntu-22.04
+    needs: telecom_utils
+    strategy:
+      matrix:
+        platform: [arm64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
+
+      - name: Check for modified files
+        id: file_check
+        run: |
+          git fetch origin
+          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
+          fi
+
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_utils.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
+            echo "run_job_telecom=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_telecom=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_4G_5GNSA.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
+            echo "run_job_telecom4G5GNSA=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_telecom4G5GNSA=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:latest
+
+      - name: Set up Docker Buildx
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom4G5GNSA == 'true'
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+
+      - name: Log in to Docker Hub
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom4G5GNSA == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push telecom 4G to 5G NSA image with caching
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom4G5GNSA == 'true'
+        run: |
+          cd Dockerfiles
+          STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make telecom_4G_5GNSA
+
+  telecom_5G:
+    runs-on: ubuntu-22.04
+    needs: telecom_utils
+    strategy:
+      matrix:
+        platform: [arm64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
+
+      - name: Check for modified files
+        id: file_check
+        run: |
+          git fetch origin
+          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
+          fi
+
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_utils.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
+            echo "run_job_telecom=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_telecom=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_5G.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
+            echo "run_job_telecom5GSA=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_telecom5GSA=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:latest
+
+      - name: Set up Docker Buildx
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom5GSA == 'true'
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+
+      - name: Log in to Docker Hub
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom5GSA == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push telecom 4G to 5G NSA image with caching
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom5GSA == 'true'
+        run: |
+          cd Dockerfiles
+          STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make telecom_5G
+
+  wifi:
+    runs-on: Linux
+    needs: sdrsa_devices
+    strategy:
+      matrix:
+        platform: [arm64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
+
+      - name: Check for modified files
+        id: file_check
+        run: |
+          git fetch origin
+          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
+          fi
+
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/wifi_basic.docker"* || "$MODIFIED_FILES" == *"scripts/rf_tools.sh"* ]]; then
+            echo "run_job_wifi=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_wifi=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:latest
+
+      - name: Set up Docker Buildx
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_wifi == 'true'
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+
+      - name: Log in to Docker Hub
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_wifi == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push wifi_basic image with caching
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_wifi == 'true'
+        run: |
+          cd Dockerfiles
+          STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make wifi
+
+  bluetooth:
+    runs-on: Linux
+    needs: sdrsa_devices
+    strategy:
+      matrix:
+        platform: [arm64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
+
+      - name: Check for modified files
+        id: file_check
+        run: |
+          git fetch origin
+          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
+          fi
+
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/bluetooth.docker"* || "$MODIFIED_FILES" == *"scripts/rf_tools.sh"* ]]; then
+            echo "run_job_bt=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_bt=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:latest
+
+      - name: Set up Docker Buildx
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_bt == 'true'
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+
+      - name: Log in to Docker Hub
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_bt == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push bluetooth image with caching
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_bt == 'true'
+        run: |
+          cd Dockerfiles
+          STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make bluetooth
+
+  rfid:
+    runs-on: ubuntu-22.04
+    needs: corebuild
+    strategy:
+      matrix:
+        platform: [arm64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
+
+      - name: Check for modified files
+        id: file_check
+        run: |
+          git fetch origin
+          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/rfid.docker"* || "$MODIFIED_FILES" == *"scripts/rf_tools.sh"* ]]; then
+            echo "run_job_rfid=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_rfid=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:latest
+
+      - name: Set up Docker Buildx
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_rfid == 'true'
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+
+      - name: Log in to Docker Hub
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_rfid == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push rfid image with caching
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_rfid == 'true'
+        run: |
+          cd Dockerfiles
+          STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make rfid
+
+  network:
+    runs-on: ubuntu-22.04
+    needs: sdrsa_devices
+    strategy:
+      matrix:
+        platform: [arm64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
+
+      - name: Check for modified files
+        id: file_check
+        run: |
+          git fetch origin
+          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/general_network.docker"* || "$MODIFIED_FILES" == *"scripts/network_common.sh"* ]]; then
+            echo "run_job_network=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_network=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:latest
+
+      - name: Set up Docker Buildx
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_network == 'true'
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+
+      - name: Log in to Docker Hub
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_network == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push rfid image with caching
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_network == 'true'
+        run: |
+          cd Dockerfiles
+          STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make network
+
+  automotive:
+    runs-on: ubuntu-22.04
+    needs: corebuild
+    strategy:
+      matrix:
+        platform: [arm64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 
+
+      - name: Check for modified files
+        id: file_check
+        run: |
+          git fetch origin
+          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/automotive.docker"* || "$MODIFIED_FILES" == *"scripts/automotive_software.sh"* ]]; then
+            echo "run_job_automotive=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_automotive=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:latest
+
+      - name: Set up Docker Buildx
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_automotive == 'true'
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+
+      - name: Log in to Docker Hub
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_automotive == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push automotive image with caching
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_automotive == 'true'
+        run: |
+          cd Dockerfiles
+          STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make automotive
+
+  reversing:
+    runs-on: Linux
+    needs: corebuild
+    strategy:
+      matrix:
+        platform: [arm64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - name: Check for modified files
+        id: file_check
+        run: |
+          git fetch origin
+          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/reversing.docker"* || "$MODIFIED_FILES" == *"scripts/reverse_software.sh"* || "$MODIFIED_FILES" == *"scripts/sast_software.sh"* ]]; then
+            echo "run_job_reversing=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_reversing=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:latest
+
+      - name: Set up Docker Buildx
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_reversing == 'true'
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+
+      - name: Log in to Docker Hub
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_reversing == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push reversing image with caching
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_reversing == 'true'
+        run: |
+          cd Dockerfiles
+          STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make reversing

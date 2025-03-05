@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        platform: [amd64, arm64]
+        platform: [amd64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -107,24 +107,24 @@ jobs:
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
           #output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
           #arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
-          echo "arm64 digest: $arch_digest_arm64"
+          #echo "arm64 digest: $arch_digest_arm64"
           #echo "riscv64 digest: $arch_digest_riscv64"
 
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
             #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   sdrsa_devices:
@@ -132,7 +132,7 @@ jobs:
     needs: corebuild
     strategy:
       matrix:
-        platform: [amd64, arm64]
+        platform: [amd64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -233,24 +233,24 @@ jobs:
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
           #output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
           #arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
-          echo "arm64 digest: $arch_digest_arm64"
+          #echo "arm64 digest: $arch_digest_arm64"
           #echo "riscv64 digest: $arch_digest_riscv64"
 
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
             #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   sdrsa_devices_antsdr:
@@ -258,7 +258,7 @@ jobs:
     needs: corebuild
     strategy:
       matrix:
-        platform: [amd64, arm64]
+        platform: [amd64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -369,24 +369,24 @@ jobs:
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
           #output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
           #arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
-          echo "arm64 digest: $arch_digest_arm64"
+          #echo "arm64 digest: $arch_digest_arm64"
           #echo "riscv64 digest: $arch_digest_riscv64"
 
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
             #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   sdrsa_devices_rtlsdrv4:
@@ -394,7 +394,7 @@ jobs:
     needs: corebuild
     strategy:
       matrix:
-        platform: [amd64, arm64]
+        platform: [amd64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -505,24 +505,24 @@ jobs:
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
           #output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
           #arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
-          echo "arm64 digest: $arch_digest_arm64"
+          #echo "arm64 digest: $arch_digest_arm64"
           #echo "riscv64 digest: $arch_digest_riscv64"
 
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
             #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   sdr_light:
@@ -530,7 +530,7 @@ jobs:
     needs: sdrsa_devices
     strategy:
       matrix:
-        platform: [amd64, arm64]
+        platform: [amd64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -641,24 +641,24 @@ jobs:
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
           #output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
           #arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
-          echo "arm64 digest: $arch_digest_arm64"
+          #echo "arm64 digest: $arch_digest_arm64"
           #echo "riscv64 digest: $arch_digest_riscv64"
 
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
             #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   deeptempest:
@@ -666,7 +666,7 @@ jobs:
     needs: sdrsa_devices
     strategy:
       matrix:
-        platform: [amd64, arm64]
+        platform: [amd64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -766,24 +766,24 @@ jobs:
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
           #output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
           #arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
-          echo "arm64 digest: $arch_digest_arm64"
+          #echo "arm64 digest: $arch_digest_arm64"
           #echo "riscv64 digest: $arch_digest_riscv64"
 
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
             #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   sdr_light_intelgpu:
@@ -918,7 +918,7 @@ jobs:
     needs: sdr_light
     strategy:
       matrix:
-        platform: [amd64, arm64]
+        platform: [amd64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -1039,24 +1039,24 @@ jobs:
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
           #output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
           #arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
-          echo "arm64 digest: $arch_digest_arm64"
+          #echo "arm64 digest: $arch_digest_arm64"
           #echo "riscv64 digest: $arch_digest_riscv64"
 
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
             #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   sdr_full_intelgpu:
@@ -1202,7 +1202,7 @@ jobs:
     needs: sdrsa_devices
     strategy:
       matrix:
-        platform: [amd64, arm64]
+        platform: [amd64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -1313,24 +1313,24 @@ jobs:
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
           #output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
           #arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
-          echo "arm64 digest: $arch_digest_arm64"
+          #echo "arm64 digest: $arch_digest_arm64"
           #echo "riscv64 digest: $arch_digest_riscv64"
 
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
             #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   telecom_2Gto3G:
@@ -1338,7 +1338,7 @@ jobs:
     needs: telecom_utils
     strategy:
       matrix:
-        platform: [amd64, arm64]
+        platform: [amd64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -1459,29 +1459,32 @@ jobs:
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
-          echo "arm64 digest: $arch_digest_arm64"
-          echo "riscv64 digest: $arch_digest_riscv64"
+          #echo "arm64 digest: $arch_digest_arm64"
+          #echo "riscv64 digest: $arch_digest_riscv64"
 
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   telecom_4G_5GNSA:
     runs-on: ubuntu-22.04
     needs: telecom_utils
     strategy:
       matrix:
-        platform: [amd64, arm64]
+        platform: [amd64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -1602,28 +1605,32 @@ jobs:
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
-          echo "arm64 digest: $arch_digest_arm64"
+          #echo "arm64 digest: $arch_digest_arm64"
+          #echo "riscv64 digest: $arch_digest_riscv64"
 
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   telecom_5G:
     runs-on: ubuntu-22.04
     needs: telecom_utils
     strategy:
       matrix:
-        platform: [amd64, arm64]
+        platform: [amd64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -1744,28 +1751,32 @@ jobs:
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
-          echo "arm64 digest: $arch_digest_arm64"
+          #echo "arm64 digest: $arch_digest_arm64"
+          #echo "riscv64 digest: $arch_digest_riscv64"
 
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   wifi:
     runs-on: Linux
     needs: sdrsa_devices
     strategy:
       matrix:
-        platform: [amd64, arm64]
+        platform: [amd64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -1876,24 +1887,24 @@ jobs:
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
           #output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
           #arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
-          echo "arm64 digest: $arch_digest_arm64"
+          #echo "arm64 digest: $arch_digest_arm64"
           #echo "riscv64 digest: $arch_digest_riscv64"
 
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
             #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   bluetooth:
@@ -1901,7 +1912,7 @@ jobs:
     needs: sdrsa_devices
     strategy:
       matrix:
-        platform: [amd64, arm64]
+        platform: [amd64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -2012,24 +2023,24 @@ jobs:
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
           #output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
           #arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
-          echo "arm64 digest: $arch_digest_arm64"
+          #echo "arm64 digest: $arch_digest_arm64"
           #echo "riscv64 digest: $arch_digest_riscv64"
 
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
             #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   rfid:
@@ -2037,7 +2048,7 @@ jobs:
     needs: corebuild
     strategy:
       matrix:
-        platform: [amd64, arm64]
+        platform: [amd64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -2136,24 +2147,24 @@ jobs:
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
           #output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
           #arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
-          echo "arm64 digest: $arch_digest_arm64"
+          #echo "arm64 digest: $arch_digest_arm64"
           #echo "riscv64 digest: $arch_digest_riscv64"
 
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
             #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   network:
@@ -2161,7 +2172,7 @@ jobs:
     needs: sdrsa_devices
     strategy:
       matrix:
-        platform: [amd64, arm64]
+        platform: [amd64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -2260,24 +2271,24 @@ jobs:
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
           #output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
           #arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
-          echo "arm64 digest: $arch_digest_arm64"
+          #echo "arm64 digest: $arch_digest_arm64"
           #echo "riscv64 digest: $arch_digest_riscv64"
 
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
             #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   automotive:
@@ -2285,7 +2296,7 @@ jobs:
     needs: corebuild
     strategy:
       matrix:
-        platform: [amd64, arm64]
+        platform: [amd64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -2384,30 +2395,32 @@ jobs:
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
-          echo "arm64 digest: $arch_digest_arm64"
-          echo "riscv64 digest: $arch_digest_riscv64"
+          #echo "arm64 digest: $arch_digest_arm64"
+          #echo "riscv64 digest: $arch_digest_riscv64"
 
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   reversing:
     runs-on: Linux
     needs: corebuild
     strategy:
       matrix:
-        platform: [amd64, arm64]
+        platform: [amd64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -2506,20 +2519,22 @@ jobs:
 
           # Inspect images for different architectures
           output_amd64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64)
-          output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_arm64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64)
+          #output_riscv64=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64)
 
           # Extract the digests
           arch_digest_amd64=$(echo "$output_amd64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
-          arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_arm64=$(echo "$output_arm64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
+          #arch_digest_riscv64=$(echo "$output_riscv64" | grep "vnd.docker.reference.digest:" | awk '{print $2}')
 
           # Debug: Print the extracted digests
           echo "amd64 digest: $arch_digest_amd64"
-          echo "arm64 digest: $arch_digest_arm64"
-          echo "riscv64 digest: $arch_digest_riscv64"
+          #echo "arm64 digest: $arch_digest_arm64"
+          #echo "riscv64 digest: $arch_digest_riscv64"
 
           # Create and push the multi-arch manifest
           docker buildx imagetools create \
             --tag ${{ env.REGISTRY_IMAGE }}:$tagname \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64 \
-            ${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            ${{ env.REGISTRY_IMAGE }}:${tagname}_amd64@$arch_digest_amd64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_arm64@$arch_digest_arm64
+            #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
