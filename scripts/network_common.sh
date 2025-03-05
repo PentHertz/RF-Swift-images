@@ -36,7 +36,7 @@ function responder_soft_install() {
 	[ -d /opt/network ] || mkdir -p /opt/network
 	cd /opt/network
 	gitinstall "https://github.com/lgandx/Responder.git" "responder_soft_install"
-	cd Sniffle/python_cli
+	cd Responder
 	pip3install -r requirements.txt
 }
 
