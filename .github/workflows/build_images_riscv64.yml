@@ -1,4 +1,4 @@
-name: Full build - Multi-Platform Docker Build with Caching
+name: Full build - RISC-V 64 Docker Build with Caching
 
 env:
   REGISTRY_IMAGE: penthertz/rfswift
