@@ -130,6 +130,8 @@ function install_soapy_modules() {
 }
 
 function install_soapyPlutoSDR_modules() {
+	set +e # TODO: debug that function
+    set +o pipefail
 	goodecho "[+] Installing Soapy PlutoSDR module"
 	install_dependencies "libad9361-dev libiio-utils libiio-dev"
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
@@ -141,6 +143,8 @@ function install_soapyPlutoSDR_modules() {
 	cmake -DCMAKE_INSTALL_PREFIX=/usr ../
 	make
 	sudo make install
+	set -e
+    set -o pipefail
 }
 
 function rtlsdr_devices_install() {

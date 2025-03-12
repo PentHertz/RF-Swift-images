@@ -77,7 +77,8 @@ function proxmark3_soft_install() {
 	installfromnet "git clone https://github.com/RfidResearchGroup/proxmark3.git"
 	cd proxmark3/
 	make clean && make -j$(nproc)
-	ln -s pm3 /usr/sbin/pm3
+	ln -s $(pwd)/pm3 /usr/sbin/pm3
+	ln -s $(pwd)/proxmark3 /usr/bin/proxmark3
 	set -e
     set -o pipefail
 }
