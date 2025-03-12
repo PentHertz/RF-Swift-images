@@ -140,6 +140,9 @@ function install_soapyPlutoSDR_modules() {
 	cd SoapyPlutoSDR
 	mkdir build
 	cd build
+	find /usr -name "libiio.so*"
+	pkg-config --list-all | grep iio
+pkg-config --libs libiio
 	cmake -DCMAKE_INSTALL_PREFIX=/usr ../
 	make
 	sudo make install
