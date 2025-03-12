@@ -15,6 +15,8 @@ function mirage_soft_install() {
     install_dependencies "libpcsclite-dev pcsc-tools kmod kbd python3-pip python3-build"
     pip3install "keyboard"
     pip3install "pycryptodomex"
+    pip3 uninstall numpy -y
+    install_dependencies "python3-numpy"
     goodecho "[+] Installing Mirage"
     [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
     cd /root/thirdparty
