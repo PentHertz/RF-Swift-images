@@ -53,7 +53,28 @@ function bluing_soft_install() {
 
     # Install necessary Python packages
     python3.10 -m pip install dbus-python==1.2.18
-    python3.10 -m pip install --no-dependencies bluing PyGObject docopt btsm btatt bluepy configobj btl2cap pkginfo xpycommon halo pyserial bthci btgatt log_symbols colorama spinners six termcolor
+    python3.10 -m pip install pygobject==3.50.0
+    python3.10 -m pip install --no-dependencies bluing docopt btsm btatt bluepy configobj btl2cap pkginfo xpycommon halo pyserial bthci btgatt log_symbols colorama spinners six termcolor
+
+    # Define the name of the script to create
+	SCRIPT_FILE="bluing_run"
+
+	# Create the script with execution permissions
+	cat > $SCRIPT_FILE << 'EOF'
+#!/bin/bash
+
+# Activate the bluing environment
+/rftools/bluetooth/bluing/bluing/bin/activate
+
+# Print a message to confirm activation
+echo "Bluing environment has been activated inside a Python environment"
+EOF
+
+	# Make the script executable
+	chmod +x $SCRIPT_FILE
+
+echo "Created $SCRIPT_FILE with execution permissions"
+echo "You can run it with: ./$SCRIPT_FILE"
 }
 
 
