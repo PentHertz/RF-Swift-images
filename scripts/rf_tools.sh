@@ -15,8 +15,6 @@ function mirage_soft_install() {
     install_dependencies "libpcsclite-dev pcsc-tools kmod kbd python3-pip python3-build"
     pip3install "keyboard"
     pip3install "pycryptodomex"
-    pip3 uninstall numpy -y
-    install_dependencies "python3-numpy"
     goodecho "[+] Installing Mirage"
     [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
     cd /root/thirdparty
@@ -33,6 +31,8 @@ function sniffle_soft_install() {
 	installfromnet "git clone https://github.com/bkerler/Sniffle.git"
 	cd Sniffle/python_cli
 	pip3install -r requirements.txt
+	pip3 uninstall numpy -y
+    install_dependencies "python3-numpy"
 }
 
 function bluing_soft_install() {
