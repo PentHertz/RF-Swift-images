@@ -221,8 +221,7 @@ function multimon_ng_soft_install () {
 
 function urh_soft_install () {
 	goodecho "[+] Installing URH"
-	pip3 install --upgrade pip setuptools>=61
-	pip3install "urh"
+	pipx install urh
 }
 
 function rtl_433_soft_install () {

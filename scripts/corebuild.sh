@@ -39,7 +39,7 @@ function docker_preinstall() {
         pulseaudio-utils libasound2-dev libavahi-client-dev task-lxqt-desktop
         language-pack-en libqwt-qt5-dev python3-click-plugins python3-zmq rsync
         iw wireless-tools usbutils bluetooth bluez bluez-tools rfkill avahi-daemon
-        qt6-base-dev qt6-base-dev-tools qt6-tools-dev qt6-tools-dev-tools libc6-dev
+        qt6-base-dev qt6-base-dev-tools qt6-tools-dev qt6-tools-dev-tools libc6-dev pipx
     )
 
     # creating a symblink for python3 for some requirements
@@ -49,8 +49,6 @@ function docker_preinstall() {
     installfromnet "apt-get -y install apt-fast"
     installfromnet "apt-fast update"
     installfromnet "apt-fast install -y ${packages[@]} --no-install-recommends"
-
-    pip3install "numpy<2.0"
 
     # Configure keyboard and locale settings
     echo apt-fast keyboard-configuration/layout string "English (US)" | debconf-set-selections
