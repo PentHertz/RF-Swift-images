@@ -222,6 +222,7 @@ function multimon_ng_soft_install () {
 function urh_soft_install () {
 	goodecho "[+] Installing URH"
 	pipx install urh
+	ln -s /root/.local/bin/urh /usr/bin/urh
 }
 
 function rtl_433_soft_install () {

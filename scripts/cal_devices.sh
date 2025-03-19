@@ -20,6 +20,7 @@ function leobodnarv2_cal_device() {
 	cd lbe-142x
 	mkdir build && cd build
 	cmake ..
+	make -j$(nproc)
 	ln -s $(pwd)/lbe-142x /usr/bin/lbe-142x
 	#usermod -aG plugdev $(whoami)
 }
