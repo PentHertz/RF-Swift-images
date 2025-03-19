@@ -50,6 +50,8 @@ function docker_preinstall() {
     installfromnet "apt-fast update"
     installfromnet "apt-fast install -y ${packages[@]} --no-install-recommends"
 
+    pip3install "numpy<2.0"
+
     # Configure keyboard and locale settings
     echo apt-fast keyboard-configuration/layout string "English (US)" | debconf-set-selections
     echo apt-fast keyboard-configuration/variant string "English (US)" | debconf-set-selections

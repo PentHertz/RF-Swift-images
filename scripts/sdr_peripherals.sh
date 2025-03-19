@@ -26,7 +26,7 @@ function check_neon() {
 
 function uhd_devices_fromsource_install() {
 	goodecho "[+] Installing UHD's dependencies"
-	install_dependencies "dpdk dpdk-dev autoconf automake build-essential ccache cmake cpufrequtils doxygen ethtool g++ git inetutils-tools libboost-all-dev libncurses5 libncurses5-dev libusb-1.0-0 libusb-1.0-0-dev libusb-dev python3-dev python3-mako python3-numpy python3-requests python3-scipy python3-setuptools \
+	install_dependencies "dpdk dpdk-dev autoconf automake build-essential ccache cmake cpufrequtils doxygen ethtool g++ git inetutils-tools libboost-all-dev libncurses5 libncurses5-dev libusb-1.0-0 libusb-1.0-0-dev libusb-dev python3-dev python3-mako python3-requests python3-scipy python3-setuptools \
 python3-ruamel.yaml"
 	goodecho "[+] Copying rules sets"
 	cp /root/rules/uhd-usrp.rules  /etc/udev/rules.d/
