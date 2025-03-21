@@ -74,7 +74,8 @@ function NanoVNASaver_cal_device() {
 
 function NanoVNASaver_cal_device_call() {
 	goodecho "[+] Installing NanoVNASaver with pip3"
-	pip3install 'https://github.com/NanoVNA-Saver/nanovna-saver/archive/refs/tags/v0.5.5.tar.gz'
+	pipx install 'https://github.com/NanoVNA-Saver/nanovna-saver/archive/refs/tags/v0.5.5.tar.gz'
+	ln -s /root/.local/bin/NanoVNASaver /usr/bin/NanoVNASaver
 }
 
 function NanoVNA_QT_cal_device() {
