@@ -28,7 +28,7 @@ function docker_preinstall() {
     local packages=(
         python3 python3-dev python3-pip python3-venv tzdata wget curl sudo pulseaudio udev python3-packaging vim
         autoconf build-essential cmake libsndfile-dev scapy screen tcpdump libtool libzmq3-dev
-        qt5-qmake qtbase5-dev xterm libusb-1.0-0-dev pkg-config git apt-utils
+        qt5-qmake qtbase5-dev xterm libusb-1.0-0-dev pkg-config git apt-utils python3-numpy
         libusb-1.0-0 libncurses5-dev libtecla1 libtecla-dev dialog procps unzip
         texlive liblog4cpp5-dev libcurl4-gnutls-dev libpcap-dev libgtk-3-dev
         qtcreator qtcreator-data qtcreator-doc qtbase5-examples qtbase5-doc-html
