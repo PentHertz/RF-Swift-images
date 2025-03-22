@@ -221,8 +221,11 @@ function multimon_ng_soft_install () {
 
 function urh_soft_install () {
 	goodecho "[+] Installing URH"
-	pipx install urh
-	ln -s /root/.local/bin/urh /usr/bin/urh
+	install_dependencies "python3-pyqt5 build-essential python3-dev qt5-qmake sip-dev"
+	pip3install https://github.com/jopohl/urh/archive/refs/tags/v2.9.8.zip
+	goodecho "[+] Qt Plugin Path for URH"
+	#echo -e "export QT_PLUGIN_PATH=/usr/lib/x86_64-linux-gnu/qt5/plugins" >> ~/.zshrc
+	QT_PATH=$(find /usr -path "*/qt5/plugins" -type d 2>/dev/null | head -1) && echo -e "\n# Qt Plugin Path for URH (dynamically detected)\nexport QT_PLUGIN_PATH=$QT_PATH" >> ~/.zshrc && echo "Added path: $QT_PATH"
 }
 
 function rtl_433_soft_install () {
