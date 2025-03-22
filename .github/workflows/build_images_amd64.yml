@@ -715,7 +715,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make deeptempest
 
   deeptempest-manifest:
-    runs-on: Linux
+    runs-on: ubuntu-22.04
     needs: deeptempest
     steps:
       - name: Checkout code
@@ -978,7 +978,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrfull
 
   sdr_full-manifest:
-    runs-on: Linux
+    runs-on: ubuntu-22.04
     needs: sdr_full
     steps:
       - name: Checkout code
@@ -1831,7 +1831,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make wifi
 
   wifi-manifest:
-    runs-on: Linux
+    runs-on: ubuntu-22.04
     needs: wifi
     steps:
       - name: Checkout code
