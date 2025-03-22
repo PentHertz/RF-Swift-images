@@ -25,14 +25,23 @@ function mirage_soft_install() {
 
 
 function sniffle_soft_install() {
-	goodecho "[+] Installing Sniffle with OpenDroneID decoder/encoder"
-	[ -d /rftools/bluetooth ] || mkdir -p /rftools/bluetooth
-	cd /rftools/bluetooth
-	installfromnet "git clone https://github.com/bkerler/Sniffle.git"
-	cd Sniffle/python_cli
-	pip3install -r requirements.txt
-	pip3 uninstall numpy -y
-    pip3install "numpy<2.0"
+    # Get current architecture
+    local arch=$(uname -m)
+    
+    # Only proceed if architecture is x86_64, amd64, arm64, or aarch64
+    if [[ "$arch" == "x86_64" ]] || [[ "$arch" == "amd64" ]] || [[ "$arch" == "arm64" ]] || [[ "$arch" == "aarch64" ]]; then
+        goodecho "[+] Installing Sniffle with OpenDroneID decoder/encoder"
+        [ -d /rftools/bluetooth ] || mkdir -p /rftools/bluetooth
+        cd /rftools/bluetooth
+        install_dependencies "gfortran"
+        installfromnet "git clone https://github.com/bkerler/Sniffle.git"
+        cd Sniffle/python_cli
+        pip3install -r requirements.txt
+        pip3 uninstall numpy -y
+        pip3install "numpy<2.0"
+    else
+        goodecho "[!] Skipping Sniffle installation: unsupported architecture ($arch)"
+    fi
 }
 
 function bluing_soft_install() {
@@ -263,8 +272,8 @@ function sparrowwifi_sdr_soft_install () { # TODO: to debug
 	goodecho "[+] Cloning and installing sparrow-wifi"
 	gitinstall "https://github.com/ghostop14/sparrow-wifi.git" "sparrowwifi"
 	cd sparrow-wifi
-	install_dependencies "python3-pip gpsd gpsd-clients python3-tk python3-setuptools qt5-qmake qtbase5-dev python3-pyqt5 python3-pyqt5.qsci python3-pyqt5.qtsvg python3-sip-dev pyqt5-dev pyqt5-dev-tools"
-	pip3install "QScintilla PyQtChart gps3 dronekit manuf python-dateutil matplotlib"
+	install_dependencies "pyqt5chart-dev python3-pip gpsd gpsd-clients python3-tk python3-setuptools qt5-qmake qtbase5-dev python3-pyqt5 python3-pyqt5.qsci python3-pyqt5.qtsvg python3-sip-dev pyqt5-dev pyqt5-dev-tools"
+	pip3install "gps3 dronekit manuf python-dateutil matplotlib"
 	pip3install --upgrade manuf
 }
 
