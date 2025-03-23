@@ -143,6 +143,6 @@ function install_mpir() {
     autoreconf -vis
     ./configure --enable-cxx
     make -j$(nproc)
-    sudo make install
-    sudo ldconfig
+    make install
+    ldconfig
 }

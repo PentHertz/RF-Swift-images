@@ -27,10 +27,11 @@ RUN chmod +x entrypoint.sh
 
 FROM ${JMPSTAGE1} as extraoot1
 # Installing GNU Radio + extra OOT modules
+
+RUN ./entrypoint.sh griridium_grmod_install
 RUN ./entrypoint.sh grgsm_grmod_install && \
 	./entrypoint.sh grlora_grmod_install && \
 	./entrypoint.sh grlorasdr_grmod_install && \
-	./entrypoint.sh griridium_grmod_install && \
 	./entrypoint.sh grinspector_grmod_install && \
 	./entrypoint.sh grX10_grmod_install && \
 	./entrypoint.sh grgfdm_grmod_install && \
