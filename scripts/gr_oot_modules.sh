@@ -24,6 +24,14 @@ function grinspector_grmod_install() {
 }
 
 function griridium_grmod_install() {
+    # Check the architecture and install MPIR only if not x86_64/amd64
+    if [ "$(uname -m)" != "x86_64" ] && [ "$(dpkg --print-architecture 2>/dev/null)" != "amd64" ]; then
+        goodecho "Non-x86_64/amd64 architecture detected: $(uname -m). Installing MPIR..."
+        install_mpir
+    else
+        goodecho "x86_64/amd64 architecture detected. Skipping MPIR installation."
+    fi  
+    # Clone and build gr-iridium
     grclone_and_build "https://github.com/muccc/gr-iridium.git" "" "griridium_grmod_install"
 }
 

@@ -132,3 +132,17 @@ install_go() {
         install_dependencies "golang-go"
     fi
 }
+
+function install_mpir() {
+    goodecho "[+] Installing MPIR"
+    [ -d /root/thirdparty ] || mkdir /root/thirdparty
+    cd /root/thirdparty
+    install_dependencies "libgmp-dev yasm m4 texinfo libfftw3-dev libsndfile1-dev"
+    git clone https://github.com/wbhart/mpir.git
+    cd mpir
+    autoreconf -vis
+    ./configure --enable-cxx
+    make -j$(nproc)
+    sudo make install
+    sudo ldconfig
+}
