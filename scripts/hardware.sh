@@ -53,7 +53,7 @@ function arduino_ide_install() {
     IDE_VERSION="2.3.4"
     avrdude_install
     [ -d /hardware ] || mkdir /hardware
-    cd /hardwaresub 
+    cd /hardware
     mkdir -p Arduino
     cd Arduino
     install_dependencies "openjdk-11-jre libfuse2 libnss3 libsecret-1-0"
