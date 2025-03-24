@@ -164,7 +164,6 @@ function seergdb_install() {
     cd /root/thirdparty
     git clone https://github.com/epasveer/seer.git
     cd seer/src
-    mkdir build
     cd build
     cmake -DQTVERSION=QT6 ..
     make -j$(nproc) seergdb

@@ -19,8 +19,6 @@ else
     $(error Unsupported architecture: $(ARCH). Supported values are amd64, arm64, riscv64)
 endif
 
-
-
 # Function to build and push using registry cache
 define build_and_push_registry
     @docker buildx build --platform $(PLATFORM) \
@@ -49,7 +47,6 @@ ifeq ($(STORAGE_TYPE),registry)
 else
     build_and_push = $(build_and_push_local)
 endif
-
 
 #
 # Specific build targets using the chosen function
