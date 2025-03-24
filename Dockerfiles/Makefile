@@ -50,6 +50,7 @@ else
     build_and_push = $(build_and_push_local)
 endif
 
+
 #
 # Specific build targets using the chosen function
 common:

@@ -26,7 +26,13 @@ RUN	./entrypoint.sh avrdude_install && \
 	./entrypoint.sh pulseview_install && \
 	./entrypoint.sh arduino_ide_install && \
 	./entrypoint.sh logic2_saleae_install && \
-	./entrypoint.sh flashrom_install
+	./entrypoint.sh flashrom_install && \
+	./entrypoint.sh dsl2sigrok_install && \
+	./entrypoint.sh seergdb_install
+
+# Installing some pluggins
+RUN	./entrypoint.sh hydranfc_trace_plugin_install
+# TODO: more plugins form OpenOCD and so on...
 
 # Cleaning and quitting
 WORKDIR /root/

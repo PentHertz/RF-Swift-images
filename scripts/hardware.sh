@@ -33,12 +33,80 @@ function flashrom_install() {
 
 function pulseview_install() {
     goodecho "[+] Installing Sigrok pulseview"
-    install_dependencies "sdcc libzip-dev libglibmm-2.4-dev"
+    install_dependencies "sdcc libzip-dev libglibmm-2.4-dev libieee1284-3-dev libnettle8"
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
     cd /root/thirdparty
     git clone https://github.com/FlUxIuS/sigrok-util.git
     cd sigrok-util/cross-compile/linux
     ./sigrok-cross-linux
+}
+
+function openocd_install() {
+    goodecho "[+] Installing Sigrok OpenOCD"
+    install_dependencies "libjaylink-dev libgpiod-dev libhidapi-dev libjim-dev"
+    [ -d /root/thirdparty ] || mkdir /root/thirdparty
+    cd /root/thirdparty
+    git clone https://github.com/openocd-org/openocd.git
+    cd openocd
+    ./bootstrap
+    ./configure \
+      --enable-maintainer-mode \
+      --enable-parport \
+      --enable-parport-ppdev \
+      --enable-parport-giveio \
+      --enable-jtag_vpi \
+      --enable-usb_blaster_libftdi \
+      --enable-amtjtagaccel \
+      --enable-ft2232_libftdi \
+      --enable-ft2232_ftd2xx \
+      --enable-ftdi \
+      --enable-stlink \
+      --enable-ti-icdi \
+      --enable-ulink \
+      --enable-osbdm \
+      --enable-opendous \
+      --enable-aice \
+      --enable-usbprog \
+      --enable-rlink \
+      --enable-armjtagew \
+      --enable-cmsis-dap \
+      --enable-cmsis-dap-v2 \
+      --enable-kitprog \
+      --enable-usb-blaster-2 \
+      --enable-presto_libftdi \
+      --enable-openjtag_ftdi \
+      --enable-jlink \
+      --enable-buspirate \
+      --enable-remote-bitbang \
+      --enable-sysfsgpio \
+      --enable-bcm2835gpio \
+      --enable-imx_gpio \
+      --enable-esp-usb-jtag \
+      --enable-xlnx-pcie-xvc \
+      --enable-linuxgpiod \
+      --enable-dmem-adv \
+      --enable-boundary-scan
+    make -j$(nproc)
+    make install
+}
+
+function dsl2sigrok_install() {
+    goodecho "[+] Installing dsl2sigrok"
+    [ -d /hardware ] || mkdir /hardware
+    cd /hardware
+    git clone https://github.com/kittennbfive/dsl2sigrok.git
+    cd dsl2sigrok
+    gcc -Wall -Wextra -Werror -O3 -o dsl2sigrok main.c zip_helper.c -lm -lzip
+    ln -s "$(pwd)dsl2sigrok" /usr/bin
+}
+
+function hydranfc_trace_plugin_install() {
+    goodecho "[+] Installing dsl2sigrok"
+    [ -d /hardware ] || mkdir /hardware
+    cd /hardware
+    git clone https://github.com/hydrabus/hydranfc_v2_sniffer_decoder.git
+    ln -s "$(pwd)/hydranfc_v2_sniffer_decoder" /usr/local/share/libsigrokdecode4DSL/decoders/ # installing for DSView
+    ls -s "$(pwd)/hydranfc_v2_sniffer_decoder" /usr/share/libsigrokdecode/decoders/
 }
 
 function arduino_ide_install() {
@@ -87,4 +155,19 @@ function logic2_saleae_install() {
     wget "https://downloads2.saleae.com/logic2/Logic-${LOGIC_VERSION}-linux-x64.AppImage"
     chmod +x "Logic-${LOGIC_VERSION}-linux-x64.AppImage"
     ln -s "$(pwd)/Logic-${LOGIC_VERSION}-linux-x64.AppImage" /usr/bin/Logic-2-Saleae
+}
+
+function seergdb_install() {
+    goodecho "[+] Installing SeerGDB GUI"
+    install_dependencies "libqt6opengl6-dev libqt6charts6-dev libqt6svg6-dev libqt6opengl6-dev libqt6charts6-dev libqt6svg6-dev"
+    [ -d /root/thirdparty ] || mkdir /root/thirdparty
+    cd /root/thirdparty
+    git clone https://github.com/epasveer/seer.git
+    cd seer/src
+    mkdir build
+    cd build
+    cmake -DQTVERSION=QT6 ..
+    make -j$(nproc) seergdb
+    make install
+    ln -s /usr/local/bin/seergdb /usr/bin/seergdb
 }
