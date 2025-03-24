@@ -113,6 +113,9 @@ reversing:
 automotive:
 	$(call build_and_push,automotive,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild_$(ARCH),$(CURDIR)/automotive.docker)
 
+hardware:
+	$(call build_and_push,hardware,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices_$(ARCH),$(CURDIR)/hardware.docker)
+
 telecom_utils:
 	$(call build_and_push,telecom_utils,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices_$(ARCH),$(CURDIR)/telecom/telecom_utils.docker)
 

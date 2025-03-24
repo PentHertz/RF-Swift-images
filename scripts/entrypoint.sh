@@ -15,6 +15,7 @@ source telecom_software.sh
 source terminal_harness.sh
 source corebuild.sh
 source network_common.sh
+source hardware.sh
 
 # Part picket from Exegol project with love <3 (https://github.com/ThePorgs/Exegol)
 if [[ $EUID -ne 0 ]]; then
