@@ -722,7 +722,7 @@ jobs:
 
   hardware-manifest:
     runs-on: ubuntu-22.04
-    needs: sdr_light
+    needs: hardware
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
