@@ -170,3 +170,11 @@ function seergdb_install() {
     make install
     ln -s /usr/local/bin/seergdb /usr/bin/seergdb
 }
+
+function openFPGALoader_install() {
+    goodecho "[+] Installing openFPGALoader"
+    install_dependencies "libftdi1-dev"
+    [ -d /root/thirdparty ] || mkdir /root/thirdparty
+    cd /root/thirdparty
+    cmake_clone_and_build "https://github.com/trabucayre/openFPGALoader.git" "build" "" "" "openFPGALoader_install"
+}
