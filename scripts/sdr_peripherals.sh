@@ -84,7 +84,7 @@ function nuand_devices_install() {
 	goodecho "[+] Installing Nuand's libs and tools from package manager"
 	installfromnet "add-apt-repository ppa:nuandllc/bladerf"
 	installfromnet "apt-fast update"
-	install_dependencies "bladerf libbladerf-dev bladerf-firmware-fx3"
+	install_dependencies "bladerf libbladerf-dev"
 	goodecho "[+] Copying rules sets"
 	cp /root/rules/88-nuand-bladerf1.rules.in /etc/udev/rules.d/
 	cp /root/rules/88-nuand-bladerf2.rules.in /etc/udev/rules.d/
