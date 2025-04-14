@@ -41,6 +41,7 @@ define build_and_push_local
         ..;
 endef
 
+
 # Choose the build function based on STORAGE_TYPE
 ifeq ($(STORAGE_TYPE),registry)
     build_and_push = $(build_and_push_registry)
