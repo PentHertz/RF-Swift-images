@@ -220,7 +220,7 @@ function pysctp_soft_install() {
 	installfromnet "git clone https://github.com/FlUxIuS/pysctp.git"
 	cd pysctp
 	install_dependencies "libsctp-dev"
-	python3 setup.py install
+	pip3install .
 }
 
 function osmobts_suite_soft_install() {
