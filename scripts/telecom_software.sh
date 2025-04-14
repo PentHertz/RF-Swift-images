@@ -216,6 +216,7 @@ function cryptomobile_soft_install() {
 function pysctp_soft_install() {
 	[ -d /telecom ] || mkdir -p /telecom
 	cd /telecom
+	export DISTUTILS_USE_SDK=0
 	goodecho "[+] Cloninig and installing pysctp"
 	installfromnet "git clone https://github.com/FlUxIuS/pysctp.git"
 	cd pysctp
