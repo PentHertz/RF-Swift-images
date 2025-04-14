@@ -134,6 +134,7 @@ function srsran4G_5GNSA_soft_install() {
 	cd build
 	cmake ../
 	make -j$(nproc)
+	make install
 	#make test
 	set -e
     set -o pipefail
@@ -154,6 +155,7 @@ function srsran5GSA_soft_install() {
 	cd build
 	cmake ../
 	make -j $(nproc)
+	make install
 	#make test -j $(nproc)
 	set -e
     set -o pipefail

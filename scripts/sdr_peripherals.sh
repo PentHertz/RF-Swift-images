@@ -228,3 +228,13 @@ function libresdr_b2x0_devices_install() {
 	installfromnet "wget https://github.com/FlUxIuS/libresdr-b2xx/releases/download/2024.1/libresdr_b210.bin"
 	installfromnet "wget https://github.com/FlUxIuS/libresdr-b2xx/releases/download/2024.1/libresdr_b220.bin"
 }
+
+function litexm2sdr_devices_install() {
+	install_dependencies "libsoapysdr-dev soapysdr-tools"
+	goodecho "[+] Installing LiteX M2SDR"
+	[ -d /root/thirdparty ] || mkdir /root/thirdparty
+    cd /root/thirdparty
+    gitinstall "https://github.com/FlUxIuS/litex_m2sdr.git" "litexm2sdr_devices_install" "main"
+    cd litex_m2sdr/litex_m2sdr/software
+    ./build.py
+}
