@@ -1,0 +1,8 @@
+#!/bin/bash
+# Start D-Bus first
+mkdir -p /var/run/dbus
+dbus-daemon --system --nofork --nopidfile &
+sleep 2
+
+# Then start Avahi
+avahi-daemon -D

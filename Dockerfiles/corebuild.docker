@@ -17,6 +17,7 @@ COPY rules /root/rules/
 COPY config /root/config/
 COPY run/update_rfscripts /usr/sbin
 COPY run/libresdr_swapfpga /usr/sbin
+COPY run/avahicontainer_start /usr/sbin
 
 WORKDIR /root/scripts/
 RUN chmod +x entrypoint.sh

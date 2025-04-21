@@ -30,7 +30,7 @@ function docker_preinstall() {
         autoconf build-essential cmake libsndfile-dev scapy screen tcpdump libtool libzmq3-dev
         qt5-qmake qtbase5-dev xterm libusb-1.0-0-dev pkg-config git apt-utils python3-numpy
         libusb-1.0-0 libncurses5-dev libtecla1 libtecla-dev dialog procps unzip pciutils
-        texlive liblog4cpp5-dev libcurl4-gnutls-dev libpcap-dev libgtk-3-dev
+        texlive liblog4cpp5-dev libcurl4-gnutls-dev libpcap-dev libgtk-3-dev avahi-daemon avahi-utils dbus
         qtcreator qtcreator-data qtcreator-doc qtbase5-examples qtbase5-doc-html
         qtbase5-dev qtbase5-private-dev libqt5opengl5-dev libqt5svg5-dev
         libcanberra-gtk-module libcanberra-gtk3-module unity-tweak-tool libhdf5-dev
