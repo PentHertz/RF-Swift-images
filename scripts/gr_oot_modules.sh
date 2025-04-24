@@ -105,6 +105,12 @@ function grdvbs2_grmod_install() {
 
 function grtempest_grmod_install() { 
     grclone_and_build "https://github.com/nash-pillai/gr-tempest.git" "" "grtempest_grmod_install"
+    cd examples
+    grcc FFT_autocorrelate.grc
+    grcc FFT_crosscorrelate.grc
+    grcc Keep_1_in_N_frames.grc
+    mkdir -p /root/.grc_gnuradio
+    cp *.block.yml /root/.grc_gnuradio
 }
 
 function deeptempest_grmod_install() {
@@ -120,6 +126,7 @@ function deeptempest_grmod_install() {
     goodecho "[+] Installing requirements for deep-tempest"
     cd end-to-end/
     pip3install -r requirement.txt
+    pip3install "numpy<2.0" # force Numpy < 2
 }
 
 function grfhss_utils_grmod_install() {

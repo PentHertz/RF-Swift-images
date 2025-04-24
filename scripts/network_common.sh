@@ -57,6 +57,38 @@ function kismet_soft_install() {
 	make install
 }
 
+function webcopilot_soft_install() {
+        goodecho "[+] Installing webcopilot"
+        [ -d /opt/network ] || mkdir -p /opt/network
+        cd /opt/network
+        gitinstall "https://github.com/h4r5h1t/webcopilot.git" "webcopilot_soft_install"
+        cd webcopilot
+        chmod +x install.sh
+	./install.sh
+}
+
+function subenum_soft_install() {
+        goodecho "[+] Installing SubEnum"
+        [ -d /opt/network ] || mkdir -p /opt/network
+        cd /opt/network
+        gitinstall "https://github.com/FlUxIuS/SubEnum.git" "subenum_soft_install"
+        cd SubEnum
+        chmod +x setup.sh
+	./setup.sh
+	ln -s $(pwd)/subenum.sh /usr/sbin/subenum.sh
+}
+
+function mbtget_soft_install() {
+        goodecho "[+] Installing mbtget"
+        [ -d /opt/network ] || mkdir -p /opt/network
+        cd /opt/network
+        gitinstall "https://github.com/sourceperl/mbtget.git" "mbtget_soft_install"
+        cd mbtget
+        perl Makefile.PL
+        make
+	make install
+}
+
 function bettercap_soft_install() {
 	goodecho "[+] Installing bettercap"
 	rm -rf ~/.cache/go-build #TODO: trying to solve build exit for ARM on GitHub

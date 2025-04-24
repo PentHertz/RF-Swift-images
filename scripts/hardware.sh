@@ -178,3 +178,14 @@ function openFPGALoader_install() {
     cd /root/thirdparty
     cmake_clone_and_build "https://github.com/trabucayre/openFPGALoader.git" "build" "" "" "openFPGALoader_install"
 }
+
+function mtkclient_install() {
+    goodecho "[+] Installing mtkclient"
+    install_dependencies "python3 git libusb-1.0-0 python3-pip libfuse2"
+    [ -d /hardware ] || mkdir /hardware
+    cd /hardware
+    gitinstall "https://github.com/bkerler/mtkclient.git" "mtkclient_install"
+    cd mtkclient
+    pip3install -r requirements.txt
+    pip3install .
+}

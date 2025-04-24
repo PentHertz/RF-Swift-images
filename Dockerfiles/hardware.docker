@@ -31,7 +31,8 @@ RUN	./entrypoint.sh avrdude_install && \
 	./entrypoint.sh seergdb_install && \
 	./entrypoint.sh openocd_install
 	
-RUN		./entrypoint.sh openFPGALoader_install
+RUN	./entrypoint.sh openFPGALoader_install && \
+	./entrypoint.sh mtkclient_install
 
 # Installing some pluggins
 RUN	./entrypoint.sh hydranfc_trace_plugin_install
