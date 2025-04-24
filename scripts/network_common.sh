@@ -13,7 +13,9 @@ function wireshark_soft_install() {
 
 function metasploit_soft_install() {
 	goodecho "[+] Installing Metasploit from package manager"
-	install_dependencies "metasploit"
+	curl https://raw.githubusercontent.com/rapid7/metasploit-omnibus/master/config/templates/metasploit-framework-wrappers/msfupdate.erb > msfinstall
+	chmod 755 msfinstall
+	sudo ./msfinstall
 }
 
 function tshark_soft_install() {
@@ -33,8 +35,8 @@ function autorecon_soft_install() {
 
 function responder_soft_install() {
 	goodecho "[+] Installing Autorecon from GitHub"
-	[ -d /opt/network ] || mkdir -p /opt/network
-	cd /opt/network
+	[ -d /root/thirdparty ] || mkdir /root/thirdparty
+    	cd /root/thirdparty
 	gitinstall "https://github.com/lgandx/Responder.git" "responder_soft_install"
 	cd Responder
 	pip3install -r requirements.txt
