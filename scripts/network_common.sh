@@ -12,12 +12,21 @@ function wireshark_soft_install() {
 }
 
 function metasploit_soft_install() {
-	goodecho "[+] Installing Metasploit"
-	[ -d /root/thirdparty ] || mkdir /root/thirdparty
-    	cd /root/thirdparty
-	curl https://raw.githubusercontent.com/rapid7/metasploit-omnibus/master/config/templates/metasploit-framework-wrappers/msfupdate.erb > msfinstall
-	chmod 755 msfinstall
-	sudo ./msfinstall
+    # Get system architecture
+    ARCH=$(uname -m)
+    
+    # Check if architecture is supported
+    if [[ "$ARCH" == "x86_64" ]] || [[ "$ARCH" == "amd64" ]] || [[ "$ARCH" == "aarch64" ]] || [[ "$ARCH" == "arm64" ]]; then
+        goodecho "[+] Installing Metasploit for $ARCH architecture"
+        [ -d /root/thirdparty ] || mkdir /root/thirdparty
+        cd /root/thirdparty
+        curl https://raw.githubusercontent.com/rapid7/metasploit-omnibus/master/config/templates/metasploit-framework-wrappers/msfupdate.erb > msfinstall
+        chmod 755 msfinstall
+        sudo ./msfinstall
+    else
+        criticalecho-noexit "[-] Unsupported architecture: $ARCH"
+        criticalecho-noexit "[-] Metasploit installation is only supported on amd64/x86_64 and arm64/aarch64"
+    fi
 }
 
 function tshark_soft_install() {
