@@ -61,7 +61,7 @@ function webcopilot_soft_install() {
         goodecho "[+] Installing webcopilot"
         [ -d /opt/network ] || mkdir -p /opt/network
         cd /opt/network
-        gitinstall "https://github.com/h4r5h1t/webcopilot.git" "webcopilot_soft_install"
+        gitinstall "https://github.com/FlUxIuS/webcopilot.git" "webcopilot_soft_install"
         cd webcopilot
         chmod +x install.sh
 	./install.sh
