@@ -28,8 +28,9 @@ RUN ./entrypoint.sh nmap_soft_install && \
 	./entrypoint.sh impacket_soft_install && \
 	./entrypoint.sh autorecon_soft_install && \
 	./entrypoint.sh responder_soft_install && \
-	./entrypoint.sh webcopilot_soft_install && \
-	./entrypoint.sh subenum_soft_install
+	./entrypoint.sh webcopilot_soft_install
+
+RUN ./entrypoint.sh subenum_soft_install
 
 # Some OT tools
 RUN ./entrypoint.sh mbtget_soft_install

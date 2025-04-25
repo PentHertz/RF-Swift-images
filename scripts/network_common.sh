@@ -31,7 +31,7 @@ function metasploit_soft_install() {
 
 function tshark_soft_install() {
 	goodecho "[+] Installing TShark from package manager"
-	install_dependencies "metasploit"
+	install_dependencies "tshark"
 }
 
 function impacket_soft_install() {
@@ -71,34 +71,34 @@ function kismet_soft_install() {
 }
 
 function webcopilot_soft_install() {
-        goodecho "[+] Installing webcopilot"
-        [ -d /opt/network ] || mkdir -p /opt/network
-        cd /opt/network
-        gitinstall "https://github.com/FlUxIuS/webcopilot.git" "webcopilot_soft_install"
-        cd webcopilot
-        chmod +x install.sh
+    goodecho "[+] Installing webcopilot"
+    [ -d /opt/network ] || mkdir -p /opt/network
+    cd /opt/network
+    gitinstall "https://github.com/FlUxIuS/webcopilot.git" "webcopilot_soft_install"
+    cd webcopilot
+    chmod +x install.sh
 	./install.sh
 }
 
 function subenum_soft_install() {
-        goodecho "[+] Installing SubEnum"
-        [ -d /opt/network ] || mkdir -p /opt/network
-        cd /opt/network
-        gitinstall "https://github.com/FlUxIuS/SubEnum.git" "subenum_soft_install"
-        cd SubEnum
-        chmod +x setup.sh
+    goodecho "[+] Installing SubEnum"
+    [ -d /opt/network ] || mkdir -p /opt/network
+    cd /opt/network
+    gitinstall "https://github.com/FlUxIuS/SubEnum.git" "subenum_soft_install"
+    cd SubEnum
+    chmod +x setup.sh
 	./setup.sh
 	ln -s $(pwd)/subenum.sh /usr/sbin/subenum.sh
 }
 
 function mbtget_soft_install() {
-        goodecho "[+] Installing mbtget"
-        [ -d /opt/network ] || mkdir -p /opt/network
-        cd /opt/network
-        gitinstall "https://github.com/sourceperl/mbtget.git" "mbtget_soft_install"
-        cd mbtget
-        perl Makefile.PL
-        make
+    goodecho "[+] Installing mbtget"
+    [ -d /opt/network ] || mkdir -p /opt/network
+    cd /opt/network
+    gitinstall "https://github.com/sourceperl/mbtget.git" "mbtget_soft_install"
+    cd mbtget
+    perl Makefile.PL
+    make
 	make install
 }
 
