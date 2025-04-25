@@ -987,7 +987,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrlight_intelgpu
 
   sdr_light_nvidiagpu:
-    runs-on: ubuntu-22.04
+    runs-on: Linux
     needs: sdr_light
     strategy:
       matrix:
