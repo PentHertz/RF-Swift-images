@@ -180,6 +180,23 @@ function openFPGALoader_install() {
 }
 
 function mtkclient_install() {
+    ARCH=$(uname -m)
+
+    case "$ARCH" in
+        x86_64|amd64)
+            goodecho "[+] Architecture: x86_64"
+            goodecho "[+] Installing mtkclient for x86_64"
+            ;;
+        aarch64|arm64)
+            goodecho "[+] Architecture: aarch64"
+            goodecho "[+] Installing mtkclient for aarch64"
+            ;;
+        *)
+            criticalecho-noexit "[-] Unsupported architecture: $ARCH"
+            atuin_soft_fromsource_install
+            exit 0
+            ;;
+    esac
     goodecho "[+] Installing mtkclient"
     install_dependencies "python3 git libusb-1.0-0 python3-pip libfuse2"
     [ -d /hardware ] || mkdir /hardware

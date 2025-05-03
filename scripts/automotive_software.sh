@@ -1,13 +1,6 @@
 #!/bin/bash
 
 function canutils_soft_install() {
-	# Check architecture
-    ARCH=$(uname -m)
-    if [[ "$ARCH" != "x86_64" && "$ARCH" != "aarch64" ]]; then
-        echo "[-] Unsupported architecture: $ARCH"
-        exit 1
-    fi
-    
 	goodecho "[+] Installing can-utils"
 	installfromnet "apt-fast -y install can-utils"
 }

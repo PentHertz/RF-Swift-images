@@ -288,6 +288,7 @@ function pysim_soft_install() {
 	goodecho "[+] Cloninig and installing PySIM"
 	gitinstall "https://github.com/osmocom/pysim.git" "pysim"
 	cd pysim
+	sed -i '/pyscard/d' requirements.txt
 	pip3install -r requirements.txt
 }
 

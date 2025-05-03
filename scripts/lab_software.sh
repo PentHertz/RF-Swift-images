@@ -1,10 +1,8 @@
 #!/bin/bash
 
 function jupyter_soft_install() {
-	goodecho "[+] Installing Jupyter lab"
-	pip3install "jupyterlab"
-	goodecho "[+] Installing Jupyter lab"
-	pip3install "notebook"
+	goodecho "[+] Installing Jupyter Notebook"
+	install_dependencies "jupyter-notebook"
 }
 
 

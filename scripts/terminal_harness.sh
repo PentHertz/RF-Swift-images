@@ -27,6 +27,19 @@ function arsenal_soft_install() {
 	echo "alias a='/opt/arsenal/run'" >> ~/.bashrc
 }
 
+function atuin_soft_fromsource_install() {
+	goodecho "[+] Proceeding with atuin installation from source instead"
+    [ -d /root/thirdparty ] || mkdir /root/thirdparty
+	cd /root/thirdparty
+	gitinstall "https://github.com/atuinsh/atuin.git" "atuin_soft_fromsource_install"
+	cd atuin
+	cargo build --release --bin atuin
+	cp target/release/atuin /usr/bin/
+    echo 'eval "$(atuin init zsh)"' >> ~/.zshrc
+    goodecho "[+] atuin installed and initialized in zshrc"
+}
+
+
 function atuin_soft_install() {
     ARCH=$(uname -m)
 
@@ -40,7 +53,8 @@ function atuin_soft_install() {
             goodecho "[+] Installing atuin for aarch64"
             ;;
         *)
-            criticalecho-noexit "[-] Unsupported architecture: $ARCH"
+            criticalecho-noexit "[-] Officially unsupported architecture: $ARCH"
+            atuin_soft_fromsource_install
             exit 0
             ;;
     esac

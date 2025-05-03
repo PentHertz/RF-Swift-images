@@ -41,7 +41,7 @@ function impacket_soft_install() {
 
 function autorecon_soft_install() {
 	goodecho "[+] Installing Autorecon from GitHub with PIP"
-	pip3install git+https://github.com/Tib3rius/AutoRecon.git
+	pipx install git+https://github.com/Tib3rius/AutoRecon.git
 }
 
 function responder_soft_install() {
