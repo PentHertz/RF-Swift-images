@@ -971,7 +971,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make rfid
 
   network:
-    runs-on: ubuntu-22.04
+    runs-on: Linux
     needs: sdrsa_devices
     strategy:
       matrix:

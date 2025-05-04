@@ -282,13 +282,14 @@ function UERANSIM_soft_install() {
 }
 
 function pysim_soft_install() {
-	install_dependencies "pcscd libpcsclite-dev python3-setuptools python3-pycryptodome python3-pyscard python3-pip"
+	install_dependencies "pcscd libpcsclite-dev python3-setuptools python3-pycryptodome python3-pyscard python3-pip python3-cryptography"
 	[ -d /telecom/SIM ] || mkdir -p /telecom/SIM
 	cd /telecom/SIM
 	goodecho "[+] Cloninig and installing PySIM"
 	gitinstall "https://github.com/osmocom/pysim.git" "pysim"
 	cd pysim
 	sed -i '/pyscard/d' requirements.txt
+	sed -i '/cryptography/d' requirements.txt
 	pip3install -r requirements.txt
 }
 
