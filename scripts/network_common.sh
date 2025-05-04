@@ -72,9 +72,14 @@ function kismet_soft_install() {
 
 function webcopilot_soft_install() {
     goodecho "[+] Installing webcopilot"
+    go install github.com/sensepost/gowitness@latest
+}
+
+function gowitnes_soft_install() {
+    goodecho "[+] Installing gowitness"
     [ -d /opt/network ] || mkdir -p /opt/network
     cd /opt/network
-    gitinstall "https://github.com/FlUxIuS/webcopilot.git" "webcopilot_soft_install"
+    gitinstall "https://github.com/FlUxIuS/webcopilot.git" "gowitnes_soft_install"
     cd webcopilot
     chmod +x install.sh
 	./install.sh
