@@ -70,12 +70,14 @@ function kismet_soft_install() {
 	make install
 }
 
-function webcopilot_soft_install() {
+function gowitnes_soft_install() {
     goodecho "[+] Installing webcopilot"
+    export GOPROXY=https://proxy.golang.org,direct
+    export GOSUMDB=sum.golang.org
     go install github.com/sensepost/gowitness@latest
 }
 
-function gowitnes_soft_install() {
+function webcopilot_soft_install() {
     goodecho "[+] Installing gowitness"
     [ -d /opt/network ] || mkdir -p /opt/network
     cd /opt/network
