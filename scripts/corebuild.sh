@@ -34,7 +34,7 @@ function docker_preinstall() {
         qtcreator qtcreator-data qtcreator-doc qtbase5-examples qtbase5-doc-html
         qtbase5-dev qtbase5-private-dev libqt5opengl5-dev libqt5svg5-dev
         libcanberra-gtk-module libcanberra-gtk3-module unity-tweak-tool libhdf5-dev
-        libreadline-dev automake qtdeclarative5-dev libqt5serialport5-dev libfftw3-single3 libfftw3-quad3
+        libreadline-dev automake qtdeclarative5-dev libqt5serialport5-dev libfftw3-single3 libfftw3-bin libfftw3-dev
         libqt5serialbus5-dev qttools5-dev python3-matplotlib libtalloc-dev
         pulseaudio-utils libasound2-dev libavahi-client-dev task-lxqt-desktop
         language-pack-en libqwt-qt5-dev python3-click-plugins python3-zmq rsync
