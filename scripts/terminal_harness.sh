@@ -30,6 +30,8 @@ function arsenal_soft_install() {
 function atuin_soft_fromsource_install() {
 	goodecho "[+] Proceeding with atuin installation from source instead"
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+    export PATH="$HOME/.cargo/bin:$PATH"
     rustup update
 	cd /root/thirdparty
 	gitinstall "https://github.com/atuinsh/atuin.git" "atuin_soft_fromsource_install"
