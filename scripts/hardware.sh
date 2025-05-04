@@ -3,6 +3,7 @@
 function dsview_install() {
 	goodecho "[+] Installing DSView for DSLogic"
 	install_dependencies "libfftw3-dev"
+    ldconfig
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
 	git clone https://github.com/DreamSourceLab/DSView.git

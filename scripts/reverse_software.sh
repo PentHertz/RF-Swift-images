@@ -69,8 +69,9 @@ function binwalk_soft_install() {
 
 function cutter_soft_install() { # TODO: fix installation
 	goodecho "[+] Installing Cutter dependencies"
-	install_dependencies "ninja-build qt6-base-dev libqt6opengl6-dev cmake meson pkgconf libzip-dev zlib1g-dev qt6-base-dev qt6-tools-dev qt6-tools-dev-tools libqt6svg6-dev libqt6core5compat6-dev libqt6svgwidgets6 qt6-l10n-tools libqt6opengl6-dev"
+	install_dependencies "ninja-build qt6-base-dev qt6-svg-dev qt6-opengl-dev libqt6opengl6-dev cmake meson pkgconf libzip-dev zlib1g-dev qt6-base-dev qt6-tools-dev qt6-tools-dev-tools libqt6svg6-dev libqt6core5compat6-dev libqt6svgwidgets6 qt6-l10n-tools libqt6opengl6-dev"
 	pip3install "meson"
+	ldconfig
 	goodecho "[+] Cloning Cutter"
 	[ -d /reverse ] || mkdir -p /reverse
 	cd /reverse
