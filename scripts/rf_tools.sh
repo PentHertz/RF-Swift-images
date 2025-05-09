@@ -37,8 +37,7 @@ function sniffle_soft_install() {
         installfromnet "git clone https://github.com/bkerler/Sniffle.git"
         cd Sniffle/python_cli
         pip3install -r requirements.txt
-        pip3 uninstall numpy -y
-        pip3install "numpy<2.0"
+        pip3 install "numpy<2"
     else
         goodecho "[!] Skipping Sniffle installation: unsupported architecture ($arch)"
     fi

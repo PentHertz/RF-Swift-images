@@ -205,7 +205,7 @@ function pycrate_soft_install() {
     
     # Install pycrate
     cd pycrate
-    pip3 install .  # Using pip instead of setup.py directly
+    pip3install .  # Using pip instead of setup.py directly
     
     # Install additional dependencies
     goodecho "[+] Installing pycrate further dependencies"

@@ -84,7 +84,7 @@ function NanoVNA_QT_cal_device() {
 	cd /rftools/calibration
 	install_dependencies "automake libtool make g++ libeigen3-dev libfftw3-dev libqt5charts5-dev"
 	goodecho "[+] Cloning and installing NanoVNA-QT"
-	gitinstall "https://github.com/nanovna-v2/NanoVNA-QT.git"
+	gitinstall "https://github.com/FlUxIuS/NanoVNA-QT.git"
 	cd NanoVNA-QT
 	autoreconf --install
 	./configure
