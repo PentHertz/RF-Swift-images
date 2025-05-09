@@ -201,7 +201,7 @@ function pycrate_soft_install() {
     # Clone pycrate repository
     cd /telecom
     goodecho "[+] Cloning and installing pycrate"
-    installfromnet "git clone https://github.com/pycrate-org/pycrate.git"
+    gitinstall "https://github.com/pycrate-org/pycrate.git" "pycrate_soft_install"
     
     # Install pycrate
     cd pycrate

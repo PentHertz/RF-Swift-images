@@ -82,20 +82,13 @@ function NanoVNA_QT_cal_device() {
 	goodecho "[+] Installing dependencies for NanoVNA-QT"
 	[ -d /rftools/calibration ] || mkdir -p /rftools/calibration
 	cd /rftools/calibration
-	install_dependencies "automake libtool make g++ libeigen3-dev libfftw3-dev libqt5charts5-dev"
+	install_dependencies "automake libtool make g++ libeigen3-dev libfftw3-dev libqt6charts6-dev"
 	goodecho "[+] Cloning and installing NanoVNA-QT"
 	gitinstall "https://github.com/FlUxIuS/NanoVNA-QT.git"
 	cd NanoVNA-QT
-	autoreconf --install
-	./configure
+	cmake .
 	make -j$(nproc)
-	cd libxavna/xavna_mock_ui/
-	qmake
- 	make -j$(nproc)
- 	cd ../..
- 	cd vna_qt
-	qmake
-	make -j$(nproc)
+	ln -s $(pwd)/vna_qt/vna_qt /usr/bin/vna_qt
 }
 
 function pocketvna_sa_device() {
