@@ -8,7 +8,7 @@ function leobodnarv1_cal_device() {
 	goodecho "[+] Cloning repository for Leobodnar v1 GPSDO"
 	gitinstall "https://github.com/hamarituc/lbgpsdo.git"
 	cd lbgpsdo
-	pip3 install -r requirements.txt
+	pip3install -r requirements.txt
 	cd /root/
 }
 

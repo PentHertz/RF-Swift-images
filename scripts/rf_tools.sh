@@ -68,7 +68,7 @@ function bluing_soft_install() {
         install_dependencies "python3.10 python3.10-venv python3.10-dev"
     fi
 
-    install_dependencies "libgirepository1.0-dev libbluetooth-dev"
+    install_dependencies "libgirepository1.0-dev libgirepository-2.0-dev libbluetooth-dev"
 
      [ -d /rftools/bluetooth/bluing ] || mkdir -p /rftools/bluetooth/bluing
     cd /rftools/bluetooth/bluing
