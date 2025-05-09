@@ -191,15 +191,25 @@ function Open5GS_soft_install() {
 }
 
 function pycrate_soft_install() {
-	[ -d /telecom ] || mkdir -p /telecom
-	cd /telecom
-	goodecho "[+] Cloninig and installing pycrate"
-	installfromnet "git clone https://github.com/pycrate-org/pycrate.git"
-	cd pycrate
-	python3 setup.py install
-	goodecho "[+] Installing pycrate further dependencies"
-	install_dependencies "libxml2-dev libxslt1-dev"
-	pip3install "lxml crc32c crcmod"
+    # Create directory if it doesn't exist
+    [ -d /telecom ] || mkdir -p /telecom
+    
+    # Install required dependencies first
+    goodecho "[+] Installing Python dependencies for pycrate"
+    install_dependencies "python3-setuptools python3-pip python3-dev libxml2-dev libxslt1-dev"
+    
+    # Clone pycrate repository
+    cd /telecom
+    goodecho "[+] Cloning and installing pycrate"
+    installfromnet "git clone https://github.com/pycrate-org/pycrate.git"
+    
+    # Install pycrate
+    cd pycrate
+    pip3 install .  # Using pip instead of setup.py directly
+    
+    # Install additional dependencies
+    goodecho "[+] Installing pycrate further dependencies"
+    pip3install "lxml crc32c crcmod"
 }
 
 function cryptomobile_soft_install() {
