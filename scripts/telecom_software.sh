@@ -197,6 +197,7 @@ function pycrate_soft_install() {
     # Install required dependencies first
     goodecho "[+] Installing Python dependencies for pycrate"
     install_dependencies "python3-setuptools python3-pip python3-dev libxml2-dev libxslt1-dev"
+    pip3install --upgrade pip setuptools wheel build
     
     # Clone pycrate repository
     cd /telecom
