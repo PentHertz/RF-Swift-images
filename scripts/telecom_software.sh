@@ -196,96 +196,16 @@ function pycrate_soft_install() {
     
     # Install required dependencies first
     goodecho "[+] Installing Python dependencies for pycrate"
-    install_dependencies "python3-setuptools python3-pip python3-dev python3-venv libxml2-dev libxslt1-dev build-essential"
-    
-    # Completely remove and reinstall setuptools for Python 3.12 compatibility
-    goodecho "[+] Installing compatible setuptools version for Python 3.12"
-    python3 -m pip uninstall -y setuptools pkg_resources
-    python3 -m pip install setuptools==68.2.2 packaging==23.2
-    
-    # Try to install crcmod directly (using the binary wheel if available)
-    goodecho "[+] Installing crcmod from binary wheel"
-    pip3 download --no-deps crcmod
-    # Find the downloaded file
-    CRCMOD_FILE=$(find . -name "crcmod-*.tar.gz" | head -1)
-    
-    if [ -n "$CRCMOD_FILE" ]; then
-        # Extract the tarball
-        mkdir -p crcmod_extract
-        tar -xzf "$CRCMOD_FILE" -C crcmod_extract --strip-components=1
-        cd crcmod_extract
-        
-        # Patch the setup.py file
-        goodecho "[+] Patching crcmod setup.py"
-        sed -i '1i import setuptools' setup.py
-        
-        # Install with a direct approach
-        python3 setup.py build
-        python3 setup.py install
-        cd ..
-        rm -rf crcmod_extract "$CRCMOD_FILE"
-    fi
-    
-    # Install other dependencies
-    goodecho "[+] Installing other dependencies"
-    pip3install "lxml"
-    pip3install "crc32c"
-    
-    # Try direct installation from PyPI first
-    goodecho "[+] Trying direct installation of pycrate from PyPI"
-    pip3install pycrate && {
-        goodecho "[+] Successfully installed pycrate from PyPI"
-        return 0
-    }
-    
-    # If PyPI install fails, proceed with source installation
-    goodecho "[+] PyPI installation failed, attempting installation from source"
-    
+    install_dependencies "python3-setuptools python3-pip python3-dev libxml2-dev libxslt1-dev python3-lxml python3-crc32c python3-crcmod"
+
     # Clone pycrate repository
     cd /telecom
-    goodecho "[+] Cloning pycrate repository"
-    
-    # Clean existing directory
-    [ -d pycrate ] && rm -rf pycrate
-    
-    # Clone the repository directly
+    goodecho "[+] Cloning and installing pycrate"
     gitinstall "https://github.com/pycrate-org/pycrate.git" "pycrate_soft_install"
     
-    # Enter the pycrate directory
+    # Install pycrate
     cd pycrate
-    
-    # Fix setup.py for Python 3.12
-    goodecho "[+] Patching setup.py for Python 3.12 compatibility"
-    sed -i '1i import setuptools' setup.py
-    
-    # Create a custom _distutils_hack.py in the current directory
-    cat > _distutils_hack.py << 'EOF'
-# Monkey patch for Python 3.12 compatibility
-import sys
-import os
-
-# Add a fake ImpImporter to pkgutil
-import pkgutil
-class FakeImpImporter:
-    pass
-pkgutil.ImpImporter = FakeImpImporter
-
-# Import the module
-sys.path.insert(0, os.getcwd())
-EOF
-
-    # Install with custom Python execution that includes our hack
-    goodecho "[+] Installing pycrate with Python 3.12 compatibility fixes"
-    PYTHONPATH=. python3 -c "import _distutils_hack; from setuptools import setup; setup()" install
-    
-    # Verify installation
-    goodecho "[+] Verifying pycrate installation"
-    python3 -c "import pycrate; print('Pycrate installed successfully')" || {
-        goodecho "[-] Pycrate installation failed"
-        return 1
-    }
-    
-    goodecho "[+] Pycrate installation completed successfully"
+    pip3install .  # Using pip instead of setup.py directly
 }
 
 function cryptomobile_soft_install() {
