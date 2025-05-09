@@ -194,23 +194,72 @@ function pycrate_soft_install() {
     # Create directory if it doesn't exist
     [ -d /telecom ] || mkdir -p /telecom
     
-    # Install required dependencies first
+    # Install required dependencies first with upgraded packages for Python 3.12
     goodecho "[+] Installing Python dependencies for pycrate"
-    install_dependencies "python3-setuptools python3-pip python3-dev libxml2-dev libxslt1-dev"
-    pip3install --upgrade pip setuptools wheel build
+    install_dependencies "python3-setuptools python3-pip python3-dev python3-venv libxml2-dev libxslt1-dev build-essential"
+    
+    # Upgrade pip and setuptools with explicit version that works with Python 3.12
+    goodecho "[+] Upgrading pip and setuptools for Python 3.12 compatibility"
+    pip3install --upgrade pip "setuptools<60.0.0" wheel build
+    
+    # Set environment variable to help with Python 3.12 distutils issues
+    export SETUPTOOLS_USE_DISTUTILS=local
+    
+    # Install dependencies first (before pycrate)
+    goodecho "[+] Installing pycrate dependencies"
+    pip3install "lxml crc32c crcmod"
+    
+    # Try direct installation from PyPI first
+    goodecho "[+] Trying direct installation from PyPI"
+    pip3install pycrate && {
+        goodecho "[+] Successfully installed pycrate from PyPI"
+        return 0
+    }
+    
+    # If PyPI install fails, proceed with source installation
+    goodecho "[+] PyPI installation failed, attempting installation from source"
     
     # Clone pycrate repository
     cd /telecom
-    goodecho "[+] Cloning and installing pycrate"
+    goodecho "[+] Cloning pycrate repository"
+    
+    # Remove any existing directory to ensure clean state
+    [ -d pycrate ] && rm -rf pycrate
+    
+    # Use your existing gitinstall function
     gitinstall "https://github.com/pycrate-org/pycrate.git" "pycrate_soft_install"
     
-    # Install pycrate
-    cd pycrate
-    pip3install .  # Using pip instead of setup.py directly
+    # If gitinstall fails, try direct git clone
+    if [ ! -d pycrate ]; then
+        goodecho "[+] Trying direct git clone"
+        git clone https://github.com/pycrate-org/pycrate.git || git clone https://github.com/P1sec/pycrate.git
+    fi
     
-    # Install additional dependencies
-    goodecho "[+] Installing pycrate further dependencies"
-    pip3install "lxml crc32c crcmod"
+    # Enter the pycrate directory
+    cd pycrate
+    
+    # Fix setup.py for Python 3.12 if needed
+    if [ -f setup.py ]; then
+        goodecho "[+] Patching setup.py for Python 3.12 compatibility"
+        grep -q "import setuptools" setup.py || sed -i '1i import setuptools' setup.py
+    fi
+    
+    # Install pycrate using pip in development mode
+    goodecho "[+] Installing pycrate from source"
+    pip3install -e . || {
+        # If pip install fails, try traditional setup.py
+        goodecho "[+] Trying traditional setup.py installation"
+        python3 setup.py install
+    }
+    
+    # Verify installation
+    goodecho "[+] Verifying pycrate installation"
+    python3 -c "import pycrate; print('Pycrate installed successfully')" || {
+        goodecho "[-] Pycrate installation failed"
+        return 1
+    }
+    
+    goodecho "[+] Pycrate installation completed successfully"
 }
 
 function cryptomobile_soft_install() {
