@@ -2,6 +2,7 @@
 
 function common_sources_and_sinks() {
     grclone_and_build "https://github.com/osmocom/gr-osmosdr.git" "" "common_sources_and_sinks"
+    ln -s /usr/lib/python3.12/site-packages/osmosdr /usr/lib/python3/dist-packages/osmosdr
 }
 
 function grgsm_grmod_install() {

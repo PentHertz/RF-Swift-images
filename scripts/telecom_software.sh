@@ -196,16 +196,57 @@ function pycrate_soft_install() {
     
     # Install required dependencies first
     goodecho "[+] Installing Python dependencies for pycrate"
-    install_dependencies "python3-setuptools python3-pip python3-dev libxml2-dev libxslt1-dev python3-lxml python3-crc32c python3-crcmod"
-
+    install_dependencies "python3-setuptools python3-pip python3-dev python3-venv libxml2-dev libxslt1-dev python3-lxml python3-crc32c python3-crcmod build-essential"
+    
+    # Create a dedicated virtual environment for pycrate
+    goodecho "[+] Creating Python virtual environment for pycrate"
+    python3 -m venv /telecom/pycrate_venv
+    
+    # Create activation script
+    goodecho "[+] Creating pycrate activation script"
+    cat > /usr/sbin/pycrate_activate << 'EOF'
+#!/bin/bash
+# Activate the pycrate Python virtual environment
+source /telecom/pycrate_venv/bin/activate
+echo "Pycrate virtual environment activated. Run 'deactivate' to exit."
+EOF
+    chmod +x /usr/sbin/pycrate_activate
+    
+    # Activate the virtual environment
+    source /telecom/pycrate_venv/bin/activate
+    
+    # Upgrade pip and setuptools in virtual environment
+    pip install --upgrade pip setuptools==65.5.0 wheel
+    
     # Clone pycrate repository
     cd /telecom
     goodecho "[+] Cloning and installing pycrate"
+    
+    # Try gitinstall first, fallback to direct git clone
     gitinstall "https://github.com/pycrate-org/pycrate.git" "pycrate_soft_install"
     
     # Install pycrate
     cd pycrate
-    pip3install .  # Using pip instead of setup.py directly
+    goodecho "[+] Installing pycrate in virtual environment"
+    pip install . || {
+        goodecho "[+] pip install failed, trying setup.py directly"
+        python setup.py install
+    }
+    
+    # Test the installation
+    python -c "import pycrate; print('Pycrate installed successfully')" || {
+        goodecho "[-] Pycrate installation failed"
+        deactivate
+        return 1
+    }
+    
+    # Deactivate virtual environment
+    deactivate
+    
+    goodecho "[+] Pycrate installation completed successfully"
+    goodecho "[+] To use pycrate, run 'source /usr/sbin/pycrate_activate'"
+    
+    return 0
 }
 
 function cryptomobile_soft_install() {
