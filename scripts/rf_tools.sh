@@ -70,20 +70,13 @@ function bluing_soft_install() {
 
     install_dependencies "libgirepository1.0-dev libbluetooth-dev"
 
-    # Create directories
-    [ -d /rftools/bluetooth/bluing ] || mkdir -p /rftools/bluetooth/bluing
+     [ -d /rftools/bluetooth/bluing ] || mkdir -p /rftools/bluetooth/bluing
     cd /rftools/bluetooth/bluing
-
-    # Upgrade pip and set up the virtual environment
-    python3.10 -m pip install --upgrade pip
     python3.10 -m venv bluing
     source bluing/bin/activate
-
-    # Install necessary Python packages
     python3.10 -m pip install dbus-python==1.2.18
-    python3.10 -m pip install pygobject==3.50.0
-    python3.10 -m pip install --no-dependencies bluing docopt btsm btatt bluepy configobj btl2cap pkginfo xpycommon halo pyserial bthci btgatt log_symbols colorama spinners six termcolor
-
+    python3.10 -m pip install --no-dependencies bluing PyGObject docopt btsm btatt bluepy configobj btl2cap pkginfo xpycommon halo pyserial bthci btgatt log_symbols colorama spinners six termcolor
+   
     # Define the name of the script to create
 	SCRIPT_FILE="bluing_run"
 
@@ -101,8 +94,8 @@ EOF
 	# Make the script executable
 	chmod +x $SCRIPT_FILE
 
-echo "Created $SCRIPT_FILE with execution permissions"
-echo "You can run it with: ./$SCRIPT_FILE"
+	echo "Created $SCRIPT_FILE with execution permissions"
+	echo "You can run it with: ./$SCRIPT_FILE"
 }
 
 

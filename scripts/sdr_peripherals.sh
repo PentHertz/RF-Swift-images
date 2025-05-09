@@ -9,7 +9,7 @@ function ad_devices_install() {
 
 function uhd_devices_install() {
 	goodecho "[+] Installing UHD's libs and tools from package manager"
-	install_dependencies "libuhd4.1.0 libuhd-dev uhd-host"
+	install_dependencies "libuhd4.6.0t64 libuhd-dev uhd-host"
 	goodecho "[+] Copying rules sets"
 	cp /root/rules/uhd-usrp.rules  /etc/udev/rules.d/
 	goodecho "[+] Downloading Hardware Driver firmware/FPGA"

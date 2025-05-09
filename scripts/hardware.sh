@@ -93,12 +93,13 @@ function openocd_install() {
 
 function dsl2sigrok_install() {
     goodecho "[+] Installing dsl2sigrok"
+    install_dependencies "libzip-dev"
     [ -d /hardware ] || mkdir /hardware
     cd /hardware
-    git clone https://github.com/kittennbfive/dsl2sigrok.git
+    git clone https://github.com/FlUxIuS/dsl2sigrok.git
     cd dsl2sigrok
     gcc -Wall -Wextra -Werror -O3 -o dsl2sigrok main.c zip_helper.c -lm -lzip
-    ln -s "$(pwd)dsl2sigrok" /usr/bin
+    ln -s "$(pwd)/dsl2sigrok" /usr/bin/dsl2sigrok
 }
 
 function hydranfc_trace_plugin_install() {
