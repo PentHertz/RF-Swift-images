@@ -152,7 +152,7 @@ pkg-config --libs libiio
 
 function rtlsdr_devices_install() {
 	goodecho "[+] Installing RTL-SDR's libs and tools from package manager"
-	install_dependencies "librtlsdr-dev librtlsdr0 rtl-sdr"
+	install_dependencies "librtlsdr-dev librtlsdr2 rtl-sdr"
 }
 
 function rtlsdrv4_devices_install() {
