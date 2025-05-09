@@ -1,15 +1,15 @@
 name: Full build - RISC-V 64 Docker Build with Caching
 
 env:
-  REGISTRY_IMAGE: penthertz/rfswift
-  CACHE_REPO: penthertz/rfswift
+  REGISTRY_IMAGE: penthertz/rfswift_noble
+  CACHE_REPO: penthertz/rfswift_noble
   DO_SPACES_ENDPOINT: ${{ secrets.BUCKET_URL }}
   DO_SPACES_REGION: ${{ secrets.BUCKET_REGION }}
 
 on:
   push:
     branches:
-      - main
+      - ubuntu_noble
     paths:
       - '**'
 
