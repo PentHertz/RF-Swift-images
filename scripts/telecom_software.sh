@@ -191,125 +191,13 @@ function Open5GS_soft_install() {
 }
 
 function pycrate_soft_install() {
-    # Create directory if it doesn't exist
-    [ -d /telecom ] || mkdir -p /telecom
-    
-    # Install required dependencies first
-    goodecho "[+] Installing Python dependencies for pycrate"
-    install_dependencies "python3-pip python3-dev libxml2-dev libxslt1-dev python3-lxml python3-crc32c python3-crcmod"
-
-    # Clone pycrate repository
-    cd /telecom
-    goodecho "[+] Cloning and installing pycrate"
-    gitinstall "https://github.com/FlUxIuS/pycrate.git" "pycrate_soft_install"
-    
-    # Try multiple installation methods
-    goodecho "[+] Installing pycrate with patched setup.py"
-    
-    # Method 1: Try using pip directly
-    pip3install . || {
-        # Method 2: Try using Python directly
-        goodecho "[+] pip install failed, trying direct Python method"
-        python3 setup.py install || {
-            # Method 3: Last resort - create a manual installer
-            goodecho "[+] setup.py install failed, using manual installation method"
-            python3 -c "
-import os, shutil, site
-dst_dir = os.path.join(site.getsitepackages()[0], 'pycrate')
-os.makedirs(dst_dir, exist_ok=True)
-for root, dirs, files in os.walk('pycrate_core'):
-    rel_dir = os.path.relpath(root, '.')
-    os.makedirs(os.path.join(site.getsitepackages()[0], rel_dir), exist_ok=True)
-    for file in files:
-        if file.endswith('.py'):
-            shutil.copy2(os.path.join(root, file), os.path.join(site.getsitepackages()[0], rel_dir, file))
-print('Manual installation completed')
-"
-        }
-    }
-    
-    # Verify installation
-    goodecho "[+] Verifying pycrate installation"
-    python3 -c "import pycrate; print('Pycrate installed successfully')" || {
-        goodecho "[-] Pycrate installation verification failed, but continuing"
-    }
+    goodecho "[+] Installing pycrate"
+    pip3install "pycrate"
 }
 
 function cryptomobile_soft_install() {
-    # Create directory if it doesn't exist
-    [ -d /telecom ] || mkdir -p /telecom
-    
-    # Install required dependencies
-    goodecho "[+] Installing Python dependencies for CryptoMobile"
-    install_dependencies "python3-pip python3-dev python3-setuptools build-essential libssl-dev"
-    
-    # Clone CryptoMobile repository
-    cd /telecom
-    goodecho "[+] Cloning and installing CryptoMobile"
-    [ -d CryptoMobile ] && rm -rf CryptoMobile
-    gitinstall "https://github.com/FlUxIuS/CryptoMobile.git" "cryptomobile_soft_install"
-    
-    # Enter CryptoMobile directory
-    cd CryptoMobile
-    
-    # Try multiple installation methods
-    goodecho "[+] Installing CryptoMobile with patched setup.py"
-    
-    # Method 1: Try using pip directly
-    pip3install . || {
-        # Method 2: Try using Python directly
-        goodecho "[+] pip install failed, trying direct Python method"
-        python3 setup.py install || {
-            # Method 3: Manual compilation and installation
-            goodecho "[+] setup.py install failed, compiling manually"
-            python3 setup.py build
-            
-            # Copy build files to site-packages
-            python3 -c "
-import site, shutil, os
-site_packages = site.getsitepackages()[0]
-build_dir = os.path.join(os.getcwd(), 'build/lib')
-
-# Create destination directory
-crypto_dir = os.path.join(site_packages, 'CryptoMobile')
-if not os.path.exists(crypto_dir):
-    os.makedirs(crypto_dir)
-
-# Copy Python files
-if os.path.exists(os.path.join(build_dir, 'CryptoMobile')):
-    for file in os.listdir(os.path.join(build_dir, 'CryptoMobile')):
-        if file.endswith('.py'):
-            shutil.copy2(
-                os.path.join(build_dir, 'CryptoMobile', file), 
-                os.path.join(crypto_dir, file)
-            )
-
-# Copy extension modules
-for file in os.listdir(build_dir):
-    if file.endswith('.so') or file.endswith('.pyd'):
-        shutil.copy2(
-            os.path.join(build_dir, file),
-            os.path.join(site_packages, file)
-        )
-
-# Create basic __init__.py if it doesn't exist
-if not os.path.exists(os.path.join(crypto_dir, '__init__.py')):
-    with open(os.path.join(crypto_dir, '__init__.py'), 'w') as f:
-        f.write('# CryptoMobile package\n')
-        f.write('__version__ = \"0.3\"\n')
-
-print('Manual installation completed')
-"
-        }
-    }
-    
-    # Verify installation
-    goodecho "[+] Verifying CryptoMobile installation"
-    python3 -c "import CryptoMobile; print('CryptoMobile installed successfully')" || {
-        goodecho "[-] CryptoMobile installation verification failed, but continuing"
-    }
-    
-    return 0
+	goodecho "[+] Installing CryptoMobile"
+    pip3install "cryptomobile"
 }
 
 function pysctp_soft_install() {
