@@ -198,6 +198,10 @@ function pycrate_soft_install() {
     goodecho "[+] Installing Python dependencies for pycrate"
     install_dependencies "python3-setuptools python3-pip python3-dev python3-venv libxml2-dev libxslt1-dev python3-lxml python3-crc32c python3-crcmod build-essential"
     
+    # Fix for Python 3.12 setuptools issue in CI/CD
+    goodecho "[+] Fixing Python setuptools"
+    python3 -m pip install --force-reinstall setuptools==65.5.0 wheel
+    
     # Create a dedicated virtual environment for pycrate
     goodecho "[+] Creating Python virtual environment for pycrate"
     python3 -m venv /telecom/pycrate_venv
@@ -248,7 +252,6 @@ EOF
     
     return 0
 }
-
 function cryptomobile_soft_install() {
 	[ -d /telecom ] || mkdir -p /telecom
 	cd /telecom
