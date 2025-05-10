@@ -207,3 +207,12 @@ function mtkclient_install() {
     pip3install -r requirements.txt
     pip3install .
 }
+
+function esptool_install() {
+    goodecho "[+] Installing ESP tool"
+    pipx install esptool
+    ln -s /root/.local/bin/esp_rfc2217_server.py /usr/sbin/esp_rfc2217_server.py
+    ln -s /root/.local/bin/espefuse.py /usr/sbin/espefuse.py
+    ln -s /root/.local/bin/espsecure.py /usr/sbin/espsecure.py
+    ln -s /root/.local/bin/esptool.py /usr/sbin/esptool.py
+}
