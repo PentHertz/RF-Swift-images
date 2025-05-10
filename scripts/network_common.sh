@@ -144,7 +144,7 @@ function voipire_soft_install() {
 }
 
 function sippts_soft_install() {
-    goodecho "[+] Installing SIP Vicious"
+    goodecho "[+] Installing SIPPTS"
     [ -d /opt/network ] || mkdir -p /opt/network
     cd /opt/network
     gitinstall "https://github.com/Pepelux/sippts.git" "sippts_soft_install"
