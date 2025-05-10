@@ -521,7 +521,7 @@ EOF
     goodecho "[+] Installing CryptoMobile with patched setup.py"
     
     # Method 1: Try using pip directly
-    pip3 install . || {
+    pip3install . || {
         # Method 2: Try using Python directly
         goodecho "[+] pip install failed, trying direct Python method"
         python3 setup.py install || {
