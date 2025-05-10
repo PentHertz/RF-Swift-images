@@ -306,106 +306,14 @@ function whad_soft_install () {
 	pip3install "whad"
 }
 
-function rfquak_soft_install() {
-    goodecho "[+] Installing RFQuack in a virtual environment"
-    
-    # Create directories if they don't exist
-    [ -d /rftools ] || mkdir -p /rftools
-    
-    # Install required dependencies
-    goodecho "[+] Installing dependencies"
-    install_dependencies "python3-pip python3-venv python3-dev build-essential git"
-    
-    # Create a virtual environment for RFQuack
-    goodecho "[+] Creating Python virtual environment for RFQuack"
-    python3 -m venv /rftools/rfquack_venv
-    
-    # Create activation script
-    goodecho "[+] Creating RFQuack activation script at /usr/sbin/rfquack_activate"
-    cat > /usr/sbin/rfquack_activate << 'EOF'
-#!/bin/bash
-# Activate the RFQuack Python virtual environment
-if [ -f /rftools/rfquack_venv/bin/activate ]; then
-    source /rftools/rfquack_venv/bin/activate
-    echo "RFQuack environment activated. You are now using $(which python3)"
-    echo "RFQuack is installed at /rftools/RFQuack"
-    cd /rftools/RFQuack
-    echo "Current directory set to $(pwd)"
-    echo "Run 'deactivate' to exit the environment."
-else
-    echo "Error: RFQuack virtual environment not found at /rftools/rfquack_venv"
-    exit 1
-fi
-EOF
-    chmod +x /usr/sbin/rfquack_activate
-    
-    # Create a symlink for easier access
-    ln -sf /usr/sbin/rfquack_activate /usr/local/bin/rfquack_activate
-    
-    # Create a deactivation script
-    goodecho "[+] Creating RFQuack deactivation script"
-    cat > /usr/sbin/rfquack_deactivate << 'EOF'
-#!/bin/bash
-# Deactivate the RFQuack virtual environment
-if [ -n "$VIRTUAL_ENV" ]; then
-    deactivate
-    echo "RFQuack environment deactivated."
-else
-    echo "No active virtual environment detected."
-fi
-EOF
-    chmod +x /usr/sbin/rfquack_deactivate
-    ln -sf /usr/sbin/rfquack_deactivate /usr/local/bin/rfquack_deactivate
-    
-    # Activate the virtual environment
-    source /rftools/rfquack_venv/bin/activate
-    
-    # Update pip
-    goodecho "[+] Updating pip in virtual environment"
-    pip install --upgrade pip
-    
-    # Clone RFQuack repository
-    cd /rftools
-    goodecho "[+] Cloning RFQuack repository"
-    if [ -d RFQuack ]; then
-        goodecho "[+] RFQuack directory already exists, updating..."
-        cd RFQuack
-        git pull
-        git submodule update --init --recursive
-    else
-        git clone --recursive https://github.com/rfquack/RFQuack
-        cd RFQuack
-    fi
-    
-    # Install requirements
-    goodecho "[+] Installing RFQuack dependencies"
-    pip install -r requirements.pip
-    
-    # Build RFQuack
-    goodecho "[+] Building RFQuack"
-    make clean build
-    
-    # Create a convenience script to run RFQuack
-    goodecho "[+] Creating RFQuack convenience script"
-    cat > /usr/local/bin/rfquack << 'EOF'
-#!/bin/bash
-source /rftools/rfquack_venv/bin/activate
-cd /rftools/RFQuack
-python "$@"
-deactivate
-EOF
-    chmod +x /usr/local/bin/rfquack
-    
-    # Deactivate the virtual environment
-    deactivate
-    
-    goodecho "[+] RFQuack installation completed"
-    goodecho "[+] To use RFQuack:"
-    goodecho "[+]   1. Run 'rfquack_activate' to activate the environment"
-    goodecho "[+]   2. When finished, run 'deactivate' or 'rfquack_deactivate'"
-    goodecho "[+]   3. You can also use the 'rfquack' command directly"
-    
-    return 0
+function rfquak_soft_install () { # TODO: Fix on Ubuntu Noble
+	goodecho "[+] Installing RFQuack from PIP"
+	[ -d /rftools ] || mkdir -p /rftools
+	cd /rftools
+	git clone --recursive https://github.com/rfquack/RFQuack
+	cd RFQuack
+	pip3install -r requirements.pip
+	make clean build
 }
 
 function artemis_soft_install () {
