@@ -207,7 +207,7 @@ function pycrate_soft_install() {
     goodecho "[+] Installing pycrate with patched setup.py"
     
     # Method 1: Try using pip directly
-    pip3 install . || {
+    pip3install . || {
         # Method 2: Try using Python directly
         goodecho "[+] pip install failed, trying direct Python method"
         python3 setup.py install || {
@@ -247,7 +247,7 @@ function cryptomobile_soft_install() {
     cd /telecom
     goodecho "[+] Cloning and installing CryptoMobile"
     [ -d CryptoMobile ] && rm -rf CryptoMobile
-    gitinstall "https://github.com/mitshell/CryptoMobile.git" "cryptomobile_soft_install"
+    gitinstall "https://github.com/FlUxIuS/CryptoMobile.git" "cryptomobile_soft_install"
     
     # Enter CryptoMobile directory
     cd CryptoMobile

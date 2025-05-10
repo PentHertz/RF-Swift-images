@@ -219,9 +219,11 @@ function multimon_ng_soft_install () {
 	install_dependencies "multimon-ng"
 }
 
-function urh_soft_install () {
-	goodecho "[+] Installing URH"
-	pip3install "urh"
+function urh_soft_install() {
+    goodecho "[+] Installing URH"
+    
+   	pipx install urh
+   	ln -s /root/.local/bin/urh /usr/sbin/urh
 }
 
 function rtl_433_soft_install () {
