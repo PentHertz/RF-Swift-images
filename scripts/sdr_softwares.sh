@@ -221,9 +221,9 @@ function multimon_ng_soft_install () {
 
 function urh_soft_install() {
     goodecho "[+] Installing URH"
-    
-   	pipx install urh
-   	ln -s /root/.local/bin/urh /usr/sbin/urh
+    apt remove libhackrf-dev -y # remove temporarly this for URH compilation TODO: find another clean way
+   	pip3install urh
+   	install_dependencies "libhackrf-dev"
 }
 
 function rtl_433_soft_install () {
