@@ -306,6 +306,16 @@ function whad_soft_install () {
 	pip3install "whad"
 }
 
+function rfquak_soft_install () {
+	goodecho "[+] Installing RFQuack from PIP"
+	[ -d /rftools ] || mkdir -p /rftools
+	cd /rftools
+	git clone --recursive https://github.com/rfquack/RFQuack
+	cd RFQuack
+	pip3install -r requirements.pip
+	make clean build
+}
+
 function artemis_soft_install () {
     # Check system architecture
     ARCH=$(uname -m)
