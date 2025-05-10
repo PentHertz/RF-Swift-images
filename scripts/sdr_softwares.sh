@@ -219,9 +219,26 @@ function multimon_ng_soft_install () {
 	install_dependencies "multimon-ng"
 }
 
-function urh_soft_install () {
-	goodecho "[+] Installing URH"
-	pip3install "urh"
+function urh_soft_install() {
+    goodecho "[+] Installing URH"
+    
+    # Check if architecture is riscv64 and skip if it is
+    if [ "$(uname -m)" = "riscv64" ]; then
+        criticalecho-noexit "[!] Skipping URH installation on RISCV64 architecture"
+        return 0
+    fi
+    
+    install_dependencies "python3-pyqt5 build-essential python3-dev qt5-qmake sip-dev"
+    pip3install https://github.com/jopohl/urh/archive/refs/tags/v2.9.8.zip
+    goodecho "[+] Qt Plugin Path for URH"
+    QT_PATH=$(find /usr -path "*/qt5/plugins" -type d 2>/dev/null | head -1)
+    
+    if [ -n "$QT_PATH" ]; then
+        echo -e "\n# Qt Plugin Path for URH (dynamically detected)\nexport QT_PLUGIN_PATH=$QT_PATH" >> ~/.zshrc
+        echo "Added path: $QT_PATH"
+    else
+        goodecho "[!] Qt5 plugins path not found"
+    fi
 }
 
 function rtl_433_soft_install () {
