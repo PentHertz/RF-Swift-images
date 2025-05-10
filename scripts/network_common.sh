@@ -125,6 +125,7 @@ function bettercap_soft_install() {
 
 function sipvicious_soft_install() {
     goodecho "[+] Installing SIP Vicious"
+    install_dependencies "libxml2-dev libxslt1-dev"
     [ -d /opt/network ] || mkdir -p /opt/network
     cd /opt/network
     gitinstall "https://github.com/EnableSecurity/sipvicious.git" "sipvicious_soft_install"

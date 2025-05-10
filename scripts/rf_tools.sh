@@ -20,7 +20,7 @@ function mirage_soft_install() {
     cd /root/thirdparty
     installfromnet "git clone https://github.com/RCayre/mirage"
     cd mirage/
-    python3 setup.py install
+    pip3install install .
 }
 
 
@@ -283,7 +283,7 @@ function sparrowwifi_sdr_soft_install () { # TODO: to debug
 	goodecho "[+] Cloning and installing sparrow-wifi"
 	gitinstall "https://github.com/ghostop14/sparrow-wifi.git" "sparrowwifi"
 	cd sparrow-wifi
-	install_dependencies "pyqt5chart-dev python3-pip gpsd gpsd-clients python3-tk python3-setuptools qt5-qmake qtbase5-dev python3-pyqt5 python3-pyqt5.qsci python3-pyqt5.qtsvg python3-sip-dev pyqt5-dev pyqt5-dev-tools"
+	install_dependencies " pyqt5chart-dev python3-pip gpsd gpsd-clients python3-tk python3-setuptools qt5-qmake qtbase5-dev python3-pyqt5 python3-pyqt5.qsci python3-pyqt5.qtsvg python3-sip-dev pyqt5-dev pyqt5-dev-tools"
 	pip3install "gps3 dronekit manuf python-dateutil matplotlib"
 	pip3install --upgrade manuf
 }
