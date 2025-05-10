@@ -33,6 +33,10 @@ RUN ./entrypoint.sh subenum_soft_install &&\
 	./entrypoint.sh webcopilot_soft_install &&\
 	./entrypoint.sh gowitnes_soft_install
 
+RUN ./entrypoint.sh sipvicious_soft_install &&\
+	./entrypoint.sh voipire_soft_install &&\
+	./entrypoint.sh sippts_soft_install
+
 # Some OT tools
 RUN ./entrypoint.sh mbtget_soft_install
 

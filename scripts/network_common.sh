@@ -122,3 +122,31 @@ function bettercap_soft_install() {
 	make install
 	ln -s /rftools/bluetoot/bettercap/bettercap /usr/bin/bettercap
 }
+
+function sipvicious_soft_install() {
+    goodecho "[+] Installing SIP Vicious"
+    [ -d /opt/network ] || mkdir -p /opt/network
+    cd /opt/network
+    gitinstall "https://github.com/EnableSecurity/sipvicious.git" "sipvicious_soft_install"
+    cd sipvicious
+    pip3install .
+}
+
+function voipire_soft_install() {
+    goodecho "[+] Installing VoIPire"
+    [ -d /opt/network ] || mkdir -p /opt/network
+    cd /opt/network
+    gitinstall "https://github.com/CR-DMcDonald/voipire.git" "voipire_soft_install"
+    cd voipire
+    cargo build --release
+    ln -s $(pwd)/target/release/voipire /usr/bin/voipire
+}
+
+function sippts_soft_install() {
+    goodecho "[+] Installing SIP Vicious"
+    [ -d /opt/network ] || mkdir -p /opt/network
+    cd /opt/network
+    gitinstall "https://github.com/Pepelux/sippts.git" "sippts_soft_install"
+    cd sippts
+    pip3install .
+}
