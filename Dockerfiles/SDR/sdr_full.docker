@@ -72,7 +72,8 @@ RUN ./entrypoint.sh grrds_grmod_install && \
 	./entrypoint.sh grntscrc_grmod_install && \
 	./entrypoint.sh grnfc_grmod_install && \
 	./entrypoint.sh grmer_grmod_install && \
-	./entrypoint.sh grflarm_grmod_install
+	./entrypoint.sh grflarm_grmod_install && \
+	./entrypoint.sh grguiextra_grmod_install
 
 #RUN ./entrypoint.sh grccsds_move_rtsa_grmod_install #TODO: fix problem with strtod_l dependency
 #RUN ./entrypoint.sh deeptempest_grmod_install
