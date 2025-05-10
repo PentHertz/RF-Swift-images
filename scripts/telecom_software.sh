@@ -365,7 +365,7 @@ function cryptomobile_soft_install() {
 	goodecho "[+] Cloninig and installing cryptomobile"
 	installfromnet "git clone https://github.com/mitshell/CryptoMobile.git"
 	cd CryptoMobile
-	python3 setup.py install
+	pip3install .
 }
 
 function pysctp_soft_install() {
