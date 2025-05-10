@@ -25,7 +25,8 @@ RUN chmod +x entrypoint.sh
 RUN ./entrypoint.sh gnuradio_soft_install && \ 
 	./entrypoint.sh common_sources_and_sinks && \
 	./entrypoint.sh install_soapy_modules && \
-	./entrypoint.sh install_soapyPlutoSDR_modules
+	./entrypoint.sh install_soapyPlutoSDR_modules && \
+	./entrypoint.sh grguiextra_grmod_install
 
 RUN ./entrypoint.sh deeptempest_grmod_install
 

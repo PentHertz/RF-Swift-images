@@ -332,3 +332,7 @@ function grclenabled_grmod_install() {
 function grflarm_grmod_install() {
     grclone_and_build "https://github.com/argilo/gr-flarm.git" "" "grflarm_grmod_install"
 }
+
+function grguiextra_grmod_install() {
+    grclone_and_build "https://github.com/ghostop14/gr-guiextra.git" "" "grguiextra_grmod_install"
+}
