@@ -662,7 +662,7 @@ jobs:
             #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   hardware:
-    runs-on: ubuntu-22.04
+    runs-on: Linux
     needs: sdrsa_devices
     strategy:
       matrix:
