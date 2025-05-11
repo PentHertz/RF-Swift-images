@@ -271,7 +271,7 @@ function ice9_bluetooth_soft_install() {
 
 function ice9_bluetooth_soft_install_call () {
 	goodecho "[+] Installing dependencies for ice9_bluetooth"
-	install_dependencies "libliquid-dev libhackrf-dev libbladerf-dev libuhd-dev libfftw3-dev"
+	install_dependencies "libliquid-dev libhackrf-dev libbladerf-dev libuhd-dev libfftw3-dev xxd"
 	goodecho "[+] Cloning ice9-bluetooth-sniffer"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
