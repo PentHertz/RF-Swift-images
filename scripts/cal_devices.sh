@@ -46,7 +46,7 @@ function KCSDI_cal_device() {
    if [ "$(uname -m)" = "aarch64" ]; then
        image_name="KCSDI-v0.4.8-49-linux-arm64.appimage"
    else
-       image_name="KCSDI-v0.4.8-49-linux-x86_64.appimage"
+       image_name="KCSDI-v0.5.2-57-linux-x86_64.AppImage"
    fi
 
    install_dependencies "libnss3-dev libfuse-dev"
