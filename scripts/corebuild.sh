@@ -146,3 +146,15 @@ function install_mpir() {
     make install
     ldconfig
 }
+
+function uvpython_install() {
+    goodecho "[+] Installing UV for fast Python install"
+    [ -d /root/thirdparty ] || mkdir /root/thirdparty
+    cd /root/thirdparty
+    gitinstall "https://github.com/astral-sh/uv.git" "uvpython_install"
+    cd uv
+    rustup toolchain uninstall 1.86-x86_64-unknown-linux-gnu
+    rustup toolchain install 1.86-x86_64-unknown-linux-gnu
+    cargo build --release
+    cp $(pwd)/target/release/{uv,uv-build,uv-globfilter,uvx} /usr/bin/
+}
