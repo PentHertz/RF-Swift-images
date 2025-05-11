@@ -93,7 +93,7 @@ function grreveng_grmod_install() {
 }
 
 function grpdu_utils_grmod_install() {
-    grclone_and_build "https://github.com/sandialabs/gr-pdu_utils.git" "" "grpdu_utils_grmod_install"
+    grclone_and_build "https://github.com/FlUxIuS/gr-pdu_utils.git" "" "grpdu_utils_grmod_install"
 }
 
 function grsandia_utils_grmod_install() {
