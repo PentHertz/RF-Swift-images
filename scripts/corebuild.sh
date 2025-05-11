@@ -153,8 +153,8 @@ function uvpython_install() {
     cd /root/thirdparty
     gitinstall "https://github.com/astral-sh/uv.git" "uvpython_install"
     cd uv
-    rustup toolchain uninstall 1.86-x86_64-unknown-linux-gnu
-    rustup toolchain install 1.86-x86_64-unknown-linux-gnu
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+    rustup update
     cargo build --release
     cp $(pwd)/target/release/{uv,uv-build,uv-globfilter,uvx} /usr/bin/
 }
