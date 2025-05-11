@@ -31,7 +31,7 @@ RUN ./entrypoint.sh cryptomobile_soft_install && \
 	./entrypoint.sh SCAT_soft_install && \
 	./entrypoint.sh SigPloit_soft_install
 
-#RUN	./entrypoint.sh jss7_soft_install # TODO: Enable after fixing it
+RUN ./entrypoint.sh jss7_soft_install
 # More to come!
 
 RUN mkdir -p /sdrtools/
