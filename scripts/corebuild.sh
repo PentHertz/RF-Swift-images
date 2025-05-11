@@ -153,6 +153,7 @@ function uvpython_install() {
     cd /root/thirdparty
     gitinstall "https://github.com/astral-sh/uv.git" "uvpython_install"
     cd uv
+    export PATH="$HOME/.cargo/bin:$PATH"
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
     rustup update
     cargo build --release
