@@ -28,9 +28,10 @@ RUN ./entrypoint.sh cryptomobile_soft_install && \
 	./entrypoint.sh pysim_soft_install && \
 	./entrypoint.sh pysctp_soft_install && \
 	./entrypoint.sh sysmoUSIM_soft_install && \
-	./entrypoint.sh jss7_soft_install && \
 	./entrypoint.sh SCAT_soft_install && \
 	./entrypoint.sh SigPloit_soft_install
+
+#RUN	./entrypoint.sh jss7_soft_install # TODO: Enable after fixing it
 # More to come!
 
 RUN mkdir -p /sdrtools/

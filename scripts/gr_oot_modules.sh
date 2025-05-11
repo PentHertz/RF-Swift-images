@@ -202,7 +202,7 @@ function grdroineid_grmod_install() { # TODO: for turbofec RISCV64:  gcc: error:
 
     cd /root/thirdparty
     echo "[+] Cloning dji_droneid"
-    grclone_and_build "https://github.com/proto17/dji_droneid.git" "gnuradio/gr-droneid" "grdroineid_grmod_install" -b "gr-droneid-update-3.10"
+    grclone_and_build "https://github.com/PentHertz/dji_droneid_rfswift.git" "gnuradio/gr-droneid" "grdroineid_grmod_install" -b "gr-droneid-update-3.10"
 }
 
 function grsatellites_grmod_install() {
