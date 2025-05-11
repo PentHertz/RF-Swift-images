@@ -221,6 +221,11 @@ function multimon_ng_soft_install () {
 
 function urh_soft_install() {
     goodecho "[+] Installing URH"
+    # Check if architecture is riscv64 and skip if it is
+    if [ "$(uname -m)" = "riscv64" ]; then
+        criticalecho-noexit "[!] Skipping URH installation on RISCV64 architecture"
+        return 0
+    fi
     apt remove libhackrf-dev -y # remove temporarly this for URH compilation TODO: find another clean way
    	pip3install urh
    	install_dependencies "libhackrf-dev"
