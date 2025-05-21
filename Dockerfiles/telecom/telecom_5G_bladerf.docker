@@ -33,6 +33,9 @@ RUN ./entrypoint.sh wireshark_soft_install && \
 	./entrypoint.sh nmap_soft_install && \
 	./entrypoint.sh tshark_soft_install
 
+# Jupyter lab
+RUN ./entrypoint.sh jupyter_soft_install
+
 RUN mkdir -p /sdrtools/
 COPY run /sdrtools/run
 
