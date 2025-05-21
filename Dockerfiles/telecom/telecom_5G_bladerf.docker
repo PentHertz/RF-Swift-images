@@ -28,6 +28,11 @@ RUN	./entrypoint.sh soapybladerf_srsran_install
 RUN ./entrypoint.sh srsran5GSA_bladerf_soft_install && \
 	./entrypoint.sh Open5GS_soft_install
 
+# Some useful network tools
+RUN ./entrypoint.sh wireshark_soft_install && \
+	./entrypoint.sh nmap_soft_install && \
+	./entrypoint.sh tshark_soft_install
+
 RUN mkdir -p /sdrtools/
 COPY run /sdrtools/run
 

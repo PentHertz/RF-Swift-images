@@ -38,7 +38,7 @@ function docker_preinstall() {
         libqt5serialbus5-dev qttools5-dev python3-matplotlib libtalloc-dev
         pulseaudio-utils libasound2-dev libavahi-client-dev task-lxqt-desktop
         language-pack-en libqwt-qt5-dev python3-click-plugins python3-zmq rsync
-        iw wireless-tools usbutils bluetooth bluez bluez-tools rfkill avahi-daemon
+        iw wireless-tools usbutils bluetooth bluez bluez-tools rfkill avahi-daemon iproute2 iptables
         qt6-base-dev qt6-base-dev-tools qt6-tools-dev qt6-tools-dev-tools libc6-dev pipx
     )
 
