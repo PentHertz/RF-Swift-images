@@ -200,6 +200,8 @@ function Open5GS_soft_install() {
 	cd open5gs
 	meson build --prefix=`pwd`/install
 	ninja -C build
+	ln -s $(pwd)/build/tests/app/5gc /usr/bin/Open5Gs_deployall # Making a quick command
+	mkdir -p /data/db # making directory for MongoDB
 	goodecho "[+] Building Web GUI"
 	mkdir -p /etc/apt/keyrings
 	curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
