@@ -1,0 +1,40 @@
+# This DockerFile is part of the RFSwift project
+# Install type: Telecom
+# Author(s): Sébastien Dudek (@FlUxIuS) @Penthertz
+# website: penthertz.com
+
+ARG BASE_IMAGE=telecom_utils
+FROM ${BASE_IMAGE}
+
+LABEL "org.container.project"="rfswift"
+LABEL "org.container.author"="Sébastien Dudek (FlUxIuS)"
+
+RUN echo 'APT::Install-Suggests "0";' >> /etc/apt/apt.conf.d/00-docker
+RUN echo 'APT::Install-Recommends "0";' >> /etc/apt/apt.conf.d/00-docker
+
+RUN apt-fast update
+
+COPY scripts /root/scripts/
+COPY rules /root/rules/
+COPY config /root/config
+
+WORKDIR /root/scripts/
+RUN chmod +x entrypoint.sh
+
+# Installing Soapy for bladeRF and SRSran
+RUN	./entrypoint.sh soapybladerf_srsran_install
+
+# Installing srsRAN project for 5G SA
+RUN ./entrypoint.sh srsran5GSA_bladerf_soft_install && \
+	./entrypoint.sh Open5GS_soft_install
+
+RUN mkdir -p /sdrtools/
+COPY run /sdrtools/run
+
+# Cleaning and quitting
+WORKDIR /root/
+#RUN rm -rf /root/scripts/
+RUN rm -rf /root/rules/
+RUN rm -rf /root/thirdparty
+RUN apt-fast clean
+RUN DEBIAN_FRONTEND=noninteractive rm -rf /var/lib/apt/lists/*

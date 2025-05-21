@@ -243,13 +243,11 @@ function Pyrit_soft_install() { #TODO: tofix for total Python3 support
 	goodecho "[+] Installing Pyrit"
 	[ -d /rftools/wifi ] || mkdir -p /rftools/wifi
 	cd /rftools/wifi
-	installfromnet "pip3 install psycopg2-binary"
+	pip3install "psycopg2-binary"
 	install_dependencies "scapy"
 	gitinstall "https://github.com/JPaulMora/Pyrit.git" "Pyrit_soft_install"
 	cd Pyrit
-	python3 setup.py clean
-	python3 setup.py build
-	python3 setup.py install
+	pip3install .
 }
 
 function eaphammer_soft_install() {

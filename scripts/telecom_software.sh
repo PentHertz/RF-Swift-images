@@ -161,6 +161,27 @@ function srsran5GSA_soft_install() {
     set -o pipefail
 }
 
+function srsran5GSA_bladerf_soft_install() {
+	set +e # TODO: debug that function
+    set +o pipefail
+	goodecho "[+] Installing srsran_project dependencies"
+	install_dependencies "cmake make gcc g++ pkg-config libfftw3-dev libmbedtls-dev libsctp-dev libyaml-cpp-dev libgtest-dev"
+	goodecho "[+] Feching srsran_project"
+	[ -d /telecom/5G ] || mkdir -p /telecom/5G
+	cd /telecom/5G
+	goodecho "[+] Cloninig and installing srsran_project"
+	installfromnet "git clone https://github.com/FlUxIuS/srsRAN_Project_bladerf.git"
+	cd srsRAN_Project_bladerf
+	mkdir build
+	cd build
+	cmake ../
+	make -j $(nproc)
+	make install
+	#make test -j $(nproc)
+	set -e
+    set -o pipefail
+}
+
 function Open5GS_soft_install() {
 	goodecho "[+] Installing Open5GS dependencies"
 	install_dependencies "ca-certificates curl gnupg"
@@ -308,12 +329,11 @@ function jss7_soft_install() {
     fi
 }
 
-
 function SCAT_soft_install() {
-	[ -d /telecom ] || mkdir -p /telecom
-	cd /telecom
-	goodecho "[+] Installing SCAT"
-	installfromnet "pip install \"scat[fastcrc] @ git+https://github.com/fgsect/scat\""
+    [ -d /telecom ] || mkdir -p /telecom
+    cd /telecom
+    goodecho "[+] Installing SCAT"
+    pip3install signalcat[fastcrc]@git+https://github.com/fgsect/scat
 }
 
 function SigPloit_soft_install() {
@@ -322,6 +342,6 @@ function SigPloit_soft_install() {
 	goodecho "[+] Cloninig and installing SigPloit"
 	gitinstall "https://github.com/FlUxIuS/SigPloit.git" "SigPloit"
 	cd SigPloit
-	installfromnet "pip install -r requirements.txt"
+	pip3install -r requirements.txt
 }
 ### TODO: more More!

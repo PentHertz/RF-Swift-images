@@ -26,7 +26,7 @@ function check_neon() {
 
 function uhd_devices_fromsource_install() {
 	goodecho "[+] Installing UHD's dependencies"
-	install_dependencies "dpdk dpdk-dev autoconf automake build-essential ccache cmake cpufrequtils doxygen ethtool g++ git inetutils-tools libboost-all-dev libncurses5 libncurses5-dev libusb-1.0-0 libusb-1.0-0-dev libusb-dev python3-dev python3-mako python3-requests python3-scipy python3-setuptools \
+	install_dependencies "dpdk dpdk-dev autoconf automake build-essential ccache cmake cpufrequtils doxygen ethtool g++ git inetutils-tools libboost-all-dev libncurses-dev libusb-1.0-0 libusb-1.0-0-dev libusb-dev python3-dev python3-mako python3-requests python3-scipy python3-setuptools \
 python3-ruamel.yaml"
 	goodecho "[+] Copying rules sets"
 	cp /root/rules/uhd-usrp.rules  /etc/udev/rules.d/
@@ -237,4 +237,13 @@ function litexm2sdr_devices_install() {
     gitinstall "https://github.com/FlUxIuS/litex_m2sdr.git" "litexm2sdr_devices_install" "main"
     cd litex_m2sdr/litex_m2sdr/software
     ./build.py
+}
+
+function soapybladerf_srsran_install() {
+    install_dependencies "uhd-soapysdr libsoapysdr-dev soapysdr-tools"
+    goodecho "[+] Installing SoapySDR bladeRF for srsRAN"
+    [ -d /root/thirdparty ] || mkdir /root/thirdparty
+    cd /root/thirdparty
+    cmake_clone_and_build "https://github.com/FlUxIuS/SoapyBladeRF_srsran.git" "build" "" "" "soapybladerf_srsran_install" "-DCMAKE_INSTALL_PREFIX=/usr"
+    ldconfig
 }
