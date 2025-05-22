@@ -129,6 +129,9 @@ telecom_4G_5GNSA:
 telecom_5G:
 	$(call build_and_push,telecom_5G,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):telecom_utils_$(ARCH),$(CURDIR)/telecom/telecom_5G.docker)
 
+telecom_5G_bladerf:
+	$(call build_and_push,telecom_5G_bladerf,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):telecom_utils_$(ARCH),$(CURDIR)/telecom/telecom_5G_bladerf.docker)
+
 deeptempest:
 	$(call build_and_push,deeptempest,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices_$(ARCH),$(CURDIR)/SDR/sdr_deeptemptest_beta.docker)
 

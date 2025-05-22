@@ -238,3 +238,12 @@ function litexm2sdr_devices_install() {
     cd litex_m2sdr/litex_m2sdr/software
     ./build.py
 }
+
+function soapybladerf_srsran_install() {
+    install_dependencies "uhd-soapysdr libsoapysdr-dev soapysdr-tools"
+    goodecho "[+] Installing SoapySDR bladeRF for srsRAN"
+    [ -d /root/thirdparty ] || mkdir /root/thirdparty
+    cd /root/thirdparty
+    cmake_clone_and_build "https://github.com/FlUxIuS/SoapyBladeRF_srsran.git" "build" "" "" "soapybladerf_srsran_install" "-DCMAKE_INSTALL_PREFIX=/usr"
+    ldconfig
+}
