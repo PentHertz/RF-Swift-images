@@ -93,7 +93,7 @@ install_go() {
     ARCH=$(uname -m)
     
     # Define URL and version
-    GO_VERSION="1.24.0" # Replace with the latest version if needed
+    GO_VERSION="1.24.4" # Replace with the latest version if needed
     BASE_URL="https://golang.org/dl/"
 
     case "$ARCH" in

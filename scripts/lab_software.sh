@@ -9,4 +9,5 @@ function jupyter_soft_install() {
 function ml_and_dl_soft_install() {
 	goodecho "[+] Installing ML/DL tools"
 	pip3install "scikit-learn pandas seaborn Tensorflow"
+	pip3install 'numpy<2.0'
 }
