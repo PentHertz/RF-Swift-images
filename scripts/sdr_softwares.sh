@@ -163,6 +163,34 @@ function sdrpp_soft_install () { # Working but not compatible with aarch64
 	cd /root
 }
 
+function sdrpp_extramodules_install() {
+	goodecho "[+] Installing SDR++ extra modules"
+    # Detect current architecture
+    case "$(uname -m)" in
+        x86_64)
+            current_arch="amd64"
+            ;;
+        aarch64)
+            current_arch="arm64"
+            ;;
+        riscv64)
+            current_arch="riscv64"
+            ;;
+        *)
+            criticalecho-noexit "Error: Unsupported architecture $(uname -m)"
+            return 1
+            ;;
+    esac
+    
+    [ -d /root/thirdparty ] || mkdir /root/thirdparty
+    cd /root/thirdparty
+    mkdir -p hydrasdr
+    cd hydrasdr
+    wget https://github.com/PentHertz/rfone/releases/download/rcbins/${current_arch}-hydrasdrpp.tar.gz
+    tar xvzf ${current_arch}-hydrasdrpp.tar.gz
+    mv hydrasdr_rfone_source.so /usr/lib/sdrpp/plugins/
+}
+
 function sigdigger_soft_install () {
 	goodecho "[+] Installing dependencies"
 	install_dependencies "libxml2-dev libxml2-utils libfftw3-dev libasound-dev"

@@ -158,7 +158,11 @@
         "USRP Source": {
             "enabled": true,
             "module": "usrp_source"
-        }
+        },
+        "HydraSDR RFOne": {
+            "enabled": true,
+            "module": "hydrasdr_rfone_source"
+        },
     },
     "modules": [],
     "modulesDirectory": "/usr/lib/sdrpp/plugins",
