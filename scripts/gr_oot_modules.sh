@@ -2,6 +2,10 @@
 
 function common_sources_and_sinks() {
     grclone_and_build "https://github.com/PentHertz/gr-osmosdr.git" "" "common_sources_and_sinks"
+    cd /rftools/sdr/oot/gr-osmosdr
+    cd thirdparty
+    chmod +x ./hydrasdr_pkg-confile.sh
+    ./hydrasdr_pkg-confile.sh
 }
 
 function grgsm_grmod_install() {
