@@ -247,7 +247,7 @@ function multimon_ng_soft_install () {
 	install_dependencies "multimon-ng"
 }
 
-function urh_soft_install() {
+function urh_soft_pip_install() {
     goodecho "[+] Installing URH"
     # Check if architecture is riscv64 and skip if it is
     if [ "$(uname -m)" = "riscv64" ]; then
@@ -257,6 +257,158 @@ function urh_soft_install() {
     apt remove libhackrf-dev -y # remove temporarly this for URH compilation TODO: find another clean way
    	pip3install urh
    	install_dependencies "libhackrf-dev"
+}
+
+function urh_soft_install() {
+    goodecho "[+] Installing URH from HydraSDR fork"
+
+    # Check if architecture is riscv64 and skip if it is
+    if [ "$(uname -m)" = "riscv64" ]; then
+        criticalecho-noexit "[!] Skipping URH installation on RISCV64 architecture"
+        return 0
+    fi
+
+    # Define paths
+    URH_VENV_DIR="/opt/urh-venv"
+    URH_CLONE_DIR="/opt/urh-hydrasdr"
+    URH_WRAPPER="/usr/sbin/urh"
+
+    # Install system dependencies
+    apt update
+    apt remove libhackrf-dev -y # remove temporarily for URH compilation
+    install_dependencies "python3-venv python3-dev build-essential git cython3 libxml2-dev libxslt1-dev zlib1g-dev"
+
+    # Clean up any existing installation
+    rm -rf "$URH_VENV_DIR" "$URH_CLONE_DIR" "$URH_WRAPPER"
+
+    # Clone HydraSDR URH fork
+    goodecho "[+] Cloning HydraSDR URH fork"
+    git clone https://github.com/hydrasdr/urh.git "$URH_CLONE_DIR"
+    if [ $? -ne 0 ]; then
+        criticalecho "[!] Failed to clone URH repository"
+        return 1
+    fi
+
+    # Create virtual environment
+    goodecho "[+] Creating Python virtual environment"
+    python3 -m venv "$URH_VENV_DIR"
+    if [ $? -ne 0 ]; then
+        criticalecho "[!] Failed to create virtual environment"
+        return 1
+    fi
+
+    # Install URH in the virtual environment
+    goodecho "[+] Installing URH dependencies and building"
+    cd "$URH_CLONE_DIR"
+
+    # Activate venv and install
+    source "$URH_VENV_DIR/bin/activate"
+
+    # Upgrade pip and install build dependencies
+    pip install --upgrade pip setuptools wheel
+    pip install "cython>=0.29.0" "numpy>=1.19.0,<1.25.0" psutil
+    pip install "pyqt5python3-pyqt5 "
+    # Try to install URH
+    python3 setup.py install
+    URH_INSTALL_STATUS=$?
+
+    # If Cython build fails, try without native extensions
+    if [ $URH_INSTALL_STATUS -ne 0 ]; then
+        goodecho "[+] Cython build failed, trying without native extensions"
+        export URH_NO_NATIVE_EXTENSIONS=1
+        python3 setup.py install
+        URH_INSTALL_STATUS=$?
+    fi
+
+    deactivate
+
+    if [ $URH_INSTALL_STATUS -ne 0 ]; then
+        criticalecho "[!] Failed to install URH"
+        return 1
+    fi
+
+    # Create wrapper script
+    goodecho "[+] Creating URH wrapper script"
+    cat > "$URH_WRAPPER" << 'EOF'
+#!/bin/bash
+
+# URH Wrapper Script - Auto-activates venv and handles cleanup
+URH_VENV_DIR="/opt/urh-venv"
+URH_PID_FILE="/tmp/urh_wrapper_$$"
+
+# Function to cleanup on exit
+cleanup() {
+    # Kill any remaining URH processes started by this wrapper
+    if [ -f "$URH_PID_FILE" ]; then
+        URH_PID=$(cat "$URH_PID_FILE" 2>/dev/null)
+        if [ -n "$URH_PID" ] && kill -0 "$URH_PID" 2>/dev/null; then
+            kill "$URH_PID" 2>/dev/null
+        fi
+        rm -f "$URH_PID_FILE"
+    fi
+}
+
+# Set up signal handlers for cleanup
+trap cleanup EXIT INT TERM
+
+# Check if virtual environment exists
+if [ ! -d "$URH_VENV_DIR" ]; then
+    echo "Error: URH virtual environment not found at $URH_VENV_DIR"
+    echo "Please reinstall URH or run the installation script again."
+    exit 1
+fi
+
+# Check if URH is installed in the venv
+if [ ! -f "$URH_VENV_DIR/bin/urh" ]; then
+    echo "Error: URH not found in virtual environment"
+    echo "Please reinstall URH or run the installation script again."
+    exit 1
+fi
+
+# Activate the virtual environment
+source "$URH_VENV_DIR/bin/activate"
+
+# Add HydraSDR library path if it exists
+if [ -d "/usr/lib" ]; then
+    export LD_LIBRARY_PATH="/usr/lib:$LD_LIBRARY_PATH"
+fi
+if [ -d "/lib" ]; then
+    export LD_LIBRARY_PATH="/lib:$LD_LIBRARY_PATH"
+fi
+
+# Run URH with all passed arguments
+echo "Starting URH (HydraSDR fork) in virtual environment..."
+"$URH_VENV_DIR/bin/urh" "$@" &
+URH_PID=$!
+
+# Store PID for cleanup
+echo "$URH_PID" > "$URH_PID_FILE"
+
+# Wait for URH to finish
+wait "$URH_PID"
+URH_EXIT_CODE=$?
+
+# Cleanup
+cleanup
+
+# Deactivate virtual environment (though it should happen automatically)
+deactivate 2>/dev/null
+
+echo "URH exited with code $URH_EXIT_CODE"
+exit $URH_EXIT_CODE
+EOF
+
+    # Make wrapper executable
+    chmod +x "$URH_WRAPPER"
+
+    # Set proper ownership
+    chown root:root "$URH_WRAPPER"
+    chown -R root:root "$URH_VENV_DIR" "$URH_CLONE_DIR"
+
+    # Restore libhackrf-dev
+    install_dependencies "libhackrf-dev"
+
+    return 0
 }
 
 function rtl_433_soft_install () {
