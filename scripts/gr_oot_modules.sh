@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function common_sources_and_sinks() {
-    grclone_and_build "https://github.com/osmocom/gr-osmosdr.git" "" "common_sources_and_sinks"
+    grclone_and_build "https://github.com/PentHertz/gr-osmosdr.git" "" "common_sources_and_sinks"
 }
 
 function grgsm_grmod_install() {
