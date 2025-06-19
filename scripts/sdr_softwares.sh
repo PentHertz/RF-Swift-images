@@ -307,7 +307,7 @@ function urh_soft_install() {
     # Upgrade pip and install build dependencies
     pip install --upgrade pip setuptools wheel
     pip install "cython>=0.29.0" "numpy>=1.19.0,<1.25.0" psutil
-    pip install "pyqt5"
+    pip install --only-binary=all pyqt5
     pip install "psutil"
     # Try to install URH
     python3 setup.py install
@@ -599,7 +599,7 @@ function satdump_sdr_soft_install () {
 
 	cmake_clone_and_build "https://github.com/nanomsg/nng.git" "build" "v1.9.0" "" "satdump_sdr_soft_install" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr
 	goodecho "[+] Cloning and installing SatDump"
-	gitinstall "https://github.com/SatDump/SatDump.git" "SatDump"
+	gitinstall "https://github.com/hydrasdr/SatDump.git" "SatDump"
 	cd SatDump
 	mkdir build && cd build
 	cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr ..
