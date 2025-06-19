@@ -1,6 +1,6 @@
 #!/bin/bash
 
-function common_sources_and_sinks() {Add commentMore actions
+function common_sources_and_sinks() {
     grclone_and_build "https://github.com/PentHertz/gr-osmosdr.git" "" "common_sources_and_sinks"
     cd /rftools/sdr/oot/gr-osmosdr
     cd thirdparty
