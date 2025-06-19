@@ -278,7 +278,7 @@ function urh_soft_install() {
 
     # Upgrade pip and install build dependencies
     pip install --upgrade pip setuptools wheel
-    pip install "cython>=0.29.0" "numpy>=1.19.0,<1.25.0" psutil
+    pip install "cython" "numpy"
     pip install "pyqt5"
     pip install "psutil"
     # Try to install URH
