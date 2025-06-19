@@ -322,6 +322,8 @@ function artemis_soft_install () {
         exit 0
     fi
 
+    install_dependencies "libxcb-cursor-dev"
+
     goodecho "[+] Installing Artemis"
     [ -d /rftools/docs ] || mkdir -p /rftools/docs
     cd /rftools/docs

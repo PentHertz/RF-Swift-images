@@ -11,7 +11,7 @@
     "bandPlanPos": 0,
     "centerTuning": false,
     "colorMap": "Classic",
-    "decimationPower": 0,
+    "decimation": 1,
     "fastFFT": false,
     "fftHeight": 300,
     "fftHold": false,
@@ -27,8 +27,9 @@
     "invertIQ": false,
     "iqCorrection": false,
     "lockMenuOrder": false,
+    "manualOffset": 0.0,
     "max": 0.0,
-    "maximized": false,
+    "maximized": true,
     "menuElements": [
         {
             "name": "Source",
@@ -95,9 +96,17 @@
             "enabled": true,
             "module": "hackrf_source"
         },
+        "Harogic Source": {
+            "enabled": true,
+            "module": "harogic_source"
+        },
         "Hermes Source": {
             "enabled": true,
             "module": "hermes_source"
+        },
+        "HydraSDR RFOne": {
+            "enabled": true,
+            "module": "hydrasdr_rfone_source"
         },
         "LimeSDR Source": {
             "enabled": true,
@@ -106,10 +115,6 @@
         "Network Sink": {
             "enabled": true,
             "module": "network_sink"
-        },
-        "PerseusSDR Source": {
-            "enabled": true,
-            "module": "perseus_source"
         },
         "PlutoSDR Source": {
             "enabled": true,
@@ -143,17 +148,9 @@
             "enabled": true,
             "module": "sdrpp_server_source"
         },
-        "SDRplay Source": {
-            "enabled": true,
-            "module": "sdrplay_source"
-        },
         "SpyServer Source": {
             "enabled": true,
             "module": "spyserver_source"
-        },
-        "Harogic Source": {
-            "enabled": true,
-            "module": "harogic_source"
         },
         "USRP Source": {
             "enabled": true,
@@ -162,14 +159,21 @@
     },
     "modules": [],
     "modulesDirectory": "/usr/lib/sdrpp/plugins",
-    "offset": 0.0,
-    "offsetMode": 0,
+    "offsets": {
+        "DK5AV X-Band": -6800000000.0,
+        "Ham-It-Up": 125000000.0,
+        "Ku LNB (10700MHz)": -10700000000.0,
+        "Ku LNB (9750MHz)": -9750000000.0,
+        "MMDS S-band (1998MHz)": -1998000000.0,
+        "SpyVerter": 120000000.0
+    },
     "resourcesDirectory": "/usr/share/sdrpp",
+    "selectedOffset": "None",
     "showMenu": true,
     "showWaterfall": true,
     "snrSmoothing": false,
     "snrSmoothingSpeed": 20,
-    "source": "",
+    "source": "HydraSDR RFOne",
     "streams": {
         "Radio": {
             "muted": false,
@@ -183,10 +187,10 @@
         "Radio": "#FFFFFF"
     },
     "vfoOffsets": {
-        "Radio": 0.0
+        "Radio": 300000.0
     },
     "windowSize": {
         "h": 720,
         "w": 1280
     }
-}                                                                   
+}

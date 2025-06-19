@@ -36,7 +36,8 @@ RUN ./entrypoint.sh ad_devices_install && \
 	./entrypoint.sh funcube_devices_install && \
 	./entrypoint.sh rfnm_devices_install && \
 	./entrypoint.sh libresdr_b2x0_devices_install && \
-	./entrypoint.sh litexm2sdr_devices_install
+	./entrypoint.sh litexm2sdr_devices_install && \
+	./entrypoint.sh hydrasdr_rfone_install
 
 ## Installing peripherals with optional drivers
 RUN ./entrypoint.sh ${UHD_BASE}_devices_install && \

@@ -247,3 +247,117 @@ function soapybladerf_srsran_install() {
     cmake_clone_and_build "https://github.com/FlUxIuS/SoapyBladeRF_srsran.git" "build" "" "" "soapybladerf_srsran_install" "-DCMAKE_INSTALL_PREFIX=/usr"
     ldconfig
 }
+
+function hydrasdr_rfone_install() {
+	goodecho "[+] Installing HydraSDR bins and libs"
+    # TODO: temporary install before official release
+    [ -d /root/thirdparty ] || mkdir /root/thirdparty
+    cd /root/thirdparty
+    mkdir -p hydrasdr
+    cd hydrasdr
+    # Detect current architecture
+    local current_arch
+    case "$(uname -m)" in
+        x86_64)
+            current_arch="amd64"
+            ;;
+        aarch64)
+            current_arch="arm64"
+            ;;
+        riscv64)
+            current_arch="riscv64"
+            ;;
+        *)
+            criticalecho-noexit "Error: Unsupported architecture $(uname -m)"
+            criticalecho-noexit "Supported architectures: x86_64 (amd64), aarch64 (arm64), riscv64"
+            ;;
+    esac
+    
+    colorecho "Detected architecture: $(uname -m) -> using ${current_arch} binaries"
+    
+    # Download architecture-specific files
+    if ! wget "https://github.com/PentHertz/rfone/releases/download/rcbins/${current_arch}-rfone_host-bins.tar.gz"; then
+        criticalecho-noexit "Error: Failed to download ${current_arch} binaries"
+    fi
+    
+    if ! wget "https://github.com/PentHertz/rfone/releases/download/rcbins/${current_arch}-rfone_host-libs.tar.gz"; then
+        criticalecho-noexit "Error: Failed to download ${current_arch} libraries"
+    fi
+    
+    # Extract files
+    if ! tar xvzf "${current_arch}-rfone_host-bins.tar.gz"; then
+        criticalecho-noexit "Error: Failed to extract binaries"
+    fi
+    
+    if ! tar xvzf "${current_arch}-rfone_host-libs.tar.gz"; then
+        criticalecho-noexit "Error: Failed to extract libraries"
+    fi
+    
+    # Install files
+    if ! mv hydrasdr* /usr/bin/; then
+        criticalecho-noexit "Error: Failed to move binaries to /usr/bin (check permissions)"
+    fi
+    
+    if ! mv libhydrasdr.* /usr/lib/; then
+        criticalecho-noexit "Error: Failed to move libraries to /usr/lib (check permissions)"
+    fi
+    
+    goodecho "HydraSDR RFOne installation completed successfully for ${current_arch}"
+}
+
+function hydrasdr_rfone_soapy_install() {
+	goodecho "[+] Installing HydraSDR Soapy lib"
+    # Detect current architecture
+    case "$(uname -m)" in
+        x86_64)
+            current_arch="amd64"
+            ;;
+        aarch64)
+            current_arch="arm64"
+            ;;
+        riscv64)
+            current_arch="riscv64"
+            ;;
+        *)
+            criticalecho-noexit "Error: Unsupported architecture $(uname -m)"
+            return 1
+            ;;
+    esac
+    
+    [ -d /root/thirdparty ] || mkdir /root/thirdparty
+    cd /root/thirdparty
+    mkdir -p hydrasdr
+    cd hydrasdr
+    wget https://github.com/PentHertz/rfone/releases/download/rcbins/${current_arch}-libhydraSoapy.tar.gz
+    tar xzf ${current_arch}-libhydraSoapy.tar.gz
+    soapy_path=$(SoapySDRUtil --info 2>/dev/null | grep -o '/[^[:space:]]*SoapySDR/modules[^[:space:]]*' | head -1)
+    mv libhydrasdrSupport.so ${soapy_path}/
+}
+
+function sdrpp_extramodules_install() {
+	goodecho "[+] Installing SDR++ extra modules"
+    # Detect current architecture
+    case "$(uname -m)" in
+        x86_64)
+            current_arch="amd64"
+            ;;
+        aarch64)
+            current_arch="arm64"
+            ;;
+        riscv64)
+            current_arch="riscv64"
+            ;;
+        *)
+            criticalecho-noexit "Error: Unsupported architecture $(uname -m)"
+            return 1
+            ;;
+    esac
+    
+    [ -d /root/thirdparty ] || mkdir /root/thirdparty
+    cd /root/thirdparty
+    mkdir -p hydrasdr
+    cd hydrasdr
+    wget https://github.com/PentHertz/rfone/releases/download/rcbins/${current_arch}-hydrasdrpp.tar.gz
+    tar xvzf ${current_arch}-hydrasdrpp.tar.gz
+    mv hydrasdr_rfone_source.so /usr/lib/sdrpp/plugins/
+}

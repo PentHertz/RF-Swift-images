@@ -1,8 +1,11 @@
 #!/bin/bash
 
-function common_sources_and_sinks() {
-    grclone_and_build "https://github.com/osmocom/gr-osmosdr.git" "" "common_sources_and_sinks"
-    ln -s /usr/lib/python3.12/site-packages/osmosdr /usr/lib/python3/dist-packages/osmosdr
+function common_sources_and_sinks() {Add commentMore actions
+    grclone_and_build "https://github.com/PentHertz/gr-osmosdr.git" "" "common_sources_and_sinks"
+    cd /rftools/sdr/oot/gr-osmosdr
+    cd thirdparty
+    chmod +x ./hydrasdr_pkg-confile.sh
+    ./hydrasdr_pkg-confile.sh
 }
 
 function grgsm_grmod_install() {
