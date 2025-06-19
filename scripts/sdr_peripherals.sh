@@ -301,6 +301,10 @@ function hydrasdr_rfone_install() {
     if ! mv libhydrasdr.* /usr/lib/; then
         criticalecho-noexit "Error: Failed to move libraries to /usr/lib (check permissions)"
     fi
+
+    wget https://github.com/PentHertz/rfone/releases/download/rcbins/libhydrasdr-headers.zip
+    unzip libhydrasdr-headers.zip
+    cp -R libhydrasdr /usr/include/
     
     goodecho "HydraSDR RFOne installation completed successfully for ${current_arch}"
 }
