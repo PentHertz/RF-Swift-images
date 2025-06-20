@@ -308,7 +308,6 @@ function urh_soft_install() {
     pip install --upgrade pip setuptools wheel
     pip install "cython>=0.29.0" "numpy>=1.19.0,<1.25.0" psutil
     pip install --only-binary=all pyqt5
-    pip install "psutil"
     # Try to install URH
     python3 setup.py install
     URH_INSTALL_STATUS=$?

@@ -251,7 +251,7 @@ function soapybladerf_srsran_install() {
 function hydrasdr_rfone_install() {
 	goodecho "[+] Installing HydraSDR bins and libs"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
-    cd /root/thirdparty
+	cd /root/thirdparty
 	cmake_clone_and_build "https://github.com/hydrasdr/rfone_host.git" "build" "" "" "hydrasdr_rfone_bin_install" -DCMAKE_INSTALL_PREFIX=/usr
 }
 
