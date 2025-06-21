@@ -7,7 +7,7 @@ function blueztools_soft_install() {
 }
 
 function mirage_soft_install() {
-    goodecho "[+] Installing bettercap dependencies"
+    goodecho "[+] Installing mirage dependencies"
     echo apt-fast keyboard-configuration/variant string "English (US)" | debconf-set-selections
     echo apt-fast keyboard-configuration/layout string "English (US)" | debconf-set-selections
     echo apt-fast console-setup/codeset47 string "Guess optimal character set" | debconf-set-selections
@@ -18,11 +18,60 @@ function mirage_soft_install() {
     goodecho "[+] Installing Mirage"
     [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
     cd /root/thirdparty
+    python3.10 -m venv /opt/mirage-env
+    source /opt/mirage-env/bin/activate
     installfromnet "git clone https://github.com/RCayre/mirage"
     cd mirage/
-    pip3install .
-}
+    pip install .
+    pip install scapy==2.5.0
+    deactivate
+    
+    goodecho "[+] Creating mirage wrapper script"
+    cat > /usr/sbin/mirage << 'EOF'
+#!/bin/bash
 
+# Mirage wrapper script
+# This script activates the mirage virtual environment, runs mirage with all passed arguments,
+# then deactivates the environment when finished
+
+# Check if the virtual environment exists
+if [ ! -d "/opt/mirage-env" ]; then
+    echo "Error: Mirage virtual environment not found at /opt/mirage-env"
+    echo "Please run the mirage installation script first."
+    exit 1
+fi
+
+# Activate the virtual environment
+source /opt/mirage-env/bin/activate
+
+# Check if mirage is installed and run it with all passed arguments
+if [ -f "/opt/mirage-env/bin/mirage" ]; then
+    # Try direct executable first
+    /opt/mirage-env/bin/mirage "$@"
+    exit_code=$?
+elif command -v mirage >/dev/null 2>&1; then
+    # Try mirage command (should be available after activating venv)
+    mirage "$@"
+    exit_code=$?
+else
+    # Fall back to running as Python module
+    /opt/mirage-env/bin/python -m mirage "$@"
+    exit_code=$?
+fi
+
+# Deactivate the virtual environment
+deactivate
+
+# Exit with the same code as mirage
+exit $exit_code
+EOF
+
+    # Make the wrapper script executable
+    chmod +x /usr/sbin/mirage
+    
+    goodecho "[+] Mirage installation completed successfully"
+    goodecho "[+] You can now run 'mirage' from anywhere on the system"
+}
 
 function sniffle_soft_install() {
     # Get current architecture
