@@ -48,7 +48,6 @@ else
     build_and_push = $(build_and_push_local)
 endif
 
-
 #
 # Specific build targets using the chosen function
 common:
@@ -135,5 +134,5 @@ telecom_5G_bladerf:
 deeptempest:
 	$(call build_and_push,deeptempest,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices_$(ARCH),$(CURDIR)/SDR/sdr_deeptemptest_beta.docker)
 
-build: common sdrsadevices sdrlight sdrfull sdrsadevicesantsdr sdrsadevicesrtlsdrv4 rfid network telecom_utils telecom_2Gto3G telecom_4G_5GNSA telecom_5G bluetooth wifi automotive reversing
+build: common sdrsadevices sdrlight sdrfull sdrsadevicesantsdr sdrsadevicesrtlsdrv4 rfid network telecom_utils telecom_2Gto3G telecom_4G_5GNSA telecom_5G telecom_5G_bladerf bluetooth wifi automotive reversing
 	@echo "Done!"

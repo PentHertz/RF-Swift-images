@@ -316,7 +316,7 @@ function hydrasdr_rfone_bin_install() {
     goodecho "HydraSDR RFOne installation completed successfully for ${current_arch}"
 }
 
-function hydrasdr_rfone_soapy_install() {
+function hydrasdr_rfone_soapy_bins_install() {
 	goodecho "[+] Installing HydraSDR Soapy lib"
     # Detect current architecture
     case "$(uname -m)" in
