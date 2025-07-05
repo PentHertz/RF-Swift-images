@@ -322,6 +322,14 @@ function soapyrfnm_grmod_install() {
     grclone_and_build "https://github.com/rfnm/soapy-rfnm.git" "" "soapyrfnm_grmod_install"
 }
 
+function soapyharogic_grmod_install() {
+    grclone_and_build "https://github.com/PentHertz/SoapyHarogic.git" "" "soapyharogic_grmod_install"
+}
+
+function hydrasdr_rfone_soapy_install() {
+    grclone_and_build "https://github.com/hydrasdr/SoapyHydraSDR.git" "" "hydrasdr_rfone_soapy_install"
+}
+
 function grmer_grmod_install() {
     grclone_and_build "https://github.com/git-artes/gr-mer.git" "" "grmer_grmod_install"
 }

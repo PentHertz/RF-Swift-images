@@ -28,7 +28,8 @@ RUN ./entrypoint.sh gnuradio_soft_install && \
 	./entrypoint.sh install_soapyPlutoSDR_modules && \
 	./entrypoint.sh kc908_sa_device && \
 	./entrypoint.sh soapyrfnm_grmod_install && \
-	./entrypoint.sh hydrasdr_rfone_soapy_install
+	./entrypoint.sh hydrasdr_rfone_soapy_install && \
+	./entrypoint.sh luaradio_sdr_soft_install
 
 # Installing extra software
 RUN	./entrypoint.sh gqrx_soft_install && \
@@ -56,9 +57,10 @@ RUN	./entrypoint.sh librevna_cal_device_buildx
 RUN ./entrypoint.sh artemis_soft_install && \
 	./entrypoint.sh gqrxscanner_sdr_soft_install
 
+RUN ./entrypoint.sh satdump_sdr_soft_install
+
 RUN mkdir -p /sdrtools/
 COPY run /sdrtools/run
-
 
 # Cleaning and quitting
 WORKDIR /root/
