@@ -598,10 +598,10 @@ function satdump_sdr_soft_install () {
 
 	cmake_clone_and_build "https://github.com/nanomsg/nng.git" "build" "v1.9.0" "" "satdump_sdr_soft_install" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr
 	goodecho "[+] Cloning and installing SatDump"
-	gitinstall "https://github.com/hydrasdr/SatDump.git" "SatDump"
+	gitinstall "https://github.com/PentHertz/SatDump.git" "SatDump"
 	cd SatDump
 	mkdir build && cd build
-	cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr ..
+	cmake -DCMAKE_BUILD_TYPE=Release -DPLUGIN_HAROGIC_SDR_SUPPORT=ON -DCMAKE_INSTALL_PREFIX=/usr ..
 	make -j`nproc`
 	ln -s ../pipelines .
 	ln -s ../resources .
