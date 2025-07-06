@@ -180,4 +180,6 @@ function harogic_sa_device() {
     ln -sf $(pwd)/libhtraapi.so.${majornum} /usr/lib/libhtraapi.so.${majornum}
     ln -sf $(pwd)/libliquid.so /usr/lib/libliquid.so
 	colorecho "[+] Note: you'll have to put your calibration data after!"
+    mkdir -p /rftools/analysers/SAStudio4_4.3.55.2_x86_64/bin/CalFile
+    ln -s /rftools/analysers/SAStudio4_4.3.55.2_x86_64/bin/CalFile /usr/local/CalFile
 }
