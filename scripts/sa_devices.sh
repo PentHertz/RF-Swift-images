@@ -179,6 +179,8 @@ function harogic_sa_device() {
     ln -sf $(pwd)/libhtraapi.so.${version} /usr/lib/libhtraapi.so.${version}
     ln -sf $(pwd)/libhtraapi.so.${majornum} /usr/lib/libhtraapi.so.${majornum}
     ln -sf $(pwd)/libliquid.so /usr/lib/libliquid.so
+    cp $(pwd)/libh* /usr/lib/
+    cp /opt/htraapi/inc/htra_api.h /usr/include
 	colorecho "[+] Note: you'll have to put your calibration data after!"
     mkdir -p /rftools/analysers/${prog}/bin/CalFile
     ln -s /rftools/analysers/${prog}/bin/CalFile /usr/bin/CalFile

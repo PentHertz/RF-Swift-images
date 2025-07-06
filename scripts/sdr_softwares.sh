@@ -282,8 +282,8 @@ function urh_soft_install() {
     rm -rf "$URH_VENV_DIR" "$URH_CLONE_DIR" "$URH_WRAPPER"
 
     # Clone HydraSDR URH fork
-    goodecho "[+] Cloning HydraSDR URH fork"
-    git clone https://github.com/hydrasdr/urh.git "$URH_CLONE_DIR"
+    goodecho "[+] Cloning HydraSDR/Penthertz URH fork"
+    git clone https://github.com/PentHertz/urh.git "$URH_CLONE_DIR"
     if [ $? -ne 0 ]; then
         criticalecho "[!] Failed to clone URH repository"
         return 1
