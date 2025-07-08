@@ -41,7 +41,7 @@ function signalhound_spike_sa_device() {
         colorecho "[+] Downloading Spike bin from SignalHound"
         [ -d /rftools/analysers ] || mkdir -p /rftools/analysers
         cd /rftools/analysers
-        filename="Spike(Ubuntu22.04x64)_4_0_0"
+        filename="Spike(Ubuntu22.04x64)_4_0_5"
         installfromnet "wget https://signalhound.com/sigdownloads/Spike/$filename.zip"
         unzip ${filename}.zip
         rm ${filename}.zip
@@ -54,7 +54,7 @@ function signalhound_spike_sa_device() {
 #!/bin/sh
 
 # Set the fixed path
-BASE_DIR="/rftools/analysers/Spike(Ubuntu22.04x64)_4_0_0"
+BASE_DIR="/rftools/analysers/Spike(Ubuntu22.04x64)_4_0_5"
 APPNAME="Spike"
 
 # Set up the environment variables
