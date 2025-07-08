@@ -44,16 +44,16 @@ function KCSDI_cal_device() {
 
    # Set image name based on architecture
    if [ "$(uname -m)" = "aarch64" ]; then
-       image_name="KCSDI-v0.4.8-49-linux-arm64.appimage"
+       image_name="KCSDI-v0.5.6-62-linux-arm64.appimage"
    else
-       image_name="KCSDI-v0.5.2-57-linux-x86_64.AppImage"
+       image_name="KCSDI-v0.5.6-62-linux-x86_64.appimage"
    fi
 
    install_dependencies "libnss3-dev libfuse-dev"
    goodecho "[+] Downloading KCSDI from penthertz repo"
    installfromnet "wget https://github.com/PentHertz/rfswift_deepace_install/releases/download/nightly/${image_name}"
    chmod +x ${image_name}
-   ln -s ${image_name} /usr/bin/KCSDI
+   ln -s $(pwd)/${image_name} /usr/bin/KCSDI
 }
 
 function NanoVNASaver_cal_device() {
