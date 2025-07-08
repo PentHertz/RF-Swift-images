@@ -71,6 +71,21 @@ EOF
     
     goodecho "[+] Mirage installation completed successfully"
     goodecho "[+] You can now run 'mirage' from anywhere on the system"
+    [ -d /rftools/bluetooth/firmwares ] || mkdir -p /rftools/bluetooth/firmwares
+    cd /rftools/bluetooth/firmwares
+    goodecho "[+] Downloading firmwares for Mirage"
+    mkdir Btlejack_microbit_ble400
+    cd Btlejack_microbit_ble400
+    installfromnet "wget https://github.com/virtualabs/btlejack/archive/refs/tags/v2.1.1.zip"
+    cd ..
+    mkdir Injectable_NRF52840
+    cd Injectable_NRF52840
+    installfromnet "wget https://github.com/RCayre/injectable-firmware/releases/download/v1.0/pca10059.hex"
+    installfromnet "wget https://github.com/RCayre/injectable-firmware/releases/download/v1.0/mdk-dongle.hex"
+    cd ..
+    mkdir NRFSniffer
+    cd NRFSniffer
+    installfromnet "wget https://nsscprodmedia.blob.core.windows.net/prod/software-and-other-downloads/desktop-software/nrf-sniffer/sw/nrf_sniffer_for_bluetooth_le_4.1.1.zip"
 }
 
 function sniffle_soft_install() {
@@ -88,6 +103,20 @@ function sniffle_soft_install() {
         pip3install -r requirements.txt
         pip3 uninstall numpy -y
         pip3install "numpy<2.0"
+        [ -d /rftools/bluetooth/firmwares/Sniffle ] || mkdir -p /rftools/bluetooth/firmwares/Sniffle
+        cd /rftools/bluetooth/firmwares/Sniffle
+        goodecho "[+] Downloading firmwares for Sniffle"
+        installfromnet "wget https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc1352p1_cc2652p1.hex"
+        installfromnet "wget https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc1352p1_cc2652p1_1M.hex"
+        installfromnet "wget https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc1352p7.hex"
+        installfromnet "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc1352p7_1M.hex"
+        installfromnet "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc1352r1.hex"
+        installfromnet "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc1354p10.hex"
+        installfromnet "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc2651p3.hex"
+        installfromnet "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc2652r1.hex"
+        installfromnet "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc2652r7.hex"
+        installfromnet "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc2652rb.hex"
+        installfromnet "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc2652rb_1M.hex"
     else
         goodecho "[!] Skipping Sniffle installation: unsupported architecture ($arch)"
     fi
@@ -135,7 +164,6 @@ echo "Created $SCRIPT_FILE with execution permissions"
 echo "You can run it with: ./$SCRIPT_FILE"
 }
 
-
 function bdaddr_soft_install() {
 	goodecho "[+] Installing bdaddr"
 	[ -d /rftools/bluetooth ] || mkdir /rftools/bluetooth
@@ -143,6 +171,17 @@ function bdaddr_soft_install() {
 	installfromnet "git clone https://github.com/thxomas/bdaddr"
 	cd bdaddr
 	make
+	ln -s $(pwd)/bdaddr /usr/bin/bdaddr
+}
+
+function bluekit_soft_install() {
+	goodecho "[+] Installing BlueKit"
+	[ -d /rftools/bluetooth ] || mkdir /rftools/bluetooth
+	cd /rftools/bluetooth
+	installfromnet "git clone https://github.com/sgxgsx/BlueToolkit.git"
+	cd BlueToolkit
+	chmod +x ./install.sh
+	./install.sh
 }
 
 # RFID package
