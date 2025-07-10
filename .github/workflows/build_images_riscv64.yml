@@ -865,7 +865,7 @@ jobs:
 
   wifi:
     runs-on: Linux
-    needs: sdrsa_devices
+    needs: network
     strategy:
       matrix:
         platform: [riscv64]

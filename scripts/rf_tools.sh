@@ -289,7 +289,7 @@ function miLazyCracker_soft_install() {
 
 # Wi-Fi Package
 function common_nettools() {
-	install_dependencies "iproute2"
+	install_dependencies "iproute2 hostapd dnsmasq"
 	echo apt-fast macchanger/automatically_run  boolean false | debconf-set-selections
 	installfromnet "apt-fast install -y -q macchanger"
 	echo apt-fast wireshark-common/install-setuid boolean true | debconf-set-selections
@@ -316,6 +316,71 @@ function pixiewps_soft_install() {
 	install_dependencies "pixiewps"
 }
 
+function hcxdumptool_soft_install() {
+	goodecho "[+] Installing hcxdumptool"
+	install_dependencies "hcxdumptool"
+}
+
+function hcxdumptool_soft_install() {
+	goodecho "[+] Installing hcxdumptool"
+	install_dependencies "hcxdumptool"
+}
+
+function hcxtools_soft_install() {
+	goodecho "[+] Installing hcxtools"
+	[ -d /rftools/wifi ] || mkdir -p /rftools/wifi
+	cd /rftools/wifi
+	gitinstall "https://github.com/ZerBea/hcxtools.git" "hcxtools_soft_install"
+	cd hcxtools
+	make -j$(nproc)
+	make install
+	ln -s /usr/bin/hcxpcapngtool /usr/bin/hcxpcaptool
+}
+
+function wpa3_dragonslayer_soft_install() {
+	goodecho "[+] Installing dragonslayer"
+	[ -d /rftools/wifi/wpa3 ] || mkdir -p /rftools/wifi/wpa3
+	cd /rftools/wifi/wpa3
+	install_dependencies "libnl-3-dev libnl-genl-3-dev pkg-config libssl-dev net-tools git libdbus-1-dev"
+	gitinstall "https://github.com/vanhoefm/dragonslayer.git" "wpa3_dragonslayer_soft_install"
+	cd dragonslayer
+	cd dragonslayer
+	./build.sh
+}
+
+function wpa3_dragonforce_soft_install() {
+	goodecho "[+] Installing dragonforce"
+	[ -d /rftools/wifi/wpa3 ] || mkdir -p /rftools/wifi/wpa3
+	cd /rftools/wifi/wpa3
+	gitinstall "https://github.com/FlUxIuS/dragonforce.git" "wpa3_dragonforce_soft_install"
+	cd dragonforce
+	./build.sh
+}
+
+function wpa3_dragondrain_and_time_soft_install() {
+	goodecho "[+] Installing dragondrain-and-time"
+	[ -d /rftools/wifi/wpa3 ] || mkdir -p /rftools/wifi/wpa3
+	cd /rftools/wifi/wpa3
+	install_dependencies "autoconf automake libtool shtool libssl-dev pkg-config"
+	gitinstall "https://github.com/vanhoefm/dragondrain-and-time.git" "wpa3_dragondrain_and_time_soft_install"
+	autoreconf -i
+	./configure
+	make -j$(nproc)
+}
+
+function wpa3_wacker_soft_install() {
+	goodecho "[+] Installing Wacker WPA3"
+	[ -d /rftools/wifi/wpa3 ] || mkdir -p /rftools/wifi/wpa3
+	cd /rftools/wifi/wpa3
+	gitinstall "https://github.com/blunderbuss-wctf/wacker.git" "wpa3_wacker_soft_install"
+	cd wacker
+	install_dependencies "pkg-config libnl-3-dev gcc libssl-dev libnl-genl-3-dev"
+	cp defconfig wpa_supplicant-2.10/wpa_supplicant/.config
+	git apply wpa_supplicant.patch
+	cd wpa_supplicant-2.10/wpa_supplicant
+	make -j$(nproc)
+}
+
 function Pyrit_soft_install() { #TODO: tofix for total Python3 support
 	goodecho "[+] Installing Pyrit"
 	[ -d /rftools/wifi ] || mkdir -p /rftools/wifi
@@ -336,6 +401,7 @@ function eaphammer_soft_install() {
 	installfromnet "git clone https://github.com/s0lst1c3/eaphammer.git"
 	cd eaphammer/
 	./ubuntu-unattended-setup
+	pip3install -r pip.req
 }
 
 function airgeddon_soft_install() { # TODO: install all dependencies
@@ -344,6 +410,7 @@ function airgeddon_soft_install() { # TODO: install all dependencies
 	cd /rftools/wifi
 	installfromnet "git clone https://github.com/v1s1t0r1sh3r3/airgeddon.git"
 	cd airgeddon/
+	install_dependencies "crunch mdk4 isc-dhcp-server hostapd lighttpd beef"
 }
 
 function wifite2_soft_install () {
@@ -352,6 +419,8 @@ function wifite2_soft_install () {
 	cd /rftools/wifi
 	installfromnet "git clone https://github.com/derv82/wifite2.git"
 	cd wifite2/
+	pipx install .
+	pipx ensurepath
 }
 
 function sparrowwifi_sdr_soft_install () { # TODO: to debug
