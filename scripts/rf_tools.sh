@@ -398,7 +398,7 @@ function eaphammer_soft_install() {
 	goodecho "[+] Installing eaphammer"
 	[ -d /rftools/wifi ] || mkdir -p /rftools/wifi
 	cd /rftools/wifi
-	installfromnet "git clone https://github.com/s0lst1c3/eaphammer.git"
+	gitinstall "https://github.com/s0lst1c3/eaphammer.git" "eaphammer_soft_install"
 	cd eaphammer/
 	./ubuntu-unattended-setup
 	pip3install -r pip.req
@@ -408,9 +408,14 @@ function airgeddon_soft_install() { # TODO: install all dependencies
 	goodecho "[+] Installing airgeddon"
 	[ -d /rftools/wifi ] || mkdir -p /rftools/wifi
 	cd /rftools/wifi
-	installfromnet "git clone https://github.com/v1s1t0r1sh3r3/airgeddon.git"
+	gitinstall "https://github.com/v1s1t0r1sh3r3/airgeddon.git" "airgeddon_soft_install"
 	cd airgeddon/
 	install_dependencies "crunch mdk4 isc-dhcp-server hostapd lighttpd beef"
+	goodecho "[+] Installing pluggins for airgeddon"
+	gitinstall "https://github.com/OscarAkaElvis/airgeddon-plugins.git" "airgeddon_soft_install"
+	cp -R airgeddon-plugins/wpa3_online_attack/* plugins/
+	cp -R airgeddon-plugins/allchars_captiveportal/* plugins/
+	cp -R airgeddon-plugins/realtek_chipset_fixer/* plugins/
 }
 
 function wifite2_soft_install () {
