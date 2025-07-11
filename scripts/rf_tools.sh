@@ -363,6 +363,7 @@ function wpa3_dragondrain_and_time_soft_install() {
 	cd /rftools/wifi/wpa3
 	install_dependencies "autoconf automake libtool shtool libssl-dev pkg-config"
 	gitinstall "https://github.com/vanhoefm/dragondrain-and-time.git" "wpa3_dragondrain_and_time_soft_install"
+	cd dragondrain-and-time
 	autoreconf -i
 	./configure
 	make -j$(nproc)
