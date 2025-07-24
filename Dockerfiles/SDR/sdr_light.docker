@@ -58,6 +58,8 @@ RUN	./entrypoint.sh librevna_cal_device_buildx
 RUN ./entrypoint.sh artemis_soft_install && \
 	./entrypoint.sh gqrxscanner_sdr_soft_install
 
+RUN ./entrypoint.sh lotus_budc_tune_device
+
 RUN mkdir -p /sdrtools/
 COPY run /sdrtools/run
 
