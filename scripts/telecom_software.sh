@@ -7,9 +7,6 @@ function yatebts_blade2_soft_install() { # TODO: make few tests with new Nuand l
 	install_dependencies "qtmultimedia5-dev libqt5multimediawidgets5 libqt5multimedia5-plugins libqt5multimedia5 qttools5-dev qttools5-dev-tools"
 	[ -d /telecom/2G ] || mkdir -p /telecom/2G
 	cd /telecom/2G
-	installfromnet "wget https://nuand.com/downloads/yate-rc-3.tar.gz"
-	tar xvzf yate-rc-3.tar.gz
-	rm -R yate
 	goodecho "[+] Fetching Yate"
 	installfromnet "git clone https://github.com/svedm/yate.git" # TODO: maybe needs to be updated to rc3? 
 	cd yate
@@ -21,6 +18,9 @@ function yatebts_blade2_soft_install() { # TODO: make few tests with new Nuand l
 	cd ..
 	#goodecho "[+] Feching YateBTS"
 	#installfromnet "git clone https://github.com/yatevoip/yatebts.git"
+	gitinstall "https://github.com/PentHertz/yatebts-rc3-nonoff.git" "yatebts_blade2_soft_install"
+	cd yatebts-rc3-nonoff
+	rm -R yate
 	cd yatebts
 	./autogen.sh
 	./configure --prefix=/usr/local
