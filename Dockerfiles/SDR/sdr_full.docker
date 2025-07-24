@@ -102,6 +102,7 @@ RUN	./entrypoint.sh sigdigger_soft_install && \
 	./entrypoint.sh wavingz_sdr_soft_install && \
 	./entrypoint.sh pyspecsdr_sdr_soft_install
 
+RUN ./entrypoint.sh satdump_sdr_soft_install
 RUN ./entrypoint.sh sdrangel_soft_fromsource_install
 
 FROM ${JMPSTAGE4} as mldlsofts

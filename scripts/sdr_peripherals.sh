@@ -56,7 +56,7 @@ python3-ruamel.yaml"
 	fi
 	make -j$(nproc)
 	sudo make install
-	sudo ldconfig
+	#sudo ldconfig
 	goodecho "[+] Downloading Hardware Driver firmware/FPGA"
     	installfromnet "uhd_images_downloader"
 }
@@ -77,7 +77,7 @@ function antsdr_uhd_devices_install() { # Is replacing original one for now
 	cmake ../
 	make -j$(nproc)
 	make install
-	ldconfig
+	#ldconfig
 }
 
 function nuand_devices_install() {
@@ -98,15 +98,11 @@ function nuand_devices_fromsource_install() {
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
     cd /root/thirdparty
 	installfromnet "git clone https://github.com/Nuand/bladeRF.git ./bladeRF"
-	cd ./bladeRF
+	cd ./bladeRF/host
 	mkdir build
 	cd build
 	cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local -DINSTALL_UDEV_RULES=ON ../
-	make && sudo make install && sudo ldconfig
-	goodecho "[+] Copying rules sets"
-        cp /root/rules/88-nuand-bladerf1.rules.in /etc/udev/rules.d/
-        cp /root/rules/88-nuand-bladerf2.rules.in /etc/udev/rules.d/
-        cp /root/rules/88-nuand-bootloader.rules.in /etc/udev/rules.d/
+	make && make install #&& sudo ldconfig
 }
 
 function hackrf_devices_install() {
@@ -170,7 +166,7 @@ function rtlsdrv4_devices_install() {
 	make
 	sudo make install
 	sudo cp ../rtl-sdr.rules /etc/udev/rules.d/
-	sudo ldconfig
+	#sudo ldconfig
 	cd /root
 	rm -R /root/thirdparty
 }
@@ -190,7 +186,7 @@ function osmofl2k_devices_install() {
 	cmake ../ -DINSTALL_UDEV_RULES=ON
 	make -j 3
 	sudo make install
-	sudo ldconfig
+	#sudo ldconfig
 	cd /root
 	rm -R /root/thirdparty
 	[ -d /rftools/sdr ] || mkdir -p /rftools/sdr
@@ -245,7 +241,7 @@ function soapybladerf_srsran_install() {
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
     cd /root/thirdparty
     cmake_clone_and_build "https://github.com/FlUxIuS/SoapyBladeRF_srsran.git" "build" "" "" "soapybladerf_srsran_install" "-DCMAKE_INSTALL_PREFIX=/usr"
-    ldconfig
+    #ldconfig
 }
 
 function hydrasdr_rfone_install() {

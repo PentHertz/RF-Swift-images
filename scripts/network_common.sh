@@ -151,3 +151,21 @@ function sippts_soft_install() {
     cd sippts
     pip3install .
 }
+
+# Cracking tools
+function hashcat_soft_install() {
+	goodecho "[+] Installing hashcat"
+	install_dependencies "pixiewps"
+}
+
+function john_soft_install() {
+    goodecho "[+] Installing SIPPTS"
+    [ -d /opt/crack ] || mkdir -p /opt/crack
+    cd /opt/crack
+    gitinstall "https://github.com/openwall/john.git" "john_soft_install"
+    cd john
+    cd src
+    ./configure
+    make -j$(nproc)
+    make install
+}

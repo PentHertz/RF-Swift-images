@@ -41,7 +41,7 @@ function signalhound_spike_sa_device() {
         colorecho "[+] Downloading Spike bin from SignalHound"
         [ -d /rftools/analysers ] || mkdir -p /rftools/analysers
         cd /rftools/analysers
-        filename="Spike(Ubuntu22.04x64)_4_0_0"
+        filename="Spike(Ubuntu22.04x64)_4_0_5"
         installfromnet "wget https://signalhound.com/sigdownloads/Spike/$filename.zip"
         unzip ${filename}.zip
         rm ${filename}.zip
@@ -54,7 +54,7 @@ function signalhound_spike_sa_device() {
 #!/bin/sh
 
 # Set the fixed path
-BASE_DIR="/rftools/analysers/Spike(Ubuntu22.04x64)_4_0_0"
+BASE_DIR="/rftools/analysers/Spike(Ubuntu22.04x64)_4_0_5"
 APPNAME="Spike"
 
 # Set up the environment variables
@@ -176,8 +176,13 @@ function harogic_sa_device() {
             ;;
     esac
     cd "/opt/htraapi/lib/$sdkarch"
-    ln -sf $(pwd)/libhtraapi.so.${version} /usr/lib/libhtraapi.so.${version}
-    ln -sf $(pwd)/libhtraapi.so.${majornum} /usr/lib/libhtraapi.so.${majornum}
+    #ln -sf $(pwd)/libhtraapi.so.${version} /usr/lib/libhtraapi.so.${version}
+    #ln -sf $(pwd)/libhtraapi.so.${majornum} /usr/lib/libhtraapi.so.${majornum}
+    cp $(pwd)/libh* /usr/lib/
     ln -sf $(pwd)/libliquid.so /usr/lib/libliquid.so
+    cp $(pwd)/libh* /usr/lib/
+    cp /opt/htraapi/inc/htra_api.h /usr/include
 	colorecho "[+] Note: you'll have to put your calibration data after!"
+    mkdir -p /rftools/analysers/${prog}/bin/CalFile
+    ln -s /rftools/analysers/${prog}/bin/CalFile /usr/bin/CalFile
 }

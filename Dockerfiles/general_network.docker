@@ -40,8 +40,13 @@ RUN ./entrypoint.sh sipvicious_soft_install &&\
 # Some OT tools
 RUN ./entrypoint.sh mbtget_soft_install
 
+# Monitoring tools
 RUN ./entrypoint.sh kismet_soft_install
 RUN ./entrypoint.sh bettercap_soft_install
+
+# Cracking tools 
+RUN ./entrypoint.sh hashcat_soft_install && \
+	./entrypoint.sh john_soft_install
 
 RUN mkdir -p /sdrtools/
 COPY run /sdrtools/run

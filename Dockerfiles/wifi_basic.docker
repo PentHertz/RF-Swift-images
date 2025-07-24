@@ -3,7 +3,7 @@
 # Author(s): Sébastien Dudek (@FlUxIuS) @Penthertz
 # website: penthertz.com
 
-ARG BASE_IMAGE=sdr_light
+ARG BASE_IMAGE=network
 FROM ${BASE_IMAGE} AS wifi_basic
 
 LABEL "org.container.project"="rfswift"
@@ -23,7 +23,10 @@ RUN chmod +x entrypoint.sh
 # Tools for Wi-Fi
 RUN ./entrypoint.sh common_nettools && \
 	./entrypoint.sh aircrack_soft_install && \
-	./entrypoint.sh reaver_soft_install && \
+	./entrypoint.sh hcxdumptool_soft_install && \
+	./entrypoint.sh hcxtools_soft_install
+
+RUN ./entrypoint.sh reaver_soft_install && \
 	./entrypoint.sh bully_soft_install && \
 	./entrypoint.sh pixiewps_soft_install && \
 	./entrypoint.sh eaphammer_soft_install && \
@@ -31,6 +34,11 @@ RUN ./entrypoint.sh common_nettools && \
 	./entrypoint.sh wifite2_soft_install && \
 	./entrypoint.sh sparrowwifi_sdr_soft_install && \
 	./entrypoint.sh krackattacks_script_soft_install
+
+RUN ./entrypoint.sh wpa3_dragonslayer_soft_install && \
+	./entrypoint.sh wpa3_dragonforce_soft_install && \
+	./entrypoint.sh wpa3_dragondrain_and_time_soft_install && \
+	./entrypoint.sh wpa3_wacker_soft_install
 
 # To fix for full Python3 support ./entrypoint.sh Pyrit_soft_install && \
 

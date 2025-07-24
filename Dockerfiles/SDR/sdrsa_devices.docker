@@ -27,7 +27,7 @@ RUN chmod +x entrypoint.sh
 # Installing Devices 
 ## Installing peripherals
 RUN ./entrypoint.sh ad_devices_install && \
-	./entrypoint.sh nuand_devices_install && \
+	./entrypoint.sh nuand_devices_fromsource_install && \
 	./entrypoint.sh hackrf_devices_install && \
 	./entrypoint.sh airspy_devices_install && \
 	./entrypoint.sh limesdr_devices_install && \

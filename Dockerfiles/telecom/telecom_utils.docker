@@ -21,13 +21,16 @@ COPY config /root/config
 WORKDIR /root/scripts/
 RUN chmod +x entrypoint.sh
 
-# Tools for Telecom
-RUN ./entrypoint.sh pycrate_soft_install
+ENV DISTUTILS_USE_SDK=0
+ENV SETUPTOOLS_USE_DISTUTILS=stdlib
 
-RUN ./entrypoint.sh cryptomobile_soft_install && \
+# Tools for Telecom
+RUN ./entrypoint.sh pycrate_soft_install && \
+	./entrypoint.sh cryptomobile_soft_install && \
 	./entrypoint.sh pysim_soft_install && \
 	./entrypoint.sh pysctp_soft_install && \
 	./entrypoint.sh sysmoUSIM_soft_install && \
+
 	./entrypoint.sh SCAT_soft_install && \
 	./entrypoint.sh SigPloit_soft_install
 

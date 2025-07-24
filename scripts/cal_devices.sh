@@ -44,16 +44,16 @@ function KCSDI_cal_device() {
 
    # Set image name based on architecture
    if [ "$(uname -m)" = "aarch64" ]; then
-       image_name="KCSDI-v0.4.8-49-linux-arm64.appimage"
+       image_name="KCSDI-v0.5.6-62-linux-arm64.appimage"
    else
-       image_name="KCSDI-v0.5.2-57-linux-x86_64.AppImage"
+       image_name="KCSDI-v0.5.6-62-linux-x86_64.appimage"
    fi
 
    install_dependencies "libnss3-dev libfuse-dev"
    goodecho "[+] Downloading KCSDI from penthertz repo"
    installfromnet "wget https://github.com/PentHertz/rfswift_deepace_install/releases/download/nightly/${image_name}"
    chmod +x ${image_name}
-   ln -s ${image_name} /usr/bin/KCSDI
+   ln -s $(pwd)/${image_name} /usr/bin/KCSDI
 }
 
 function NanoVNASaver_cal_device() {
@@ -82,13 +82,20 @@ function NanoVNA_QT_cal_device() {
 	goodecho "[+] Installing dependencies for NanoVNA-QT"
 	[ -d /rftools/calibration ] || mkdir -p /rftools/calibration
 	cd /rftools/calibration
-	install_dependencies "automake libtool make g++ libeigen3-dev libfftw3-dev libqt6charts6-dev"
+	install_dependencies "automake libtool make g++ libeigen3-dev libfftw3-dev libqt5charts5-dev"
 	goodecho "[+] Cloning and installing NanoVNA-QT"
-	gitinstall "https://github.com/FlUxIuS/NanoVNA-QT.git"
+	gitinstall "https://github.com/nanovna-v2/NanoVNA-QT.git"
 	cd NanoVNA-QT
-	cmake .
+	autoreconf --install
+	./configure
 	make -j$(nproc)
-	ln -s $(pwd)/vna_qt/vna_qt /usr/bin/vna_qt
+	cd libxavna/xavna_mock_ui/
+	qmake
+ 	make -j$(nproc)
+ 	cd ../..
+ 	cd vna_qt
+	qmake
+	make -j$(nproc)
 }
 
 function pocketvna_sa_device() {
@@ -156,4 +163,12 @@ function xnec2c_cal_device() {
 	./autogen.sh
 	./configure
 	make && make install
+}
+
+function lotus_budc_tune_device() {
+	goodecho "[+] Installing dependencies for lotus_budc"
+	install_dependencies "apt install libserialport-dev"
+	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
+    cd /root/thirdparty
+	cmake_clone_and_build "https://github.com/PentHertz/lotus_budc_controler.git" "build" "" "" "lotus_budc_tune_device"
 }

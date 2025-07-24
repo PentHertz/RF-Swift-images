@@ -295,7 +295,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrlight
 
   hardware:
-    runs-on: ubuntu-22.04
+    runs-on: Linux
     needs: sdrsa_devices
     strategy:
       matrix:
@@ -735,7 +735,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make telecom_4G_5GNSA
 
   telecom_5G:
-    runs-on: ubuntu-22.04
+    runs-on: Linux
     needs: telecom_utils
     strategy:
       matrix:
@@ -799,7 +799,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make telecom_5G
 
   telecom_5G_bladerf:
-    runs-on: ubuntu-22.04
+    runs-on: Linux
     needs: telecom_utils
     strategy:
       matrix:
@@ -864,7 +864,7 @@ jobs:
 
   wifi:
     runs-on: Linux
-    needs: sdrsa_devices
+    needs: network
     strategy:
       matrix:
         platform: [arm64]
