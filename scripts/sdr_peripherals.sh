@@ -98,15 +98,11 @@ function nuand_devices_fromsource_install() {
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
     cd /root/thirdparty
 	installfromnet "git clone https://github.com/Nuand/bladeRF.git ./bladeRF"
-	cd ./bladeRF
+	cd ./bladeRF/host
 	mkdir build
 	cd build
 	cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local -DINSTALL_UDEV_RULES=ON ../
-	make && sudo make install #&& sudo ldconfig
-	goodecho "[+] Copying rules sets"
-        cp /root/rules/88-nuand-bladerf1.rules.in /etc/udev/rules.d/
-        cp /root/rules/88-nuand-bladerf2.rules.in /etc/udev/rules.d/
-        cp /root/rules/88-nuand-bootloader.rules.in /etc/udev/rules.d/
+	make && make install #&& sudo ldconfig
 }
 
 function hackrf_devices_install() {
