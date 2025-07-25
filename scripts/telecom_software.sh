@@ -255,7 +255,7 @@ function pycrate_soft_install() {
 function cryptomobile_soft_install() {
 	goodecho "[+] Installing CryptoMobile"
 	# First ensure setuptools is installed
-    #pip3install --upgrade pip setuptools
+    pip3install --upgrade pip setuptools
     export DISTUTILS_USE_SDK=0
 	gitinstall "https://github.com/FlUxIuS/CryptoMobile.git" "cryptomobile_soft_install"
     cd CryptoMobile
