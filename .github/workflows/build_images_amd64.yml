@@ -1,7 +1,7 @@
 name: Full build - AMD64 Docker Build with Caching
 
 env:
-   REGISTRY_IMAGE: penthertz/rfswift_noble
+  REGISTRY_IMAGE: penthertz/rfswift_noble
   CACHE_REPO: penthertz/rfswift_noble
   DO_SPACES_ENDPOINT: ${{ secrets.BUCKET_URL }}
   DO_SPACES_REGION: ${{ secrets.BUCKET_REGION }}
