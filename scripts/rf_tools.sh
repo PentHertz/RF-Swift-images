@@ -101,8 +101,9 @@ function sniffle_soft_install() {
         installfromnet "git clone https://github.com/bkerler/Sniffle.git"
         cd Sniffle/python_cli
         pip3install -r requirements.txt
-        #pip3 uninstall numpy -y --break-system-packages
-        #pip3install "numpy<2.0"
+        
+        pip3 uninstall numpy -y --break-system-packages
+        pip3install "numpy<2.0"
         [ -d /rftools/bluetooth/firmwares/Sniffle ] || mkdir -p /rftools/bluetooth/firmwares/Sniffle
         cd /rftools/bluetooth/firmwares/Sniffle
         goodecho "[+] Downloading firmwares for Sniffle"
