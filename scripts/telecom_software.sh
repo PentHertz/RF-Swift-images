@@ -256,6 +256,7 @@ function cryptomobile_soft_install() {
 	goodecho "[+] Installing CryptoMobile"
 	# First ensure setuptools is installed
     pip3install --upgrade pip setuptools
+    export SETUPTOOLS_USE_DISTUTILS=stdlib
 	gitinstall "https://github.com/FlUxIuS/CryptoMobile.git" "cryptomobile_soft_install"
     cd CryptoMobile
     pip3install .
