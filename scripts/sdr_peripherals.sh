@@ -204,7 +204,7 @@ function xtrx_devices_install() {
 
 function funcube_devices_install() {
 	goodecho "[+] Installing funcube from package manager"
-	install_dependencies "gr-funcube libgnuradio-funcube1.0.0 qthid-fcd-controller"
+	install_dependencies "gr-funcube libgnuradio-funcube3.10.0 qthid-fcd-controller"
 }
 
 function rfnm_devices_install() {
