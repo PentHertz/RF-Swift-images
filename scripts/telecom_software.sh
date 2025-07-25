@@ -259,7 +259,7 @@ function cryptomobile_soft_install() {
     export DISTUTILS_USE_SDK=0
 	gitinstall "https://github.com/FlUxIuS/CryptoMobile.git" "cryptomobile_soft_install"
     cd CryptoMobile
-    pip3install .
+    pip3install . --no-build-isolation
 }
 
 function pysctp_soft_install() {
