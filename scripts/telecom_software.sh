@@ -245,8 +245,6 @@ function Open5GS_nohttp2_soft_install() {
 	npm ci
 }
 
-
-
 function pycrate_soft_install() {
     goodecho "[+] Installing pycrate"
     pip3install "pycrate"
@@ -258,7 +256,7 @@ function cryptomobile_soft_install() {
     pip3install --upgrade pip setuptools
 	gitinstall "https://github.com/FlUxIuS/CryptoMobile.git" "cryptomobile_soft_install"
     cd CryptoMobile
-    pip3install .
+    pip3install --no-build-isolation .
 }
 
 function pysctp_soft_install() {

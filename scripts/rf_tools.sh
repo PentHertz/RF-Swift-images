@@ -101,22 +101,22 @@ function sniffle_soft_install() {
         installfromnet "git clone https://github.com/bkerler/Sniffle.git"
         cd Sniffle/python_cli
         pip3install -r requirements.txt
-        pip3 uninstall numpy -y
-        pip3install "numpy<2.0"
+        #pip3 uninstall numpy -y --break-system-packages
+        #pip3install "numpy<2.0"
         [ -d /rftools/bluetooth/firmwares/Sniffle ] || mkdir -p /rftools/bluetooth/firmwares/Sniffle
         cd /rftools/bluetooth/firmwares/Sniffle
         goodecho "[+] Downloading firmwares for Sniffle"
         installfromnet "wget https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc1352p1_cc2652p1.hex"
         installfromnet "wget https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc1352p1_cc2652p1_1M.hex"
         installfromnet "wget https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc1352p7.hex"
-        installfromnet "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc1352p7_1M.hex"
-        installfromnet "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc1352r1.hex"
-        installfromnet "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc1354p10.hex"
-        installfromnet "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc2651p3.hex"
-        installfromnet "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc2652r1.hex"
-        installfromnet "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc2652r7.hex"
-        installfromnet "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc2652rb.hex"
-        installfromnet "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc2652rb_1M.hex"
+        installfromnet "wget https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc1352p7_1M.hex"
+        installfromnet "wget https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc1352r1.hex"
+        installfromnet "wget https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc1354p10.hex"
+        installfromnet "wget https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc2651p3.hex"
+        installfromnet "wget https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc2652r1.hex"
+        installfromnet "wget https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc2652r7.hex"
+        installfromnet "wget https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc2652rb.hex"
+        installfromnet "wget https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc2652rb_1M.hex"
     else
         goodecho "[!] Skipping Sniffle installation: unsupported architecture ($arch)"
     fi
