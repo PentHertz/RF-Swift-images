@@ -598,7 +598,7 @@ function luaradio_sdr_soft_install () {
 	goodecho "[+] Cloning and installing luaradio"
 	gitinstall "https://github.com/hydrasdr/luaradio.git" "luaradio"
 	goodecho "[+] Installing Luaradio dependencies"
-	install_dependencies "luajit libliquid-dev libvolk2-dev libfftw3-dev libluajit-5.1-dev pkg-config"
+	install_dependencies "luajit libliquid-dev libvolk-dev libfftw3-dev libluajit-5.1-dev pkg-config"
 	goodecho "[+] Compiing Luaradio apps"
 	cd luaradio/embed
 	sudo make install-lmod
