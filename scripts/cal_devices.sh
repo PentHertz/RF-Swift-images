@@ -160,7 +160,7 @@ function xnec2c_cal_device() {
 
 function lotus_budc_tune_device() {
 	goodecho "[+] Installing dependencies for lotus_budc"
-	install_dependencies "apt install libserialport-dev"
+	install_dependencies "apt install libserialport-dev libserialport0"
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
     cd /root/thirdparty
 	cmake_clone_and_build "https://github.com/PentHertz/lotus_budc_controler.git" "build" "" "" "lotus_budc_tune_device"
