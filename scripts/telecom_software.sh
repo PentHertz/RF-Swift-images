@@ -251,12 +251,8 @@ function pycrate_soft_install() {
 }
 
 function cryptomobile_soft_install() {
-	goodecho "[+] Installing CryptoMobile"
-	# Force older setuptools version that includes distutils
-    #pip3install --upgrade pip
-    #pip3install "setuptools<60.0.0" wheel
-    #export DISTUTILS_USE_SDK=0
-	gitinstall "https://github.com/FlUxIuS/CryptoMobile.git" "cryptomobile_soft_install"
+    goodecho "[+] Installing CryptoMobile"
+    gitinstall "https://github.com/FlUxIuS/CryptoMobile.git" "cryptomobile_soft_install"
     cd CryptoMobile
     pip3install .
 }

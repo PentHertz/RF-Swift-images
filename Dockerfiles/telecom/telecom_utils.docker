@@ -21,9 +21,6 @@ COPY config /root/config
 WORKDIR /root/scripts/
 RUN chmod +x entrypoint.sh
 
-ENV DISTUTILS_USE_SDK=0
-ENV SETUPTOOLS_USE_DISTUTILS=stdlib
-
 # Tools for Telecom
 RUN ./entrypoint.sh pycrate_soft_install && \
 	./entrypoint.sh cryptomobile_soft_install && \
