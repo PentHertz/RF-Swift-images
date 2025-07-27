@@ -14,7 +14,7 @@ function grgsm_grmod_install() {
 }
 
 function grlora_grmod_install() {
-    install_dependencies "libliquid-dev libliquid2d"
+    install_dependencies "libliquid-dev libliquid1"
     grclone_and_build "https://github.com/rpp0/gr-lora.git" "" "grlora_grmod_install"
 }
 
