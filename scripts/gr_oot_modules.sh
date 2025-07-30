@@ -8,6 +8,10 @@ function common_sources_and_sinks() {
     ./hydrasdr_pkg-confile.sh
 }
 
+function grbladerf_grmod_install() {
+    grclone_and_build "https://github.com/Nuand/gr-bladeRF.git" "" "grbladerf_grmod_install"
+}
+
 function grgsm_grmod_install() {
     install_dependencies "build-essential libtool libtalloc-dev libsctp-dev shtool autoconf automake git-core pkg-config make gcc gnutls-dev libusb-1.0-0-dev libmnl-dev libosmocore libosmocore-dev"
     grclone_and_build "https://github.com/FlUxIuS/gr-gsm.git" "" "grgsm_grmod_install"
