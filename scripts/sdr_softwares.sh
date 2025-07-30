@@ -603,3 +603,16 @@ function luaradio_sdr_soft_install () {
 	cd luaradio/embed
 	sudo make install-lmod
 }
+
+function gnss_sdr_soft_install () {
+	goodecho "[+] Installing GNSS-SDR tools"
+	[ -d /root/thirdparty ] || mkdir /root/thirdparty
+	cd /root/thirdparty
+	install_dependencies "pkg-config libboost-dev libboost-date-time-dev"
+    install_dependencies "libboost-system-dev libboost-filesystem-dev libboost-thread-dev libboost-chrono-dev"
+    install_dependencies "libboost-serialization-dev liblog4cpp5-dev"
+    install_dependencies "libblas-dev liblapack-dev libarmadillo-dev libgflags-dev libgoogle-glog-dev"
+    install_dependencies "libssl-dev libpcap-dev libmatio-dev libpugixml-dev libgtest-dev"
+    install_dependencies "libprotobuf-dev libcpu-features-dev protobuf-compiler python3-mako"
+	cmake_clone_and_build "https://github.com/gnss-sdr/gnss-sdr.git" "build" "" "" "gnss_sdr_soft_install"
+}

@@ -29,7 +29,8 @@ RUN ./entrypoint.sh gnuradio_soft_install && \
 	./entrypoint.sh kc908_sa_device && \
 	./entrypoint.sh soapyrfnm_grmod_install && \
 	./entrypoint.sh hydrasdr_rfone_soapy_install && \
-	./entrypoint.sh soapyharogic_grmod_install
+	./entrypoint.sh soapyharogic_grmod_install && \
+	./entrypoint.sh grbladerf_grmod_install
 
 # Installing extra software
 RUN	./entrypoint.sh gqrx_soft_install && \
@@ -54,6 +55,8 @@ RUN ./entrypoint.sh jupyter_soft_install && \
 	
 RUN	./entrypoint.sh librevna_cal_device_buildx
 #	./entrypoint.sh xnec2c_cal_device # TODO: fix source
+
+RUN ./entrypoint.sh gnss_sdr_soft_install
 
 RUN ./entrypoint.sh artemis_soft_install && \
 	./entrypoint.sh gqrxscanner_sdr_soft_install

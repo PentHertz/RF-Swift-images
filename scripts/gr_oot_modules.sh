@@ -13,6 +13,10 @@ function grgsm_grmod_install() {
     grclone_and_build "https://github.com/FlUxIuS/gr-gsm.git" "" "grgsm_grmod_install"
 }
 
+function grbladerf_grmod_install() {
+    grclone_and_build "https://github.com/Nuand/gr-bladeRF.git" "" "grbladerf_grmod_install"
+}
+
 function grlora_grmod_install() {
     install_dependencies "libliquid-dev libliquid1"
     grclone_and_build "https://github.com/rpp0/gr-lora.git" "" "grlora_grmod_install"
