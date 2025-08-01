@@ -136,6 +136,7 @@ function harogic_sa_device() {
 	rm "$prog.zip"
 	cd "$prog"
 	currentpath=$(pwd)
+    mkdir -p /root/Desktop
 	sh -c ./install.sh
 	case "$arch" in # quick fix for aarch64
   		aarch64|unknown) 
