@@ -331,7 +331,7 @@ function soapyharogic_grmod_install() {
 }
 
 function hydrasdr_rfone_soapy_install() {
-    grclone_and_build "https://github.com/hydrasdr/SoapyHydraSDR.git" "" "hydrasdr_rfone_soapy_install"
+    grclone_and_build "https://github.com/PentHertz/SoapyHydraSDR.git" "" "hydrasdr_rfone_soapy_install"
 }
 
 function grmer_grmod_install() {
