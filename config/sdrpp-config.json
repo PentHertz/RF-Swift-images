@@ -106,7 +106,7 @@
         },
         "HydraSDR RFOne": {
             "enabled": true,
-            "module": "hydrasdr_rfone_source"
+            "module": "hydrasdr_source"
         },
         "LimeSDR Source": {
             "enabled": true,
