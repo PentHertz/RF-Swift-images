@@ -248,7 +248,9 @@ function hydrasdr_rfone_install() {
 	goodecho "[+] Installing HydraSDR bins and libs"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	cmake_clone_and_build "https://github.com/hydrasdr/rfone_host.git" "build" "" "" "hydrasdr_rfone_bin_install" -DCMAKE_INSTALL_PREFIX=/usr
+	cmake_clone_and_build "https://github.com/hydrasdr/rfone_host.git" "build" "" "" "hydrasdr_rfone_install" -DCMAKE_INSTALL_PREFIX=/usr
+	ln -s /usr/include/libhydrasdr/hydrasdr.h /usr/include/hydrasdr.h
+	ln -s /usr/include/libhydrasdr/hydrasdr_commands.h /usr/include/hydrasdr_commands.h
 }
 
 function hydrasdr_rfone_bin_install() {
