@@ -41,8 +41,7 @@ RUN	./entrypoint.sh gqrx_soft_install && \
 	./entrypoint.sh retrogram_soapysdr_soft_install && \
 	./entrypoint.sh luaradio_sdr_soft_install
 
-RUN ./entrypoint.sh sdrpp_soft_fromsource_install && \
-	./entrypoint.sh sdrpp_extramodules_install
+RUN ./entrypoint.sh sdrpp_soft_fromsource_install
 
 # Calibration tools
 RUN ./entrypoint.sh jupyter_soft_install && \
