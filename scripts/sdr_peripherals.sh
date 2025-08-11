@@ -352,9 +352,13 @@ function sdrpp_extramodules_install() {
             ;;
         aarch64)
             current_arch="arm64"
+            criticalecho-noexit "Error: Unsupported architecture $(uname -m)"
+            return 1
             ;;
         riscv64)
             current_arch="riscv64"
+            criticalecho-noexit "Error: Unsupported architecture $(uname -m)"
+            return 1
             ;;
         *)
             criticalecho-noexit "Error: Unsupported architecture $(uname -m)"
@@ -364,9 +368,8 @@ function sdrpp_extramodules_install() {
     
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
     cd /root/thirdparty
-    mkdir -p hydrasdr
-    cd hydrasdr
-    wget https://github.com/PentHertz/rfone/releases/download/rcbins/${current_arch}-hydrasdrpp.tar.gz
-    tar xvzf ${current_arch}-hydrasdrpp.tar.gz
-    mv hydrasdr_rfone_source.so /usr/lib/sdrpp/plugins/
+    mkdir -p signalhoundsdrpp
+    cd signalhoundsdrpp
+    wget https://github.com/PentHertz/SDRPlusPlus/releases/download/SignalHound/signalhound_bb_source-amd64.so
+    mv signalhound_bb_source-amd64.so /usr/lib/sdrpp/plugins/signalhound_bb_source.so
 }

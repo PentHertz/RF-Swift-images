@@ -30,7 +30,8 @@ RUN ./entrypoint.sh gnuradio_soft_install && \
 	./entrypoint.sh soapyrfnm_grmod_install && \
 	./entrypoint.sh hydrasdr_rfone_soapy_install && \
 	./entrypoint.sh soapyharogic_grmod_install && \
-	./entrypoint.sh grbladerf_grmod_install
+	./entrypoint.sh grbladerf_grmod_install && \
+	./entrypoint.sh grbb60_Receiver_grmod_install
 
 # Installing extra software
 RUN	./entrypoint.sh gqrx_soft_install && \
@@ -41,7 +42,8 @@ RUN	./entrypoint.sh gqrx_soft_install && \
 	./entrypoint.sh retrogram_soapysdr_soft_install && \
 	./entrypoint.sh luaradio_sdr_soft_install
 
-RUN ./entrypoint.sh sdrpp_soft_fromsource_install
+RUN ./entrypoint.sh sdrpp_soft_fromsource_install && \
+	./entrypoint.sh	sdrpp_extramodules_install
 
 # Calibration tools
 RUN ./entrypoint.sh jupyter_soft_install && \

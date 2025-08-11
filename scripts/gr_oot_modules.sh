@@ -278,9 +278,12 @@ function grbb60_Receiver_grmod_install() {
     cp libbb_api.* /usr/local/lib
     ldconfig -v -n /usr/local/lib
     ln -sf /usr/local/lib/libbb_api.so.5 /usr/local/lib/libbb_api.so
+    ln -sf /usr/local/lib/libbb_api.so.5 /usr/lib/libbb_api.so
+    ln -sf /usr/local/lib/libbb_api.so.5 /usr/lib/libbb_api.so.5
 
     # Clone and build the gr-bb60 repository
     grclone_and_build "https://github.com/SignalHound/gr-bb60.git" "" "grbb60_Receiver_grmod_install"
+    ln -sf /rftools/sdr/oot/gr-bb60/include/bb60/bb_api.h /usr/include/bb_api.h
 }
 
 function grm17_grmod_install() {
