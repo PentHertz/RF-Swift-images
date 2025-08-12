@@ -108,6 +108,10 @@
             "enabled": true,
             "module": "hydrasdr_source"
         },
+        "KC908": {
+            "enabled": true,
+            "module": "kcsdr_source"
+        },
         "LimeSDR Source": {
             "enabled": true,
             "module": "limesdr_source"
@@ -147,6 +151,10 @@
         "SDR++ Server Source": {
             "enabled": true,
             "module": "sdrpp_server_source"
+        },
+        "SignalHound BB": {
+            "enabled": true,
+            "module": "signalhound_bb_source"
         },
         "SpyServer Source": {
             "enabled": true,
