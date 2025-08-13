@@ -370,6 +370,6 @@ function sdrpp_extramodules_install() {
     cd /root/thirdparty
     mkdir -p signalhoundsdrpp
     cd signalhoundsdrpp
-    wget https://github.com/PentHertz/SDRPlusPlus/releases/download/SignalHound/signalhound_bb_source-amd64.so
-    mv signalhound_bb_source-amd64.so /usr/lib/sdrpp/plugins/signalhound_bb_source.so
+    wget -O /usr/lib/sdrpp/plugins/signalhound_bb_source.so https://github.com/PentHertz/SDRPlusPlus/releases/download/SignalHound/signalhound_bb_source-amd64.so
+    wget -O /usr/lib/sdrpp/plugins/kcsdr_source-amd64.so https://github.com/PentHertz/SDRPlusPlus/releases/download/KC908/kcsdr_source-amd64.so
 }

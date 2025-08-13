@@ -19,6 +19,7 @@ function kc908_sa_device() {
         chmod 666 ${INCLUDE_DIR}/kcsdr.h
         chmod 666 ${LIB_DIR}/libkcsdr.so
         rm -f /usr/lib/libftd3xx.so
+        cp ./linux/ftd3xx.h /usr/include/
         cp ./linux/libftd3xx.so /usr/lib/
         cp ./linux/libftd3xx.so.0.5.21 /usr/lib/
         cp ./linux/51-ftd3xx.rules /etc/udev/rules.d/
@@ -29,6 +30,7 @@ function kc908_sa_device() {
         && cmake -DCMAKE_INSTALL_PREFIX=/usr ../ \
         && make -j$(nproc); sudo make install
         cd /root/
+        #ln -s /usr/lib/python3.12/site-packages/gnuradio/kc_sdr /usr/lib/python3/dist-packages/gnuradio/ # quick fix for location
     else
         criticalecho-noexit "[!] Architecture is not amd64 or x86_64. Skipping installation."
     fi
