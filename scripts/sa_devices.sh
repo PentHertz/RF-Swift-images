@@ -30,7 +30,7 @@ function kc908_sa_device() {
         && cmake -DCMAKE_INSTALL_PREFIX=/usr ../ \
         && make -j$(nproc); sudo make install
         cd /root/
-        #ln -s /usr/lib/python3.12/site-packages/gnuradio/kc_sdr /usr/lib/python3/dist-packages/gnuradio/ # quick fix for location
+        ln -s /usr/lib/python3.12/site-packages/gnuradio/kc_sdr /usr/lib/python3/dist-packages/gnuradio/ # quick fix for location
     else
         criticalecho-noexit "[!] Architecture is not amd64 or x86_64. Skipping installation."
     fi
