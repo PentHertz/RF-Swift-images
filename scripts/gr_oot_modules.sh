@@ -335,7 +335,10 @@ function soapyharogic_grmod_install() {
 
 function hydrasdr_rfone_soapy_install() {
     grclone_and_build "https://github.com/PentHertz/SoapyHydraSDR.git" "" "hydrasdr_rfone_soapy_install"
-    rm /usr/lib/x86_64-linux-gnu/SoapySDR/modules0.8/libSoapyHydraSDR.so # removing extra lib
+    if [ -f /usr/lib/x86_64-linux-gnu/SoapySDR/modules0.8/libSoapyHydraSDR.so ]; then
+        rm /usr/lib/x86_64-linux-gnu/SoapySDR/modules0.8/libSoapyHydraSDR.so
+        echo "Removed libSoapyHydraSDR.so"
+    fi  
 }
 
 function grmer_grmod_install() {
