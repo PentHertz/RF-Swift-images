@@ -169,3 +169,82 @@ function john_soft_install() {
     make -j$(nproc)
     make install
 }
+
+function caido_install() {
+    goodecho "[+] Installing Caido Desktop"
+    install_dependencies "libnss3"
+    ARCH=$(uname -m)
+    
+    # Map architecture names to Caido's naming convention
+    case "$ARCH" in
+        x86_64|amd64)
+            CAIDO_ARCH="x86_64"
+            ;;
+        aarch64|arm64)
+            CAIDO_ARCH="aarch64"
+            ;;
+        *)
+            criticalecho-noexit "[!] Error: Unsupported architecture: $ARCH"
+            criticalecho-noexit "[!] Supported architectures: x86_64, aarch64/arm64"
+            exit 0
+            ;;
+    esac
+    
+    goodecho "[+] Detected architecture: $ARCH -> Using Caido $CAIDO_ARCH"
+    
+    # Install required dependencies
+    install_dependencies "curl jq tar"
+    
+    # Create directory structure
+    [ -d /security ] || mkdir /security
+    cd /security
+    mkdir -p Caido
+    cd Caido
+    
+    # Get the latest release and download appropriate desktop version
+    goodecho "[+] Fetching latest Caido desktop release information..."
+    CAIDO_URL=$(curl -s https://api.caido.io/releases/latest | jq -r ".links[] | select(.display == \"Linux Desktop ${CAIDO_ARCH} (tar.gz)\") | .link")
+    
+    if [ -z "$CAIDO_URL" ] || [ "$CAIDO_URL" = "null" ]; then
+        criticalecho-noexit "[!] Error: Could not fetch Caido desktop download URL for architecture $CAIDO_ARCH"
+        exit 0
+    fi
+    
+    goodecho "[+] Downloading Caido Desktop from: $CAIDO_URL"
+    curl -L "$CAIDO_URL" -o caido-desktop.tar.gz
+    
+    # Verify download
+    if [ ! -f caido-desktop.tar.gz ] || [ ! -s caido-desktop.tar.gz ]; then
+        criticalecho-noexit "[!] Error: Failed to download Caido Desktop or file is empty"
+        exit 0
+    fi
+    
+    # Extract
+    goodecho "[+] Extracting Caido Desktop..."
+    tar -xf caido-desktop.tar.gz
+    rm caido-desktop.tar.gz
+    
+    # Find the caido binary and make it executable
+    CAIDO_BINARY=$(find . -name "caido" -type f)
+    if [ -z "$CAIDO_BINARY" ]; then
+        criticalecho-noexit "[!] Error: Could not find caido binary in extracted files"
+        exit 0
+    fi
+    
+    chmod +x "$CAIDO_BINARY"
+    
+    # Create wrapper script with --no-sandbox flag
+    goodecho "[+] Creating Caido launcher script..."
+    cat > /usr/bin/caido << 'EOF'
+#!/bin/bash
+cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
+CAIDO_DIR="/security/Caido"
+CAIDO_BINARY=$(find "$CAIDO_DIR" -name "caido" -type f)
+exec "$CAIDO_BINARY" --no-sandbox "$@"
+EOF
+    
+    chmod +x /usr/bin/caido
+    
+    goodecho "[+] Caido Desktop installed successfully"
+    goodecho "[+] Usage: caido (launches with --no-sandbox automatically)"
+}
