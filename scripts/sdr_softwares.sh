@@ -616,3 +616,31 @@ function gnss_sdr_soft_install () {
     install_dependencies "libprotobuf-dev libcpu-features-dev protobuf-compiler python3-mako"
 	cmake_clone_and_build "https://github.com/gnss-sdr/gnss-sdr.git" "build" "" "" "gnss_sdr_soft_install"
 }
+
+function dumpvdl2_soft_install () {
+	goodecho "[+] Installing dumpvdl2 tools"
+	[ -d /root/thirdparty ] || mkdir /root/thirdparty
+	cd /root/thirdparty
+	cmake_clone_and_build "https://github.com/szpajder/libacars.git" "build" "" "" "install_libacars"
+	cmake_clone_and_build "https://github.com/szpajder/dumpvdl2.git" "build" "" "" "dumpvdl2_soft_install"
+}
+
+function readsb_soft_install () {
+	goodecho "[+] Installing readsb software"
+	[ -d /rftools/sdr ] || mkdir /rftools/sdr
+	cd /rftools/sdr
+	gitinstall "https://github.com/wiedehopf/readsb.git" "readsb"
+	cd readsb
+	make -j$(nproc)
+	ln -s readsb /usr/bin/readsb
+}
+
+function dump1090_soft_install () {
+	goodecho "[+] Installing dump1090 software"
+	[ -d /rftools/sdr ] || mkdir /rftools/sdr
+	cd /rftools/sdr
+	gitinstall "https://github.com/antirez/dump1090.git" "dump1090"
+	cd dump1090
+	make -j$(nproc)
+	ln -s dump1090 /usr/bin/dump1090
+}
