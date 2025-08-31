@@ -142,15 +142,15 @@ function imhex_soft_install() {
 	goodecho "[+] Cloning and installing ImHex"
 	[ -d /reverse ] || mkdir /reverse
 	cd /reverse
-	gitinstall "https://github.com/WerWolv/ImHex.git" "imhex_soft_install" "releases/v1.36.X"
+	gitinstall "https://github.com/WerWolv/ImHex.git" "imhex_soft_install" "releases/v1.37.X"
 	cd ImHex
 	chmod +x dist/get_deps_debian.sh
-	sed -i -e 's/g++-14/g++-12/g' -e 's/gcc-14/gcc-12/g' dist/get_deps_debian.sh
+	#sed -i -e 's/g++-14/g++-12/g' -e 's/gcc-14/gcc-12/g' dist/get_deps_debian.sh
 	goodecho "[+] Installing ImHex dependencies"
 	installfromnet "sh -c ./dist/get_deps_debian.sh"
 	mkdir -p build
 	cd build
-	CC=gcc-12 CXX=g++-12                          \
+	CC=gcc-14 CXX=g++-14                          \
 	cmake -G "Ninja"                              \
 	    -DCMAKE_BUILD_TYPE=Release                \
 	    -DCMAKE_INSTALL_PREFIX="/usr"             \
