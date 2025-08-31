@@ -170,7 +170,7 @@ function john_soft_install() {
     make install
 }
 
-function caido_install() {
+function caido_soft_install() {
     goodecho "[+] Installing Caido Desktop"
     install_dependencies "libnss3"
     ARCH=$(uname -m)

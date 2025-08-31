@@ -57,6 +57,7 @@ function docker_preinstall() {
     update-locale
 
     # Installing Cython
+    installfromnet "apt-fast install -y python3-pip" # forcing for RISC-V
     pip3install "cython"
 }
 
