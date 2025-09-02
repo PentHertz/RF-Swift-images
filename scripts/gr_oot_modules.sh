@@ -164,6 +164,11 @@ function grieee802-11_grmod_install() {
 
 function grieee802154_grmod_install() {
     grclone_and_build "https://github.com/bastibl/gr-ieee802-15-4.git" "" "grieee802154_grmod_install"
+    cd /rftools/sdr/oot/gr-ieee802-15-4/examples
+    grc *.grc
+    mkdir -p /root/.grc_gnuradio
+    cp *.yml /root/.grc_gnuradio/
+    cp *.py /root/.grc_gnuradio/
 }
 
 function grrds_grmod_install() {
