@@ -76,8 +76,7 @@ RUN ./entrypoint.sh grrds_grmod_install && \
 	./entrypoint.sh grguiextra_grmod_install && \
 	./entrypoint.sh grrftap_grmod_install && \
 	./entrypoint.sh grieee802-11ah_grmod_install && \
-	./entrypoint.sh grieee80211-grwifi_grmod_install && \
-	./entrypoint.sh grfosphor_grmod_install
+	./entrypoint.sh grieee80211-grwifi_grmod_install
 
 #RUN ./entrypoint.sh grccsds_move_rtsa_grmod_install #TODO: fix problem with strtod_l dependency
 #RUN ./entrypoint.sh deeptempest_grmod_install
@@ -118,6 +117,8 @@ RUN ./entrypoint.sh install_GPU_nvidia  && \
 	./entrypoint.sh install_GPU_Intel  && \
 	./entrypoint.sh install_GPU_Radeon_until5000  && \
 	./entrypoint.sh install_GPU_latest_Radeon
+
+RUN	./entrypoint.sh grfosphor_grmod_install
 
 RUN mkdir -p /sdrtools/
 COPY run /sdrtools/run

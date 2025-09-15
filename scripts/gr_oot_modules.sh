@@ -185,13 +185,16 @@ function grrds_grmod_install() {
 }
 
 function grfosphor_grmod_install() {
-    install_dependencies "cmake xorg-dev libglu1-mesa-dev opencl-headers libwayland-dev libxkbcommon-dev"
-    goodecho "[+] Cloning and building GLFW3"
-    [ -d /root/thirdparty ] || mkdir /root/thirdparty
-    cd /root/thirdparty
-    cmake_clone_and_build "https://github.com/glfw/glfw" "build" "" "" "grfosphor_grmod_install" -DBUILD_SHARED_LIBS=true
-    cd /root/thirdparty
-    grclone_and_build "https://github.com/osmocom/gr-fosphor.git" "" "grfosphor_grmod_install"
+    ARCH=$(uname -m)
+    if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then
+        install_dependencies "cmake xorg-dev libglu1-mesa-dev opencl-headers libwayland-dev libxkbcommon-dev"
+        goodecho "[+] Cloning and building GLFW3"
+        [ -d /root/thirdparty ] || mkdir /root/thirdparty
+        cd /root/thirdparty
+        cmake_clone_and_build "https://github.com/glfw/glfw" "build" "" "" "grfosphor_grmod_install" -DBUILD_SHARED_LIBS=true
+        cd /root/thirdparty
+        grclone_and_build "https://github.com/osmocom/gr-fosphor.git" "" "grfosphor_grmod_install"
+    fi
 }
 
 function grdroineid_grmod_install() { # TODO: for turbofec RISCV64:  gcc: error: '-march=native': ISA string must begin with rv32 or rv64 
