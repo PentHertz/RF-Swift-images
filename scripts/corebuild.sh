@@ -75,18 +75,70 @@ function rust_tools () {
 }
 
 function install_GPU_nvidia () {
-    goodecho "[+] Installing Nvidia libs and drivers"
+    ARCH=$(uname -m)
+
+    case "$ARCH" in
+        x86_64|amd64)
+            goodecho "[+] Architecture: x86_64"
+            goodecho "[+] Installing Nvidia libs and drivers"
+            ;;
+        *)
+            criticalecho-noexit "[-] Unsupported architecture: $ARCH"
+            exit 0
+            ;;
+    esac
     install_dependencies "nvidia-opencl-dev nvidia-modprobe nvidia-cuda-dev"
 }
 
 function install_GPU_Intel() {
-    goodecho "[+] Installing Intel GPU libs and drivers"
+    ARCH=$(uname -m)
+
+    case "$ARCH" in
+        x86_64|amd64)
+            goodecho "[+] Architecture: x86_64"
+            goodecho "[+] Installing Intel GPU libs and drivers"
+            ;;
+        *)
+            criticalecho-noexit "[-] Unsupported architecture: $ARCH"
+            exit 0
+            ;;
+    esac
     install_dependencies "intel-opencl-icd ocl-icd-dev ocl-icd-opencl-dev"
 }
 
 function install_GPU_Radeon_until5000() {
-    goodecho "[+] Installing Intel GPU libs and drivers"
+    ARCH=$(uname -m)
+
+    case "$ARCH" in
+        x86_64|amd64)
+            goodecho "[+] Installing Radeon old GPU libs and drivers"
+            ;;
+        *)
+            criticalecho-noexit "[-] Unsupported architecture: $ARCH"
+            exit 0
+            ;;
+    esac
     install_dependencies "mesa-opencl-icd"
+}
+
+function install_GPU_latest_Radeon() { # tested with GPD Pocket 4
+    ARCH=$(uname -m)
+
+    case "$ARCH" in
+        x86_64|amd64)
+            goodecho "[+] Installing Radeon latest GPU libs and drivers"
+            ;;
+        *)
+            criticalecho-noexit "[-] Unsupported architecture: $ARCH"
+            exit 0
+            ;;
+    esac
+    install_dependencies "mesa-utils vulkan-tools mesa-vulkan-drivers"
+    [ -d /root/thirdparty ] || mkdir /root/thirdparty
+    cd /root/thirdparty
+    installfromnet "wget https://repo.radeon.com/amdgpu-install/6.4.2.1/ubuntu/noble/amdgpu-install_6.4.60402-1_all.deb"
+    dpkg -i amdgpu-install_6.4.60402-1_all.deb
+    amdgpu-install -y --accept-eula
 }
 
 install_go() {
@@ -94,7 +146,7 @@ install_go() {
     ARCH=$(uname -m)
     
     # Define URL and version
-    GO_VERSION="1.25.0" # Replace with the latest version if needed
+    GO_VERSION="1.25.1" # Replace with the latest version if needed
     BASE_URL="https://golang.org/dl/"
 
     case "$ARCH" in
