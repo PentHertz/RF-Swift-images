@@ -6,7 +6,7 @@ function dsview_install() {
     ldconfig
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	git clone https://github.com/DreamSourceLab/DSView.git
+	installfromnet "git clone https://github.com/DreamSourceLab/DSView.git"
 	cd DSView
 	mkdir build
 	cd build
@@ -25,7 +25,7 @@ function flashrom_install() {
     install_dependencies "meson pciutils usbutils libpci-dev libusb-dev libftdi1 libftdi-dev zlib1g-dev subversion libusb-1.0-0-dev"
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
     cd /root/thirdparty
-    git clone https://github.com/flashrom/flashrom.git
+    installfromnet "git clone https://github.com/flashrom/flashrom.git"
     cd flashrom
     meson setup builddir
     meson compile -C builddir
@@ -216,4 +216,21 @@ function esptool_install() {
     ln -s /root/.local/bin/espefuse.py /usr/sbin/espefuse.py
     ln -s /root/.local/bin/espsecure.py /usr/sbin/espsecure.py
     ln -s /root/.local/bin/esptool.py /usr/sbin/esptool.py
+}
+
+function ngscopeclient_install() { # TODO: Optimize install starting from git clone
+    goodecho "[+] Installing ngscopeclient"
+    [ -d /hardware ] || mkdir /hardware
+    cd /hardware
+    install_dependencies "build-essential git cmake pkgconf libgtk-3-dev libsigc++-2.0-dev libyaml-cpp-dev catch2 libglfw3-dev curl xzip libhidapi-dev"
+    install_dependencies "libvulkan-dev glslang-dev glslang-tools spirv-tools glslc"
+    install_dependencies "liblxi-dev libtirpc-dev"
+    install_dependencies "texlive texlive-fonts-extra texlive-extra-utils"
+    installfromnet "git clone --recursive https://github.com/ngscopeclient/scopehal-apps.git"
+    cd scopehal-apps
+    mkdir build 
+    cd build 
+    cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF 
+    make -j$(nproc)
+    ln -s /hardware/scopehal-apps/build/src/ngscopeclient/ngscopeclient /usr/bin/ngscopeclient
 }
