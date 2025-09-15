@@ -37,6 +37,12 @@ RUN	./entrypoint.sh openFPGALoader_install && \
 
 RUN ./entrypoint.sh ngscopeclient_install
 
+# GPU drivers for NVidia, Intel and Radeon
+RUN ./entrypoint.sh install_GPU_nvidia  && \
+	./entrypoint.sh install_GPU_Intel  && \
+	./entrypoint.sh install_GPU_Radeon_until5000  && \
+	./entrypoint.sh install_GPU_latest_Radeon
+
 # Installing some pluggins
 RUN	./entrypoint.sh hydranfc_trace_plugin_install
 # TODO: more plugins form OpenOCD and so on...
