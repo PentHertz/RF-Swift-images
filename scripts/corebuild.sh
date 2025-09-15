@@ -123,7 +123,6 @@ function install_GPU_Radeon_until5000() {
 
 function install_GPU_latest_Radeon() { # tested with GPD Pocket 4
     ARCH=$(uname -m)
-
     case "$ARCH" in
         x86_64|amd64)
             goodecho "[+] Installing Radeon latest GPU libs and drivers"
@@ -133,6 +132,13 @@ function install_GPU_latest_Radeon() { # tested with GPD Pocket 4
             exit 0
             ;;
     esac
+    
+    # Add AMD GPG key using modern method
+    goodecho "[+] Adding AMD GPG key"
+    wget -qO /tmp/rocm.gpg.key https://repo.radeon.com/rocm/rocm.gpg.key
+    gpg --dearmor < /tmp/rocm.gpg.key | tee /usr/share/keyrings/amdgpu-archive-keyring.gpg > /dev/null
+    rm /tmp/rocm.gpg.key
+    
     install_dependencies "mesa-utils vulkan-tools mesa-vulkan-drivers"
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
     cd /root/thirdparty
