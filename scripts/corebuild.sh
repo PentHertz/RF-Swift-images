@@ -144,6 +144,7 @@ function install_GPU_latest_Radeon() { # tested with GPD Pocket 4
     cd /root/thirdparty
     installfromnet "wget https://repo.radeon.com/amdgpu-install/6.4.2.1/ubuntu/noble/amdgpu-install_6.4.60402-1_all.deb"
     dpkg -i amdgpu-install_6.4.60402-1_all.deb
+    apt update
     amdgpu-install -y --accept-eula
 }
 
