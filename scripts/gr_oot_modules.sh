@@ -162,6 +162,14 @@ function grieee802-11_grmod_install() {
     grclone_and_build "https://github.com/bastibl/gr-ieee802-11.git" "" "grieee802-11_grmod_install"
 }
 
+function grieee802-11ah_grmod_install() {
+    grclone_and_build "https://github.com/irongiant33/gr-ieee802-11ah.git" "" "grieee802-11ah_grmod_install"
+}
+
+function grieee80211-grwifi_grmod_install() { # gr-WiFi project
+    grclone_and_build "https://github.com/cloud9477/gr-ieee80211.git" "" "grieee80211-grwifi_grmod_install"
+}
+
 function grieee802154_grmod_install() {
     grclone_and_build "https://github.com/bastibl/gr-ieee802-15-4.git" "" "grieee802154_grmod_install"
     cd /rftools/sdr/oot/gr-ieee802-15-4/examples
@@ -366,4 +374,8 @@ function grguiextra_grmod_install() {
 
 function grrftap_grmod_install() {
     grclone_and_build "https://github.com/FlUxIuS/gr-rftap.git" "" "grrftap_grmod_install"
+}
+
+function grhtra_grmod_install() {
+    grclone_and_build "https://github.com/HAROGIC-Technologies/gr-htra.git" "" "grhtra_grmod_install"
 }
