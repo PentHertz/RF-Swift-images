@@ -133,18 +133,16 @@ function install_GPU_latest_Radeon() { # tested with GPD Pocket 4
             ;;
     esac
     
-    # Add AMD GPG key using modern method
+
+    # Add AMD GPG key before installing dependencies
     goodecho "[+] Adding AMD GPG key"
-    wget -qO /tmp/rocm.gpg.key https://repo.radeon.com/rocm/rocm.gpg.key
-    gpg --dearmor < /tmp/rocm.gpg.key | tee /usr/share/keyrings/amdgpu-archive-keyring.gpg > /dev/null
-    rm /tmp/rocm.gpg.key
+    apt-key adv --fetch-keys https://repo.radeon.com/rocm/rocm.gpg.key
     
     install_dependencies "mesa-utils vulkan-tools mesa-vulkan-drivers"
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
     cd /root/thirdparty
     installfromnet "wget https://repo.radeon.com/amdgpu-install/6.4.2.1/ubuntu/noble/amdgpu-install_6.4.60402-1_all.deb"
     dpkg -i amdgpu-install_6.4.60402-1_all.deb
-    apt update
     amdgpu-install -y --accept-eula
 }
 
