@@ -377,5 +377,8 @@ function grrftap_grmod_install() {
 }
 
 function grhtra_grmod_install() {
-    grclone_and_build "https://github.com/HAROGIC-Technologies/gr-htra.git" "" "grhtra_grmod_install"
+    ARCH=$(uname -m)
+    if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ] || [ "$ARCH" = "arm64" ] || [ "$ARCH" = "aarch64" ]; then
+        grclone_and_build "https://github.com/HAROGIC-Technologies/gr-htra.git" "" "grhtra_grmod_install"
+    fi
 }
