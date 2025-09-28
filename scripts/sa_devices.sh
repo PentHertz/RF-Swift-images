@@ -43,7 +43,7 @@ function signalhound_spike_sa_device() {
         colorecho "[+] Downloading Spike bin from SignalHound"
         [ -d /rftools/analysers ] || mkdir -p /rftools/analysers
         cd /rftools/analysers
-        filename="Spike(Ubuntu22.04x64)_4_0_5"
+        filename="Spike(Ubuntu22.04x64)_4_0_8"
         installfromnet "wget https://signalhound.com/sigdownloads/Spike/$filename.zip"
         unzip ${filename}.zip
         rm ${filename}.zip
@@ -56,7 +56,7 @@ function signalhound_spike_sa_device() {
 #!/bin/sh
 
 # Set the fixed path
-BASE_DIR="/rftools/analysers/Spike(Ubuntu22.04x64)_4_0_5"
+BASE_DIR="/rftools/analysers/Spike(Ubuntu22.04x64)_4_0_8"
 APPNAME="Spike"
 
 # Set up the environment variables
@@ -127,13 +127,13 @@ function harogic_sa_device() {
     sdkarch=""
 	case "$arch" in
   		x86_64|amd64)
-    		prog="SAStudio4_4.3.55.24v1_x86_64";;
+    		prog="SAStudio4_4.3.55.27_x86_64";;
   		aarch64|unknown|arm64) # We asume unknwon would be RPi 5 for now...?
-    		prog="SAStudio4_3.55.24_aarch64";;
+    		prog="SAStudio4_4.3.55.27_arm64";;
   		*)
     		printf 'Unsupported architecture: "%s"!\n' "$arch" >&2; exit 0;;
 	esac
-	installfromnet "wget https://github.com/PentHertz/rfswift_harogic_install/releases/download/0.55.61/$prog.zip"
+	installfromnet "wget https://github.com/PentHertz/rfswift_harogic_install/releases/download/v0.55.62/$prog.zip"
 	unzip "$prog.zip"
 	rm "$prog.zip"
 	cd "$prog"
@@ -146,7 +146,7 @@ function harogic_sa_device() {
 	esac
 	ln -s /usr/local/bin/sastudio/.sastudio.sh /usr/sbin/sastudio
 	goodecho "[+] Installing htraapi"
-	installfromnet "wget https://github.com/PentHertz/rfswift_harogic_install/releases/download/0.55.61/Install_HTRA_SDK.zip"
+	installfromnet "wget https://github.com/PentHertz/rfswift_harogic_install/releases/download/v0.55.62/Install_HTRA_SDK.zip"
     unzip Install_HTRA_SDK.zip
     rm Install_HTRA_SDK.zip
     cd Install_HTRA_SDK/
