@@ -342,11 +342,24 @@ function grnfc_grmod_install() {
 }
 
 function soapyrfnm_grmod_install() {
-    grclone_and_build "https://github.com/rfnm/soapy-rfnm.git" "" "soapyrfnm_grmod_install"
+    ARCH=$(uname -m)
+    if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then
+        grclone_and_build "https://github.com/rfnm/soapy-rfnm.git" "" "soapyrfnm_grmod_install"
+    elif [ "$ARCH" = "arm64" ] || [ "$ARCH" = "aarch64" ]; then
+        # ARM64 specific flags to avoid compiler segmentation faults
+        export MAKEFLAGS="-j1"  # Single-threaded compilation
+        grclone_and_build "https://github.com/rfnm/soapy-rfnm.git" "" "soapyrfnm_grmod_install" \
+            -DCMAKE_CXX_FLAGS="-fno-lto -O1 -fno-strict-aliasing" \
+            -DCMAKE_C_FLAGS="-fno-lto -O1 -fno-strict-aliasing"
+        unset MAKEFLAGS
+    fi
 }
 
 function soapyharogic_grmod_install() {
-    grclone_and_build "https://github.com/PentHertz/SoapyHarogic.git" "" "soapyharogic_grmod_install"
+    ARCH=$(uname -m)
+    if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ] || [ "$ARCH" = "arm64" ] || [ "$ARCH" = "aarch64" ]; then
+        grclone_and_build "https://github.com/PentHertz/SoapyHarogic.git" "" "soapyharogic_grmod_install"
+    fi
 }
 
 function hydrasdr_rfone_soapy_install() {
@@ -381,7 +394,12 @@ function grrftap_grmod_install() {
 
 function grhtra_grmod_install() {
     ARCH=$(uname -m)
-    if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ] || [ "$ARCH" = "arm64" ] || [ "$ARCH" = "aarch64" ]; then
+    if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then
         grclone_and_build "https://github.com/HAROGIC-Technologies/gr-htra.git" "" "grhtra_grmod_install"
+    elif [ "$ARCH" = "arm64" ] || [ "$ARCH" = "aarch64" ]; then
+        # ARM64 specific flags to avoid LTO segmentation fault
+        grclone_and_build "https://github.com/HAROGIC-Technologies/gr-htra.git" "" "grhtra_grmod_install" \
+            -DCMAKE_CXX_FLAGS="-fno-lto -O2" \
+            -DCMAKE_C_FLAGS="-fno-lto -O2"
     fi
 }
