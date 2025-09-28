@@ -177,7 +177,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=antsdr_uhd RTLSDR_BASE=rtlsdr make sdrsadevicesantsdr
 
   sdr_light:
-    runs-on: ubuntu-22.04
+    runs-on: Linux
     needs: sdrsa_devices
     strategy:
       matrix:
