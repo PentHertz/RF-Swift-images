@@ -547,7 +547,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make telecom_utils
 
   telecom_2Gto3G:
-    runs-on: ubuntu-22.04
+    runs-on: Linux
     needs: telecom_utils
     strategy:
       matrix:

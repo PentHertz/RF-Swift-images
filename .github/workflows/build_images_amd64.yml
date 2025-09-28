@@ -1069,7 +1069,7 @@ jobs:
             #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   telecom_2Gto3G:
-    runs-on: ubuntu-22.04
+    runs-on: Linux
     needs: telecom_utils
     strategy:
       matrix:
@@ -1215,7 +1215,7 @@ jobs:
             #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   telecom_4G_5GNSA:
-    runs-on: ubuntu-22.04
+    runs-on: Linux
     needs: telecom_utils
     strategy:
       matrix:
@@ -1361,7 +1361,7 @@ jobs:
             #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   telecom_5G_bladerf:
-    runs-on: ubuntu-22.04
+    runs-on: Linux
     needs: telecom_utils
     strategy:
       matrix:
@@ -1507,7 +1507,7 @@ jobs:
             #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   telecom_5G:
-    runs-on: ubuntu-22.04
+    runs-on: Linux
     needs: telecom_utils
     strategy:
       matrix:
