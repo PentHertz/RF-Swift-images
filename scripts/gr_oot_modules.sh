@@ -290,7 +290,7 @@ function grbb60_Receiver_grmod_install() {
     # Download and install the Signal Hound SDK
     installfromnet "wget https://signalhound.com/sigdownloads/SDK/signal_hound_sdk_09_16_25.zip"
     unzip signal_hound_sdk_09_16_25.zip
-    cd "signal_hound_sdk/device_apis/bb_series/lib/linux/Ubuntu 18.04"
+    cd "signal_hound_sdk/device_apis/bb_series/lib/linux_x64/Ubuntu 18.04"
     cp libbb_api.* /usr/local/lib
     ldconfig -v -n /usr/local/lib
     ln -sf /usr/local/lib/libbb_api.so.5 /usr/local/lib/libbb_api.so
