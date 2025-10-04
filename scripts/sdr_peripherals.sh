@@ -8,28 +8,32 @@ function ad_devices_install() {
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
 	cd /root/thirdparty
 	
-	# Install dependencies
-	install_dependencies "libxml2 libxml2-dev bison flex cmake git libaio libaio-dev boost-dev libusb-dev avahi-dev"
+	# Install dependencies (Alpine equivalents)
+	install_dependencies "libxml2 libxml2-dev bison flex cmake git libaio-dev boost-dev libusb-dev avahi-dev avahi-compat-libdns_sd"
 	
 	# Build libiio from source
 	goodecho "[+] Building libiio from source"
 	installfromnet "git clone https://github.com/analogdevicesinc/libiio.git"
 	cd libiio
-	cmake .
+	
+	# Run cmake in the source directory (not in build/)
+	cmake -DCMAKE_INSTALL_PREFIX=/usr .
 	make -j$(nproc)
 	make install
 	ldconfig 2>/dev/null || true
-	cd ..
+	
+	cd /root/thirdparty
 	
 	# Build libad9361-iio from source
 	goodecho "[+] Building libad9361-iio from source"
 	installfromnet "git clone https://github.com/analogdevicesinc/libad9361-iio.git"
 	cd libad9361-iio
-	cmake .
+	
+	# Run cmake in the source directory (not in build/)
+	cmake -DCMAKE_INSTALL_PREFIX=/usr .
 	make -j$(nproc)
 	make install
 	ldconfig 2>/dev/null || true
-	cd ..
 	
 	goodecho "[+] AD9361 and libiio installation completed"
 }
