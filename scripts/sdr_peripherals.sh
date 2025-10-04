@@ -383,22 +383,56 @@ function libresdr_b2x0_devices_install() {
 }
 
 function litexm2sdr_devices_install() {
-	install_dependencies "soapysdr-dev soapysdr"
 	goodecho "[+] Installing LiteX M2SDR"
-	[ -d /root/thirdparty ] || mkdir /root/thirdparty
+	
+	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
 	cd /root/thirdparty
+	
+	# Ensure SoapySDR is built from source first (it's not in Alpine repos)
+	if ! command -v SoapySDRUtil &> /dev/null; then
+		goodecho "[+] SoapySDR not found, building it first"
+		
+		# Build SoapySDR
+		installfromnet "git clone https://github.com/pothosware/SoapySDR.git"
+		cd SoapySDR
+		mkdir build
+		cd build
+		cmake -DCMAKE_INSTALL_PREFIX=/usr ../
+		make -j$(nproc)
+		make install
+		ldconfig 2>/dev/null || true
+		cd /root/thirdparty
+	fi
+	
 	gitinstall "https://github.com/FlUxIuS/litex_m2sdr.git" "litexm2sdr_devices_install" "main"
 	cd litex_m2sdr/litex_m2sdr/software
 	./build.py
 }
 
 function soapybladerf_srsran_install() {
-	install_dependencies "soapysdr-dev soapysdr"
 	goodecho "[+] Installing SoapySDR bladeRF for srsRAN"
-	[ -d /root/thirdparty ] || mkdir /root/thirdparty
+	
+	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
 	cd /root/thirdparty
+	
+	# Ensure SoapySDR is built from source first
+	if ! command -v SoapySDRUtil &> /dev/null; then
+		goodecho "[+] SoapySDR not found, building it first"
+		
+		# Build SoapySDR
+		installfromnet "git clone https://github.com/pothosware/SoapySDR.git"
+		cd SoapySDR
+		mkdir build
+		cd build
+		cmake -DCMAKE_INSTALL_PREFIX=/usr ../
+		make -j$(nproc)
+		make install
+		ldconfig 2>/dev/null || true
+		cd /root/thirdparty
+	fi
+	
 	cmake_clone_and_build "https://github.com/FlUxIuS/SoapyBladeRF_srsran.git" "build" "" "" "soapybladerf_srsran_install" "-DCMAKE_INSTALL_PREFIX=/usr"
-	ldconfig /usr/local/lib 2>/dev/null || true
+	ldconfig 2>/dev/null || true
 }
 
 function hydrasdr_rfone_install() {
