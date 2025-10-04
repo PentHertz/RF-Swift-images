@@ -3,8 +3,28 @@
 source common.sh
 
 function ad_devices_install() {
+function ad_devices_install() {
 	goodecho "[+] Installing AD libs and tools from package manager"
-	install_dependencies "ad9361 libiio libiio-dev"
+	install_dependencies "libiio-utils libiio-dev"
+	
+	goodecho "[!] Note: libad9361 may need to be compiled from source on Alpine"
+	goodecho "[!] Installing from libad9361-iio source"
+	
+	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
+	cd /root/thirdparty
+	
+	# Install build dependencies
+	install_dependencies "cmake git"
+	
+	# Clone and build libad9361-iio
+	installfromnet "git clone https://github.com/analogdevicesinc/libad9361-iio.git"
+	cd libad9361-iio
+	mkdir -p build
+	cd build
+	cmake -DCMAKE_INSTALL_PREFIX=/usr ..
+	make -j$(nproc)
+	make install
+	ldconfig /usr/local/lib 2>/dev/null || true
 }
 
 function uhd_devices_install() {
