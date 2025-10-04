@@ -236,15 +236,9 @@ function uvpython_install() {
     [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
     cd /root/thirdparty
     
-    # Install build dependencies for UV
+    # Install comprehensive build dependencies for UV
     goodecho "[+] Installing build dependencies for UV"
-    install_dependencies "cargo rust bzip2-dev"
-    
-    # Ensure rust/cargo is installed
-    if ! command -v cargo &> /dev/null; then
-        goodecho "[+] Installing Rust for UV compilation"
-        apk add --no-cache cargo rust
-    fi
+    install_dependencies "cargo rust bzip2-dev bzip2-static xz-dev zstd-dev zstd-static openssl-dev openssl-libs-static"
     
     gitinstall "https://github.com/astral-sh/uv.git" "uvpython_install"
     cd uv
@@ -259,6 +253,10 @@ function uvpython_install() {
     fi
     
     rustup update
+    
+    # Set RUSTFLAGS for static linking on musl
+    export RUSTFLAGS="-C target-feature=+crt-static"
+    
     cargo build --release
     
     # Copy binaries
