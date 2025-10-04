@@ -3,12 +3,12 @@
 source common.sh
 
 function ad_devices_install() {
-	goodecho "[+] Installing AD libs and tools"
+	goodecho "[+] Installing libiio for PlutoSDR support"
 	
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
 	cd /root/thirdparty
 	
-	# Install dependencies - Alpine equivalents
+	# Install dependencies
 	install_dependencies "libxml2 libxml2-dev bison flex cmake git libaio-dev boost-dev libusb-dev avahi-dev"
 	
 	# Build libiio from source
@@ -20,22 +20,11 @@ function ad_devices_install() {
 	make install
 	cd ..
 	
-	# Update library cache
 	ldconfig 2>/dev/null || true
 	
-	# Build libad9361-iio from source
-	goodecho "[+] Building libad9361-iio from source"
-	installfromnet "git clone https://github.com/analogdevicesinc/libad9361-iio.git"
-	cd libad9361-iio
-	cmake -DCMAKE_INSTALL_PREFIX=/usr .
-	make -j$(nproc)
-	make install
-	cd ..
-	
-	# Final library cache update
-	ldconfig 2>/dev/null || true
-	
-	goodecho "[+] AD9361 and libiio installation completed"
+	goodecho "[+] libiio installed successfully"
+	goodecho "[!] Note: libad9361-iio skipped - not required for basic PlutoSDR operation"
+	goodecho "[!] Install gr-iio separately for GNU Radio integration"
 }
 
 function uhd_devices_install() {
