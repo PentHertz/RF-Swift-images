@@ -21,18 +21,39 @@ function ad_devices_install() {
 	make -j$(nproc)
 	make install
 	
-	# Update library cache and ensure headers are findable
+	# Update library cache
 	ldconfig 2>/dev/null || true
 	
-	# Verify installation
-	goodecho "[+] Verifying libiio installation"
-	if [ ! -f /usr/include/iio.h ]; then
-		goodecho "[!] Warning: iio.h not found in /usr/include, checking /usr/local/include"
-		if [ -f /usr/local/include/iio.h ]; then
-			ln -sf /usr/local/include/iio.h /usr/include/iio.h
-		else
-			criticalecho-noexit "[!] Error: iio.h not found after installation"
-		fi
+	# Manually create pkg-config file if it doesn't exist
+	if [ ! -f /usr/lib/pkgconfig/libiio.pc ]; then
+		goodecho "[+] Creating libiio pkg-config file"
+		mkdir -p /usr/lib/pkgconfig
+		cat > /usr/lib/pkgconfig/libiio.pc <<EOF
+prefix=/usr
+exec_prefix=\${prefix}
+libdir=\${exec_prefix}/lib
+includedir=\${prefix}/include
+
+Name: libiio
+Description: Library for interfacing with IIO devices
+Version: 0.25
+Libs: -L\${libdir} -liio
+Cflags: -I\${includedir}
+EOF
+	fi
+	
+	# Update PKG_CONFIG_PATH
+	export PKG_CONFIG_PATH=/usr/lib/pkgconfig:/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
+	
+	# Verify libiio can be found
+	if pkg-config --exists libiio; then
+		goodecho "[+] libiio found via pkg-config"
+		LIBIIO_CFLAGS=$(pkg-config --cflags libiio)
+		LIBIIO_LIBS=$(pkg-config --libs libiio)
+	else
+		goodecho "[!] Setting libiio paths manually"
+		LIBIIO_CFLAGS="-I/usr/include"
+		LIBIIO_LIBS="-L/usr/lib -liio"
 	fi
 	
 	# Build libad9361-iio from source
@@ -43,14 +64,12 @@ function ad_devices_install() {
 	mkdir -p build
 	cd build
 	
-	# Set include and library paths explicitly
-	export C_INCLUDE_PATH=/usr/include:/usr/local/include
-	export CPLUS_INCLUDE_PATH=/usr/include:/usr/local/include
-	export LIBRARY_PATH=/usr/lib:/usr/local/lib
-	export LD_LIBRARY_PATH=/usr/lib:/usr/local/lib
-	
+	# Run cmake with explicit paths
 	cmake -DCMAKE_INSTALL_PREFIX=/usr \
 		  -DCMAKE_INSTALL_LIBDIR=lib \
+		  -DLIBIIO_INCLUDEDIR=/usr/include \
+		  -DLIBIIO_LIBRARIES=/usr/lib/libiio.so \
+		  -DPkgConfig_FOUND=TRUE \
 		  ..
 	
 	make -j$(nproc)
