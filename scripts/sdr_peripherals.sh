@@ -8,8 +8,8 @@ function ad_devices_install() {
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
 	cd /root/thirdparty
 	
-	# Install build dependencies
-	install_dependencies "cmake git libusb-dev libxml2-dev bison flex libaio-dev pkgconf"
+	# Install build dependencies including libaio
+	install_dependencies "cmake git libusb-dev libxml2-dev bison flex libaio-dev"
 	
 	# Build libiio from source
 	goodecho "[+] Building libiio from source"
@@ -21,15 +21,16 @@ function ad_devices_install() {
 	make -j$(nproc)
 	make install
 	
-	# Update library cache
-	ldconfig 2>/dev/null || true
+	# Update pkg-config and library cache
+	ldconfig /usr/local/lib 2>/dev/null || true
+	export PKG_CONFIG_PATH=/usr/lib/pkgconfig:/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
 	
-	# Find where libiio was actually installed
-	LIBIIO_INCLUDE=$(find /usr -name "iio.h" 2>/dev/null | head -1 | xargs dirname)
-	LIBIIO_LIB=$(find /usr -name "libiio.so*" 2>/dev/null | head -1)
-	
-	goodecho "[+] Found libiio include at: $LIBIIO_INCLUDE"
-	goodecho "[+] Found libiio library at: $LIBIIO_LIB"
+	# Verify libiio installation
+	if ! pkg-config --exists libiio; then
+		goodecho "[!] Warning: libiio pkg-config not found, setting paths manually"
+		export LIBIIO_INCLUDEDIR=/usr/include
+		export LIBIIO_LIBDIR=/usr/lib
+	fi
 	
 	# Build libad9361-iio from source
 	cd /root/thirdparty
@@ -39,16 +40,16 @@ function ad_devices_install() {
 	mkdir -p build
 	cd build
 	
-	# Use detected paths
+	# Use explicit paths if pkg-config fails
 	cmake -DCMAKE_INSTALL_PREFIX=/usr \
-	      -DLIBIIO_INCLUDEDIR="$LIBIIO_INCLUDE" \
-	      -DLIBIIO_LIBRARIES="$LIBIIO_LIB" \
-	      ..
-	      
+		  -DLIBIIO_INCLUDEDIR=/usr/include \
+		  -DLIBIIO_LIBRARIES=/usr/lib/libiio.so \
+		  ..
+	
 	make -j$(nproc)
 	make install
 	
-	ldconfig 2>/dev/null || true
+	ldconfig /usr/local/lib 2>/dev/null || true
 }
 
 function uhd_devices_install() {
