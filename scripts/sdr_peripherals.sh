@@ -9,7 +9,7 @@ function ad_devices_install() {
 	cd /root/thirdparty
 	
 	# Install build dependencies including libaio
-	install_dependencies "cmake git libusb-dev libxml2-dev bison flex libaio-dev"
+	install_dependencies "cmake git libusb-dev libxml2-dev bison flex libaio-dev pkgconf"
 	
 	# Build libiio from source
 	goodecho "[+] Building libiio from source"
@@ -17,19 +17,22 @@ function ad_devices_install() {
 	cd libiio
 	mkdir -p build
 	cd build
-	cmake -DCMAKE_INSTALL_PREFIX=/usr ..
+	cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib ..
 	make -j$(nproc)
 	make install
 	
-	# Update pkg-config and library cache
-	ldconfig /usr/local/lib 2>/dev/null || true
-	export PKG_CONFIG_PATH=/usr/lib/pkgconfig:/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
+	# Update library cache and ensure headers are findable
+	ldconfig 2>/dev/null || true
 	
-	# Verify libiio installation
-	if ! pkg-config --exists libiio; then
-		goodecho "[!] Warning: libiio pkg-config not found, setting paths manually"
-		export LIBIIO_INCLUDEDIR=/usr/include
-		export LIBIIO_LIBDIR=/usr/lib
+	# Verify installation
+	goodecho "[+] Verifying libiio installation"
+	if [ ! -f /usr/include/iio.h ]; then
+		goodecho "[!] Warning: iio.h not found in /usr/include, checking /usr/local/include"
+		if [ -f /usr/local/include/iio.h ]; then
+			ln -sf /usr/local/include/iio.h /usr/include/iio.h
+		else
+			criticalecho-noexit "[!] Error: iio.h not found after installation"
+		fi
 	fi
 	
 	# Build libad9361-iio from source
@@ -40,16 +43,22 @@ function ad_devices_install() {
 	mkdir -p build
 	cd build
 	
-	# Use explicit paths if pkg-config fails
+	# Set include and library paths explicitly
+	export C_INCLUDE_PATH=/usr/include:/usr/local/include
+	export CPLUS_INCLUDE_PATH=/usr/include:/usr/local/include
+	export LIBRARY_PATH=/usr/lib:/usr/local/lib
+	export LD_LIBRARY_PATH=/usr/lib:/usr/local/lib
+	
 	cmake -DCMAKE_INSTALL_PREFIX=/usr \
-		  -DLIBIIO_INCLUDEDIR=/usr/include \
-		  -DLIBIIO_LIBRARIES=/usr/lib/libiio.so \
+		  -DCMAKE_INSTALL_LIBDIR=lib \
 		  ..
 	
 	make -j$(nproc)
 	make install
 	
-	ldconfig /usr/local/lib 2>/dev/null || true
+	ldconfig 2>/dev/null || true
+	
+	goodecho "[+] AD9361 and libiio installation completed"
 }
 
 function uhd_devices_install() {
