@@ -6,7 +6,7 @@ function docker_preinstall() {
     # Basic update
     apk update
 
-    # Install necessary tools (Alpine equivalents)
+    # Install bash and basic tools first
     apk add --no-cache bash gnupg
 
     # Check if gpg-agent is installed
@@ -15,34 +15,69 @@ function docker_preinstall() {
         apk add --no-cache gnupg-agent
     fi
 
-    local packages=(
-        python3 python3-dev py3-pip tzdata wget curl sudo pulseaudio eudev py3-packaging vim
-        autoconf build-base cmake libsndfile-dev py3-scapy screen tcpdump libtool zeromq-dev
-        qt5-qtbase-dev xterm libusb-dev pkgconf git py3-numpy
-        libusb ncurses-dev libtecla libtecla-dev dialog procps unzip pciutils
-        texlive log4cpp-dev curl-dev libpcap-dev gtk+3.0-dev avahi avahi-tools dbus
-        qt5-qtbase qt5-qtbase-dev mesa-dev qt5-qtsvg-dev py3-setuptools 
-        libcanberra-gtk3 hdf5-dev
-        readline-dev automake qt5-qtdeclarative-dev qt5-qtserialport-dev fftw-dev
-        qt5-qtserialbus-dev qt5-qttools-dev py3-matplotlib talloc-dev
-        pulseaudio-utils alsa-lib-dev avahi-dev lxqt-about
-        py3-click-plugins py3-zmq rsync
-        iw wireless-tools usbutils bluez bluez-deprecated rfkill iproute2 iptables
-        qt6-qtbase-dev libc-dev py3-pipx
+    # Core system packages (guaranteed to exist)
+    local core_packages=(
+        python3 python3-dev py3-pip tzdata wget curl sudo vim
+        autoconf build-base cmake screen tcpdump libtool zeromq-dev
+        xterm libusb-dev pkgconf git py3-numpy
+        libusb ncurses-dev dialog procps unzip pciutils
+        curl-dev libpcap-dev gtk+3.0-dev avahi avahi-tools dbus
+        mesa-dev py3-setuptools readline-dev automake
+        fftw-dev py3-matplotlib talloc-dev
+        pulseaudio pulseaudio-utils alsa-lib-dev avahi-dev
+        py3-click-plugins rsync iw wireless-tools usbutils 
+        bluez bluez-deprecated iproute2 iptables util-linux
+        qt6-qtbase-dev libc-dev py3-pipx eudev py3-packaging
+    )
+
+    # Qt5 packages (may vary by Alpine version)
+    local qt5_packages=(
+        qt5-qtbase-dev qt5-qtbase qt5-qtsvg-dev
+        qt5-qtdeclarative-dev qt5-qtserialport-dev
+        qt5-qttools-dev
+    )
+
+    # Optional packages (might not exist in all Alpine versions)
+    local optional_packages=(
+        libsndfile-dev libcanberra-gtk3 hdf5-dev
+        texlive log4cpp-dev lxqt-about
     )
 
     # Creating a symlink for python3
     ln -sf /usr/bin/python3 /usr/bin/python
 
-    # Install all packages with apk
-    installfromnet "apk add --no-cache ${packages[@]}"
+    # Install core packages
+    goodecho "[+] Installing core packages"
+    installfromnet "apk add --no-cache ${core_packages[@]}"
 
-    # Configure locale (Alpine handles this differently with musl)
-    apk add --no-cache musl-locales musl-locales-lang
+    # Install Qt5 packages
+    goodecho "[+] Installing Qt5 packages"
+    installfromnet "apk add --no-cache ${qt5_packages[@]}" || {
+        criticalecho-noexit "[-] Some Qt5 packages failed to install"
+    }
+
+    # Install optional packages (don't fail if missing)
+    goodecho "[+] Installing optional packages"
+    for pkg in "${optional_packages[@]}"; do
+        apk add --no-cache "$pkg" 2>/dev/null || {
+            goodecho "[!] Package $pkg not available, skipping"
+        }
+    done
+
+    # Try to install qt5-qtserialbus-dev if available
+    apk add --no-cache qt5-qtserialbus-dev 2>/dev/null || {
+        goodecho "[!] qt5-qtserialbus-dev not available in this Alpine version"
+    }
+
+    # Configure locale
+    apk add --no-cache musl-locales musl-locales-lang 2>/dev/null || true
     export LANG=en_US.UTF-8
     export LC_ALL=en_US.UTF-8
 
-    # Installing Cython
+    # Install Python packages not available in Alpine repos
+    goodecho "[+] Installing Python packages via pip"
+    pip3install "scapy"
+    pip3install "pyzmq"
     pip3install "cython"
 }
 
@@ -121,7 +156,6 @@ function install_GPU_latest_Radeon() {
             ;;
     esac
     
-    # Alpine doesn't support AMD ROCm packages directly
     goodecho "[!] Note: AMD ROCm is not available for Alpine Linux"
     goodecho "[!] Installing Mesa Vulkan drivers as alternative"
     
@@ -136,7 +170,7 @@ install_go() {
     ARCH=$(uname -m)
     
     # Define URL and version
-    GO_VERSION="1.23.4" # Using a stable version known to work well
+    GO_VERSION="1.23.4"
     BASE_URL="https://golang.org/dl/"
 
     case "$ARCH" in
@@ -172,7 +206,7 @@ install_go() {
         echo 'export GOPROXY=direct' >> /root/.bashrc
         
         # Also add to .profile for better compatibility
-        grep -qxF 'export GOPROXY=direct' /root/.profile || echo 'export GOPROXY=direct' >> /root/.profile
+        grep -qxF 'export GOPROXY=direct' /root/.profile 2>/dev/null || echo 'export GOPROXY=direct' >> /root/.profile
     else
         echo "Download failed. Falling back to package manager."
         install_dependencies "go"
@@ -195,7 +229,7 @@ function install_mpir() {
     make install
     
     # Update library cache (Alpine uses ldconfig differently)
-    ldconfig /usr/local/lib || true
+    ldconfig /usr/local/lib 2>/dev/null || true
 }
 
 function uvpython_install() {
