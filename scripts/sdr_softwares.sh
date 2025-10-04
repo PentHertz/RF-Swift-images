@@ -35,7 +35,7 @@ function gnuradio_soft_install() {
 	
 	cmake -DCMAKE_INSTALL_PREFIX=/usr \
 		  -DENABLE_PYTHON=ON \
-		  -DENABLE_GR_QTGUI=OFF \
+		  -DENABLE_GR_QTGUI=ON \
 		  -DENABLE_GR_AUDIO=ON \
 		  ..
 	
