@@ -1,48 +1,50 @@
 #!/bin/bash
 
 function gnuradio_soft_install() {
-	goodecho "[+] Building GNU Radio from source with full Qt support"
-	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
-	cd /root/thirdparty
-	
-	install_dependencies "cmake build-base boost-dev fftw-dev cppunit-dev swig python3-dev py3-numpy py3-mako gsl-dev gmp-dev mpir-dev alsa-lib-dev jack-dev portaudio-dev libusb-dev zeromq-dev qt5-qtbase-dev qt5-qtsvg-dev qt5-qttools-dev git"
-	
-	# Build log4cpp
-	goodecho "[+] Building log4cpp"
-	installfromnet "wget https://downloads.sourceforge.net/project/log4cpp/log4cpp-1.1.x%20%28new%29/log4cpp-1.1/log4cpp-1.1.4.tar.gz"
-	tar xzf log4cpp-1.1.4.tar.gz
-	cd log4cpp
-	./configure --prefix=/usr
-	make -j$(nproc)
-	make install
-	cd ..
-	
-	pip3 install --break-system-packages click click-plugins packaging pygccxml pyqt5
-	
-	# Build pybind11
-	goodecho "[+] Building pybind11"
-	installfromnet "git clone https://github.com/pybind/pybind11.git"
-	cd pybind11
-	cmake -DCMAKE_INSTALL_PREFIX=/usr -DPYBIND11_TEST=OFF .
-	make install
-	cd ..
-	
-	# Build GNU Radio without QtGUI (use GQRX or other tools instead)
-	installfromnet "git clone --recursive https://github.com/gnuradio/gnuradio.git"
-	cd gnuradio
-	mkdir build
-	cd build
-	
-	cmake -DCMAKE_INSTALL_PREFIX=/usr \
-		  -DENABLE_PYTHON=ON \
-		  -DENABLE_GR_QTGUI=ON \
-		  -DENABLE_GR_AUDIO=ON \
-		  ..
-	
-	make -j$(nproc)
-	make install
-	ldconfig 2>/dev/null || true
+        goodecho "[+] Building GNU Radio from source with full Qt support"
+        [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
+        cd /root/thirdparty
+
+        install_dependencies "py3-numpy qwt-dev libvolk-dev py3-qt5 cmake build-base boost-dev fftw-dev cppunit-dev swig python3-dev py3-numpy py3-mako gsl-dev gmp-dev mpir-dev alsa-lib-dev jack-dev portaudio-dev libusb-dev zeromq-dev qt5-qtbase-dev qt5-qtsvg-dev qt5-qttools-dev git"
+
+        # Build log4cpp
+        goodecho "[+] Building log4cpp"
+        installfromnet "wget https://downloads.sourceforge.net/project/log4cpp/log4cpp-1.1.x%20%28new%29/log4cpp-1.1/log4cpp-1.1.4.tar.gz"
+        tar xzf log4cpp-1.1.4.tar.gz
+        cd log4cpp
+        ./configure --prefix=/usr
+        make -j$(nproc)
+        make install
+        cd ..
+
+        pip3install "click click-plugins packaging pygccxml numpy"
+
+        # Build pybind11
+        goodecho "[+] Building pybind11"
+        installfromnet "git clone https://github.com/pybind/pybind11.git"
+        cd pybind11
+        cmake -DCMAKE_INSTALL_PREFIX=/usr -DPYBIND11_TEST=OFF .
+        make install
+        cd ..
+
+        # Build GNU Radio without QtGUI (use GQRX or other tools instead)
+        installfromnet "git clone --recursive https://github.com/gnuradio/gnuradio.git"
+        cd gnuradio
+        mkdir build
+        cd build
+
+        cmake -DCMAKE_INSTALL_PREFIX=/usr \
+                  -DENABLE_PYTHON=ON \
+                  -DENABLE_GR_QTGUI=ON \
+                  -DENABLE_GR_AUDIO=ON \
+                  -DENABLE_DEFAULT=ON \
+                  ..
+
+        make -j$(nproc)
+        make install
+        ldconfig 2>/dev/null || true
 }
+
 
 function sdrangel_soft_install() {
 	goodecho "[!] Note: SDRAngel binary packages not available for Alpine"
