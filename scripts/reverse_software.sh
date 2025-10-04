@@ -164,11 +164,9 @@ function appledb_rs_soft_install() {
 	[ -d /reverse ] || mkdir /reverse
 	cd /reverse
 	gitinstall "https://github.com/FlUxIuS/appledb_rs.git" "appledb_rs"
-	rustup update stable
-    rustup default stable
 	cd appledb_rs
 	cargo build --release
-	#chmod +x ./build_web.sh
+	chmod +x ./build_web.sh
 	ln -s ./target/release/appledb_cli /usr/local/bin/appledb_cli
 	ln -s ./target/release/appledb_server /usr/local/bin/appledb_server
 }
