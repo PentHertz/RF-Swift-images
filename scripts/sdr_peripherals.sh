@@ -146,8 +146,38 @@ function hackrf_devices_install() {
 }
 
 function airspy_devices_install() {
-	goodecho "[+] Installing airspy from package manager"
-	install_dependencies "airspy airspy-dev"
+	goodecho "[+] Installing airspy from source"
+	
+	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
+	cd /root/thirdparty
+	
+	# Install build dependencies
+	install_dependencies "cmake git libusb-dev build-base pkgconf"
+	
+	# Build libairspy
+	goodecho "[+] Building libairspy from source"
+	installfromnet "git clone https://github.com/airspy/airspyone_host.git"
+	cd airspyone_host
+	mkdir build
+	cd build
+	cmake -DCMAKE_INSTALL_PREFIX=/usr -DINSTALL_UDEV_RULES=ON ../
+	make -j$(nproc)
+	make install
+	
+	# Build libairspyhf
+	cd /root/thirdparty
+	goodecho "[+] Building libairspyhf from source"
+	installfromnet "git clone https://github.com/airspy/airspyhf.git"
+	cd airspyhf
+	mkdir build
+	cd build
+	cmake -DCMAKE_INSTALL_PREFIX=/usr -DINSTALL_UDEV_RULES=ON ../
+	make -j$(nproc)
+	make install
+	
+	ldconfig 2>/dev/null || true
+	
+	goodecho "[+] Airspy devices installed from source"
 }
 
 function limesdr_devices_install() {
