@@ -337,8 +337,26 @@ function install_soapyPlutoSDR_modules() {
 }
 
 function rtlsdr_devices_install() {
-	goodecho "[+] Installing RTL-SDR's libs and tools from package manager"
-	install_dependencies "rtl-sdr rtl-sdr-dev"
+	goodecho "[+] Installing RTL-SDR's libs and tools from source"
+	
+	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
+	cd /root/thirdparty
+	
+	# Install build dependencies
+	install_dependencies "cmake git libusb-dev build-base pkgconf"
+	
+	# Build rtl-sdr from source
+	installfromnet "git clone https://github.com/osmocom/rtl-sdr.git"
+	cd rtl-sdr
+	mkdir build
+	cd build
+	cmake -DCMAKE_INSTALL_PREFIX=/usr -DINSTALL_UDEV_RULES=ON -DDETACH_KERNEL_DRIVER=ON ../
+	make -j$(nproc)
+	make install
+	
+	ldconfig 2>/dev/null || true
+	
+	goodecho "[+] RTL-SDR installed from source"
 }
 
 function rtlsdrv4_devices_install() {
