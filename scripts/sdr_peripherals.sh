@@ -8,8 +8,8 @@ function ad_devices_install() {
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
 	cd /root/thirdparty
 	
-	# Install build dependencies
-	install_dependencies "cmake git libusb-dev libxml2-dev bison flex"
+	# Install build dependencies including libaio
+	install_dependencies "cmake git libusb-dev libxml2-dev bison flex libaio-dev"
 	
 	# Build libiio from source
 	goodecho "[+] Building libiio from source"
