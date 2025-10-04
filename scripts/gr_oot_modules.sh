@@ -403,3 +403,7 @@ function grhtra_grmod_install() {
             -DCMAKE_C_FLAGS="-fno-lto -O2"
     fi
 }
+
+function soapyusdr_grmod_install() {
+    install_dependencies "soapysdr-module-usdr"
+}

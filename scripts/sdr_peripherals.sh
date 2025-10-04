@@ -380,3 +380,10 @@ function sdrpp_extramodules_install() {
     wget -O /usr/lib/sdrpp/plugins/signalhound_bb_source.so https://github.com/PentHertz/SDRPlusPlus/releases/download/SignalHound/signalhound_bb_source-amd64.so
     wget -O /usr/lib/sdrpp/plugins/kcsdr_source-amd64.so https://github.com/PentHertz/SDRPlusPlus/releases/download/KC908/kcsdr_source-amd64.so
 }
+
+function usdr_lib_install() {
+	goodecho "[+] Adding Wavelet repo"
+	add-apt-repository -y ppa:wavelet-lab/usdr-lib
+	goodecho "[+] Installing u/xSDR tools and libs"
+    install_dependencies "usdr-tools libusdr-dev"
+}
