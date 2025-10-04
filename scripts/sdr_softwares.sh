@@ -5,8 +5,8 @@ function gnuradio_soft_install() {
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
 	cd /root/thirdparty
 	
-	# Install build dependencies (log4cpp removed - not in Alpine)
-	install_dependencies "cmake build-base boost-dev fftw-dev cppunit-dev swig python3-dev py3-numpy py3-mako gsl-dev gmp-dev mpir-dev alsa-lib-dev jack-dev portaudio-dev libusb-dev zeromq-dev qt5-qtbase-dev"
+	# Install build dependencies
+	install_dependencies "cmake build-base boost-dev fftw-dev cppunit-dev swig python3-dev py3-numpy py3-mako gsl-dev gmp-dev mpir-dev alsa-lib-dev jack-dev portaudio-dev libusb-dev zeromq-dev qt5-qtbase-dev git"
 	
 	# Build log4cpp from source
 	goodecho "[+] Building log4cpp from source"
@@ -18,8 +18,18 @@ function gnuradio_soft_install() {
 	make install
 	cd ..
 	
-	# Install Python packages including pybind11
-	pip3 install --break-system-packages click click-plugins packaging pybind11 pygccxml
+	# Install Python packages
+	pip3 install --break-system-packages click click-plugins packaging pygccxml
+	
+	# Build and install pybind11 with CMake support
+	goodecho "[+] Building pybind11 from source"
+	installfromnet "git clone https://github.com/pybind/pybind11.git"
+	cd pybind11
+	mkdir build
+	cd build
+	cmake -DCMAKE_INSTALL_PREFIX=/usr -DPYBIND11_TEST=OFF ..
+	make install
+	cd ../..
 	
 	# Clone and build GNU Radio
 	installfromnet "git clone --recursive https://github.com/gnuradio/gnuradio.git"
@@ -36,7 +46,6 @@ function gnuradio_soft_install() {
 	make install
 	ldconfig 2>/dev/null || true
 }
-
 function sdrangel_soft_install() {
 	goodecho "[!] Note: SDRAngel binary packages not available for Alpine"
 	goodecho "[!] Use sdrangel_soft_fromsource_install instead"
