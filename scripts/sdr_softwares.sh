@@ -5,23 +5,31 @@ function gnuradio_soft_install() {
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
 	cd /root/thirdparty
 	
-	# Install build dependencies
-	install_dependencies "cmake build-base boost-dev fftw-dev cppunit-dev swig python3-dev py3-numpy py3-mako gsl-dev gmp-dev mpir-dev alsa-lib-dev jack-dev portaudio-dev libusb-dev zeromq-dev log4cpp-dev qt5-qtbase-dev py3-pybind11 py3-pybind11-dev"
+	# Install build dependencies (log4cpp removed - not in Alpine)
+	install_dependencies "cmake build-base boost-dev fftw-dev cppunit-dev swig python3-dev py3-numpy py3-mako gsl-dev gmp-dev mpir-dev alsa-lib-dev jack-dev portaudio-dev libusb-dev zeromq-dev qt5-qtbase-dev"
 	
-	# Install Python packages
-	pip3install "click click-plugins packaging pygccxml"
+	# Build log4cpp from source
+	goodecho "[+] Building log4cpp from source"
+	installfromnet "wget https://downloads.sourceforge.net/project/log4cpp/log4cpp-1.1.x%20%28new%29/log4cpp-1.1/log4cpp-1.1.4.tar.gz"
+	tar xzf log4cpp-1.1.4.tar.gz
+	cd log4cpp
+	./configure --prefix=/usr
+	make -j$(nproc)
+	make install
+	cd ..
 	
-	# Clone GNU Radio
+	# Install Python packages including pybind11
+	pip3 install --break-system-packages click click-plugins packaging pybind11 pygccxml
+	
+	# Clone and build GNU Radio
 	installfromnet "git clone --recursive https://github.com/gnuradio/gnuradio.git"
 	cd gnuradio
 	mkdir build
 	cd build
 	
-	# Configure with pybind11
 	cmake -DCMAKE_INSTALL_PREFIX=/usr \
 		  -DENABLE_PYTHON=ON \
 		  -DENABLE_GR_QTGUI=ON \
-		  -Dpybind11_DIR=/usr/lib/python3.12/site-packages/pybind11/share/cmake/pybind11 \
 		  ..
 	
 	make -j$(nproc)
