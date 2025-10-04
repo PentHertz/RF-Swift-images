@@ -8,74 +8,28 @@ function ad_devices_install() {
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
 	cd /root/thirdparty
 	
-	# Install build dependencies including libaio
-	install_dependencies "cmake git libusb-dev libxml2-dev bison flex libaio-dev pkgconf"
+	# Install dependencies
+	install_dependencies "libxml2 libxml2-dev bison flex cmake git libaio boost-dev libusb-dev avahi-dev"
 	
 	# Build libiio from source
 	goodecho "[+] Building libiio from source"
 	installfromnet "git clone https://github.com/analogdevicesinc/libiio.git"
 	cd libiio
-	mkdir -p build
-	cd build
-	cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib ..
+	cmake .
 	make -j$(nproc)
 	make install
-	
-	# Update library cache
 	ldconfig 2>/dev/null || true
-	
-	# Manually create pkg-config file if it doesn't exist
-	if [ ! -f /usr/lib/pkgconfig/libiio.pc ]; then
-		goodecho "[+] Creating libiio pkg-config file"
-		mkdir -p /usr/lib/pkgconfig
-		cat > /usr/lib/pkgconfig/libiio.pc <<EOF
-prefix=/usr
-exec_prefix=\${prefix}
-libdir=\${exec_prefix}/lib
-includedir=\${prefix}/include
-
-Name: libiio
-Description: Library for interfacing with IIO devices
-Version: 0.25
-Libs: -L\${libdir} -liio
-Cflags: -I\${includedir}
-EOF
-	fi
-	
-	# Update PKG_CONFIG_PATH
-	export PKG_CONFIG_PATH=/usr/lib/pkgconfig:/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
-	
-	# Verify libiio can be found
-	if pkg-config --exists libiio; then
-		goodecho "[+] libiio found via pkg-config"
-		LIBIIO_CFLAGS=$(pkg-config --cflags libiio)
-		LIBIIO_LIBS=$(pkg-config --libs libiio)
-	else
-		goodecho "[!] Setting libiio paths manually"
-		LIBIIO_CFLAGS="-I/usr/include"
-		LIBIIO_LIBS="-L/usr/lib -liio"
-	fi
+	cd ..
 	
 	# Build libad9361-iio from source
-	cd /root/thirdparty
 	goodecho "[+] Building libad9361-iio from source"
 	installfromnet "git clone https://github.com/analogdevicesinc/libad9361-iio.git"
 	cd libad9361-iio
-	mkdir -p build
-	cd build
-	
-	# Run cmake with explicit paths
-	cmake -DCMAKE_INSTALL_PREFIX=/usr \
-		  -DCMAKE_INSTALL_LIBDIR=lib \
-		  -DLIBIIO_INCLUDEDIR=/usr/include \
-		  -DLIBIIO_LIBRARIES=/usr/lib/libiio.so \
-		  -DPkgConfig_FOUND=TRUE \
-		  ..
-	
+	cmake .
 	make -j$(nproc)
 	make install
-	
 	ldconfig 2>/dev/null || true
+	cd ..
 	
 	goodecho "[+] AD9361 and libiio installation completed"
 }
