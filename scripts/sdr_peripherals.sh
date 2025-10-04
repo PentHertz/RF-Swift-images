@@ -8,8 +8,8 @@ function ad_devices_install() {
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
 	cd /root/thirdparty
 	
-	# Install build dependencies including libaio
-	install_dependencies "cmake git libusb-dev libxml2-dev bison flex libaio-dev"
+	# Install build dependencies
+	install_dependencies "cmake git libusb-dev libxml2-dev bison flex libaio-dev pkgconf"
 	
 	# Build libiio from source
 	goodecho "[+] Building libiio from source"
@@ -21,6 +21,16 @@ function ad_devices_install() {
 	make -j$(nproc)
 	make install
 	
+	# Update library cache
+	ldconfig 2>/dev/null || true
+	
+	# Find where libiio was actually installed
+	LIBIIO_INCLUDE=$(find /usr -name "iio.h" 2>/dev/null | head -1 | xargs dirname)
+	LIBIIO_LIB=$(find /usr -name "libiio.so*" 2>/dev/null | head -1)
+	
+	goodecho "[+] Found libiio include at: $LIBIIO_INCLUDE"
+	goodecho "[+] Found libiio library at: $LIBIIO_LIB"
+	
 	# Build libad9361-iio from source
 	cd /root/thirdparty
 	goodecho "[+] Building libad9361-iio from source"
@@ -28,11 +38,17 @@ function ad_devices_install() {
 	cd libad9361-iio
 	mkdir -p build
 	cd build
-	cmake -DCMAKE_INSTALL_PREFIX=/usr ..
+	
+	# Use detected paths
+	cmake -DCMAKE_INSTALL_PREFIX=/usr \
+	      -DLIBIIO_INCLUDEDIR="$LIBIIO_INCLUDE" \
+	      -DLIBIIO_LIBRARIES="$LIBIIO_LIB" \
+	      ..
+	      
 	make -j$(nproc)
 	make install
 	
-	ldconfig /usr/local/lib 2>/dev/null || true
+	ldconfig 2>/dev/null || true
 }
 
 function uhd_devices_install() {
