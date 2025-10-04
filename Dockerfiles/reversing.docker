@@ -34,7 +34,8 @@ RUN ./entrypoint.sh LLVM_install && \
 	./entrypoint.sh honggfuzz_install && \
 	./entrypoint.sh semgrep_install && \
 	./entrypoint.sh cppcheck_install && \
-	./entrypoint.sh clang_static_analyzer_install
+	./entrypoint.sh clang_static_analyzer_install && \
+	./entrypoint.sh appledb_rs_soft_install
 
 RUN ./entrypoint.sh cutter_soft_install &&\
 	./entrypoint.sh imhex_soft_install

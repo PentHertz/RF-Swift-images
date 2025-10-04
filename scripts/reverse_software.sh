@@ -158,4 +158,17 @@ function imhex_soft_install() {
 	ninja install
 }
 
+function appledb_rs_soft_install() {
+	goodecho "[+] Cloning and installing appledb_rs"
+	install_dependencies "yarnpkg"
+	[ -d /reverse ] || mkdir /reverse
+	cd /reverse
+	gitinstall "https://github.com/FlUxIuS/appledb_rs.git" "appledb_rs"
+	cd appledb_rs
+	cargo build --release
+	#chmod +x ./build_web.sh
+	ln -s ./target/release/appledb_cli /usr/local/bin/appledb_cli
+	ln -s ./target/release/appledb_server /usr/local/bin/appledb_server
+}
+
 ### TODO: more More!
