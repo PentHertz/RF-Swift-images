@@ -33,18 +33,34 @@ function uhd_devices_install() {
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
 	cd /root/thirdparty
 	
-	# Install dependencies including Python modules
+	# Install dependencies
 	install_dependencies "cmake build-base boost-dev libusb-dev python3-dev py3-numpy ncurses-dev"
 	
-	# Install Python packages via pip that aren't in Alpine repos
+	# Install Python packages via pip
 	pip3install "mako requests ruamel.yaml"
+	
+	# Find numpy include directory
+	NUMPY_INCLUDE=$(python3 -c "import numpy; print(numpy.get_include())" 2>/dev/null)
+	
+	if [ -z "$NUMPY_INCLUDE" ] || [ ! -f "$NUMPY_INCLUDE/numpy/arrayobject.h" ]; then
+		goodecho "[!] Numpy headers not found, disabling Python API"
+		ENABLE_PYTHON=OFF
+	else
+		goodecho "[+] Found numpy headers at: $NUMPY_INCLUDE"
+		ENABLE_PYTHON=ON
+		export CPLUS_INCLUDE_PATH="$NUMPY_INCLUDE:$CPLUS_INCLUDE_PATH"
+	fi
 	
 	# Clone and build UHD
 	installfromnet "git clone https://github.com/EttusResearch/uhd.git"
 	cd uhd/host
 	mkdir build
 	cd build
-	cmake -DCMAKE_INSTALL_PREFIX=/usr ..
+	
+	cmake -DCMAKE_INSTALL_PREFIX=/usr \
+		  -DENABLE_PYTHON_API=$ENABLE_PYTHON \
+		  ..
+	
 	make -j$(nproc)
 	make install
 	
