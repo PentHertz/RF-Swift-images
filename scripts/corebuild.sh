@@ -27,7 +27,7 @@ function docker_preinstall() {
         pulseaudio pulseaudio-utils alsa-lib-dev avahi-dev
         py3-click-plugins rsync iw wireless-tools usbutils 
         bluez bluez-deprecated iproute2 iptables util-linux
-        qt6-qtbase-dev libc-dev py3-pipx eudev py3-packaging
+        qt6-qtbase-dev libc-dev eudev py3-packaging
     )
 
     # Qt5 packages (may vary by Alpine version)
@@ -228,7 +228,6 @@ function install_mpir() {
     make -j$(nproc)
     make install
     
-    # Update library cache (Alpine uses ldconfig differently)
     ldconfig /usr/local/lib 2>/dev/null || true
 }
 
