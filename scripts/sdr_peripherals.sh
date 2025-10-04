@@ -89,6 +89,13 @@ function nuand_devices_install() {
 	cp /root/rules/88-nuand-bladerf1.rules.in /etc/udev/rules.d/
 	cp /root/rules/88-nuand-bladerf2.rules.in /etc/udev/rules.d/
 	cp /root/rules/88-nuand-bootloader.rules.in /etc/udev/rules.d/
+
+	#installing Python bindings
+	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
+    cd /root/thirdparty
+	git clone https://github.com/Nuand/bladeRF.git
+   	cd bladeRF/host/libraries/libbladeRF_bindings/python
+   	python3 setup.py install
 }
 
 function nuand_devices_fromsource_install() {
