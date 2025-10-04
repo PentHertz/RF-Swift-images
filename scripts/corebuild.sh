@@ -232,36 +232,21 @@ function install_mpir() {
 }
 
 function uvpython_install() {
-    goodecho "[+] Installing UV for fast Python install"
-    [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
-    cd /root/thirdparty
+    goodecho "[+] Installing UV via pip (pre-built binary)"
     
-    # Install comprehensive build dependencies for UV
-    goodecho "[+] Installing build dependencies for UV"
-    install_dependencies "cargo rust bzip2-dev bzip2-static xz-dev zstd-dev zstd-static openssl-dev openssl-libs-static"
+    # Install uv using pip (provides pre-built binaries)
+    pip3install uv
     
-    gitinstall "https://github.com/astral-sh/uv.git" "uvpython_install"
-    cd uv
+    # Ensure uv is in PATH
+    export PATH="$HOME/.local/bin:$PATH"
+    grep -qxF 'export PATH="$HOME/.local/bin:$PATH"' /root/.bashrc || echo 'export PATH="$HOME/.local/bin:$PATH"' >> /root/.bashrc
     
-    # Ensure cargo is in PATH
-    export PATH="$HOME/.cargo/bin:$PATH"
-    
-    # Install rustup if not already installed
-    if ! command -v rustup &> /dev/null; then
-        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-        source $HOME/.cargo/env
+    # Verify installation
+    if command -v uv &> /dev/null; then
+        goodecho "[+] UV $(uv --version) installed successfully"
+    else
+        criticalecho-noexit "[-] UV installation failed"
     fi
-    
-    rustup update
-    
-    # Set RUSTFLAGS for static linking on musl
-    export RUSTFLAGS="-C target-feature=+crt-static"
-    
-    cargo build --release
-    
-    # Copy binaries
-    cp $(pwd)/target/release/uv /usr/bin/ 2>/dev/null || true
-    cp $(pwd)/target/release/uvx /usr/bin/ 2>/dev/null || true
     
     goodecho "[+] UV installation completed"
 }
