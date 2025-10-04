@@ -52,6 +52,42 @@ function apt-fast() {
 }
 export -f apt-fast
 
+# Alpine-compatible chsh wrapper
+function chsh() {
+    local shell=""
+    local user="$(whoami)"
+    
+    # Parse arguments
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -s|--shell)
+                shell="$2"
+                shift 2
+                ;;
+            *)
+                user="$1"
+                shift
+                ;;
+        esac
+    done
+    
+    # If no shell specified, return
+    if [ -z "$shell" ]; then
+        echo "Usage: chsh -s <shell> [username]"
+        return 1
+    fi
+    
+    # Change shell in /etc/passwd
+    if [ -f /etc/passwd ]; then
+        sed -i "s|^\($user:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:\).*|\1$shell|" /etc/passwd
+        echo "Changed shell for $user to $shell"
+    else
+        echo "Error: Could not change shell"
+        return 1
+    fi
+}
+export -f chsh
+
 ### Echo functions
 
 function colorecho () {
