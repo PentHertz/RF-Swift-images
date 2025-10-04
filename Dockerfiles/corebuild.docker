@@ -2,14 +2,12 @@
 # Install type: subbuild for SDR
 # Author(s): Sébastien Dudek (@FlUxIuS) @Penthertz
 # website: penthertz.com
-
-FROM ubuntu:24.04
-
+FROM alpine:3.20
 LABEL "org.container.project"="rfswift"
 LABEL "org.container.author"="Sébastien Dudek (FlUxIuS)"
 
-RUN echo 'APT::Install-Suggests "0";' >> /etc/apt/apt.conf.d/00-docker
-RUN echo 'APT::Install-Recommends "0";' >> /etc/apt/apt.conf.d/00-docker
+# Install bash first (Alpine uses ash by default)
+RUN apk add --no-cache bash
 
 # Set-up scripts
 COPY scripts /root/scripts/
@@ -18,13 +16,12 @@ COPY config /root/config/
 COPY run/update_rfscripts /usr/sbin
 COPY run/libresdr_swapfpga /usr/sbin
 COPY run/avahicontainer_start /usr/sbin
-
 WORKDIR /root/scripts/
 RUN chmod +x entrypoint.sh
 
 # Forcing upgrade for the base image
-RUN apt update -y && \
-	apt upgrade -y
+RUN apk update && \
+    apk upgrade
 
 # Pre-installation tools
 RUN ./entrypoint.sh docker_preinstall
@@ -34,11 +31,11 @@ RUN ./entrypoint.sh install_go
 
 # Installing Terminal harnesses
 RUN ./entrypoint.sh fzf_soft_install && \
-	./entrypoint.sh zsh_tools_install && \
-	./entrypoint.sh arsenal_soft_install && \
-	./entrypoint.sh audio_tools && \
-	./entrypoint.sh rust_tools && \
-	./entrypoint.sh atuin_soft_install
+    ./entrypoint.sh zsh_tools_install && \
+    ./entrypoint.sh arsenal_soft_install && \
+    ./entrypoint.sh audio_tools && \
+    ./entrypoint.sh rust_tools && \
+    ./entrypoint.sh atuin_soft_install
 
 RUN ./entrypoint.sh uvpython_install
 
@@ -47,9 +44,10 @@ COPY config/.zshrc /root/.zshrc
 # Cleaning and quitting
 WORKDIR /root/
 RUN rm -rf /root/thirdparty && \
-	rm -rf /root/rules/ && \
-	rm -rf /root/config/ && \
-	apt-fast clean
-RUN DEBIAN_FRONTEND=noninteractive rm -rf /var/lib/apt/lists/*
-#RUN useradd -ms /bin/bash phzapp
+    rm -rf /root/rules/ && \
+    rm -rf /root/config/ && \
+    rm -rf /var/cache/apk/* && \
+    rm -rf /tmp/*
+
+#RUN adduser -D -s /bin/bash phzapp
 #USER phzapp

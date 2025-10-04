@@ -2,8 +2,6 @@
 
 set -eo pipefail
 
-### Part picket from Exegol project with love <3 (https://github.com/ThePorgs/Exegol)
-
 export RED='\033[1;31m'
 export BLUE='\033[1;34m'
 export GREEN='\033[1;32m'
@@ -44,7 +42,8 @@ function installfromnet() {
 function install_dependencies() {
     local dependencies=$1
     goodecho "[+] Installing dependencies: ${dependencies}"
-    installfromnet "apt-fast install -y ${dependencies}"
+    # Changed from apt-fast to apk for Alpine
+    installfromnet "apk add --no-cache ${dependencies}"
 }
 
 function grclone_and_build() {
@@ -110,7 +109,7 @@ function gitinstall() {
         if [ $? -eq 0 ]; then
             # Ensure the directory /var/lib/db/ exists, create if not
             if [ ! -d "/var/lib/db/" ]; then
-                sudo mkdir -p /var/lib/db/
+                mkdir -p /var/lib/db/
             fi
             
             # Get the absolute path of the repository
@@ -123,7 +122,7 @@ function gitinstall() {
             cd ..
 
             # Append the repository name, absolute path, and method to the file
-            echo "$repo_name:$repo_abs_path:$method" | sudo tee -a /var/lib/db/rfswift_github.lst > /dev/null
+            echo "$repo_name:$repo_abs_path:$method" | tee -a /var/lib/db/rfswift_github.lst > /dev/null
 
             colorecho "Repository '$repo_name' cloned successfully."
             colorecho "Added '$repo_name $repo_abs_path' to /var/lib/db/rfswift_github.lst"
@@ -180,7 +179,7 @@ function cmake_clone_and_build() {
         echo "Running CMake and building..."
         cmake "${cmake_args[@]}" ../
         make -j$(nproc)
-        sudo make install
+        make install
         cd ..
         rm -rf build/ # Cleaning build directory
     fi
@@ -196,9 +195,9 @@ function check_and_install_lib() {
     else
         colorecho "[!] $lib_name is not installed. Attempting to install..."
         
-        # Attempt to install the library using apt-get
-        installfromnet "apt-fast update"
-        installfromnet "apt-fast -y install $lib_name"
+        # Attempt to install the library using apk (Alpine's package manager)
+        installfromnet "apk update"
+        installfromnet "apk add --no-cache $lib_name"
 
         # Verify the installation
         if pkg-config --exists "$pkg_config_name"; then
