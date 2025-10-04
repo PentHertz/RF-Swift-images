@@ -236,6 +236,10 @@ function uvpython_install() {
     [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
     cd /root/thirdparty
     
+    # Install build dependencies for UV
+    goodecho "[+] Installing build dependencies for UV"
+    install_dependencies "cargo rust bzip2-dev"
+    
     # Ensure rust/cargo is installed
     if ! command -v cargo &> /dev/null; then
         goodecho "[+] Installing Rust for UV compilation"
