@@ -28,20 +28,25 @@ function ad_devices_install() {
 }
 
 function uhd_devices_install() {
-	goodecho "[+] Building UHD from source (not available in Alpine repos)"
+	goodecho "[+] Building UHD from source (without Python bindings)"
 	
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
 	cd /root/thirdparty
 	
 	# Install dependencies
-	install_dependencies "cmake build-base boost-dev libusb-dev python3-dev py3-mako py3-numpy ncurses-dev"
+	install_dependencies "cmake build-base boost-dev libusb-dev ncurses-dev"
 	
 	# Clone and build UHD
 	installfromnet "git clone https://github.com/EttusResearch/uhd.git"
 	cd uhd/host
 	mkdir build
 	cd build
-	cmake -DCMAKE_INSTALL_PREFIX=/usr ..
+	
+	# Disable Python bindings to avoid numpy header issues
+	cmake -DCMAKE_INSTALL_PREFIX=/usr \
+		  -DENABLE_PYTHON_API=OFF \
+		  ..
+	
 	make -j$(nproc)
 	make install
 	
