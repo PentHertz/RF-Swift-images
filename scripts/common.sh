@@ -238,3 +238,28 @@ function pip3install() {
     criticalecho-noexit "[-] Failed to install Python package(s): ${install_args}"
     return 1
 }
+
+function apt-fast() {
+    local cmd="$1"
+    shift
+    
+    case "$cmd" in
+        install)
+            apk add --no-cache "$@"
+            ;;
+        update)
+            apk update
+            ;;
+        upgrade)
+            apk upgrade
+            ;;
+        clean)
+            rm -rf /var/cache/apk/*
+            ;;
+        *)
+            echo "apt-fast command '$cmd' not supported in Alpine wrapper"
+            return 1
+            ;;
+    esac
+}
+export -f apt-fast
