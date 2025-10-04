@@ -181,15 +181,101 @@ function airspy_devices_install() {
 }
 
 function limesdr_devices_install() {
-	goodecho "[+] Installing LimeSDR's libs and tools from package manager"
-	install_dependencies "soapysdr limesuite limesuite-dev"
+	goodecho "[+] Installing LimeSDR's libs and tools from source"
+	
+	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
+	cd /root/thirdparty
+	
+	# Install build dependencies
+	install_dependencies "cmake git build-base libusb-dev sqlite-dev"
+	
+	# Build SoapySDR first (LimeSuite depends on it)
+	goodecho "[+] Building SoapySDR from source"
+	installfromnet "git clone https://github.com/pothosware/SoapySDR.git"
+	cd SoapySDR
+	mkdir build
+	cd build
+	cmake -DCMAKE_INSTALL_PREFIX=/usr ../
+	make -j$(nproc)
+	make install
+	
+	ldconfig 2>/dev/null || true
+	
+	# Build LimeSuite
+	cd /root/thirdparty
+	goodecho "[+] Building LimeSuite from source"
+	installfromnet "git clone https://github.com/myriadrf/LimeSuite.git"
+	cd LimeSuite
+	mkdir builddir
+	cd builddir
+	cmake -DCMAKE_INSTALL_PREFIX=/usr -DINSTALL_UDEV_RULES=ON ../
+	make -j$(nproc)
+	make install
+	
+	ldconfig 2>/dev/null || true
+	
+	goodecho "[+] LimeSDR and SoapySDR installed from source"
 }
 
 function install_soapy_modules() {
-	goodecho "[+] Installing Soapy extra modules"
-	install_dependencies "soapysdr-dev soapysdr-module-rtlsdr soapysdr-module-hackrf soapysdr-module-uhd soapysdr-module-airspy"
-	# Note: Some modules may not be available in Alpine repos
-	goodecho "[!] Note: Some SoapySDR modules may need to be compiled from source on Alpine"
+	goodecho "[+] Installing Soapy extra modules from source"
+	
+	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
+	cd /root/thirdparty
+	
+	# Ensure SoapySDR is installed first
+	if ! command -v SoapySDRUtil &> /dev/null; then
+		goodecho "[!] SoapySDR not found, installing it first"
+		limesdr_devices_install
+	fi
+	
+	# Build SoapyRTLSDR
+	goodecho "[+] Building SoapyRTLSDR"
+	installfromnet "git clone https://github.com/pothosware/SoapyRTLSDR.git"
+	cd SoapyRTLSDR
+	mkdir build
+	cd build
+	cmake -DCMAKE_INSTALL_PREFIX=/usr ../
+	make -j$(nproc)
+	make install
+	
+	# Build SoapyHackRF
+	cd /root/thirdparty
+	goodecho "[+] Building SoapyHackRF"
+	installfromnet "git clone https://github.com/pothosware/SoapyHackRF.git"
+	cd SoapyHackRF
+	mkdir build
+	cd build
+	cmake -DCMAKE_INSTALL_PREFIX=/usr ../
+	make -j$(nproc)
+	make install
+	
+	# Build SoapyUHD
+	cd /root/thirdparty
+	goodecho "[+] Building SoapyUHD"
+	installfromnet "git clone https://github.com/pothosware/SoapyUHD.git"
+	cd SoapyUHD
+	mkdir build
+	cd build
+	cmake -DCMAKE_INSTALL_PREFIX=/usr ../
+	make -j$(nproc)
+	make install
+	
+	# Build SoapyAirspy
+	cd /root/thirdparty
+	goodecho "[+] Building SoapyAirspy"
+	installfromnet "git clone https://github.com/pothosware/SoapyAirspy.git"
+	cd SoapyAirspy
+	mkdir build
+	cd build
+	cmake -DCMAKE_INSTALL_PREFIX=/usr ../
+	make -j$(nproc)
+	make install
+	
+	ldconfig 2>/dev/null || true
+	
+	goodecho "[+] Soapy modules installed from source"
+	goodecho "[!] Note: Some modules (osmosdr, mirisdr, rfspace) may need separate installation"
 }
 
 function install_soapyPlutoSDR_modules() {
