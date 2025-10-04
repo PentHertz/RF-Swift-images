@@ -1,240 +1,264 @@
 #!/bin/bash
 
-set -eo pipefail
+function docker_preinstall() {
+    export TZ=Etc/UTC
 
-export RED='\033[1;31m'
-export BLUE='\033[1;34m'
-export GREEN='\033[1;32m'
-export NOCOLOR='\033[0m'
+    # Basic update
+    apk update
 
-### Echo functions
+    # Install bash and basic tools first
+    apk add --no-cache bash gnupg
 
-function colorecho () {
-    echo -e "${BLUE}$*${NOCOLOR}"
-}
+    # Check if gpg-agent is installed
+    if ! command -v gpg-agent &> /dev/null; then
+        echo "Installing gnupg-agent..."
+        apk add --no-cache gnupg-agent
+    fi
 
-function criticalecho () {
-    echo -e "${RED}$*${NOCOLOR}" 2>&1
-    exit 1
-}
+    # Core system packages (guaranteed to exist)
+    local core_packages=(
+        python3 python3-dev py3-pip tzdata wget curl sudo vim
+        autoconf build-base cmake screen tcpdump libtool zeromq-dev
+        xterm libusb-dev pkgconf git py3-numpy
+        libusb ncurses-dev dialog procps unzip pciutils
+        curl-dev libpcap-dev gtk+3.0-dev avahi avahi-tools dbus
+        mesa-dev py3-setuptools readline-dev automake
+        fftw-dev py3-matplotlib talloc-dev
+        pulseaudio pulseaudio-utils alsa-lib-dev avahi-dev
+        py3-click-plugins rsync iw wireless-tools usbutils 
+        bluez bluez-deprecated iproute2 iptables util-linux
+        qt6-qtbase-dev libc-dev py3-pipx eudev py3-packaging
+    )
 
-function criticalecho-noexit () {
-    echo -e "${RED}$*${NOCOLOR}" 2>&1
-}
+    # Qt5 packages (may vary by Alpine version)
+    local qt5_packages=(
+        qt5-qtbase-dev qt5-qtbase qt5-qtsvg-dev
+        qt5-qtdeclarative-dev qt5-qtserialport-dev
+        qt5-qttools-dev
+    )
 
-### </3 Love comes to an end
+    # Optional packages (might not exist in all Alpine versions)
+    local optional_packages=(
+        libsndfile-dev libcanberra-gtk3 hdf5-dev
+        texlive log4cpp-dev lxqt-about
+    )
 
-function goodecho () {
-    echo -e "${GREEN}$*${NOCOLOR}" 2>&1
-}
+    # Creating a symlink for python3
+    ln -sf /usr/bin/python3 /usr/bin/python
 
-function installfromnet() {
-    n=0
-    until [ "$n" -ge 5 ]
-    do
-        colorecho "[Internet][Download] Try number: $n"
-        $* && break 
-        n=$((n+1)) 
-        sleep 15
+    # Install core packages
+    goodecho "[+] Installing core packages"
+    installfromnet "apk add --no-cache ${core_packages[@]}"
+
+    # Install Qt5 packages
+    goodecho "[+] Installing Qt5 packages"
+    installfromnet "apk add --no-cache ${qt5_packages[@]}" || {
+        criticalecho-noexit "[-] Some Qt5 packages failed to install"
+    }
+
+    # Install optional packages (don't fail if missing)
+    goodecho "[+] Installing optional packages"
+    for pkg in "${optional_packages[@]}"; do
+        apk add --no-cache "$pkg" 2>/dev/null || {
+            goodecho "[!] Package $pkg not available, skipping"
+        }
     done
+
+    # Try to install qt5-qtserialbus-dev if available
+    apk add --no-cache qt5-qtserialbus-dev 2>/dev/null || {
+        goodecho "[!] qt5-qtserialbus-dev not available in this Alpine version"
+    }
+
+    # Configure locale
+    apk add --no-cache musl-locales musl-locales-lang 2>/dev/null || true
+    export LANG=en_US.UTF-8
+    export LC_ALL=en_US.UTF-8
+
+    goodecho "[+] Installing Python packages via pip"
+    pip3install "scapy"
+    pip3install "pyzmq"
+    pip3install "cython"
 }
 
-function install_dependencies() {
-    local dependencies=$1
-    goodecho "[+] Installing dependencies: ${dependencies}"
-    # Changed from apt-fast to apk for Alpine
-    installfromnet "apk add --no-cache ${dependencies}"
+function audio_tools () {
+    goodecho "[+] Installing audio tools from package manager"
+    installfromnet "apk add --no-cache audacity sox"
 }
 
-function grclone_and_build() {
-    local repo_url=$1
-    local repo_subdir=$2
-    local method=$3  # Custom method name
-    local build_dir="build"
-    local branch=""
-    shift 3
-
-    # Check if a branch is specified (e.g., -b branch_name)
-    if [[ $1 == "-b" ]]; then
-        branch=$2
-        shift 2
-    fi
-
-    local cmake_args=("$@")  # Capture all remaining arguments as CMake arguments
-
-    # Create the base directory if it doesn't exist
-    [ -d /rftools/sdr/oot ] || mkdir -p /rftools/sdr/oot
-    cd /rftools/sdr/oot || exit
-
-    # If no subdirectory is provided, use the repository name as the build directory
-    if [ -z "$repo_subdir" ]; then
-        repo_subdir=$build_dir
-    else
-        repo_subdir=$repo_subdir/$build_dir
-    fi
-
-    # Clone the repository and switch to the specified branch if provided
-    cmake_clone_and_build "$repo_url" "$repo_subdir" "$branch" "" "$method" "-DCMAKE_INSTALL_PREFIX=/usr/local" "${cmake_args[@]}"
+function rust_tools () {
+    goodecho "[+] Installing RUST tools"
+    installfromnet "apk add --no-cache cargo rust"
+    curl --proto '=https' --tlsv1.3 https://sh.rustup.rs -sSf | sh -s -- -y
+    source $HOME/.cargo/env
+    [[ "$SHELL" =~ "zsh" ]] && { grep -qxF '. "$HOME/.cargo/env"' ~/.zshrc || echo '. "$HOME/.cargo/env"' >> ~/.zshrc; } || { grep -qxF '. "$HOME/.cargo/env"' ~/.bashrc || echo '. "$HOME/.cargo/env"' >> ~/.bashrc; }
 }
 
-function gitinstall() {
-    # Extract the repository URL from the argument
-    repo_url="$1"
-    method="$2"
-    branch="$3"
+function install_GPU_nvidia () {
+    ARCH=$(uname -m)
+
+    case "$ARCH" in
+        x86_64|amd64)
+            goodecho "[+] Architecture: x86_64"
+            goodecho "[+] Installing Nvidia libs and drivers"
+            ;;
+        *)
+            criticalecho-noexit "[-] Unsupported architecture: $ARCH"
+            exit 0
+            ;;
+    esac
     
-    # Extract the repository name (last part of the URL without .git)
-    repo_name=$(basename "$repo_url" .git)
-
-    # Check if the repository already exists in the current directory
-    if [ -d "$repo_name" ]; then
-        colorecho "Repository '$repo_name' already exists. Pulling latest changes..."
-        cd "$repo_name" || exit
-        installfromnet "git pull"
-        if [ $? -eq 0 ]; then
-            goodecho "Repository '$repo_name' updated successfully."
-        else
-            criticalecho-noexit "Failed to update the repository."
-        fi
-        cd ..
-    else
-        # Clone the repository with the specified branch if provided
-        if [ -n "$branch" ]; then
-            installfromnet "git clone -b $branch $repo_url"
-        else
-            installfromnet "git clone $repo_url"
-        fi
-
-        # If the clone was successful, write the name and path to the file
-        if [ $? -eq 0 ]; then
-            # Ensure the directory /var/lib/db/ exists, create if not
-            if [ ! -d "/var/lib/db/" ]; then
-                mkdir -p /var/lib/db/
-            fi
-            
-            # Get the absolute path of the repository
-            repo_abs_path="$(pwd)/$repo_name"
-            cd $repo_name
-            # Attempt to update submodules; continue regardless of success
-            git submodule update --init --recursive || {
-                goodecho "Failed to update submodules, but continuing."
-            }
-            cd ..
-
-            # Append the repository name, absolute path, and method to the file
-            echo "$repo_name:$repo_abs_path:$method" | tee -a /var/lib/db/rfswift_github.lst > /dev/null
-
-            colorecho "Repository '$repo_name' cloned successfully."
-            colorecho "Added '$repo_name $repo_abs_path' to /var/lib/db/rfswift_github.lst"
-        else
-            criticalecho "Failed to clone the repository."
-        fi
-    fi
+    goodecho "[!] Note: Installing Mesa as NVIDIA proprietary drivers have limited Alpine support"
+    install_dependencies "mesa-dev mesa-dri-gallium"
+    goodecho "[!] For full NVIDIA support, consider using nvidia-docker runtime or Ubuntu-based image"
 }
 
-function cmake_clone_and_build() {
-    local repo_url=$1
-    local build_dir=$2  # This should be a path relative to the repo root
-    local branch=$3
-    local reset_commit=$4
-    local method=$5
-    shift 5
-    local cmake_args=("$@")
+function install_GPU_Intel() {
+    ARCH=$(uname -m)
 
-    local repo_name=$(basename "$repo_url" .git)
-
-    echo "Checking directory for: $repo_name"
-
-    if [ ! -d "$repo_name" ]; then
-        echo "Cloning repository..."
-        gitinstall "$repo_url" "$method" "$branch"
-        cd "$repo_name" || exit
-        should_build=true
-    else
-        echo "Repository exists. Ensuring it's up to date..."
-        cd "$repo_name" || exit
-        installfromnet "git fetch"
-        local LOCAL=$(git rev-parse @)
-        local REMOTE=$(git rev-parse @{u})
-        if [ "$LOCAL" != "$REMOTE" ]; then
-            installfromnet "git pull"
-            should_build=true
-        else
-            echo "No updates needed."
-            should_build=false
-        fi
-    fi
-
-    if [ -n "$reset_commit" ]; then
-        echo "Resetting repository to commit/tag $reset_commit"
-        git reset --hard "$reset_commit"
-    fi
-
-    if [ "$should_build" = true ]; then
-        if [ ! -d "$build_dir" ]; then
-            echo "Creating build directory..."
-            mkdir -p "$build_dir"
-        fi
-        cd "$build_dir" || exit
-        echo "Running CMake and building..."
-        cmake "${cmake_args[@]}" ../
-        make -j$(nproc)
-        make install
-        cd ..
-        rm -rf build/ # Cleaning build directory
-    fi
+    case "$ARCH" in
+        x86_64|amd64)
+            goodecho "[+] Architecture: x86_64"
+            goodecho "[+] Installing Intel GPU libs and drivers"
+            ;;
+        *)
+            criticalecho-noexit "[-] Unsupported architecture: $ARCH"
+            exit 0
+            ;;
+    esac
+    install_dependencies "mesa-dev mesa-dri-gallium intel-media-driver"
 }
 
-function check_and_install_lib() {
-    local lib_name=$1
-    local pkg_config_name=$2
+function install_GPU_Radeon_until5000() {
+    ARCH=$(uname -m)
 
-    # Check if the library is installed using pkg-config
-    if pkg-config --exists "$pkg_config_name"; then
-        goodecho "[+] $lib_name is already installed."
-    else
-        colorecho "[!] $lib_name is not installed. Attempting to install..."
+    case "$ARCH" in
+        x86_64|amd64)
+            goodecho "[+] Installing Radeon old GPU libs and drivers"
+            ;;
+        *)
+            criticalecho-noexit "[-] Unsupported architecture: $ARCH"
+            exit 0
+            ;;
+    esac
+    install_dependencies "mesa-dev mesa-dri-gallium"
+}
+
+function install_GPU_latest_Radeon() {
+    ARCH=$(uname -m)
+    case "$ARCH" in
+        x86_64|amd64)
+            goodecho "[+] Installing Radeon latest GPU libs and drivers"
+            ;;
+        *)
+            criticalecho-noexit "[-] Unsupported architecture: $ARCH"
+            exit 0
+            ;;
+    esac
+    
+    goodecho "[!] Note: AMD ROCm is not available for Alpine Linux"
+    goodecho "[!] Installing Mesa Vulkan drivers as alternative"
+    
+    install_dependencies "mesa-utils mesa-vulkan-ati mesa-dri-gallium vulkan-tools"
+    
+    goodecho "[!] For full AMD ROCm support, consider using Ubuntu-based image"
+    goodecho "[!] You can use gcompat for some glibc compatibility if needed"
+}
+
+install_go() {
+    # Detect system architecture
+    ARCH=$(uname -m)
+    
+    # Define URL and version
+    GO_VERSION="1.23.4"
+    BASE_URL="https://golang.org/dl/"
+
+    case "$ARCH" in
+        "x86_64"|"amd64")
+            ARCH_DL="amd64"
+            ;;
+        "aarch64"|"arm64")
+            ARCH_DL="arm64"
+            ;;
+        "riscv64")
+            ARCH_DL="riscv64"
+            ;;
+        *)
+            echo "Architecture $ARCH is not recognized. Using package manager to install Go."
+            install_dependencies "go"
+            return
+            ;;
+    esac
+
+    # Construct the download URL
+    GO_TAR="go${GO_VERSION}.linux-${ARCH_DL}.tar.gz"
+    GO_URL="${BASE_URL}${GO_TAR}"
+
+    # Download and install Go
+    echo "Downloading Go $GO_VERSION for $ARCH..."
+    wget $GO_URL -O /tmp/$GO_TAR
+
+    if [ $? -eq 0 ]; then
+        # Extract and move Go to /usr
+        tar -C /usr --strip-components=1 -xzf /tmp/$GO_TAR go/bin go/pkg go/src
+        rm /tmp/$GO_TAR
+        echo "Go $GO_VERSION installed successfully in /usr/bin."
+        echo 'export GOPROXY=direct' >> /root/.bashrc
         
-        # Attempt to install the library using apk (Alpine's package manager)
-        installfromnet "apk update"
-        installfromnet "apk add --no-cache $lib_name"
-
-        # Verify the installation
-        if pkg-config --exists "$pkg_config_name"; then
-            goodecho "[+] $lib_name has been successfully installed."
-        else
-            criticalecho "[!] Failed to install $lib_name. Please check the package name or install it manually."
-        fi
+        # Also add to .profile for better compatibility
+        grep -qxF 'export GOPROXY=direct' /root/.profile 2>/dev/null || echo 'export GOPROXY=direct' >> /root/.profile
+    else
+        echo "Download failed. Falling back to package manager."
+        install_dependencies "go"
     fi
 }
 
-function pip3install() {
-    local n=0
-    local install_args="$*"  # Capture all arguments passed to the function
+function install_mpir() {
+    goodecho "[+] Installing MPIR"
+    [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
+    cd /root/thirdparty
     
-    goodecho "[+] Installing Python package(s): ${install_args}"
+    # Install build dependencies
+    install_dependencies "gmp-dev yasm m4 texinfo fftw-dev libsndfile-dev git"
     
-    # Try up to 5 times
-    until [ "$n" -ge 5 ]
-    do
-        colorecho "[pip3][Install] Try number: $n"
-        if [[ "$install_args" == *"-r "* ]] || [[ "$install_args" == *"--requirement "* ]]; then
-            # Handle requirements file installation
-            pip install --break-system-packages --ignore-installed $install_args && {
-                goodecho "[+] Successfully installed packages from requirements file"
-                return 0
-            }
-        else
-            # Handle single package or other pip arguments
-            pip install --break-system-packages --ignore-installed $install_args && {
-                goodecho "[+] Successfully installed ${install_args}"
-                return 0
-            }
-        fi
-        n=$((n+1))
-        sleep 15
-    done
+    git clone https://github.com/wbhart/mpir.git
+    cd mpir
+    autoreconf -vis
+    ./configure --enable-cxx
+    make -j$(nproc)
+    make install
     
-    criticalecho-noexit "[-] Failed to install Python package(s): ${install_args}"
-    return 1
+    ldconfig /usr/local/lib 2>/dev/null || true
+}
+
+function uvpython_install() {
+    goodecho "[+] Installing UV for fast Python install"
+    [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
+    cd /root/thirdparty
+    
+    # Ensure rust/cargo is installed
+    if ! command -v cargo &> /dev/null; then
+        goodecho "[+] Installing Rust for UV compilation"
+        apk add --no-cache cargo rust
+    fi
+    
+    gitinstall "https://github.com/astral-sh/uv.git" "uvpython_install"
+    cd uv
+    
+    # Ensure cargo is in PATH
+    export PATH="$HOME/.cargo/bin:$PATH"
+    
+    # Install rustup if not already installed
+    if ! command -v rustup &> /dev/null; then
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+        source $HOME/.cargo/env
+    fi
+    
+    rustup update
+    cargo build --release
+    
+    # Copy binaries
+    cp $(pwd)/target/release/uv /usr/bin/ 2>/dev/null || true
+    cp $(pwd)/target/release/uvx /usr/bin/ 2>/dev/null || true
+    
+    goodecho "[+] UV installation completed"
 }
