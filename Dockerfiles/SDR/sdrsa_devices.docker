@@ -2,25 +2,22 @@
 # Install type: SDR and SA devices for SDR Dockers
 # Author(s): Sébastien Dudek (@FlUxIuS) @Penthertz
 # website: penthertz.com
-
 ARG BASE_IMAGE=corebuild
 FROM ${BASE_IMAGE}
-
 ARG UHD_BASE=uhd # Use antsdr_uhd with ANTSDR
 ARG RTLSDR_BASE=rtlsdr # rtlsdrv4 for v4 version driver
-
 LABEL "org.container.project"="rfswift"
 LABEL "org.container.author"="Sébastien Dudek"
 
-RUN echo 'APT::Install-Suggests "0";' >> /etc/apt/apt.conf.d/00-docker
-RUN echo 'APT::Install-Recommends "0";' >> /etc/apt/apt.conf.d/00-docker
+# Alpine doesn't need APT configuration
+# apk is already minimal by default
 
-RUN apt-fast update
+# Update Alpine packages
+RUN apk update
 
 COPY scripts /root/scripts/
 COPY rules /root/rules/
 COPY config /root/config/
-
 WORKDIR /root/scripts/
 RUN chmod +x entrypoint.sh
 
@@ -54,7 +51,8 @@ WORKDIR /root/
 RUN rm -rf /root/thirdparty && \
 	rm -rf /root/rules/ && \
 	rm -rf /root/config/ && \
-	apt-fast clean
-RUN DEBIAN_FRONTEND=noninteractive rm -rf /var/lib/apt/lists/*
-#RUN useradd -ms /bin/bash phzapp
+	rm -rf /var/cache/apk/* && \
+	rm -rf /tmp/*
+
+#RUN adduser -D -s /bin/bash phzapp
 #USER phzapp
