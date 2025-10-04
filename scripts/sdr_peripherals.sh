@@ -28,12 +28,30 @@ function ad_devices_install() {
 }
 
 function uhd_devices_install() {
-	goodecho "[+] Installing UHD's libs and tools from package manager"
-	install_dependencies "uhd uhd-dev uhd-tools"
+	goodecho "[+] Building UHD from source (not available in Alpine repos)"
+	
+	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
+	cd /root/thirdparty
+	
+	# Install dependencies
+	install_dependencies "cmake build-base boost-dev libusb-dev python3-dev py3-mako py3-numpy ncurses-dev"
+	
+	# Clone and build UHD
+	installfromnet "git clone https://github.com/EttusResearch/uhd.git"
+	cd uhd/host
+	mkdir build
+	cd build
+	cmake -DCMAKE_INSTALL_PREFIX=/usr ..
+	make -j$(nproc)
+	make install
+	
+	ldconfig 2>/dev/null || true
+	
 	goodecho "[+] Copying rules sets"
-	cp /root/rules/uhd-usrp.rules  /etc/udev/rules.d/
+	cp /root/rules/uhd-usrp.rules /etc/udev/rules.d/
+	
 	goodecho "[+] Downloading Hardware Driver firmware/FPGA"
-	installfromnet "/usr/bin/uhd_images_downloader"
+	installfromnet "uhd_images_downloader"
 }
 
 function check_neon() {
