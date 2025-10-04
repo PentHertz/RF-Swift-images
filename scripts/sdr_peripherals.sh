@@ -3,7 +3,6 @@
 source common.sh
 
 function ad_devices_install() {
-function ad_devices_install() {
 	goodecho "[+] Installing AD libs and tools from package manager"
 	install_dependencies "libiio-utils libiio-dev"
 	
