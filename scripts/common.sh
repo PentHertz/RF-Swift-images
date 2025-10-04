@@ -7,6 +7,51 @@ export BLUE='\033[1;34m'
 export GREEN='\033[1;32m'
 export NOCOLOR='\033[0m'
 
+function apt-fast() {
+    # Remove -y flag and other apt-specific flags
+    local args=()
+    local cmd=""
+    
+    for arg in "$@"; do
+        case "$arg" in
+            -y|--yes|--assume-yes)
+                # Skip these flags, apk doesn't need them
+                continue
+                ;;
+            install|update|upgrade|clean)
+                cmd="$arg"
+                ;;
+            --no-install-recommends)
+                # Skip this flag, not needed in apk
+                continue
+                ;;
+            *)
+                args+=("$arg")
+                ;;
+        esac
+    done
+    
+    case "$cmd" in
+        install)
+            apk add --no-cache "${args[@]}"
+            ;;
+        update)
+            apk update
+            ;;
+        upgrade)
+            apk upgrade
+            ;;
+        clean)
+            rm -rf /var/cache/apk/*
+            ;;
+        *)
+            echo "apt-fast command '$cmd' not supported in Alpine wrapper"
+            return 1
+            ;;
+    esac
+}
+export -f apt-fast
+
 ### Echo functions
 
 function colorecho () {
@@ -238,28 +283,3 @@ function pip3install() {
     criticalecho-noexit "[-] Failed to install Python package(s): ${install_args}"
     return 1
 }
-
-function apt-fast() {
-    local cmd="$1"
-    shift
-    
-    case "$cmd" in
-        install)
-            apk add --no-cache "$@"
-            ;;
-        update)
-            apk update
-            ;;
-        upgrade)
-            apk upgrade
-            ;;
-        clean)
-            rm -rf /var/cache/apk/*
-            ;;
-        *)
-            echo "apt-fast command '$cmd' not supported in Alpine wrapper"
-            return 1
-            ;;
-    esac
-}
-export -f apt-fast
