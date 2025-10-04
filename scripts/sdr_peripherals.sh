@@ -117,7 +117,10 @@ function nuand_devices_install() {
 
 function nuand_devices_fromsource_install() {
 	goodecho "[+] Installing bladeRF dependencies"
-	install_dependencies "libusb-dev libusb build-base cmake ncurses-dev libtecla libtecla-dev pkgconf git wget"
+	install_dependencies "libusb-dev libusb build-base cmake ncurses-dev pkgconf git wget"
+	
+	goodecho "[!] Note: libtecla not available in Alpine, building bladeRF without it"
+	
 	goodecho "[+] Cloning, building and installing Nuand's repository"
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
 	cd /root/thirdparty
@@ -125,7 +128,14 @@ function nuand_devices_fromsource_install() {
 	cd ./bladeRF/host
 	mkdir build
 	cd build
-	cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local -DINSTALL_UDEV_RULES=ON ../
+	
+	# Build without libtecla - it's optional for interactive CLI features
+	cmake -DCMAKE_BUILD_TYPE=Release \
+		  -DCMAKE_INSTALL_PREFIX=/usr/local \
+		  -DINSTALL_UDEV_RULES=ON \
+		  -DENABLE_LIBTECLA=OFF \
+		  ../
+	
 	make && make install
 	ldconfig /usr/local/lib 2>/dev/null || true
 }
