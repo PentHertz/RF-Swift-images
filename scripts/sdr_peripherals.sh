@@ -9,7 +9,7 @@ function ad_devices_install() {
 	cd /root/thirdparty
 	
 	# Install dependencies
-	install_dependencies "libxml2 libxml2-dev bison flex cmake git libaio boost-dev libusb-dev avahi-dev"
+	install_dependencies "libxml2 libxml2-dev bison flex cmake git libaio libaio-dev boost-dev libusb-dev avahi-dev"
 	
 	# Build libiio from source
 	goodecho "[+] Building libiio from source"
