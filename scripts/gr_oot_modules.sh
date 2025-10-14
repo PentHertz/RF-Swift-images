@@ -262,10 +262,18 @@ function gr_DCF77_Receiver_grmod_install() {
 }
 
 function grsignalhound_Receiver_grmod_install() {
-    # Check if the system architecture is x86_64/amd64
-    if [[ "$(uname -m)" != "x86_64" && "$(uname -m)" != "amd64" ]]; then
-        criticalecho-noexit "[!] This installation script is only compatible with x86_64/amd64 architecture."
+    # Check if the system architecture is supported
+    ARCH=$(uname -m)
+    if [[ "$ARCH" != "x86_64" && "$ARCH" != "amd64" && "$ARCH" != "aarch64" && "$ARCH" != "arm64" ]]; then
+        criticalecho-noexit "[!] This installation script is only compatible with x86_64/amd64 and aarch64/arm64 architectures."
         return 0
+    fi
+
+    # Normalize architecture names
+    if [[ "$ARCH" == "amd64" ]]; then
+        ARCH="x86_64"
+    elif [[ "$ARCH" == "arm64" ]]; then
+        ARCH="aarch64"
     fi
 
     # Install the necessary dependencies
@@ -275,42 +283,129 @@ function grsignalhound_Receiver_grmod_install() {
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
     cd /root/thirdparty
 
-    # Download and install the FTDI library
-    installfromnet "wget https://ftdichip.com/wp-content/uploads/2022/07/libftd2xx-x86_64-1.4.27.tgz"
-    tar xvfz libftd2xx-x86_64-1.4.27.tgz
-    cd release/build
-    cp libftd2xx.* /usr/local/lib
-    chmod 0755 /usr/local/lib/libftd2xx.so.1.4.27
-    ln -sf /usr/local/lib/libftd2xx.so.1.4.27 /usr/local/lib/libftd2xx.so
-    cd ..
-    cp ftd2xx.h /usr/local/include
-    cp WinTypes.h /usr/local/include
-    ldconfig -v
+    # Download and install the FTDI library based on architecture
+    if [[ "$ARCH" == "x86_64" ]]; then
+        installfromnet "wget https://ftdichip.com/wp-content/uploads/2025/03/libftd2xx-linux-x86_64-1.4.33.tgz"
+        tar xvfz libftd2xx-linux-x86_64-1.4.33.tgz
+        cd release/build
+        cp libftd2xx.* /usr/local/lib
+        chmod 0755 /usr/local/lib/libftd2xx.so.1.4.33
+        ln -sf /usr/local/lib/libftd2xx.so.1.4.33 /usr/local/lib/libftd2xx.so
+        cd ..
+        cp ftd2xx.h /usr/local/include
+        cp WinTypes.h /usr/local/include
+        ldconfig -v
+        cd /root/thirdparty
+    elif [[ "$ARCH" == "aarch64" ]]; then
+        installfromnet "wget https://ftdichip.com/wp-content/uploads/2025/03/libftd2xx-linux-arm-v8-1.4.33.tgz"
+        tar xvfz libftd2xx-linux-arm-v8-1.4.33.tgz
+        cd release/build
+        cp libftd2xx.* /usr/local/lib
+        chmod 0755 /usr/local/lib/libftd2xx.so.1.4.33
+        ln -sf /usr/local/lib/libftd2xx.so.1.4.33 /usr/local/lib/libftd2xx.so
+        cd ..
+        cp ftd2xx.h /usr/local/include
+        cp WinTypes.h /usr/local/include
+        ldconfig -v
+        cd /root/thirdparty
+    fi
 
     # Download and install the Signal Hound SDK
     installfromnet "wget https://signalhound.com/sigdownloads/SDK/signal_hound_sdk_10_07_25.zip"
-    unzip signal_hound_sdk_10_07_25.zip
+    unzip -q signal_hound_sdk_10_07_25.zip
     INIT_PATH=$(pwd)
-    cd "signal_hound_sdk/device_apis/bb_series/lib/linux_x64/Ubuntu 18.04"
-    cp libbb_api.* /usr/local/lib
-    ldconfig -v -n /usr/local/lib
-    ln -sf /usr/local/lib/libbb_api.so.5 /usr/local/lib/libbb_api.so
-    ln -sf /usr/local/lib/libbb_api.so.5 /usr/lib/libbb_api.so
-    ln -sf /usr/local/lib/libbb_api.so.5 /usr/lib/libbb_api.so.5
+
+    # Install bb_series library
+    if [[ "$ARCH" == "x86_64" ]]; then
+        cd "$INIT_PATH/signal_hound_sdk/device_apis/bb_series/lib/linux_x64/Ubuntu 18.04"
+        cp libbb_api.so.5.0.9 /usr/local/lib/
+        ldconfig -v -n /usr/local/lib
+        ln -sf /usr/local/lib/libbb_api.so.5.0.9 /usr/local/lib/libbb_api.so.5
+        ln -sf /usr/local/lib/libbb_api.so.5 /usr/local/lib/libbb_api.so
+        ln -sf /usr/local/lib/libbb_api.so.5 /usr/lib/libbb_api.so
+        ln -sf /usr/local/lib/libbb_api.so.5 /usr/lib/libbb_api.so.5
+        # Copy FTDI library from SDK if not already installed
+        if [[ ! -f /usr/local/lib/libftd2xx.so ]]; then
+            cp libftd2xx.so /usr/local/lib/
+            chmod 0755 /usr/local/lib/libftd2xx.so
+            ldconfig -v
+        fi
+    elif [[ "$ARCH" == "aarch64" ]]; then
+        cd "$INIT_PATH/signal_hound_sdk/device_apis/bb_series/lib/aarch64"
+        cp libbb_api.so.5.0.10 /usr/local/lib/
+        ldconfig -v -n /usr/local/lib
+        ln -sf /usr/local/lib/libbb_api.so.5.0.10 /usr/local/lib/libbb_api.so.5
+        ln -sf /usr/local/lib/libbb_api.so.5 /usr/local/lib/libbb_api.so
+        ln -sf /usr/local/lib/libbb_api.so.5 /usr/lib/libbb_api.so
+        ln -sf /usr/local/lib/libbb_api.so.5 /usr/lib/libbb_api.so.5
+    fi
+
+    # Install vsg60_series library (x86_64 only - no aarch64 version available)
+    if [[ "$ARCH" == "x86_64" ]]; then
+        cd "$INIT_PATH/signal_hound_sdk/device_apis/vsg60_series/lib/linux/Ubuntu 18.04"
+        cp libvsg_api.so.1.0.9 /usr/local/lib/
+        chmod 0755 /usr/local/lib/libvsg_api.so.1.0.9
+        ln -sf /usr/local/lib/libvsg_api.so.1.0.9 /usr/local/lib/libvsg_api.so
+        ln -sf /usr/local/lib/libvsg_api.so.1.0.9 /usr/lib/libvsg_api.so
+        ldconfig -v
+    fi
+
+    # Install sm_series library
+    if [[ "$ARCH" == "x86_64" ]]; then
+        cd "$INIT_PATH/signal_hound_sdk/device_apis/sm_series/lib/linux_x64/Ubuntu 18.04"
+        cp libsm_api.so.2.3.8 /usr/local/lib/
+        chmod 0755 /usr/local/lib/libsm_api.so.2.3.8
+        ln -sf /usr/local/lib/libsm_api.so.2.3.8 /usr/local/lib/libsm_api.so
+        ln -sf /usr/local/lib/libsm_api.so.2.3.8 /usr/lib/libsm_api.so
+        ldconfig -v
+    elif [[ "$ARCH" == "aarch64" ]]; then
+        cd "$INIT_PATH/signal_hound_sdk/device_apis/sm_series/lib/aarch64"
+        cp libsm_api.so.2.3.7 /usr/local/lib/
+        chmod 0755 /usr/local/lib/libsm_api.so.2.3.7
+        ln -sf /usr/local/lib/libsm_api.so.2.3.7 /usr/local/lib/libsm_api.so
+        ln -sf /usr/local/lib/libsm_api.so.2.3.7 /usr/lib/libsm_api.so
+        ldconfig -v
+    fi
+
+    # Install sp_series library (both architectures available)
+    if [[ "$ARCH" == "x86_64" ]]; then
+        cd "$INIT_PATH/signal_hound_sdk/device_apis/sp_series/lib/linux_x64/Ubuntu 18.04"
+        cp libsp_api.so.1.0.8 /usr/local/lib/
+        chmod 0755 /usr/local/lib/libsp_api.so.1.0.8
+        ln -sf /usr/local/lib/libsp_api.so.1.0.8 /usr/local/lib/libsp_api.so
+        ln -sf /usr/local/lib/libsp_api.so.1.0.8 /usr/lib/libsp_api.so
+        ldconfig -v
+    elif [[ "$ARCH" == "aarch64" ]]; then
+        cd "$INIT_PATH/signal_hound_sdk/device_apis/sp_series/lib/aarch64"
+        cp libsp_api.so.1.0.4 /usr/local/lib/
+        chmod 0755 /usr/local/lib/libsp_api.so.1.0.4
+        ln -sf /usr/local/lib/libsp_api.so.1.0.4 /usr/local/lib/libsp_api.so
+        ln -sf /usr/local/lib/libsp_api.so.1.0.4 /usr/lib/libsp_api.so
+        ldconfig -v
+    fi
+
+    # Install tg_series library (x86_64 only based on tree output)
+    if [[ "$ARCH" == "x86_64" ]]; then
+        cd "$INIT_PATH/signal_hound_sdk/device_apis/tg_series/lib/linux"
+        cp libtg_api.so.1.1.0 /usr/local/lib/
+        chmod 0755 /usr/local/lib/libtg_api.so.1.1.0
+        ln -sf /usr/local/lib/libtg_api.so.1.1.0 /usr/local/lib/libtg_api.so
+        ln -sf /usr/local/lib/libtg_api.so.1.1.0 /usr/lib/libtg_api.so
+        # Copy FTDI library if needed
+        if [[ -f libftd2xx.so && ! -f /usr/local/lib/libftd2xx.so ]]; then
+            cp libftd2xx.so /usr/local/lib/
+            chmod 0755 /usr/local/lib/libftd2xx.so
+        fi
+        ldconfig -v
+    fi
+
+    # Return to init path
     cd $INIT_PATH
-    cd "signal_hound_sdk/device_apis/vsg60_series/lib/linux/Ubuntu 18.04"
-    cp libvsg_api.so.1.0.9 /usr/local/lib
-    ln -sf /usr/lib/libvsg_api.so.1.0.9 /usr/lib/libvsg_api.so
-    cd $INIT_PATH
-    cd "signal_hound_sdk/device_apis/sm_series/lib/linux_x64/Ubuntu 18.04"
-    cp libsm_api.so.2.3.8 /usr/lib/
-    ln -sf /usr/lib/libsm_api.so.2.3.8 /usr/lib/libsm_api.so
 
     # Clone and build the gr-signal-hound repository
     grclone_and_build "https://github.com/SignalHound/gr-signal-hound.git" "" "grsignalhound_Receiver_grmod_install"
-    #ln -sf /rftools/sdr/oot/gr-signal-hound/include/gnuradio/signal_hound/bb_api.h /usr/include/bb_api.h
-    #ln -sf /rftools/sdr/oot/gr-signal-hound/include/gnuradio/signal_hound/bb_series.h /usr/include/bb_series.h
 
+    echo "[+] Signal Hound installation completed for $ARCH architecture"
 }
 
 function grm17_grmod_install() {
