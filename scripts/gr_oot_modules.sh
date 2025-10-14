@@ -287,11 +287,9 @@ function grsignalhound_Receiver_grmod_install() {
     if [[ "$ARCH" == "x86_64" ]]; then
         installfromnet "wget https://ftdichip.com/wp-content/uploads/2025/03/libftd2xx-linux-x86_64-1.4.33.tgz"
         tar xvfz libftd2xx-linux-x86_64-1.4.33.tgz
-        cd release/build
+        cd linux-x86_64
         cp libftd2xx.* /usr/local/lib
         chmod 0755 /usr/local/lib/libftd2xx.so.1.4.33
-        ln -sf /usr/local/lib/libftd2xx.so.1.4.33 /usr/local/lib/libftd2xx.so
-        cd ..
         cp ftd2xx.h /usr/local/include
         cp WinTypes.h /usr/local/include
         ldconfig -v
@@ -299,11 +297,9 @@ function grsignalhound_Receiver_grmod_install() {
     elif [[ "$ARCH" == "aarch64" ]]; then
         installfromnet "wget https://ftdichip.com/wp-content/uploads/2025/03/libftd2xx-linux-arm-v8-1.4.33.tgz"
         tar xvfz libftd2xx-linux-arm-v8-1.4.33.tgz
-        cd release/build
+        cd linux-arm-v8
         cp libftd2xx.* /usr/local/lib
         chmod 0755 /usr/local/lib/libftd2xx.so.1.4.33
-        ln -sf /usr/local/lib/libftd2xx.so.1.4.33 /usr/local/lib/libftd2xx.so
-        cd ..
         cp ftd2xx.h /usr/local/include
         cp WinTypes.h /usr/local/include
         ldconfig -v
