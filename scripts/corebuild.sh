@@ -207,6 +207,7 @@ function install_mpir() {
 
 function uvpython_install() {
     goodecho "[+] Installing UV for fast Python install"
+    install_dependencies "clang libclang-dev llvm-dev build-essential"
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
     cd /root/thirdparty
     gitinstall "https://github.com/astral-sh/uv.git" "uvpython_install"
