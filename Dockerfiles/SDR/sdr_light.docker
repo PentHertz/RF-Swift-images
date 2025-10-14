@@ -45,7 +45,8 @@ RUN	./entrypoint.sh gqrx_soft_install && \
 	./entrypoint.sh luaradio_sdr_soft_install && \
 	./entrypoint.sh dump1090_soft_install && \
 	./entrypoint.sh readsb_soft_install && \
-	./entrypoint.sh dumpvdl2_soft_install
+	./entrypoint.sh dumpvdl2_soft_install && \
+	./entrypoint.sh dumphfdl_soft_install
 
 RUN ./entrypoint.sh sdrpp_soft_fromsource_install && \
 	./entrypoint.sh	sdrpp_extramodules_install

@@ -644,3 +644,11 @@ function dump1090_soft_install () {
 	make -j$(nproc)
 	ln -s dump1090 /usr/bin/dump1090
 }
+
+function dumphfdl_soft_install () {
+	goodecho "[+] Installing dumphfdl tools"
+	install_dependencies "build-essential cmake pkg-config libglib2.0-dev libconfig++-dev libliquid-dev libfftw3-dev libsqlite3-dev libzmq3-dev"
+	[ -d /root/thirdparty ] || mkdir /root/thirdparty
+	cd /root/thirdparty
+	cmake_clone_and_build "https://github.com/szpajder/dumphfdl.git" "build" "" "" "dumphfdl_soft_install"
+}
