@@ -261,7 +261,7 @@ function gr_DCF77_Receiver_grmod_install() {
     gitinstall "https://github.com/henningM1r/gr_DCF77_Receiver.git" "gr_DCF77_Receiver_grmod_install"
 }
 
-function grbb60_Receiver_grmod_install() {
+function grsignalhound_Receiver_grmod_install() {
     # Check if the system architecture is x86_64/amd64
     if [[ "$(uname -m)" != "x86_64" && "$(uname -m)" != "amd64" ]]; then
         criticalecho-noexit "[!] This installation script is only compatible with x86_64/amd64 architecture."
@@ -269,7 +269,7 @@ function grbb60_Receiver_grmod_install() {
     fi
 
     # Install the necessary dependencies
-    install_dependencies "libusb-1.0-0"
+    install_dependencies "libusb-1.0-0 libspdlog-dev clang-format"
 
     # Create third-party directory if it doesn't exist
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
@@ -288,18 +288,29 @@ function grbb60_Receiver_grmod_install() {
     ldconfig -v
 
     # Download and install the Signal Hound SDK
-    installfromnet "wget https://signalhound.com/sigdownloads/SDK/signal_hound_sdk_09_16_25.zip"
-    unzip signal_hound_sdk_09_16_25.zip
+    installfromnet "wget https://signalhound.com/sigdownloads/SDK/signal_hound_sdk_10_07_25.zip"
+    unzip signal_hound_sdk_10_07_25.zip
+    INIT_PATH=$(pwd)
     cd "signal_hound_sdk/device_apis/bb_series/lib/linux_x64/Ubuntu 18.04"
     cp libbb_api.* /usr/local/lib
     ldconfig -v -n /usr/local/lib
     ln -sf /usr/local/lib/libbb_api.so.5 /usr/local/lib/libbb_api.so
     ln -sf /usr/local/lib/libbb_api.so.5 /usr/lib/libbb_api.so
     ln -sf /usr/local/lib/libbb_api.so.5 /usr/lib/libbb_api.so.5
+    cd $INIT_PATH
+    cd "signal_hound_sdk/device_apis/vsg60_series/lib/linux/Ubuntu 18.04"
+    cp libvsg_api.so.1.0.9 /usr/local/lib
+    ln -sf /usr/lib/libvsg_api.so.1.0.9 /usr/lib/libvsg_api.so
+    cd $INIT_PATH
+    cd "signal_hound_sdk/device_apis/sm_series/lib/linux_x64/Ubuntu 18.04"
+    cp libsm_api.so.2.3.8 /usr/lib/
+    ln -sf /usr/lib/libsm_api.so.2.3.8 /usr/lib/libsm_api.so
 
-    # Clone and build the gr-bb60 repository
-    grclone_and_build "https://github.com/SignalHound/gr-bb60.git" "" "grbb60_Receiver_grmod_install"
-    ln -sf /rftools/sdr/oot/gr-bb60/include/bb60/bb_api.h /usr/include/bb_api.h
+    # Clone and build the gr-signal-hound repository
+    grclone_and_build "https://github.com/SignalHound/gr-signal-hound.git" "" "grsignalhound_Receiver_grmod_install"
+    #ln -sf /rftools/sdr/oot/gr-signal-hound/include/gnuradio/signal_hound/bb_api.h /usr/include/bb_api.h
+    #ln -sf /rftools/sdr/oot/gr-signal-hound/include/gnuradio/signal_hound/bb_series.h /usr/include/bb_series.h
+
 }
 
 function grm17_grmod_install() {
@@ -406,4 +417,9 @@ function grhtra_grmod_install() {
 
 function soapyusdr_grmod_install() {
     install_dependencies "soapysdr-module-usdr"
+}
+
+function grradioastro_grmod_install() {
+    install_dependencies "python3-ephem git cmake liborc-0.4-dev"
+    grclone_and_build "https://github.com/WVURAIL/gr-radio_astro.git" "" "grradioastro_grmod_install"
 }
