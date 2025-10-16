@@ -263,9 +263,9 @@ function gr_DCF77_Receiver_grmod_install() {
 
 function grsignalhound_Receiver_grmod_install() {
     # Check if the system architecture is supported
-    ARCH=$(uname -m)
-    if [[ "$ARCH" != "x86_64" && "$ARCH" != "amd64" && "$ARCH" != "aarch64" && "$ARCH" != "arm64" ]]; then
-        criticalecho-noexit "[!] This installation script is only compatible with x86_64/amd64 and aarch64/arm64 architectures."
+    ARCH=$(uname -m) # TODO: continue with aarch64 suppport
+    if [[ "$ARCH" != "x86_64" && "$ARCH" != "amd64" ]]; then # && "$ARCH" != "aarch64" && "$ARCH" != "arm64" ]]; then
+        criticalecho-noexit "[!] This installation script is only compatible with x86_64/amd64 architectures."
         return 0
     fi
 
