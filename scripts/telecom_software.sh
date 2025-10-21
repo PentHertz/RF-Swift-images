@@ -132,7 +132,7 @@ function srsran4G_5GNSA_soft_install() {
 	cd srsRAN_4G
 	mkdir build
 	cd build
-	cmake ../
+	cmake -DCMAKE_CXX_FLAGS="-Wno-error=array-bounds" ..
 	make -j$(nproc)
 	make install
 	#make test
