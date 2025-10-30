@@ -20,6 +20,11 @@ function avrdude_install() {
 	install_dependencies "avrdude avrdude-doc"
 }
 
+function dfu_util_install() {
+    goodecho "[+] Installing dfu-util"
+    install_dependencies "dfu-util"
+}
+
 function flashrom_install() {
     goodecho "[+] Installing flashrom"
     install_dependencies "meson pciutils usbutils libpci-dev libusb-dev libftdi1 libftdi-dev zlib1g-dev subversion libusb-1.0-0-dev"

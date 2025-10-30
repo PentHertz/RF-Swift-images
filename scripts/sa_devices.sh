@@ -43,7 +43,7 @@ function signalhound_spike_sa_device() {
         colorecho "[+] Downloading Spike bin from SignalHound"
         [ -d /rftools/analysers ] || mkdir -p /rftools/analysers
         cd /rftools/analysers
-        filename="Spike(Ubuntu22.04x64)_4_0_8"
+        filename="Spike(Ubuntu22.04x64)_4_0_10"
         installfromnet "wget https://signalhound.com/sigdownloads/Spike/$filename.zip"
         unzip ${filename}.zip
         rm ${filename}.zip
@@ -83,11 +83,11 @@ function signalhound_vsg60_sa_device() {
         colorecho "[+] Downloading VSG60 bin from SignalHound"
         [ -d /rftools/generators ] || mkdir -p /rftools/generators
         cd /rftools/generators
-        filename="VSG60(Ubuntu22.04x64)_1_0_15"
+        filename="VSG60(Ubuntu22.04x64)_1_0_19.zip"
         installfromnet "wget https://signalhound.com/sigdownloads/VSG60/$filename.zip"
-        unzip VSG60\(Ubuntu22.04x64\)_1_0_15.zip
-        rm VSG60\(Ubuntu22.04x64\)_1_0_15.zip
-        cd VSG60\(Ubuntu22.04x64\)_1_0_15
+        unzip "VSG60(Ubuntu22.04x64)_1_0_19.zip"
+        rm "VSG60(Ubuntu22.04x64)_1_0_19.zip"
+        cd "VSG60(Ubuntu22.04x64)_1_0_19"
         chmod +x setup.sh
         sh -c ./setup.sh
         local script_path="/usr/sbin/vsg60"
@@ -97,7 +97,7 @@ function signalhound_vsg60_sa_device() {
 #!/bin/sh
 
 # Set the fixed path
-BASE_DIR="/rftools/generators/VSG60(Ubuntu22.04x64)_1_0_15"
+BASE_DIR="/rftools/generators/VSG60(Ubuntu22.04x64)_1_0_19"
 APPNAME="vsg60"
 
 # Set up the environment variables
@@ -127,13 +127,13 @@ function harogic_sa_device() {
     sdkarch=""
     case "$arch" in
         x86_64|amd64)
-            prog="SAStudio4_4.3.55.27_x86_64";;
+            prog="SAStudio4_4.3.55.29_x86_64";;
         aarch64|unknown|arm64)
-            prog="SAStudio4_4.3.55.27_arm64";;
+            prog="SAStudio4_4.3.55.29_arm64";;
         *)
             printf 'Unsupported architecture: "%s"!\n' "$arch" >&2; exit 0;;
     esac
-    installfromnet "wget https://github.com/PentHertz/rfswift_harogic_install/releases/download/v0.55.62/$prog.zip"
+    installfromnet "wget https://github.com/PentHertz/rfswift_harogic_install/releases/download/v0.55.63/$prog.zip"
     unzip "$prog.zip"
     rm "$prog.zip"
     cd "$prog"
@@ -146,7 +146,7 @@ function harogic_sa_device() {
     esac
     ln -s /usr/local/bin/sastudio/.sastudio.sh /usr/sbin/sastudio
     goodecho "[+] Installing htraapi"
-    installfromnet "wget https://github.com/PentHertz/rfswift_harogic_install/releases/download/v0.55.62/Install_HTRA_SDK.zip"
+    installfromnet "wget https://github.com/PentHertz/rfswift_harogic_install/releases/download/v0.55.63/Install_HTRA_SDK.zip"
     unzip Install_HTRA_SDK.zip
     rm Install_HTRA_SDK.zip
     cd Install_HTRA_SDK/

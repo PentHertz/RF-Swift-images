@@ -304,71 +304,33 @@ function urh_soft_install() {
     goodecho "[+] Creating URH wrapper script"
     cat > "$URH_WRAPPER" << 'EOF'
 #!/bin/bash
+# URH Wrapper Script - Auto-activates venv
 
-# URH Wrapper Script - Auto-activates venv and handles cleanup
 URH_VENV_DIR="/opt/urh-venv"
-URH_PID_FILE="/tmp/urh_wrapper_$$"
-
-# Function to cleanup on exit
-cleanup() {
-    # Kill any remaining URH processes started by this wrapper
-    if [ -f "$URH_PID_FILE" ]; then
-        URH_PID=$(cat "$URH_PID_FILE" 2>/dev/null)
-        if [ -n "$URH_PID" ] && kill -0 "$URH_PID" 2>/dev/null; then
-            kill "$URH_PID" 2>/dev/null
-        fi
-        rm -f "$URH_PID_FILE"
-    fi
-}
-
-# Set up signal handlers for cleanup
-trap cleanup EXIT INT TERM
 
 # Check if virtual environment exists
 if [ ! -d "$URH_VENV_DIR" ]; then
     echo "Error: URH virtual environment not found at $URH_VENV_DIR"
-    echo "Please reinstall URH or run the installation script again."
     exit 1
 fi
 
 # Check if URH is installed in the venv
 if [ ! -f "$URH_VENV_DIR/bin/urh" ]; then
     echo "Error: URH not found in virtual environment"
-    echo "Please reinstall URH or run the installation script again."
     exit 1
 fi
 
-# Activate the virtual environment
+# Fix XDG_RUNTIME_DIR warning if not set
+if [ -z "$XDG_RUNTIME_DIR" ]; then
+    export XDG_RUNTIME_DIR="/tmp/runtime-$(whoami)"
+    mkdir -p "$XDG_RUNTIME_DIR"
+    chmod 700 "$XDG_RUNTIME_DIR"
+fi
+
+# Activate venv and run URH
 source "$URH_VENV_DIR/bin/activate"
-
-# Add HydraSDR library path if it exists
-if [ -d "/usr/lib" ]; then
-    export LD_LIBRARY_PATH="/usr/lib:$LD_LIBRARY_PATH"
-fi
-if [ -d "/lib" ]; then
-    export LD_LIBRARY_PATH="/lib:$LD_LIBRARY_PATH"
-fi
-
-# Run URH with all passed arguments
-echo "Starting URH (HydraSDR fork) in virtual environment..."
-"$URH_VENV_DIR/bin/urh" "$@" &
-URH_PID=$!
-
-# Store PID for cleanup
-echo "$URH_PID" > "$URH_PID_FILE"
-
-# Wait for URH to finish
-wait "$URH_PID"
-URH_EXIT_CODE=$?
-
-# Cleanup
-cleanup
-
-# Deactivate virtual environment (though it should happen automatically)
-deactivate 2>/dev/null
-
-echo "URH exited with code $URH_EXIT_CODE"
-exit $URH_EXIT_CODE
+echo "Starting URH (HydraSDR fork)..."
+exec "$URH_VENV_DIR/bin/urh" "$@"
 EOF
 
     # Make wrapper executable

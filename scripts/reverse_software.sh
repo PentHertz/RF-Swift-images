@@ -171,4 +171,21 @@ function appledb_rs_soft_install() {
 	ln -s ./target/release/appledb_server /usr/local/bin/appledb_server
 }
 
+function bytecaster_install() {
+    goodecho "[+] Installing ByteCaster"
+    
+    [ -d /reverse ] || mkdir /reverse
+    cd /reverse && git clone https://github.com/FlUxIuS/ByteCaster.git
+    cd ByteCaster
+    
+    # Compile for current architecture (Go auto-detects in Docker)
+    CGO_ENABLED=0 go build -ldflags="-w -s" -tags netgo -o ByteCaster
+    chmod +x ByteCaster
+    
+    # Create symlink
+    ln -sf /reverse/ByteCaster/ByteCaster /usr/bin/ByteCaster
+    
+    goodecho "[+] ByteCaster installed at /usr/bin/ByteCaster"
+}
+
 ### TODO: more More!

@@ -248,3 +248,22 @@ EOF
     goodecho "[+] Caido Desktop installed successfully"
     goodecho "[+] Usage: caido (launches with --no-sandbox automatically)"
 }
+
+function trufflehog_script_install() {
+    # Check architecture
+    ARCH=$(uname -m)
+    case "$ARCH" in
+        x86_64|amd64)
+            ARCH_NORMALIZED="amd64"
+            ;;
+        aarch64|arm64)
+            ARCH_NORMALIZED="arm64"
+            ;;
+        *)
+            criticalecho-noexit "[-] Unsupported architecture: $ARCH"
+            return 0
+            ;;
+    esac
+    
+    curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh -s -- -b /usr/local/bin
+}
