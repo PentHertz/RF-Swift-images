@@ -159,9 +159,33 @@ function logic2_saleae_install() {
     cd /hardware
     mkdir -p Saleae
     cd Saleae
+    
+    # Download the AppImage
     wget "https://downloads2.saleae.com/logic2/Logic-${LOGIC_VERSION}-linux-x64.AppImage"
     chmod +x "Logic-${LOGIC_VERSION}-linux-x64.AppImage"
-    ln -s "$(pwd)/Logic-${LOGIC_VERSION}-linux-x64.AppImage" /usr/bin/Logic-2-Saleae
+    
+    # Extract the AppImage to avoid needing FUSE in containers
+    goodecho "[+] Extracting AppImage (avoiding FUSE requirement)..."
+    ./Logic-${LOGIC_VERSION}-linux-x64.AppImage --appimage-extract
+    
+    # Create symlink to the extracted Logic binary with --no-sandbox
+    # This creates an alias that always runs with --no-sandbox
+    cat > /usr/local/bin/Logic << 'EOF'
+#!/bin/bash
+exec /hardware/Saleae/squashfs-root/Logic --no-sandbox "$@"
+EOF
+    chmod +x /usr/local/bin/Logic
+    
+    # Also create the original symlink for compatibility
+    ln -sf /hardware/Saleae/squashfs-root/Logic /usr/local/bin/Logic-2-Saleae
+    
+    # Optional: Create additional convenience aliases
+    ln -sf /usr/local/bin/Logic /usr/local/bin/logic
+    ln -sf /usr/local/bin/Logic /usr/local/bin/logic2
+    
+    goodecho "[+] Logic 2 installed successfully!"
+    goodecho "[+] You can now run it with: Logic (or logic, logic2)"
+    goodecho "[+] The --no-sandbox flag is automatically applied"
 }
 
 function seergdb_install() {
