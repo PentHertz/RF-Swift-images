@@ -56,7 +56,7 @@ function signalhound_spike_sa_device() {
 #!/bin/sh
 
 # Set the fixed path
-BASE_DIR="/rftools/analysers/Spike(Ubuntu22.04x64)_4_0_8"
+BASE_DIR="/rftools/analysers/Spike(Ubuntu22.04x64)_4_0_10"
 APPNAME="Spike"
 
 # Set up the environment variables
@@ -139,7 +139,7 @@ function harogic_sa_device() {
     cd "$prog"
     currentpath=$(pwd)
     mkdir -p /root/Desktop
-    sh -c ./install.sh
+    sh -c USER=root LOGNAME=root ./install.sh
     case "$arch" in
         aarch64|unknown) 
             ln -s /usr/lib/aarch64-linux-gnu/libffi.so.8 /usr/lib/libffi.so.6;;
