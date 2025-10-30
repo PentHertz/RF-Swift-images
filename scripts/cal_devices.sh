@@ -73,6 +73,7 @@ function NanoVNASaver_cal_device() {
 }
 
 function NanoVNASaver_cal_device_call() {
+	install_dependencies "libxcb-cursor0"
 	goodecho "[+] Installing NanoVNASaver with pip3"
 	pipx install 'https://github.com/NanoVNA-Saver/nanovna-saver/archive/refs/tags/v0.7.3.tar.gz'
 	ln -s /root/.local/bin/NanoVNASaver /usr/bin/NanoVNASaver
