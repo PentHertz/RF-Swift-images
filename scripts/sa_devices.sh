@@ -83,7 +83,7 @@ function signalhound_vsg60_sa_device() {
         colorecho "[+] Downloading VSG60 bin from SignalHound"
         [ -d /rftools/generators ] || mkdir -p /rftools/generators
         cd /rftools/generators
-        filename="VSG60(Ubuntu22.04x64)_1_0_19.zip"
+        filename="VSG60(Ubuntu22.04x64)_1_0_19"
         installfromnet "wget https://signalhound.com/sigdownloads/VSG60/$filename.zip"
         unzip "VSG60(Ubuntu22.04x64)_1_0_19.zip"
         rm "VSG60(Ubuntu22.04x64)_1_0_19.zip"
