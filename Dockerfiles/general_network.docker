@@ -28,7 +28,10 @@ RUN ./entrypoint.sh nmap_soft_install && \
 	./entrypoint.sh impacket_soft_install && \
 	./entrypoint.sh autorecon_soft_install && \
 	./entrypoint.sh responder_soft_install && \
-	./entrypoint.sh trufflehog_script_install
+	./entrypoint.sh trufflehog_script_install && \
+	./entrypoint.sh hping3_soft_install && \
+	./entrypoint.sh arping_soft_install && \
+	./entrypoint.sh netexec_soft_install
 	
 RUN ./entrypoint.sh subenum_soft_install &&\
 	./entrypoint.sh webcopilot_soft_install &&\

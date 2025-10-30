@@ -5,6 +5,16 @@ function nmap_soft_install() {
 	install_dependencies "nmap"
 }
 
+function hping3_soft_install() {
+    goodecho "[+] Installing hping3"
+    install_dependencies "hping3"
+}
+
+function arping_soft_install() {
+    goodecho "[+] Installing arping"
+    install_dependencies "arping"
+}
+
 function wireshark_soft_install() {
 	goodecho "[+] Installing Wireshark from package manager"
 	echo "wireshark-common wireshark-common/install-setuid boolean true" | sudo debconf-set-selections
@@ -150,6 +160,20 @@ function sippts_soft_install() {
     gitinstall "https://github.com/Pepelux/sippts.git" "sippts_soft_install"
     cd sippts
     pip3install .
+}
+
+function netexec_soft_install() {
+    goodecho "[+] Installing NetExec"
+    install_dependencies "pipx git"
+    pipx ensurepath
+    pipx install git+https://github.com/Pennyw0rth/NetExec
+}
+
+function above_soft_install() {
+    goodecho "[+] Installing Above"
+    install_dependencies "python3-scapy python3-colorama python3-setuptools"
+    pipx install git+https://github.com/caster0x00/above.git
+    ln -s  /root/.local/bin/above /usr/sbin/above
 }
 
 # Cracking tools

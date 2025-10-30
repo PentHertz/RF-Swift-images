@@ -325,6 +325,21 @@ function bully_soft_install() {
 	install_dependencies "bully"
 }
 
+function wifipumpkin3_soft_install() {
+	goodecho "[+] Installing wifipumpkin3"
+	[ -d /rftools/wifi ] || mkdir -p /rftools/wifi
+	cd /rftools/wifi
+	install_dependencies "python3-dev libssl-dev libffi-dev build-essential python3"
+	gitinstall "https://github.com/P0cL4bs/wifipumpkin3.git" "wifipumpkin3_soft_install"
+	cd wifipumpkin3
+	pipx install .
+	ln -s /usr/local/bin/captiveflask /usr/sbin/captiveflask
+	ln -s /usr/local/bin/evilqr3 /usr/sbin/evilqr3
+	ln -s /usr/local/bin/phishkin3 /usr/sbin/phishkin3
+	ln -s /usr/local/bin/sslstrip3 /usr/sbin/sslstrip3
+	ln -s /usr/local/bin/wifipumpkin3 /usr/sbin/wifipumpkin3
+}
+
 function pixiewps_soft_install() {
 	goodecho "[+] Installing pixiewps"
 	install_dependencies "pixiewps"
@@ -349,6 +364,11 @@ function hcxtools_soft_install() {
 	make -j$(nproc)
 	make install
 	ln -s /usr/bin/hcxpcapngtool /usr/bin/hcxpcaptool
+}
+
+function mdk3_soft_install() {
+	goodecho "[+] Installing mdk3"
+	install_dependencies "mdk3"
 }
 
 function wpa3_dragonslayer_soft_install() {
