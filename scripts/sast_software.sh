@@ -65,3 +65,33 @@ function clang_static_analyzer_install() {
     echo "[+] installing clang-static-analyzer"
     install_dependencies "clang clang-tools"
 }
+
+function joernsast_install() {
+    echo "[+] Installing Joern"
+
+    install_dependencies "apt-transport-https curl gnupg"
+    echo "deb https://repo.scala-sbt.org/scalasbt/debian all main" | sudo tee /etc/apt/sources.list.d/sbt.list
+    echo "deb https://repo.scala-sbt.org/scalasbt/debian /" | sudo tee /etc/apt/sources.list.d/sbt_old.list
+    curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | sudo -H gpg --no-default-keyring --keyring gnupg-ring:/etc/apt/trusted.gpg.d/scalasbt-release.gpg --import
+    sudo chmod 644 /etc/apt/trusted.gpg.d/scalasbt-release.gpg
+    sudo apt-get update
+    install_dependencies "sbt"
+
+
+    [ -d /sast ] || mkdir -p /sast
+    cd /sast
+
+    gitinstall "https://github.com/FlUxIuS/joern.git"
+    cd joern
+    sbt stage
+    ln -sf $(pwd)/joern /usr/local/bin/joern
+    ln -sf $(pwd)/joern-cli /usr/local/bin/joern-cli
+    ln -sf $(pwd)/joern-export /usr/local/bin/joern-export
+    ln -sf $(pwd)/joern-flow /usr/local/bin/joern-flow
+    ln -sf $(pwd)/joern-parse /usr/local/bin/joern-parse
+    ln -sf $(pwd)/joern-scan /usr/local/bin/joern-scan
+    ln -sf $(pwd)/joern-slice /usr/local/bin/joern-slice
+    ln -sf $(pwd)/joern-vectors /usr/local/bin/joern-vectors
+    ln -sf $(pwd)/c2cpg.sh /usr/local/bin/c2cpg.sh
+    ln -sf $(pwd)/c2cpg.sh /usr/local/bin/c2cpg 
+}

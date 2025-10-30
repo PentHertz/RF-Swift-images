@@ -44,9 +44,9 @@ function KCSDI_cal_device() {
 
    # Set image name based on architecture
    if [ "$(uname -m)" = "aarch64" ]; then
-       image_name="KCSDI-v0.5.6-62-linux-arm64.appimage"
+       image_name="KCSDI-v0.5.8-69-linux-arm64.appimage"
    else
-       image_name="KCSDI-v0.5.6-62-linux-x86_64.appimage"
+       image_name="KCSDI-v0.5.8-69-linux-x86_64.appimage"
    fi
 
    install_dependencies "libnss3-dev libfuse-dev"
@@ -74,7 +74,7 @@ function NanoVNASaver_cal_device() {
 
 function NanoVNASaver_cal_device_call() {
 	goodecho "[+] Installing NanoVNASaver with pip3"
-	pipx install 'https://github.com/NanoVNA-Saver/nanovna-saver/archive/refs/tags/v0.5.5.tar.gz'
+	pipx install 'https://github.com/NanoVNA-Saver/nanovna-saver/archive/refs/tags/v0.7.3.tar.gz'
 	ln -s /root/.local/bin/NanoVNASaver /usr/bin/NanoVNASaver
 }
 
