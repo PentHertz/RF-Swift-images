@@ -167,6 +167,21 @@ function netexec_soft_install() {
     install_dependencies "pipx git"
     pipx ensurepath
     pipx install git+https://github.com/Pennyw0rth/NetExec
+    ln -s /root/.local/bin/netexec /usr/sbin/netexec
+}
+
+function donpapi_soft_install() {
+    goodecho "[+] Installing DonPAPI"
+    install_dependencies "pipx git"
+    pipx install git+https://github.com/FlUxIuS/DonPAPI
+    ln -s /root/.local/bin/DonPAPI /usr/sbin/DonPAPI
+}
+
+function donpwner_soft_install() {
+    goodecho "[+] Installing DonPwner"
+    [ -d /opt/network ] || mkdir -p /opt/network
+    cd /opt/network
+    gitinstall "https://github.com/FlUxIuS/DonPwner.git" "donpwner_soft_install"
 }
 
 function above_soft_install() {

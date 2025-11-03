@@ -355,7 +355,7 @@ function jss7_soft_install() {
         goodecho "[+] Cloning and installing jSS7"
         gitinstall "https://github.com/PentHertz/jss7.git" "jss7"
         cd jss7
-        mvn install
+        mvn install -DskipTests
     else
         goodecho "[!] Unsupported architecture: $arch. jSS7 installation aborted."
     fi
