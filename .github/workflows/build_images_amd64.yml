@@ -254,7 +254,7 @@ jobs:
             #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   sdrsa_devices_antsdr:
-    runs-on: ubuntu-22.04
+    runs-on: Linux
     needs: corebuild
     strategy:
       matrix:
@@ -933,7 +933,7 @@ jobs:
             #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   telecom_utils:
-    runs-on: ubuntu-22.04
+    runs-on: Linux
     needs: sdrsa_devices
     strategy:
       matrix:

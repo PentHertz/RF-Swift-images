@@ -198,7 +198,7 @@ function cyberther_soft_install() {
 	goodecho "[CyberEther][+] Cloning GitHub repository"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-    gitinstall "https://github.com/luigifcruz/CyberEther.git" "cyberther_soft_install"
+    gitinstall "https://github.com/FlUxIuS/CyberEther.git" "cyberther_soft_install"
 	cd CyberEther
 	meson setup -Dbuildtype=debugoptimized build && cd build
 	ninja install
