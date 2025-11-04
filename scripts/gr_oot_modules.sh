@@ -498,11 +498,11 @@ function grhtra_grmod_install() {
     ARCH=$(uname -m)
     if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then
         grclone_and_build "https://github.com/HAROGIC-Technologies/gr-htra.git" "" "grhtra_grmod_install"
-    elif [ "$ARCH" = "arm64" ] || [ "$ARCH" = "aarch64" ]; then
+    #elif [ "$ARCH" = "arm64" ] || [ "$ARCH" = "aarch64" ]; then
         # ARM64 specific flags to avoid LTO segmentation fault
-        grclone_and_build "https://github.com/HAROGIC-Technologies/gr-htra.git" "" "grhtra_grmod_install" \
-            -DCMAKE_CXX_FLAGS="-fno-lto -O2" \
-            -DCMAKE_C_FLAGS="-fno-lto -O2"
+        #grclone_and_build "https://github.com/HAROGIC-Technologies/gr-htra.git" "" "grhtra_grmod_install" \
+        #    -DCMAKE_CXX_FLAGS="-fno-lto -O2" \
+        #    -DCMAKE_C_FLAGS="-fno-lto -O2" // TODO: support ARM64 
     fi
 }
 
