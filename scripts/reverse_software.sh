@@ -161,13 +161,13 @@ function imhex_soft_install() {
     
     if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then
         goodecho "[+] Installing ImHex for x86_64"
-        install_dependencies "libmbedtls14t64 libmbedx509-1t64"
+        install_dependencies "libmbedtls14t64 libmbedx509-1t64 libglfw3-dev"
         installfromnet "wget https://github.com/WerWolv/ImHex/releases/download/v$IMH_VERSION/imhex-$IMH_VERSION-Ubuntu-24.04-x86_64.deb"
         dpkg -i imhex-$IMH_VERSION-Ubuntu-24.04-x86_64.deb
         
     elif [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
         goodecho "[+] Installing ImHex for arm64"
-        install_dependencies "libmbedtls14t64 libmbedx509-1t64"
+        install_dependencies "libmbedtls14t64 libmbedx509-1t64 libglfw3-dev"
         
         # Download the AppImage
         installfromnet "wget https://github.com/WerWolv/ImHex/releases/download/v$IMH_VERSION/imhex-$IMH_VERSION-arm64.AppImage"
