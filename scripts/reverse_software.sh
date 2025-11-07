@@ -12,7 +12,7 @@ function unicorn_soft_install() {
 	goodecho "[+] Cloning Unicorn Engine project"
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
 	cd /root/thirdparty
-
+	ARCH=$(uname -m)
     if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then # TODO: fix arm64 install
 		installfromnet "git clone https://github.com/unicorn-engine/unicorn.git"
 		cd unicorn
@@ -32,7 +32,7 @@ function keystone_soft_install() {
 	goodecho "[+] Cloning Keystone Engine project"
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
 	cd /root/thirdparty
-
+	ARCH=$(uname -m)
     if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then # TODO: fix arm64 install
 		installfromnet "git clone https://github.com/keystone-engine/keystone.git"
 		cd keystone
@@ -51,7 +51,7 @@ function keystone_soft_install() {
 function radare2_soft_install() {
 	# Check architecture
     ARCH=$(uname -m)
-    if [[ "$ARCH" != "x86_64" ]]; then
+    if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then
         criticalecho-noexit "[-] Unsupported architecture: $ARCH"
         exit 0
     fi
