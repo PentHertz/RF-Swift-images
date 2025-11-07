@@ -23,8 +23,7 @@ function unicorn_soft_install() {
 		goodecho "[+] Installing Python bindings"
 		pip3install "unicorn"
     else
-        goodecho "[-] Unsupported architecture: $ARCH"
-        return 1
+        criticalecho-noexit "[-] Unsupported architecture: $ARCH"
     fi
 }
 
@@ -43,8 +42,7 @@ function keystone_soft_install() {
 		goodecho "[+] Installing Python bindings"
 		pip3install "keystone-engine"
     else
-        goodecho "[-] Unsupported architecture: $ARCH"
-        return 1
+        criticalecho-noexit "[-] Unsupported architecture: $ARCH"
     fi
 }
 
@@ -187,8 +185,7 @@ function imhex_soft_install() {
         rm -rf squashfs-root
         
     else
-        goodecho "[-] Unsupported architecture: $ARCH"
-        return 1
+        criticalecho-noexit "[-] Unsupported architecture: $ARCH"
     fi
 }
 
