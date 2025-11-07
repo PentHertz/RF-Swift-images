@@ -205,7 +205,7 @@ function install_mpir() {
     ldconfig
 }
 
-function uvpython_install() {
+function uvpython_install_fromsources() {
     goodecho "[+] Installing UV for fast Python install"
     install_dependencies "clang libclang-dev llvm-dev build-essential"
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
@@ -217,4 +217,15 @@ function uvpython_install() {
     rustup update
     cargo build --release
     cp $(pwd)/target/release/{uv,uv-build,uv-globfilter,uvx} /usr/bin/
+}
+
+function uvpython_install() { # Avoid terrible long builds
+    goodecho "[+] Installing UV for fast Python install"
+    install_dependencies "clang libclang-dev llvm-dev build-essential"
+    [ -d /root/thirdparty ] || mkdir /root/thirdparty
+    cd /root/thirdparty
+    UV_VERSION="0.9.7"
+    installfromnet "wget https://github.com/astral-sh/uv/releases/download/$UV_VERSION/uv-installer.sh"
+    chmod +x uv-installer.sh
+    ./uv-installer.sh
 }

@@ -63,7 +63,29 @@ function responder_soft_install() {
 	pip3install -r requirements.txt
 }
 
+
 function kismet_soft_install() {
+    ARCH=$(uname -m)
+    
+    if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
+        goodecho "[+] Installing Kismet from official repository for $ARCH"
+        installfromnet "wget -O - https://www.kismetwireless.net/repos/kismet-release.gpg.key --quiet | gpg --dearmor | sudo tee /usr/share/keyrings/kismet-archive-keyring.gpg >/dev/null"
+        installfromnet "echo 'deb [signed-by=/usr/share/keyrings/kismet-archive-keyring.gpg] https://www.kismetwireless.net/repos/apt/release/noble noble main' | sudo tee /etc/apt/sources.list.d/kismet.list >/dev/null"
+        sudo apt update
+        install_dependencies "kismet"
+        
+    elif [ "$ARCH" = "riscv64" ]; then
+        goodecho "[+] RISC-V architecture detected, installing Kismet from source"
+        kismet_soft_install_fromsource
+        
+    else
+        goodecho "[-] Unsupported architecture: $ARCH"
+        goodecho "[!] Attempting to install from source as fallback"
+        kismet_soft_install_fromsource
+    fi
+}
+
+function kismet_soft_install_fromsource() {
 	goodecho "[+] Installing Kismet dependencies"
 	[ -d /rftools ] || mkdir -p /rftools
 	cd /rftools

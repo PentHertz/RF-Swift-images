@@ -118,7 +118,7 @@ function hydranfc_trace_plugin_install() {
 
 function arduino_ide_install() {
     ARCH=$(uname -m)
-    if [ "$ARCH" != "x86_64" ]; then
+    if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then
         criticalecho-noexit "[!] Error: This script only supports x86_64/amd64 architecture."
         criticalecho-noexit "[!] Current architecture: $ARCH"
         exit 0
@@ -148,7 +148,7 @@ EOL
 function logic2_saleae_install() {
     goodecho "[+] Installing Logic 2 for Saleae"
     ARCH=$(uname -m)
-    if [ "$ARCH" != "x86_64" ]; then
+    if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then
         criticalecho-noexit "[!] Error: This script only supports x86_64/amd64 architecture."
         criticalecho-noexit "[!] Current architecture: $ARCH"
         exit 0

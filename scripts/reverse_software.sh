@@ -12,28 +12,40 @@ function unicorn_soft_install() {
 	goodecho "[+] Cloning Unicorn Engine project"
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
 	cd /root/thirdparty
-	installfromnet "git clone https://github.com/unicorn-engine/unicorn.git"
-	cd unicorn
-	mkdir build; cd build
-	cmake .. -DCMAKE_BUILD_TYPE=Release
-	make -j$(nproc)
-	make install
-	goodecho "[+] Installing Python bindings"
-	pip3install "unicorn"
+
+    if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then # TODO: fix arm64 install
+		installfromnet "git clone https://github.com/unicorn-engine/unicorn.git"
+		cd unicorn
+		mkdir build; cd build
+		cmake .. -DCMAKE_BUILD_TYPE=Release
+		make -j$(nproc)
+		make install
+		goodecho "[+] Installing Python bindings"
+		pip3install "unicorn"
+    else
+        goodecho "[-] Unsupported architecture: $ARCH"
+        return 1
+    fi
 }
 
 function keystone_soft_install() {
 	goodecho "[+] Cloning Keystone Engine project"
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
 	cd /root/thirdparty
-	installfromnet "git clone https://github.com/keystone-engine/keystone.git"
-	cd keystone
-	mkdir build; cd build
-	cmake .. -DCMAKE_BUILD_TYPE=Release
-	make -j$(nproc)
-	make install
-	goodecho "[+] Installing Python bindings"
-	pip3install "keystone-engine"
+
+    if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then # TODO: fix arm64 install
+		installfromnet "git clone https://github.com/keystone-engine/keystone.git"
+		cd keystone
+		mkdir build; cd build
+		cmake .. -DCMAKE_BUILD_TYPE=Release
+		make -j$(nproc)
+		make install
+		goodecho "[+] Installing Python bindings"
+		pip3install "keystone-engine"
+    else
+        goodecho "[-] Unsupported architecture: $ARCH"
+        return 1
+    fi
 }
 
 function radare2_soft_install() {
@@ -110,10 +122,10 @@ function qiling_soft_install() {
             goodecho "[+] Architecture: x86_64"
             goodecho "[+] Installing qiling for x86_64"
             ;;
-        aarch64|arm64)
-            goodecho "[+] Architecture: aarch64"
-            goodecho "[+] Installing qiling for aarch64"
-            ;;
+        #aarch64|arm64) # TODO: fix arm64 install
+        #    goodecho "[+] Architecture: aarch64"
+        #    goodecho "[+] Installing qiling for aarch64"
+        #    ;;
         *)
             criticalecho-noexit "[-] Unsupported architecture: $ARCH"
             exit 0
@@ -138,7 +150,49 @@ function emba_soft_install() {
 	sudo ./installer.sh -d
 }
 
+
 function imhex_soft_install() {
+    [ -d /root/thirdparty ] || mkdir /root/thirdparty
+    cd /root/thirdparty
+    
+    ARCH=$(uname -m)
+
+    IMH_VERSION="1.37.4"
+    
+    if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then
+        goodecho "[+] Installing ImHex for x86_64"
+        install_dependencies "libmbedtls14t64 libmbedx509-1t64"
+        installfromnet "wget https://github.com/WerWolv/ImHex/releases/download/v$IMH_VERSION/imhex-$IMH_VERSION-Ubuntu-24.04-x86_64.deb"
+        dpkg -i imhex-$IMH_VERSION-Ubuntu-24.04-x86_64.deb
+        
+    elif [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
+        goodecho "[+] Installing ImHex for arm64"
+        install_dependencies "libmbedtls14t64 libmbedx509-1t64"
+        
+        # Download the AppImage
+        installfromnet "wget https://github.com/WerWolv/ImHex/releases/download/v$IMH_VERSION/imhex-$IMH_VERSION-arm64.AppImage"
+        chmod +x imhex-$IMH_VERSION-arm64.AppImage
+        
+        # Extract AppImage without FUSE
+        ./imhex-$IMH_VERSION-arm64.AppImage --appimage-extract
+        
+        # Move extracted contents to proper location
+        cp -r squashfs-root /opt/imhex
+        
+        # Create symlink in /usr/local/bin
+        ln -sf /opt/imhex/AppRun /usr/local/bin/imhex
+        
+        # Clean up
+        rm -f imhex-$IMH_VERSION-arm64.AppImage
+        rm -rf squashfs-root
+        
+    else
+        goodecho "[-] Unsupported architecture: $ARCH"
+        return 1
+    fi
+}
+
+function imhex_soft_install_fromsource() {
 	goodecho "[+] Cloning and installing ImHex"
 	[ -d /reverse ] || mkdir /reverse
 	cd /reverse
@@ -161,8 +215,8 @@ function imhex_soft_install() {
 function appledb_rs_soft_install() {
 	goodecho "[+] Cloning and installing appledb_rs"
 	install_dependencies "yarnpkg"
-	[ -d /reverse ] || mkdir /reverse
-	cd /reverse
+	[ -d /root/thirdparty ] || mkdir /root/thirdparty
+    cd /root/thirdparty
 	gitinstall "https://github.com/FlUxIuS/appledb_rs.git" "appledb_rs"
 	cd appledb_rs
 	cargo build --release

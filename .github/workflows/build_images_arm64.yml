@@ -117,7 +117,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=uhd RTLSDR_BASE=rtlsdr make sdrsadevices
 
   sdrsa_devices_antsdr:
-    runs-on: ubuntu-22.04
+    runs-on: Linux
     needs: corebuild
     strategy:
       matrix:
@@ -611,7 +611,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make telecom_2Gto3G
 
   telecom_4G_5GNSA:
-    runs-on: ubuntu-22.04
+    runs-on: Linux
     needs: telecom_utils
     strategy:
       matrix:
