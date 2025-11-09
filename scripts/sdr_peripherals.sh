@@ -64,7 +64,7 @@ python3-ruamel.yaml"
 function antsdr_uhd_devices_install() { # Is replacing original one for now
 	goodecho "[+] Installing dependencies for ANTSDR UHD"
 	install_dependencies "autoconf automake build-essential ccache cmake cpufrequtils doxygen ethtool libpthread-stubs0-dev"
-	install_dependencies "g++ git inetutils-tools libboost-all-dev libncurses5 libncurses5-dev libusb-1.0-0 libusb-1.0-0-dev"
+	install_dependencies "g++ git inetutils-tools libboost-all-dev libncurses6 libncurses-dev libusb-1.0-0 libusb-1.0-0-dev"
 	install_dependencies "python3-dev python3-mako python3-numpy python3-requests python3-scipy python3-setuptools"
 	install_dependencies "python3-ruamel.yaml"
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
@@ -100,7 +100,7 @@ function nuand_devices_install() {
 
 function nuand_devices_fromsource_install() {
     goodecho "[+] Installing bladeRF dependencies"
-	install_dependencies "libusb-1.0-0-dev libusb-1.0-0 build-essential cmake libncurses5-dev libtecla1 libtecla-dev pkg-config git wget"
+	install_dependencies "libusb-1.0-0-dev libusb-1.0-0 build-essential cmake libncurses-dev libtecla1 libtecla-dev pkg-config git wget"
     goodecho "[+] Cloning, building and installing Nuand's repository"
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
     cd /root/thirdparty

@@ -131,7 +131,7 @@ function bluing_soft_install() {
 		cd /root/thirdparty
         # RISC-V: Build Python 3.10 from source
         sudo apt-get update
-        install_dependencies "build-essential libssl-dev zlib1g-dev libncurses5-dev libncursesw5-dev libreadline-dev libsqlite3-dev libgdbm-dev libdb5.3-dev libbz2-dev libexpat1-dev liblzma-dev libffi-dev libgirepository1.0-dev libbluetooth-dev"
+        install_dependencies "build-essential libssl-dev zlib1g-dev libncurses-dev libncursesw6-dev libreadline-dev libsqlite3-dev libgdbm-dev libdb5.3-dev libbz2-dev libexpat1-dev liblzma-dev libffi-dev libgirepository1.0-dev libbluetooth-dev"
         wget https://www.python.org/ftp/python/3.10.13/Python-3.10.13.tgz
         tar xzf Python-3.10.13.tgz
         cd Python-3.10.13
