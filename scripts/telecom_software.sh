@@ -182,6 +182,40 @@ function srsran5GSA_bladerf_soft_install() {
     set -o pipefail
 }
 
+install_npm_for_arch() {
+    local arch=$(uname -m)
+    
+    if [ "$arch" = "riscv64" ]; then
+        goodecho "Installing npm for RISC-V64 from Node.js binary..."
+        
+        # Try apt first
+        if install_dependencies "npm" 2>/dev/null; then
+            echo "npm installed via apt"
+            return 0
+        fi
+        
+        # If that fails, use npx from nodejs or install via alternative method
+        if command -v node >/dev/null 2>&1; then
+            goodecho "Node.js found, installing npm via npx..."
+            # Use corepack if available
+            if command -v corepack >/dev/null 2>&1; then
+                corepack enable
+                corepack prepare npm@latest --activate
+            else
+                # Download and install npm manually
+                cd /tmp
+                installfromnet "curl -L https://www.npmjs.com/install.sh | sh"
+            fi
+        else
+            criticalecho-noexit "WARNING: Cannot install npm on RISC-V64, skipping npm-dependent installations"
+            return 1
+        fi
+    else
+        # For other architectures, use standard apt installation
+        install_dependencies "npm"
+    fi
+}
+
 function Open5GS_soft_install() {
 	goodecho "[+] Installing Open5GS dependencies"
 	install_dependencies "ca-certificates curl gnupg"
@@ -210,9 +244,18 @@ function Open5GS_soft_install() {
 	installfromnet "apt-fast update"
 	install_dependencies "nodejs"
 	cd webui
-	npm ci
-}
 
+	install_npm_for_arch || {
+	    criticalecho-noexit "npm installation failed, skipping npm-dependent components"
+	    export SKIP_NPM_INSTALLS=1
+	}
+
+	if [ "$SKIP_NPM_INSTALLS" != "1" ]; then
+	    npm ci
+	else
+	    criticalecho-noexit "Skipping npm installation (npm not available on this architecture)"
+	fi
+}
 
 function Open5GS_nohttp2_soft_install() {
 	goodecho "[+] Installing Open5GS dependencies"

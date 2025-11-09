@@ -6,21 +6,23 @@
 # set -euo pipefail // -> some scripts fails to install properly, and binaries are normally working. TODO: Need see why some install processes are failing with it.
 
 
-function LLVM_install() { # expects llvm version
-    LLVM_VERSION=17
+function LLVM_install() { # expects llvm version TODO: not available on RISCV64 yet
+    if [[ "$ARCH" == "x86_64" ]] || [[ "$ARCH" == "amd64" ]] || [[ "$ARCH" == "aarch64" ]] || [[ "$ARCH" == "arm64" ]]; then
+        LLVM_VERSION=17
 
-    goodecho "[+] installing LLVM ${LLVM_VERSION}"
+        goodecho "[+] installing LLVM ${LLVM_VERSION}"
 
-    [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
-    cd /root/thirdparty
+        [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
+        cd /root/thirdparty
 
-    installfromnet "wget -c https://apt.llvm.org/llvm.sh"
+        installfromnet "wget -c https://apt.llvm.org/llvm.sh"
 
-    chmod +x llvm.sh
-    ./llvm.sh ${LLVM_VERSION}
+        chmod +x llvm.sh
+        ./llvm.sh ${LLVM_VERSION}
 
-    export LLVM_CONFIG=llvm-config-${LLVM_VERSION}
-    echo "Defaults env_keep += \"${LLVM_CONFIG}\"" | sudo EDITOR='tee -a' visudo
+        export LLVM_CONFIG=llvm-config-${LLVM_VERSION}
+        echo "Defaults env_keep += \"${LLVM_CONFIG}\"" | sudo EDITOR='tee -a' visudo
+    fi
 }
 
 function semgrep_install() {

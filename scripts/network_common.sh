@@ -51,7 +51,11 @@ function impacket_soft_install() {
 
 function autorecon_soft_install() {
 	goodecho "[+] Installing Autorecon from GitHub with PIP"
-	pipx install git+https://github.com/Tib3rius/AutoRecon.git
+    ARCH=$(uname -m)
+    
+    if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then # TODO: do not compile in arm64
+	   pipx install git+https://github.com/Tib3rius/AutoRecon.git
+    fi
 }
 
 function responder_soft_install() {
@@ -104,9 +108,13 @@ function kismet_soft_install_fromsource() {
 
 function gowitnes_soft_install() {
     goodecho "[+] Installing webcopilot"
-    export GOPROXY=https://proxy.golang.org,direct
-    export GOSUMDB=sum.golang.org
-    go install github.com/sensepost/gowitness@latest
+    ARCH=$(uname -m)
+    
+    if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then # TODO: takes forever to compile on arm64
+        export GOPROXY=https://proxy.golang.org,direct
+        export GOSUMDB=sum.golang.org
+        go install github.com/sensepost/gowitness@latest
+    fi
 }
 
 function webcopilot_soft_install() {
@@ -176,12 +184,14 @@ function voipire_soft_install() {
 }
 
 function sippts_soft_install() {
-    goodecho "[+] Installing SIPPTS"
-    [ -d /opt/network ] || mkdir -p /opt/network
-    cd /opt/network
-    gitinstall "https://github.com/Pepelux/sippts.git" "sippts_soft_install"
-    cd sippts
-    pip3install .
+    goodecho "[+] Installing SIPPTS" #TODO: not valid yet on RISCV64
+    if [[ "$ARCH" == "x86_64" ]] || [[ "$ARCH" == "amd64" ]] || [[ "$ARCH" == "aarch64" ]] || [[ "$ARCH" == "arm64" ]]; then
+        [ -d /opt/network ] || mkdir -p /opt/network
+        cd /opt/network
+        gitinstall "https://github.com/Pepelux/sippts.git" "sippts_soft_install"
+        cd sippts
+        pip3install .
+    fi
 }
 
 function netexec_soft_install() {

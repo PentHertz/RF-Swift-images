@@ -235,6 +235,33 @@ function urh_soft_pip_install() {
 
 function urh_soft_install() {
     goodecho "[+] Installing URH from HydraSDR fork"
+    [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
+	cd /root/thirdparty
+    ARCH=$(uname -m)
+    VERSION_URH="2.9.8"
+    GITBUILD="git20251109.d528343"
+    case "$ARCH" in
+        x86_64|amd64)
+            ARCH="amd64"
+            ;;
+        aarch64|arm64)
+            ARCH="arm64"
+            ;;
+        risv64)
+            ARCH="riscv64"
+            ;;
+        *)
+            criticalecho-noexit "[-] Unsupported architecture: $ARCH"
+            return 0
+            ;;
+    esac
+    FILENAME="urh-penthertz_$ARCH_$VERSION_URH+$GITBUILD.deb"
+    installfromnet "wget https://github.com/PentHertz/urh/releases/download/v$VERSION_URH/$FILENAME"
+    dpkg -i $FILENAME
+}
+
+function urh_soft_install_fromsource() {
+    goodecho "[+] Installing URH from HydraSDR fork"
 
     # Check if architecture is riscv64 and skip if it is
     if [ "$(uname -m)" = "riscv64" ]; then
@@ -557,15 +584,17 @@ function pyspecsdr_sdr_soft_install () {
 }
 
 function luaradio_sdr_soft_install () {
-	[ -d /rftools/sdr ] || mkdir -p /rftools/sdr
-	cd /rftools/sdr
-	goodecho "[+] Cloning and installing luaradio"
-	gitinstall "https://github.com/hydrasdr/luaradio.git" "luaradio"
-	goodecho "[+] Installing Luaradio dependencies"
-	install_dependencies "luajit libliquid-dev libvolk-dev libfftw3-dev libluajit-5.1-dev pkg-config gnuplot"
-	goodecho "[+] Compiing Luaradio apps"
-	cd luaradio/embed
-	sudo make install-lmod
+	if [[ "$ARCH" == "x86_64" ]] || [[ "$ARCH" == "amd64" ]] || [[ "$ARCH" == "aarch64" ]] || [[ "$ARCH" == "arm64" ]]; then
+		[ -d /rftools/sdr ] || mkdir -p /rftools/sdr
+		cd /rftools/sdr
+		goodecho "[+] Cloning and installing luaradio"
+		gitinstall "https://github.com/hydrasdr/luaradio.git" "luaradio"
+		goodecho "[+] Installing Luaradio dependencies"
+		install_dependencies "luajit libliquid-dev libvolk-dev libfftw3-dev libluajit-5.1-dev pkg-config gnuplot"
+		goodecho "[+] Compiing Luaradio apps"
+		cd luaradio/embed
+		sudo make install-lmod
+	fi
 }
 
 function gnss_sdr_soft_install () {

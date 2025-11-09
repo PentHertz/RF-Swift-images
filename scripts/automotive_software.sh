@@ -32,9 +32,11 @@ function savvycan_soft_install() {
 	ln -s SavvyCAN /usr/bin/SavvyCAN
 }
 
-function gallia_soft_install() {
+function gallia_soft_install() { #TODO: not valid yet on RISCV64
 	goodecho "[+] Installing Gallia"
-	pip3install "gallia"
+	if [[ "$ARCH" == "x86_64" ]] || [[ "$ARCH" == "amd64" ]] || [[ "$ARCH" == "aarch64" ]] || [[ "$ARCH" == "arm64" ]]; then
+		pip3install "gallia"
+	fi
 }
 
 function v2ginjector_soft_install() {
