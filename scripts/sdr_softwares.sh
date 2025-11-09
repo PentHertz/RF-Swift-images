@@ -236,7 +236,7 @@ function urh_soft_pip_install() {
 function urh_soft_install() {
     goodecho "[+] Installing URH from HydraSDR fork"
     [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
-	cd /root/thirdparty
+    cd /root/thirdparty
     ARCH=$(uname -m)
     VERSION_URH="2.9.8"
     GITBUILD="git20251109.d528343"
@@ -247,7 +247,7 @@ function urh_soft_install() {
         aarch64|arm64)
             ARCH="arm64"
             ;;
-        risv64)
+        riscv64)  # Fixed typo: was "risv64"
             ARCH="riscv64"
             ;;
         *)
@@ -255,7 +255,8 @@ function urh_soft_install() {
             return 0
             ;;
     esac
-    FILENAME="urh-penthertz_$ARCH_$VERSION_URH+$GITBUILD.deb"
+    # Use curly braces to properly delimit variable names
+    FILENAME="urh-penthertz_${ARCH}_${VERSION_URH}+${GITBUILD}.deb"
     installfromnet "wget https://github.com/PentHertz/urh/releases/download/v$VERSION_URH/$FILENAME"
     dpkg -i $FILENAME
 }
