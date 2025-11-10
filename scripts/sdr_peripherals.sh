@@ -357,19 +357,9 @@ function sdrpp_extramodules_install() {
         x86_64)
             current_arch="amd64"
             ;;
-        aarch64)
-            current_arch="arm64"
-            criticalecho-noexit "Error: Unsupported architecture $(uname -m)"
-            return 1
-            ;;
-        riscv64)
-            current_arch="riscv64"
-            criticalecho-noexit "Error: Unsupported architecture $(uname -m)"
-            return 1
-            ;;
         *)
             criticalecho-noexit "Error: Unsupported architecture $(uname -m)"
-            return 1
+            return 0
             ;;
     esac
     
