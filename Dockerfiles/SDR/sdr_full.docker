@@ -88,6 +88,8 @@ RUN ./entrypoint.sh grrds_grmod_install && \
 	./entrypoint.sh grieee80211-grwifi_grmod_install && \
 	./entrypoint.sh grradioastro_grmod_install
 
+#RUN ./entrypoint.sh grccsds_move_rtsa_grmod_install
+
 # Installing OOT modules from sandia
 RUN ./entrypoint.sh grpdu_utils_grmod_install && \
 	./entrypoint.sh grsandia_utils_grmod_install && \ 
@@ -128,12 +130,6 @@ LABEL "org.container.stage"="mldlsofts"
 
 # Installing extra ML/DL software
 RUN ./entrypoint.sh ml_and_dl_soft_install
-
-# GPU drivers for NVidia, Intel and Radeon
-RUN ./entrypoint.sh install_GPU_nvidia && \
-	./entrypoint.sh install_GPU_Intel && \
-	./entrypoint.sh install_GPU_Radeon_until5000 && \
-	./entrypoint.sh install_GPU_latest_Radeon
 
 RUN	./entrypoint.sh grfosphor_grmod_install
 
