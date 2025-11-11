@@ -2398,8 +2398,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-fetch-depth: 2
-
+          fetch-depth: 2
       - name: Check for modified files
         id: file_check
         run: |
