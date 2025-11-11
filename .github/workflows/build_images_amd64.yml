@@ -1,21 +1,22 @@
 name: Full build - AMD64 Docker Build with Caching
 
 env:
-  REGISTRY_IMAGE: penthertz/rfswift_noble
-  CACHE_REPO: penthertz/rfswift_noble
+  REGISTRY_IMAGE: penthertz/rfswiftdev_noble
+  CACHE_REPO: penthertz/rfswiftdev_noble
   DO_SPACES_ENDPOINT: ${{ secrets.BUCKET_URL }}
   DO_SPACES_REGION: ${{ secrets.BUCKET_REGION }}
 
 on:
   push:
     branches:
-      - ubuntu_noble
+      - multistagedev
     paths:
       - '**'
 
 jobs:
   corebuild:
     runs-on: ubuntu-22.04
+    timeout-minutes: 340
     strategy:
       matrix:
         platform: [amd64]
@@ -64,12 +65,14 @@ jobs:
 
   corebuild-manifest:
     runs-on: ubuntu-22.04
+    timeout-minutes: 340
     needs: corebuild
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 2 
+      
       - name: Check for modified files
         id: file_check
         run: |
@@ -95,6 +98,7 @@ jobs:
           version: latest
 
       - name: Log in to Docker Hub
+        if: steps.file_check.outputs.run_job_corebuild == 'true'
         uses: docker/login-action@v3
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
@@ -129,6 +133,7 @@ jobs:
 
   sdrsa_devices:
     runs-on: ubuntu-22.04
+    timeout-minutes: 340
     needs: corebuild
     strategy:
       matrix:
@@ -175,7 +180,7 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push sdr_light image with caching
+      - name: Build and push sdrsa_devices image with caching
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true'
         run: |
           cd Dockerfiles
@@ -183,12 +188,14 @@ jobs:
 
   sdrsa_devices-manifest:
     runs-on: ubuntu-22.04
+    timeout-minutes: 340
     needs: sdrsa_devices
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 2 
+      
       - name: Check for modified files
         id: file_check
         run: |
@@ -255,6 +262,7 @@ jobs:
 
   sdrsa_devices_antsdr:
     runs-on: Linux
+    timeout-minutes: 340
     needs: corebuild
     strategy:
       matrix:
@@ -282,6 +290,7 @@ jobs:
           else
             echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light_antsdr.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
             echo "run_job_sdrsa_antsdr_devices=true" >> $GITHUB_OUTPUT
           else
@@ -306,7 +315,7 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push sdr_light image with caching
+      - name: Build and push sdrsa_devices_antsdr image with caching
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_antsdr_devices == 'true'
         run: |
           cd Dockerfiles
@@ -314,12 +323,14 @@ jobs:
 
   sdrsa_devices_antsdr-manifest:
     runs-on: ubuntu-22.04
+    timeout-minutes: 340
     needs: sdrsa_devices_antsdr
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 2 
+      
       - name: Check for modified files
         id: file_check
         run: |
@@ -337,6 +348,7 @@ jobs:
           else
             echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light_antsdr.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
             echo "run_job_sdrsa_antsdr_devices=true" >> $GITHUB_OUTPUT
           else
@@ -391,6 +403,7 @@ jobs:
 
   sdr_light:
     runs-on: Linux
+    timeout-minutes: 340
     needs: sdrsa_devices
     strategy:
       matrix:
@@ -418,6 +431,7 @@ jobs:
           else
             echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
             echo "run_job_sdr_light=true" >> $GITHUB_OUTPUT
           else
@@ -450,12 +464,14 @@ jobs:
 
   sdr_light-manifest:
     runs-on: ubuntu-22.04
+    timeout-minutes: 340
     needs: sdr_light
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 2 
+      
       - name: Check for modified files
         id: file_check
         run: |
@@ -473,6 +489,7 @@ jobs:
           else
             echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
             echo "run_job_sdr_light=true" >> $GITHUB_OUTPUT
           else
@@ -527,6 +544,7 @@ jobs:
 
   hardware:
     runs-on: Linux
+    timeout-minutes: 340
     needs: sdrsa_devices
     strategy:
       matrix:
@@ -554,6 +572,7 @@ jobs:
           else
             echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/hardware.docker"* || "$MODIFIED_FILES" == *"scripts/hardware.sh"* ]]; then
             echo "run_job_hardware=true" >> $GITHUB_OUTPUT
           else
@@ -586,12 +605,14 @@ jobs:
 
   hardware-manifest:
     runs-on: ubuntu-22.04
+    timeout-minutes: 340
     needs: hardware
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 2 
+      
       - name: Check for modified files
         id: file_check
         run: |
@@ -609,6 +630,7 @@ jobs:
           else
             echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/hardware.docker"* || "$MODIFIED_FILES" == *"scripts/hardware.sh"* ]]; then
             echo "run_job_hardware=true" >> $GITHUB_OUTPUT
           else
@@ -634,7 +656,7 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Create and push multi-arch manifest for sdr_light
+      - name: Create and push multi-arch manifest for hardware
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_hardware == 'true'
         run: |
           tagname=hardware
@@ -663,6 +685,7 @@ jobs:
 
   deeptempest:
     runs-on: Linux
+    timeout-minutes: 340
     needs: sdrsa_devices
     strategy:
       matrix:
@@ -672,6 +695,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 2 
+      
       - name: Check for modified files
         id: file_check
         run: |
@@ -708,7 +732,7 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push sdr_light image with caching
+      - name: Build and push deeptempest image with caching
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true'
         run: |
           cd Dockerfiles
@@ -716,12 +740,14 @@ jobs:
 
   deeptempest-manifest:
     runs-on: ubuntu-22.04
+    timeout-minutes: 340
     needs: deeptempest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 2 
+      
       - name: Check for modified files
         id: file_check
         run: |
@@ -759,7 +785,7 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Create and push multi-arch manifest for sdr_light
+      - name: Create and push multi-arch manifest for deeptempest
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' 
         run: |
           tagname=deeptempest
@@ -788,6 +814,7 @@ jobs:
 
   sdr_full:
     runs-on: Linux
+    timeout-minutes: 340
     needs: sdr_light
     strategy:
       matrix:
@@ -815,11 +842,13 @@ jobs:
           else
             echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
             echo "run_job_sdr_light=true" >> $GITHUB_OUTPUT
           else
             echo "run_job_sdr_light=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR_full.docker"* || "$MODIFIED_FILES" == *"scripts/sdr_softwares.sh"* || "$MODIFIED_FILES" == *"scripts/gr_oot_modules.sh"* ]]; then
             echo "run_job_sdrfull=true" >> $GITHUB_OUTPUT
           else
@@ -852,12 +881,14 @@ jobs:
 
   sdr_full-manifest:
     runs-on: ubuntu-22.04
+    timeout-minutes: 340
     needs: sdr_full
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 2 
+      
       - name: Check for modified files
         id: file_check
         run: |
@@ -875,11 +906,13 @@ jobs:
           else
             echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
             echo "run_job_sdr_light=true" >> $GITHUB_OUTPUT
           else
             echo "run_job_sdr_light=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR_full.docker"* || "$MODIFIED_FILES" == *"scripts/sdr_softwares.sh"* || "$MODIFIED_FILES" == *"scripts/gr_oot_modules.sh"* ]]; then
             echo "run_job_sdrfull=true" >> $GITHUB_OUTPUT
           else
@@ -934,6 +967,7 @@ jobs:
 
   telecom_utils:
     runs-on: Linux
+    timeout-minutes: 340
     needs: sdrsa_devices
     strategy:
       matrix:
@@ -961,6 +995,7 @@ jobs:
           else
             echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_utils.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
             echo "run_job_telecom=true" >> $GITHUB_OUTPUT
           else
@@ -985,7 +1020,7 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push telecom utils with caching
+      - name: Build and push telecom_utils image with caching
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true'
         run: |
           cd Dockerfiles
@@ -993,12 +1028,14 @@ jobs:
 
   telecom_utils-manifest:
     runs-on: ubuntu-22.04
+    timeout-minutes: 340
     needs: telecom_utils
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 2 
+      
       - name: Check for modified files
         id: file_check
         run: |
@@ -1016,6 +1053,7 @@ jobs:
           else
             echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_utils.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
             echo "run_job_telecom=true" >> $GITHUB_OUTPUT
           else
@@ -1041,7 +1079,7 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Create and push multi-arch manifest for telecom 2G to 3G
+      - name: Create and push multi-arch manifest for telecom_utils
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true'
         run: |
           tagname=telecom_utils
@@ -1070,6 +1108,7 @@ jobs:
 
   telecom_2Gto3G:
     runs-on: Linux
+    timeout-minutes: 340
     needs: telecom_utils
     strategy:
       matrix:
@@ -1097,11 +1136,13 @@ jobs:
           else
             echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_utils.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
             echo "run_job_telecom=true" >> $GITHUB_OUTPUT
           else
             echo "run_job_telecom=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_2Gto3G.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
             echo "run_job_telecom23G=true" >> $GITHUB_OUTPUT
           else
@@ -1126,7 +1167,7 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push telecom 2G to 3G image with caching
+      - name: Build and push telecom_2Gto3G image with caching
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom23G == 'true'
         run: |
           cd Dockerfiles
@@ -1134,12 +1175,14 @@ jobs:
 
   telecom_2Gto3G-manifest:
     runs-on: ubuntu-22.04
+    timeout-minutes: 340
     needs: telecom_2Gto3G
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 2 
+      
       - name: Check for modified files
         id: file_check
         run: |
@@ -1157,11 +1200,13 @@ jobs:
           else
             echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_utils.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
             echo "run_job_telecom=true" >> $GITHUB_OUTPUT
           else
             echo "run_job_telecom=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_2Gto3G.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
             echo "run_job_telecom23G=true" >> $GITHUB_OUTPUT
           else
@@ -1187,7 +1232,7 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Create and push multi-arch manifest for telecom 2G to 3G
+      - name: Create and push multi-arch manifest for telecom_2Gto3G
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom23G == 'true'
         run: |
           tagname=telecom_2Gto3G
@@ -1216,6 +1261,7 @@ jobs:
 
   telecom_4G_5GNSA:
     runs-on: Linux
+    timeout-minutes: 340
     needs: telecom_utils
     strategy:
       matrix:
@@ -1243,11 +1289,13 @@ jobs:
           else
             echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_utils.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
             echo "run_job_telecom=true" >> $GITHUB_OUTPUT
           else
             echo "run_job_telecom=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_4G_5GNSA.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
             echo "run_job_telecom4G5GNSA=true" >> $GITHUB_OUTPUT
           else
@@ -1272,7 +1320,7 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push telecom 4G to 5G NSA image with caching
+      - name: Build and push telecom_4G_5GNSA image with caching
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom4G5GNSA == 'true'
         run: |
           cd Dockerfiles
@@ -1280,12 +1328,14 @@ jobs:
 
   telecom_4G_5GNSA-manifest:
     runs-on: ubuntu-22.04
+    timeout-minutes: 340
     needs: telecom_4G_5GNSA
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 2 
+      
       - name: Check for modified files
         id: file_check
         run: |
@@ -1303,11 +1353,13 @@ jobs:
           else
             echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_utils.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
             echo "run_job_telecom=true" >> $GITHUB_OUTPUT
           else
             echo "run_job_telecom=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_4G_5GNSA.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
             echo "run_job_telecom4G5GNSA=true" >> $GITHUB_OUTPUT
           else
@@ -1333,7 +1385,7 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Create and push multi-arch manifest for telecom 4G to 5G NSA
+      - name: Create and push multi-arch manifest for telecom_4G_5GNSA
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom4G5GNSA == 'true'
         run: |
           tagname=telecom_4G_5GNSA
@@ -1362,6 +1414,7 @@ jobs:
 
   telecom_5G_bladerf:
     runs-on: Linux
+    timeout-minutes: 340
     needs: telecom_utils
     strategy:
       matrix:
@@ -1389,11 +1442,13 @@ jobs:
           else
             echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_utils.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
             echo "run_job_telecom=true" >> $GITHUB_OUTPUT
           else
             echo "run_job_telecom=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_5G_bladerf.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
             echo "run_job_telecom5GSA=true" >> $GITHUB_OUTPUT
           else
@@ -1418,7 +1473,7 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push telecom 5G SA for bladeRF image with caching
+      - name: Build and push telecom_5G_bladerf image with caching
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom5GSA == 'true'
         run: |
           cd Dockerfiles
@@ -1426,12 +1481,14 @@ jobs:
 
   telecom_5G_bladerf-manifest:
     runs-on: ubuntu-22.04
+    timeout-minutes: 340
     needs: telecom_5G_bladerf
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 2 
+      
       - name: Check for modified files
         id: file_check
         run: |
@@ -1449,11 +1506,13 @@ jobs:
           else
             echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_utils.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
             echo "run_job_telecom=true" >> $GITHUB_OUTPUT
           else
             echo "run_job_telecom=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_5G_bladerf.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
             echo "run_job_telecom5GSA=true" >> $GITHUB_OUTPUT
           else
@@ -1479,7 +1538,7 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Create and push multi-arch manifest for telecom 5G compatible with bladeRF
+      - name: Create and push multi-arch manifest for telecom_5G_bladerf
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom5GSA == 'true'
         run: |
           tagname=telecom_5G_bladerf
@@ -1508,6 +1567,7 @@ jobs:
 
   telecom_5G:
     runs-on: Linux
+    timeout-minutes: 340
     needs: telecom_utils
     strategy:
       matrix:
@@ -1535,11 +1595,13 @@ jobs:
           else
             echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_utils.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
             echo "run_job_telecom=true" >> $GITHUB_OUTPUT
           else
             echo "run_job_telecom=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_5G.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
             echo "run_job_telecom5GSA=true" >> $GITHUB_OUTPUT
           else
@@ -1564,7 +1626,7 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push telecom 5G SA image with caching
+      - name: Build and push telecom_5G image with caching
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom5GSA == 'true'
         run: |
           cd Dockerfiles
@@ -1572,12 +1634,14 @@ jobs:
 
   telecom_5G-manifest:
     runs-on: ubuntu-22.04
+    timeout-minutes: 340
     needs: telecom_5G
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 2 
+      
       - name: Check for modified files
         id: file_check
         run: |
@@ -1595,11 +1659,13 @@ jobs:
           else
             echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_utils.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
             echo "run_job_telecom=true" >> $GITHUB_OUTPUT
           else
             echo "run_job_telecom=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/telecom_5G.docker"* || "$MODIFIED_FILES" == *"scripts/telecom_software.sh"* ]]; then
             echo "run_job_telecom5GSA=true" >> $GITHUB_OUTPUT
           else
@@ -1625,7 +1691,7 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Create and push multi-arch manifest for telecom 5G
+      - name: Create and push multi-arch manifest for telecom_5G
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom5GSA == 'true'
         run: |
           tagname=telecom_5G
@@ -1654,6 +1720,7 @@ jobs:
 
   wifi:
     runs-on: Linux
+    timeout-minutes: 340
     needs: network
     strategy:
       matrix:
@@ -1681,6 +1748,7 @@ jobs:
           else
             echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/wifi_basic.docker"* || "$MODIFIED_FILES" == *"scripts/rf_tools.sh"* ]]; then
             echo "run_job_wifi=true" >> $GITHUB_OUTPUT
           else
@@ -1705,7 +1773,7 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push wifi_basic image with caching
+      - name: Build and push wifi image with caching
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_wifi == 'true'
         run: |
           cd Dockerfiles
@@ -1713,12 +1781,14 @@ jobs:
 
   wifi-manifest:
     runs-on: ubuntu-22.04
+    timeout-minutes: 340
     needs: wifi
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 2 
+      
       - name: Check for modified files
         id: file_check
         run: |
@@ -1736,6 +1806,7 @@ jobs:
           else
             echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/wifi_basic.docker"* || "$MODIFIED_FILES" == *"scripts/rf_tools.sh"* ]]; then
             echo "run_job_wifi=true" >> $GITHUB_OUTPUT
           else
@@ -1761,7 +1832,7 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Create and push multi-arch manifest for wifi_basic
+      - name: Create and push multi-arch manifest for wifi
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_wifi == 'true'
         run: |
           tagname=wifi
@@ -1790,6 +1861,7 @@ jobs:
 
   bluetooth:
     runs-on: Linux
+    timeout-minutes: 340
     needs: sdrsa_devices
     strategy:
       matrix:
@@ -1817,6 +1889,7 @@ jobs:
           else
             echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/bluetooth.docker"* || "$MODIFIED_FILES" == *"scripts/rf_tools.sh"* ]]; then
             echo "run_job_bt=true" >> $GITHUB_OUTPUT
           else
@@ -1849,12 +1922,14 @@ jobs:
 
   bluetooth-manifest:
     runs-on: ubuntu-22.04
+    timeout-minutes: 340
     needs: bluetooth
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 2 
+      
       - name: Check for modified files
         id: file_check
         run: |
@@ -1872,6 +1947,7 @@ jobs:
           else
             echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/bluetooth.docker"* || "$MODIFIED_FILES" == *"scripts/rf_tools.sh"* ]]; then
             echo "run_job_bt=true" >> $GITHUB_OUTPUT
           else
@@ -1926,6 +2002,7 @@ jobs:
 
   rfid:
     runs-on: ubuntu-22.04
+    timeout-minutes: 340
     needs: corebuild
     strategy:
       matrix:
@@ -1947,6 +2024,7 @@ jobs:
           else
             echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/rfid.docker"* || "$MODIFIED_FILES" == *"scripts/rf_tools.sh"* ]]; then
             echo "run_job_rfid=true" >> $GITHUB_OUTPUT
           else
@@ -1959,32 +2037,34 @@ jobs:
           image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_rfid == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_rfid == 'true'
         uses: docker/setup-buildx-action@v3
         with:
           install: true
 
       - name: Log in to Docker Hub
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_rfid == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_rfid == 'true'
         uses: docker/login-action@v3
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push rfid image with caching
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_rfid == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_rfid == 'true'
         run: |
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make rfid
 
   rfid-manifest:
     runs-on: ubuntu-22.04
+    timeout-minutes: 340
     needs: rfid
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 2 
+      
       - name: Check for modified files
         id: file_check
         run: |
@@ -1996,6 +2076,7 @@ jobs:
           else
             echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/rfid.docker"* || "$MODIFIED_FILES" == *"scripts/rf_tools.sh"* ]]; then
             echo "run_job_rfid=true" >> $GITHUB_OUTPUT
           else
@@ -2008,21 +2089,21 @@ jobs:
           image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_rfid == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_rfid == 'true'
         uses: docker/setup-buildx-action@v3
         with:
           install: true
           version: latest
 
       - name: Log in to Docker Hub
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_rfid == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_rfid == 'true'
         uses: docker/login-action@v3
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Create and push multi-arch manifest for rfid
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_rfid == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_rfid == 'true'
         run: |
           tagname=rfid
 
@@ -2050,6 +2131,7 @@ jobs:
 
   network:
     runs-on: Linux
+    timeout-minutes: 340
     needs: sdrsa_devices
     strategy:
       matrix:
@@ -2071,6 +2153,7 @@ jobs:
           else
             echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/general_network.docker"* || "$MODIFIED_FILES" == *"scripts/network_common.sh"* ]]; then
             echo "run_job_network=true" >> $GITHUB_OUTPUT
           else
@@ -2095,7 +2178,7 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push rfid image with caching
+      - name: Build and push network image with caching
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_network == 'true'
         run: |
           cd Dockerfiles
@@ -2103,12 +2186,14 @@ jobs:
 
   network-manifest:
     runs-on: ubuntu-22.04
+    timeout-minutes: 340
     needs: network
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 2 
+      
       - name: Check for modified files
         id: file_check
         run: |
@@ -2120,6 +2205,7 @@ jobs:
           else
             echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/general_network.docker"* || "$MODIFIED_FILES" == *"scripts/network_common.sh"* ]]; then
             echo "run_job_network=true" >> $GITHUB_OUTPUT
           else
@@ -2145,7 +2231,7 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Create and push multi-arch manifest for rfid
+      - name: Create and push multi-arch manifest for network
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_network == 'true'
         run: |
           tagname=network
@@ -2174,6 +2260,7 @@ jobs:
 
   automotive:
     runs-on: ubuntu-22.04
+    timeout-minutes: 340
     needs: corebuild
     strategy:
       matrix:
@@ -2195,6 +2282,7 @@ jobs:
           else
             echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/automotive.docker"* || "$MODIFIED_FILES" == *"scripts/automotive_software.sh"* ]]; then
             echo "run_job_automotive=true" >> $GITHUB_OUTPUT
           else
@@ -2207,32 +2295,34 @@ jobs:
           image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_automotive == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_automotive == 'true'
         uses: docker/setup-buildx-action@v3
         with:
           install: true
 
       - name: Log in to Docker Hub
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_automotive == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_automotive == 'true'
         uses: docker/login-action@v3
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push automotive image with caching
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_automotive == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_automotive == 'true'
         run: |
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make automotive
 
   automotive-manifest:
     runs-on: ubuntu-22.04
+    timeout-minutes: 340
     needs: automotive
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 2 
+      
       - name: Check for modified files
         id: file_check
         run: |
@@ -2244,6 +2334,7 @@ jobs:
           else
             echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/automotive.docker"* || "$MODIFIED_FILES" == *"scripts/automotive_software.sh"* ]]; then
             echo "run_job_automotive=true" >> $GITHUB_OUTPUT
           else
@@ -2256,21 +2347,21 @@ jobs:
           image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_automotive == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_automotive == 'true'
         uses: docker/setup-buildx-action@v3
         with:
           install: true
           version: latest
 
       - name: Log in to Docker Hub
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_automotive == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_automotive == 'true'
         uses: docker/login-action@v3
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Create and push multi-arch manifest for automotive
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_automotive == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_automotive == 'true'
         run: |
           tagname=automotive
 
@@ -2298,6 +2389,7 @@ jobs:
 
   reversing:
     runs-on: Linux
+    timeout-minutes: 340
     needs: corebuild
     strategy:
       matrix:
@@ -2306,7 +2398,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2
+fetch-depth: 2
 
       - name: Check for modified files
         id: file_check
@@ -2319,6 +2411,7 @@ jobs:
           else
             echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/reversing.docker"* || "$MODIFIED_FILES" == *"scripts/reverse_software.sh"* || "$MODIFIED_FILES" == *"scripts/sast_software.sh"* ]]; then
             echo "run_job_reversing=true" >> $GITHUB_OUTPUT
           else
@@ -2331,32 +2424,34 @@ jobs:
           image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_reversing == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_reversing == 'true'
         uses: docker/setup-buildx-action@v3
         with:
           install: true
 
       - name: Log in to Docker Hub
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_reversing == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_reversing == 'true'
         uses: docker/login-action@v3
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push reversing image with caching
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_reversing == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_reversing == 'true'
         run: |
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make reversing
 
   reversing-manifest:
     runs-on: ubuntu-22.04
+    timeout-minutes: 340
     needs: reversing
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 2 
+      
       - name: Check for modified files
         id: file_check
         run: |
@@ -2368,6 +2463,7 @@ jobs:
           else
             echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/reversing.docker"* || "$MODIFIED_FILES" == *"scripts/reverse_software.sh"* || "$MODIFIED_FILES" == *"scripts/sast_software.sh"* ]]; then
             echo "run_job_reversing=true" >> $GITHUB_OUTPUT
           else
@@ -2380,21 +2476,21 @@ jobs:
           image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_reversing == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_reversing == 'true'
         uses: docker/setup-buildx-action@v3
         with:
           install: true
           version: latest
 
       - name: Log in to Docker Hub
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_reversing == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_reversing == 'true'
         uses: docker/login-action@v3
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Create and push multi-arch manifest for reversing
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_reversing == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_reversing == 'true'
         run: |
           tagname=reversing
 
