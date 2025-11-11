@@ -76,6 +76,7 @@ else
     build_stage = $(build_stage_local)
 endif
 
+
 #
 # Specific build targets using the chosen function
 #
