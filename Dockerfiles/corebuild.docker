@@ -42,12 +42,6 @@ RUN ./entrypoint.sh fzf_soft_install && \
 
 RUN ./entrypoint.sh uvpython_install
 
-# GPU drivers for NVidia, Intel and Radeon
-RUN ./entrypoint.sh install_GPU_nvidia && \
-	./entrypoint.sh install_GPU_Intel && \
-	./entrypoint.sh install_GPU_Radeon_until5000 && \
-	./entrypoint.sh install_GPU_latest_Radeon
-
 COPY config/.zshrc /root/.zshrc
 
 # Cleaning and quitting
