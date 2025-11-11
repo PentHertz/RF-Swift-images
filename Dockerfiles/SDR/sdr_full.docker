@@ -4,14 +4,11 @@
 # website: penthertz.com
 
 ARG BASE_IMAGE=sdr_light
-ARG JMPSTAGE1=begin
-ARG JMPSTAGE2=extraoot1
-ARG JMPSTAGE3=extraoot2
-ARG JMPSTAGE4=extrasofts
-FROM ${BASE_IMAGE} AS begin
+FROM ${BASE_IMAGE} AS stage-begin
 
 LABEL "org.container.project"="rfswift"
 LABEL "org.container.author"="Sébastien Dudek (FlUxIuS)"
+LABEL "org.container.stage"="begin"
 
 RUN echo 'APT::Install-Suggests "0";' >> /etc/apt/apt.conf.d/00-docker
 RUN echo 'APT::Install-Recommends "0";' >> /etc/apt/apt.conf.d/00-docker
@@ -25,10 +22,16 @@ COPY config /root/config/
 WORKDIR /root/scripts/
 RUN chmod +x entrypoint.sh
 
-FROM ${JMPSTAGE1} as extraoot1
-# Installing GNU Radio + extra OOT modules
+# ============================================
+# STAGE 1: Extra OOT Modules Part 1
+# ============================================
+FROM stage-begin AS stage-extraoot1
 
+LABEL "org.container.stage"="extraoot1"
+
+# Installing GNU Radio + extra OOT modules - First batch
 RUN ./entrypoint.sh griridium_grmod_install
+
 RUN ./entrypoint.sh grgsm_grmod_install && \
 	./entrypoint.sh grlora_grmod_install && \
 	./entrypoint.sh grlorasdr_grmod_install && \
@@ -45,10 +48,17 @@ RUN ./entrypoint.sh grgsm_grmod_install && \
 	./entrypoint.sh grdect2_grmod_install && \
 	./entrypoint.sh grfoo_grmod_install && \
 	./entrypoint.sh grieee802-11_grmod_install && \ 
-	./entrypoint.sh grieee802154_grmod_install  # depends on grfoo_grmod_install
+	./entrypoint.sh grieee802154_grmod_install
+
 RUN ./entrypoint.sh gruaslink_grmod_install
 
-FROM ${JMPSTAGE2} as extraoot2
+# ============================================
+# STAGE 2: Extra OOT Modules Part 2
+# ============================================
+FROM stage-extraoot1 AS stage-extraoot2
+
+LABEL "org.container.stage"="extraoot2"
+
 RUN ./entrypoint.sh grrds_grmod_install && \
 	./entrypoint.sh grdroineid_grmod_install && \
 	./entrypoint.sh grsatellites_grmod_install && \
@@ -78,22 +88,23 @@ RUN ./entrypoint.sh grrds_grmod_install && \
 	./entrypoint.sh grieee80211-grwifi_grmod_install && \
 	./entrypoint.sh grradioastro_grmod_install
 
-#RUN ./entrypoint.sh grccsds_move_rtsa_grmod_install #TODO: fix problem with strtod_l dependency
-#RUN ./entrypoint.sh deeptempest_grmod_install
-## TODO: More more!
-
 # Installing OOT modules from sandia
 RUN ./entrypoint.sh grpdu_utils_grmod_install && \
 	./entrypoint.sh grsandia_utils_grmod_install && \ 
 	./entrypoint.sh grtiming_utils_grmod_install && \
-	./entrypoint.sh grfhss_utils_grmod_install 
-# depends on 'grpdu_utils_grmod_install' and 'grtiming_utils_grmod_install' and 'grsandia_utils_grmod_install'
+	./entrypoint.sh grfhss_utils_grmod_install
 
-FROM ${JMPSTAGE3} AS extrasofts
+# ============================================
+# STAGE 3: Extra Software
+# ============================================
+FROM stage-extraoot2 AS stage-extrasofts
+
+LABEL "org.container.stage"="extrasofts"
+
 # Installing CyberEther
-RUN ./entrypoint.sh cyberther_soft_install # Enabe OpenCL for better exp
+RUN ./entrypoint.sh cyberther_soft_install
 
-# Installing softwares
+# Installing software packages
 RUN	./entrypoint.sh sigdigger_soft_install && \
 	./entrypoint.sh qsstv_soft_install && \
 	./entrypoint.sh nfclaboratory_soft_install && \
@@ -108,17 +119,30 @@ RUN	./entrypoint.sh sigdigger_soft_install && \
 RUN ./entrypoint.sh satdump_sdr_soft_install
 RUN ./entrypoint.sh sdrangel_soft_fromsource_install
 
-FROM ${JMPSTAGE4} as mldlsofts
-# Installing extra software
+# ============================================
+# STAGE 4: ML/DL and GPU Support
+# ============================================
+FROM stage-extrasofts AS stage-mldlsofts
+
+LABEL "org.container.stage"="mldlsofts"
+
+# Installing extra ML/DL software
 RUN ./entrypoint.sh ml_and_dl_soft_install
 
 # GPU drivers for NVidia, Intel and Radeon
-RUN ./entrypoint.sh install_GPU_nvidia  && \
-	./entrypoint.sh install_GPU_Intel  && \
-	./entrypoint.sh install_GPU_Radeon_until5000  && \
+RUN ./entrypoint.sh install_GPU_nvidia && \
+	./entrypoint.sh install_GPU_Intel && \
+	./entrypoint.sh install_GPU_Radeon_until5000 && \
 	./entrypoint.sh install_GPU_latest_Radeon
 
 RUN	./entrypoint.sh grfosphor_grmod_install
+
+# ============================================
+# FINAL STAGE: Cleanup
+# ============================================
+FROM stage-mldlsofts AS final
+
+LABEL "org.container.stage"="final"
 
 RUN mkdir -p /sdrtools/
 COPY run /sdrtools/run

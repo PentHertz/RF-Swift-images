@@ -9,13 +9,14 @@ env:
 on:
   push:
     branches:
-      - ubuntu_noble
+      - multistagedev
     paths:
       - '**'
 
 jobs:
   corebuild:
     runs-on: ubuntu-22.04
+    timeout-minutes: 340
     strategy:
       matrix:
         platform: [arm64]
@@ -64,6 +65,7 @@ jobs:
 
   sdrsa_devices:
     runs-on: ubuntu-22.04
+    timeout-minutes: 340
     needs: corebuild
     strategy:
       matrix:
@@ -118,6 +120,7 @@ jobs:
 
   sdrsa_devices_antsdr:
     runs-on: Linux
+    timeout-minutes: 340
     needs: corebuild
     strategy:
       matrix:
@@ -177,6 +180,7 @@ jobs:
 
   sdr_light:
     runs-on: Linux
+    timeout-minutes: 340
     needs: sdrsa_devices
     strategy:
       matrix:
@@ -236,6 +240,7 @@ jobs:
 
   hardware:
     runs-on: Linux
+    timeout-minutes: 340
     needs: sdrsa_devices
     strategy:
       matrix:
@@ -295,6 +300,7 @@ jobs:
 
   hardware-manifest:
     runs-on: ubuntu-22.04
+    timeout-minutes: 340
     needs: hardware
     steps:
       - name: Checkout code
@@ -372,6 +378,7 @@ jobs:
 
   deeptempest:
     runs-on: Linux
+    timeout-minutes: 340
     needs: sdrsa_devices
     strategy:
       matrix:
@@ -425,6 +432,7 @@ jobs:
 
   sdr_full:
     runs-on: Linux
+    timeout-minutes: 340
     needs: sdr_light
     strategy:
       matrix:
@@ -489,6 +497,7 @@ jobs:
 
   telecom_utils:
     runs-on: ubuntu-22.04
+    timeout-minutes: 340
     needs: sdrsa_devices
     strategy:
       matrix:
@@ -548,6 +557,7 @@ jobs:
 
   telecom_2Gto3G:
     runs-on: Linux
+    timeout-minutes: 340
     needs: telecom_utils
     strategy:
       matrix:
@@ -612,6 +622,7 @@ jobs:
 
   telecom_4G_5GNSA:
     runs-on: Linux
+    timeout-minutes: 340
     needs: telecom_utils
     strategy:
       matrix:
@@ -676,6 +687,7 @@ jobs:
 
   telecom_5G:
     runs-on: Linux
+    timeout-minutes: 340
     needs: telecom_utils
     strategy:
       matrix:
@@ -732,7 +744,7 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push telecom 4G to 5G NSA image with caching
+      - name: Build and push telecom 5G SA image with caching
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom5GSA == 'true'
         run: |
           cd Dockerfiles
@@ -740,6 +752,7 @@ jobs:
 
   telecom_5G_bladerf:
     runs-on: Linux
+    timeout-minutes: 340
     needs: telecom_utils
     strategy:
       matrix:
@@ -804,6 +817,7 @@ jobs:
 
   wifi:
     runs-on: Linux
+    timeout-minutes: 340
     needs: network
     strategy:
       matrix:
@@ -863,6 +877,7 @@ jobs:
 
   bluetooth:
     runs-on: Linux
+    timeout-minutes: 340
     needs: sdrsa_devices
     strategy:
       matrix:
@@ -922,6 +937,7 @@ jobs:
 
   rfid:
     runs-on: ubuntu-22.04
+    timeout-minutes: 340
     needs: corebuild
     strategy:
       matrix:
@@ -975,6 +991,7 @@ jobs:
 
   network:
     runs-on: Linux
+    timeout-minutes: 340
     needs: sdrsa_devices
     strategy:
       matrix:
@@ -1020,7 +1037,7 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push rfid image with caching
+      - name: Build and push network image with caching
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_network == 'true'
         run: |
           cd Dockerfiles
@@ -1028,6 +1045,7 @@ jobs:
 
   automotive:
     runs-on: ubuntu-22.04
+    timeout-minutes: 340
     needs: corebuild
     strategy:
       matrix:
@@ -1081,6 +1099,7 @@ jobs:
 
   reversing:
     runs-on: Linux
+    timeout-minutes: 340
     needs: corebuild
     strategy:
       matrix:
