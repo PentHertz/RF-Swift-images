@@ -1,0 +1,622 @@
+name: Tagged Release Build - RISCV64
+
+env:
+  DEV_REGISTRY: penthertz/rfswiftdev_noble
+  RELEASE_REGISTRY: penthertz/rfswift_noble_test
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Triggers on version tags like v1.0.0, v2.1.3, etc.
+
+jobs:
+  retag-corebuild:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Retag corebuild RISCV64 image
+        run: |
+          tagname=corebuild
+          arch=riscv64
+          version=${{ steps.get_version.outputs.version }}
+          
+          docker pull ${{ env.DEV_REGISTRY }}:${tagname}_${arch}
+          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
+                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
+          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
+          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
+                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+
+  retag-sdrsa_devices:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    needs: retag-corebuild
+    steps:
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Retag sdrsa_devices RISCV64 image
+        run: |
+          tagname=sdrsa_devices
+          arch=riscv64
+          version=${{ steps.get_version.outputs.version }}
+          
+          docker pull ${{ env.DEV_REGISTRY }}:${tagname}_${arch}
+          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
+                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
+          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
+          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
+                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+
+  retag-sdrsa_devices_antsdr:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    needs: retag-corebuild
+    steps:
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Retag sdrsa_devices_antsdr RISCV64 image
+        run: |
+          tagname=sdrsa_devices_antsdr
+          arch=riscv64
+          version=${{ steps.get_version.outputs.version }}
+          
+          docker pull ${{ env.DEV_REGISTRY }}:${tagname}_${arch}
+          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
+                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
+          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
+          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
+                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+
+  retag-sdr_light:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    needs: retag-sdrsa_devices
+    steps:
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Retag sdr_light RISCV64 image
+        run: |
+          tagname=sdr_light
+          arch=riscv64
+          version=${{ steps.get_version.outputs.version }}
+          
+          docker pull ${{ env.DEV_REGISTRY }}:${tagname}_${arch}
+          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
+                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
+          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
+          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
+                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+
+  retag-hardware:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    needs: retag-sdrsa_devices
+    steps:
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Retag hardware RISCV64 image
+        run: |
+          tagname=hardware
+          arch=riscv64
+          version=${{ steps.get_version.outputs.version }}
+          
+          docker pull ${{ env.DEV_REGISTRY }}:${tagname}_${arch}
+          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
+                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
+          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
+          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
+                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+
+  retag-deeptempest:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    needs: retag-sdrsa_devices
+    steps:
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Retag deeptempest RISCV64 image
+        run: |
+          tagname=deeptempest
+          arch=riscv64
+          version=${{ steps.get_version.outputs.version }}
+          
+          docker pull ${{ env.DEV_REGISTRY }}:${tagname}_${arch}
+          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
+                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
+          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
+          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
+                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+
+  retag-sdr_full:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    needs: retag-sdr_light
+    steps:
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Retag sdr_full RISCV64 image
+        run: |
+          tagname=sdr_full
+          arch=riscv64
+          version=${{ steps.get_version.outputs.version }}
+          
+          docker pull ${{ env.DEV_REGISTRY }}:${tagname}_${arch}
+          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
+                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
+          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
+          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
+                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+
+  retag-telecom_utils:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    needs: retag-sdrsa_devices
+    steps:
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Retag telecom_utils RISCV64 image
+        run: |
+          tagname=telecom_utils
+          arch=riscv64
+          version=${{ steps.get_version.outputs.version }}
+          
+          docker pull ${{ env.DEV_REGISTRY }}:${tagname}_${arch}
+          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
+                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
+          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
+          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
+                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+
+  retag-telecom_2Gto3G:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    needs: retag-telecom_utils
+    steps:
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Retag telecom_2Gto3G RISCV64 image
+        run: |
+          tagname=telecom_2Gto3G
+          arch=riscv64
+          version=${{ steps.get_version.outputs.version }}
+          
+          docker pull ${{ env.DEV_REGISTRY }}:${tagname}_${arch}
+          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
+                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
+          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
+          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
+                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+
+  retag-telecom_4G_5GNSA:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    needs: retag-telecom_utils
+    steps:
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo="version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Retag telecom_4G_5GNSA RISCV64 image
+        run: |
+          tagname=telecom_4G_5GNSA
+          arch=riscv64
+          version=${{ steps.get_version.outputs.version }}
+          
+          docker pull ${{ env.DEV_REGISTRY }}:${tagname}_${arch}
+          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
+                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
+          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
+          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
+                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+
+  retag-telecom_5G_bladerf:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    needs: retag-telecom_utils
+    steps:
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Retag telecom_5G_bladerf RISCV64 image
+        run: |
+          tagname=telecom_5G_bladerf
+          arch=riscv64
+          version=${{ steps.get_version.outputs.version }}
+          
+          docker pull ${{ env.DEV_REGISTRY }}:${tagname}_${arch}
+          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
+                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
+          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
+          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
+                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+
+  retag-telecom_5G:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    needs: retag-telecom_utils
+    steps:
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Retag telecom_5G RISCV64 image
+        run: |
+          tagname=telecom_5G
+          arch=riscv64
+          version=${{ steps.get_version.outputs.version }}
+          
+          docker pull ${{ env.DEV_REGISTRY }}:${tagname}_${arch}
+          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
+                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
+          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
+          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
+                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+
+  retag-network:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    needs: retag-sdrsa_devices
+    steps:
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Retag network RISCV64 image
+        run: |
+          tagname=network
+          arch=riscv64
+          version=${{ steps.get_version.outputs.version }}
+          
+          docker pull ${{ env.DEV_REGISTRY }}:${tagname}_${arch}
+          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
+                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
+          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
+          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
+                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+
+  retag-wifi:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    needs: retag-network
+    steps:
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Retag wifi RISCV64 image
+        run: |
+          tagname=wifi
+          arch=riscv64
+          version=${{ steps.get_version.outputs.version }}
+          
+          docker pull ${{ env.DEV_REGISTRY }}:${tagname}_${arch}
+          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
+                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
+          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
+          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
+                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+
+  retag-bluetooth:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    needs: retag-sdrsa_devices
+    steps:
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Retag bluetooth RISCV64 image
+        run: |
+          tagname=bluetooth
+          arch=riscv64
+          version=${{ steps.get_version.outputs.version }}
+          
+          docker pull ${{ env.DEV_REGISTRY }}:${tagname}_${arch}
+          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
+                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
+          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
+          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
+                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+
+  retag-rfid:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    needs: retag-corebuild
+    steps:
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Retag rfid RISCV64 image
+        run: |
+          tagname=rfid
+          arch=riscv64
+          version=${{ steps.get_version.outputs.version }}
+          
+          docker pull ${{ env.DEV_REGISTRY }}:${tagname}_${arch}
+          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
+                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
+          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
+          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
+                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+
+  retag-automotive:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    needs: retag-corebuild
+    steps:
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Retag automotive RISCV64 image
+        run: |
+          tagname=automotive
+          arch=riscv64
+          version=${{ steps.get_version.outputs.version }}
+          
+          docker pull ${{ env.DEV_REGISTRY }}:${tagname}_${arch}
+          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
+                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
+          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
+          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
+                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+
+  retag-reversing:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    needs: retag-corebuild
+    steps:
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Retag reversing RISCV64 image
+        run: |
+          tagname=reversing
+          arch=riscv64
+          version=${{ steps.get_version.outputs.version }}
+          
+          docker pull ${{ env.DEV_REGISTRY }}:${tagname}_${arch}
+          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
+                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
+          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
+          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
+                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
