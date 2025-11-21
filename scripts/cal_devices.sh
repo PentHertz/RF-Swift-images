@@ -117,7 +117,7 @@ function pocketvna_sa_device() {
 
 function librevna_cal_device() {
 	goodecho "[+] Installing dependencies for LibreVNA"
-	install_dependencies "qt6-base-dev libqt6svg6 libusb-1.0-0-dev"
+	install_dependencies "qt6-base-dev libqt6svg6 libusb-1.0-0-dev qt6-svg-dev"
 	[ -d /rftools/calibration ] || mkdir -p /rftools/calibration
 	cd /rftools/calibration
 	gitinstall "https://github.com/jankae/LibreVNA.git" "librevna_cal_device"
