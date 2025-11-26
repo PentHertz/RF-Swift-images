@@ -1,8 +1,8 @@
 name: Tagged Release Build - AMD64
 
 env:
-  DEV_REGISTRY: penthertz/rfswiftdev_noble
   RELEASE_REGISTRY: penthertz/rfswift_noble_test
+  PLATFORM: linux/amd64
 
 on:
   push:
@@ -10,16 +10,22 @@ on:
       - 'v*.*.*'  # Triggers on version tags like v1.0.0, v2.1.3, etc.
 
 jobs:
-  retag-corebuild:
+  build-corebuild:
     runs-on: ubuntu-22.04
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Extract version from tag
         id: get_version
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -29,31 +35,36 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Retag corebuild AMD64 image
-        run: |
-          tagname=corebuild
-          arch=amd64
-          version=${{ steps.get_version.outputs.version }}
-          
-          docker pull ${{ env.DEV_REGISTRY }}:${tagname}_${arch}
-          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
-                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
-          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
-          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
-                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
-          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+      - name: Build and push corebuild AMD64 image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./dockerfiles/corebuild/Dockerfile
+          platforms: ${{ env.PLATFORM }}
+          push: true
+          tags: |
+            ${{ env.RELEASE_REGISTRY }}:corebuild_${{ steps.get_version.outputs.version }}_amd64
+            ${{ env.RELEASE_REGISTRY }}:corebuild_amd64
+          cache-from: type=registry,ref=${{ env.RELEASE_REGISTRY }}:corebuild_amd64
+          cache-to: type=inline
 
-  retag-sdrsa_devices:
+  build-sdrsa_devices:
     runs-on: ubuntu-22.04
-    timeout-minutes: 30
-    needs: retag-corebuild
+    timeout-minutes: 60
+    needs: build-corebuild
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Extract version from tag
         id: get_version
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -63,31 +74,38 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Retag sdrsa_devices AMD64 image
-        run: |
-          tagname=sdrsa_devices
-          arch=amd64
-          version=${{ steps.get_version.outputs.version }}
-          
-          docker pull ${{ env.DEV_REGISTRY }}:${tagname}_${arch}
-          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
-                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
-          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
-          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
-                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
-          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+      - name: Build and push sdrsa_devices AMD64 image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./dockerfiles/sdrsa_devices/Dockerfile
+          platforms: ${{ env.PLATFORM }}
+          push: true
+          tags: |
+            ${{ env.RELEASE_REGISTRY }}:sdrsa_devices_${{ steps.get_version.outputs.version }}_amd64
+            ${{ env.RELEASE_REGISTRY }}:sdrsa_devices_amd64
+          cache-from: type=registry,ref=${{ env.RELEASE_REGISTRY }}:sdrsa_devices_amd64
+          cache-to: type=inline
+          build-args: |
+            BASE_IMAGE=${{ env.RELEASE_REGISTRY }}:corebuild_${{ steps.get_version.outputs.version }}_amd64
 
-  retag-sdrsa_devices_antsdr:
+  build-sdrsa_devices_antsdr:
     runs-on: ubuntu-22.04
-    timeout-minutes: 30
-    needs: retag-corebuild
+    timeout-minutes: 60
+    needs: build-corebuild
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Extract version from tag
         id: get_version
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -97,31 +115,38 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Retag sdrsa_devices_antsdr AMD64 image
-        run: |
-          tagname=sdrsa_devices_antsdr
-          arch=amd64
-          version=${{ steps.get_version.outputs.version }}
-          
-          docker pull ${{ env.DEV_REGISTRY }}:${tagname}_${arch}
-          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
-                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
-          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
-          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
-                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
-          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+      - name: Build and push sdrsa_devices_antsdr AMD64 image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./dockerfiles/sdrsa_devices_antsdr/Dockerfile
+          platforms: ${{ env.PLATFORM }}
+          push: true
+          tags: |
+            ${{ env.RELEASE_REGISTRY }}:sdrsa_devices_antsdr_${{ steps.get_version.outputs.version }}_amd64
+            ${{ env.RELEASE_REGISTRY }}:sdrsa_devices_antsdr_amd64
+          cache-from: type=registry,ref=${{ env.RELEASE_REGISTRY }}:sdrsa_devices_antsdr_amd64
+          cache-to: type=inline
+          build-args: |
+            BASE_IMAGE=${{ env.RELEASE_REGISTRY }}:corebuild_${{ steps.get_version.outputs.version }}_amd64
 
-  retag-sdr_light:
+  build-sdr_light:
     runs-on: ubuntu-22.04
-    timeout-minutes: 30
-    needs: retag-sdrsa_devices
+    timeout-minutes: 60
+    needs: build-sdrsa_devices
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Extract version from tag
         id: get_version
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -131,31 +156,38 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Retag sdr_light AMD64 image
-        run: |
-          tagname=sdr_light
-          arch=amd64
-          version=${{ steps.get_version.outputs.version }}
-          
-          docker pull ${{ env.DEV_REGISTRY }}:${tagname}_${arch}
-          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
-                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
-          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
-          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
-                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
-          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+      - name: Build and push sdr_light AMD64 image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./dockerfiles/sdr_light/Dockerfile
+          platforms: ${{ env.PLATFORM }}
+          push: true
+          tags: |
+            ${{ env.RELEASE_REGISTRY }}:sdr_light_${{ steps.get_version.outputs.version }}_amd64
+            ${{ env.RELEASE_REGISTRY }}:sdr_light_amd64
+          cache-from: type=registry,ref=${{ env.RELEASE_REGISTRY }}:sdr_light_amd64
+          cache-to: type=inline
+          build-args: |
+            BASE_IMAGE=${{ env.RELEASE_REGISTRY }}:sdrsa_devices_${{ steps.get_version.outputs.version }}_amd64
 
-  retag-hardware:
+  build-hardware:
     runs-on: ubuntu-22.04
-    timeout-minutes: 30
-    needs: retag-sdrsa_devices
+    timeout-minutes: 60
+    needs: build-sdrsa_devices
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Extract version from tag
         id: get_version
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -165,31 +197,38 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Retag hardware AMD64 image
-        run: |
-          tagname=hardware
-          arch=amd64
-          version=${{ steps.get_version.outputs.version }}
-          
-          docker pull ${{ env.DEV_REGISTRY }}:${tagname}_${arch}
-          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
-                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
-          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
-          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
-                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
-          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+      - name: Build and push hardware AMD64 image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./dockerfiles/hardware/Dockerfile
+          platforms: ${{ env.PLATFORM }}
+          push: true
+          tags: |
+            ${{ env.RELEASE_REGISTRY }}:hardware_${{ steps.get_version.outputs.version }}_amd64
+            ${{ env.RELEASE_REGISTRY }}:hardware_amd64
+          cache-from: type=registry,ref=${{ env.RELEASE_REGISTRY }}:hardware_amd64
+          cache-to: type=inline
+          build-args: |
+            BASE_IMAGE=${{ env.RELEASE_REGISTRY }}:sdrsa_devices_${{ steps.get_version.outputs.version }}_amd64
 
-  retag-deeptempest:
+  build-deeptempest:
     runs-on: ubuntu-22.04
-    timeout-minutes: 30
-    needs: retag-sdrsa_devices
+    timeout-minutes: 60
+    needs: build-sdrsa_devices
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Extract version from tag
         id: get_version
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -199,31 +238,38 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Retag deeptempest AMD64 image
-        run: |
-          tagname=deeptempest
-          arch=amd64
-          version=${{ steps.get_version.outputs.version }}
-          
-          docker pull ${{ env.DEV_REGISTRY }}:${tagname}_${arch}
-          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
-                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
-          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
-          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
-                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
-          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+      - name: Build and push deeptempest AMD64 image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./dockerfiles/deeptempest/Dockerfile
+          platforms: ${{ env.PLATFORM }}
+          push: true
+          tags: |
+            ${{ env.RELEASE_REGISTRY }}:deeptempest_${{ steps.get_version.outputs.version }}_amd64
+            ${{ env.RELEASE_REGISTRY }}:deeptempest_amd64
+          cache-from: type=registry,ref=${{ env.RELEASE_REGISTRY }}:deeptempest_amd64
+          cache-to: type=inline
+          build-args: |
+            BASE_IMAGE=${{ env.RELEASE_REGISTRY }}:sdrsa_devices_${{ steps.get_version.outputs.version }}_amd64
 
-  retag-sdr_full:
+  build-sdr_full:
     runs-on: ubuntu-22.04
-    timeout-minutes: 30
-    needs: retag-sdr_light
+    timeout-minutes: 60
+    needs: build-sdr_light
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Extract version from tag
         id: get_version
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -233,31 +279,38 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Retag sdr_full AMD64 image
-        run: |
-          tagname=sdr_full
-          arch=amd64
-          version=${{ steps.get_version.outputs.version }}
-          
-          docker pull ${{ env.DEV_REGISTRY }}:${tagname}_${arch}
-          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
-                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
-          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
-          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
-                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
-          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+      - name: Build and push sdr_full AMD64 image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./dockerfiles/sdr_full/Dockerfile
+          platforms: ${{ env.PLATFORM }}
+          push: true
+          tags: |
+            ${{ env.RELEASE_REGISTRY }}:sdr_full_${{ steps.get_version.outputs.version }}_amd64
+            ${{ env.RELEASE_REGISTRY }}:sdr_full_amd64
+          cache-from: type=registry,ref=${{ env.RELEASE_REGISTRY }}:sdr_full_amd64
+          cache-to: type=inline
+          build-args: |
+            BASE_IMAGE=${{ env.RELEASE_REGISTRY }}:sdr_light_${{ steps.get_version.outputs.version }}_amd64
 
-  retag-telecom_utils:
+  build-telecom_utils:
     runs-on: ubuntu-22.04
-    timeout-minutes: 30
-    needs: retag-sdrsa_devices
+    timeout-minutes: 60
+    needs: build-sdrsa_devices
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Extract version from tag
         id: get_version
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -267,64 +320,37 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Retag telecom_utils AMD64 image
-        run: |
-          tagname=telecom_utils
-          arch=amd64
-          version=${{ steps.get_version.outputs.version }}
-          
-          docker pull ${{ env.DEV_REGISTRY }}:${tagname}_${arch}
-          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
-                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
-          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
-          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
-                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
-          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+      - name: Build and push telecom_utils AMD64 image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./dockerfiles/telecom_utils/Dockerfile
+          platforms: ${{ env.PLATFORM }}
+          push: true
+          tags: |
+            ${{ env.RELEASE_REGISTRY }}:telecom_utils_${{ steps.get_version.outputs.version }}_amd64
+            ${{ env.RELEASE_REGISTRY }}:telecom_utils_amd64
+          cache-from: type=registry,ref=${{ env.RELEASE_REGISTRY }}:telecom_utils_amd64
+          cache-to: type=inline
+          build-args: |
+            BASE_IMAGE=${{ env.RELEASE_REGISTRY }}:sdrsa_devices_${{ steps.get_version.outputs.version }}_amd64
 
-  retag-telecom_2Gto3G:
+  build-telecom_2Gto3G:
     runs-on: ubuntu-22.04
-    timeout-minutes: 30
-    needs: retag-telecom_utils
+    timeout-minutes: 60
+    needs: build-telecom_utils
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Extract version from tag
         id: get_version
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Retag telecom_2Gto3G AMD64 image
-        run: |
-          tagname=telecom_2Gto3G
-          arch=amd64
-          version=${{ steps.get_version.outputs.version }}
-          
-          docker pull ${{ env.DEV_REGISTRY }}:${tagname}_${arch}
-          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
-                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
-          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
-          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
-                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
-          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
-
-  retag-telecom_4G_5GNSA:
-    runs-on: ubuntu-22.04
-    timeout-minutes: 30
-    needs: retag-telecom_utils
-    steps:
-      - name: Extract version from tag
-        id: get_version
-        run: |
-          VERSION=${GITHUB_REF#refs/tags/v}
-          echo="version=${VERSION}" >> $GITHUB_OUTPUT
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -335,31 +361,38 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Retag telecom_4G_5GNSA AMD64 image
-        run: |
-          tagname=telecom_4G_5GNSA
-          arch=amd64
-          version=${{ steps.get_version.outputs.version }}
-          
-          docker pull ${{ env.DEV_REGISTRY }}:${tagname}_${arch}
-          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
-                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
-          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
-          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
-                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
-          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+      - name: Build and push telecom_2Gto3G AMD64 image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./dockerfiles/telecom_2Gto3G/Dockerfile
+          platforms: ${{ env.PLATFORM }}
+          push: true
+          tags: |
+            ${{ env.RELEASE_REGISTRY }}:telecom_2Gto3G_${{ steps.get_version.outputs.version }}_amd64
+            ${{ env.RELEASE_REGISTRY }}:telecom_2Gto3G_amd64
+          cache-from: type=registry,ref=${{ env.RELEASE_REGISTRY }}:telecom_2Gto3G_amd64
+          cache-to: type=inline
+          build-args: |
+            BASE_IMAGE=${{ env.RELEASE_REGISTRY }}:telecom_utils_${{ steps.get_version.outputs.version }}_amd64
 
-  retag-telecom_5G_bladerf:
+  build-telecom_4G_5GNSA:
     runs-on: ubuntu-22.04
-    timeout-minutes: 30
-    needs: retag-telecom_utils
+    timeout-minutes: 60
+    needs: build-telecom_utils
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Extract version from tag
         id: get_version
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -369,31 +402,38 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Retag telecom_5G_bladerf AMD64 image
-        run: |
-          tagname=telecom_5G_bladerf
-          arch=amd64
-          version=${{ steps.get_version.outputs.version }}
-          
-          docker pull ${{ env.DEV_REGISTRY }}:${tagname}_${arch}
-          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
-                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
-          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
-          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
-                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
-          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+      - name: Build and push telecom_4G_5GNSA AMD64 image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./dockerfiles/telecom_4G_5GNSA/Dockerfile
+          platforms: ${{ env.PLATFORM }}
+          push: true
+          tags: |
+            ${{ env.RELEASE_REGISTRY }}:telecom_4G_5GNSA_${{ steps.get_version.outputs.version }}_amd64
+            ${{ env.RELEASE_REGISTRY }}:telecom_4G_5GNSA_amd64
+          cache-from: type=registry,ref=${{ env.RELEASE_REGISTRY }}:telecom_4G_5GNSA_amd64
+          cache-to: type=inline
+          build-args: |
+            BASE_IMAGE=${{ env.RELEASE_REGISTRY }}:telecom_utils_${{ steps.get_version.outputs.version }}_amd64
 
-  retag-telecom_5G:
+  build-telecom_5G_bladerf:
     runs-on: ubuntu-22.04
-    timeout-minutes: 30
-    needs: retag-telecom_utils
+    timeout-minutes: 60
+    needs: build-telecom_utils
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Extract version from tag
         id: get_version
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -403,31 +443,38 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Retag telecom_5G AMD64 image
-        run: |
-          tagname=telecom_5G
-          arch=amd64
-          version=${{ steps.get_version.outputs.version }}
-          
-          docker pull ${{ env.DEV_REGISTRY }}:${tagname}_${arch}
-          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
-                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
-          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
-          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
-                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
-          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+      - name: Build and push telecom_5G_bladerf AMD64 image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./dockerfiles/telecom_5G_bladerf/Dockerfile
+          platforms: ${{ env.PLATFORM }}
+          push: true
+          tags: |
+            ${{ env.RELEASE_REGISTRY }}:telecom_5G_bladerf_${{ steps.get_version.outputs.version }}_amd64
+            ${{ env.RELEASE_REGISTRY }}:telecom_5G_bladerf_amd64
+          cache-from: type=registry,ref=${{ env.RELEASE_REGISTRY }}:telecom_5G_bladerf_amd64
+          cache-to: type=inline
+          build-args: |
+            BASE_IMAGE=${{ env.RELEASE_REGISTRY }}:telecom_utils_${{ steps.get_version.outputs.version }}_amd64
 
-  retag-network:
+  build-telecom_5G:
     runs-on: ubuntu-22.04
-    timeout-minutes: 30
-    needs: retag-sdrsa_devices
+    timeout-minutes: 60
+    needs: build-telecom_utils
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Extract version from tag
         id: get_version
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -437,31 +484,38 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Retag network AMD64 image
-        run: |
-          tagname=network
-          arch=amd64
-          version=${{ steps.get_version.outputs.version }}
-          
-          docker pull ${{ env.DEV_REGISTRY }}:${tagname}_${arch}
-          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
-                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
-          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
-          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
-                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
-          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+      - name: Build and push telecom_5G AMD64 image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./dockerfiles/telecom_5G/Dockerfile
+          platforms: ${{ env.PLATFORM }}
+          push: true
+          tags: |
+            ${{ env.RELEASE_REGISTRY }}:telecom_5G_${{ steps.get_version.outputs.version }}_amd64
+            ${{ env.RELEASE_REGISTRY }}:telecom_5G_amd64
+          cache-from: type=registry,ref=${{ env.RELEASE_REGISTRY }}:telecom_5G_amd64
+          cache-to: type=inline
+          build-args: |
+            BASE_IMAGE=${{ env.RELEASE_REGISTRY }}:telecom_utils_${{ steps.get_version.outputs.version }}_amd64
 
-  retag-wifi:
+  build-network:
     runs-on: ubuntu-22.04
-    timeout-minutes: 30
-    needs: retag-network
+    timeout-minutes: 60
+    needs: build-sdrsa_devices
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Extract version from tag
         id: get_version
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -471,31 +525,38 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Retag wifi AMD64 image
-        run: |
-          tagname=wifi
-          arch=amd64
-          version=${{ steps.get_version.outputs.version }}
-          
-          docker pull ${{ env.DEV_REGISTRY }}:${tagname}_${arch}
-          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
-                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
-          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
-          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
-                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
-          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+      - name: Build and push network AMD64 image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./dockerfiles/network/Dockerfile
+          platforms: ${{ env.PLATFORM }}
+          push: true
+          tags: |
+            ${{ env.RELEASE_REGISTRY }}:network_${{ steps.get_version.outputs.version }}_amd64
+            ${{ env.RELEASE_REGISTRY }}:network_amd64
+          cache-from: type=registry,ref=${{ env.RELEASE_REGISTRY }}:network_amd64
+          cache-to: type=inline
+          build-args: |
+            BASE_IMAGE=${{ env.RELEASE_REGISTRY }}:sdrsa_devices_${{ steps.get_version.outputs.version }}_amd64
 
-  retag-bluetooth:
+  build-wifi:
     runs-on: ubuntu-22.04
-    timeout-minutes: 30
-    needs: retag-sdrsa_devices
+    timeout-minutes: 60
+    needs: build-network
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Extract version from tag
         id: get_version
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -505,31 +566,38 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Retag bluetooth AMD64 image
-        run: |
-          tagname=bluetooth
-          arch=amd64
-          version=${{ steps.get_version.outputs.version }}
-          
-          docker pull ${{ env.DEV_REGISTRY }}:${tagname}_${arch}
-          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
-                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
-          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
-          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
-                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
-          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+      - name: Build and push wifi AMD64 image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./dockerfiles/wifi/Dockerfile
+          platforms: ${{ env.PLATFORM }}
+          push: true
+          tags: |
+            ${{ env.RELEASE_REGISTRY }}:wifi_${{ steps.get_version.outputs.version }}_amd64
+            ${{ env.RELEASE_REGISTRY }}:wifi_amd64
+          cache-from: type=registry,ref=${{ env.RELEASE_REGISTRY }}:wifi_amd64
+          cache-to: type=inline
+          build-args: |
+            BASE_IMAGE=${{ env.RELEASE_REGISTRY }}:network_${{ steps.get_version.outputs.version }}_amd64
 
-  retag-rfid:
+  build-bluetooth:
     runs-on: ubuntu-22.04
-    timeout-minutes: 30
-    needs: retag-corebuild
+    timeout-minutes: 60
+    needs: build-sdrsa_devices
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Extract version from tag
         id: get_version
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -539,31 +607,38 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Retag rfid AMD64 image
-        run: |
-          tagname=rfid
-          arch=amd64
-          version=${{ steps.get_version.outputs.version }}
-          
-          docker pull ${{ env.DEV_REGISTRY }}:${tagname}_${arch}
-          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
-                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
-          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
-          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
-                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
-          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+      - name: Build and push bluetooth AMD64 image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./dockerfiles/bluetooth/Dockerfile
+          platforms: ${{ env.PLATFORM }}
+          push: true
+          tags: |
+            ${{ env.RELEASE_REGISTRY }}:bluetooth_${{ steps.get_version.outputs.version }}_amd64
+            ${{ env.RELEASE_REGISTRY }}:bluetooth_amd64
+          cache-from: type=registry,ref=${{ env.RELEASE_REGISTRY }}:bluetooth_amd64
+          cache-to: type=inline
+          build-args: |
+            BASE_IMAGE=${{ env.RELEASE_REGISTRY }}:sdrsa_devices_${{ steps.get_version.outputs.version }}_amd64
 
-  retag-automotive:
+  build-rfid:
     runs-on: ubuntu-22.04
-    timeout-minutes: 30
-    needs: retag-corebuild
+    timeout-minutes: 60
+    needs: build-corebuild
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Extract version from tag
         id: get_version
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -573,31 +648,38 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Retag automotive AMD64 image
-        run: |
-          tagname=automotive
-          arch=amd64
-          version=${{ steps.get_version.outputs.version }}
-          
-          docker pull ${{ env.DEV_REGISTRY }}:${tagname}_${arch}
-          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
-                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
-          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
-          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
-                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
-          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+      - name: Build and push rfid AMD64 image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./dockerfiles/rfid/Dockerfile
+          platforms: ${{ env.PLATFORM }}
+          push: true
+          tags: |
+            ${{ env.RELEASE_REGISTRY }}:rfid_${{ steps.get_version.outputs.version }}_amd64
+            ${{ env.RELEASE_REGISTRY }}:rfid_amd64
+          cache-from: type=registry,ref=${{ env.RELEASE_REGISTRY }}:rfid_amd64
+          cache-to: type=inline
+          build-args: |
+            BASE_IMAGE=${{ env.RELEASE_REGISTRY }}:corebuild_${{ steps.get_version.outputs.version }}_amd64
 
-  retag-reversing:
+  build-automotive:
     runs-on: ubuntu-22.04
-    timeout-minutes: 30
-    needs: retag-corebuild
+    timeout-minutes: 60
+    needs: build-corebuild
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Extract version from tag
         id: get_version
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -607,16 +689,58 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Retag reversing AMD64 image
+      - name: Build and push automotive AMD64 image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./dockerfiles/automotive/Dockerfile
+          platforms: ${{ env.PLATFORM }}
+          push: true
+          tags: |
+            ${{ env.RELEASE_REGISTRY }}:automotive_${{ steps.get_version.outputs.version }}_amd64
+            ${{ env.RELEASE_REGISTRY }}:automotive_amd64
+          cache-from: type=registry,ref=${{ env.RELEASE_REGISTRY }}:automotive_amd64
+          cache-to: type=inline
+          build-args: |
+            BASE_IMAGE=${{ env.RELEASE_REGISTRY }}:corebuild_${{ steps.get_version.outputs.version }}_amd64
+
+  build-reversing:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    needs: build-corebuild
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: get_version
         run: |
-          tagname=reversing
-          arch=amd64
-          version=${{ steps.get_version.outputs.version }}
-          
-          docker pull ${{ env.DEV_REGISTRY }}:${tagname}_${arch}
-          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
-                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
-          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}_${version}
-          docker tag ${{ env.DEV_REGISTRY }}:${tagname}_${arch} \
-                     ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
-          docker push ${{ env.RELEASE_REGISTRY }}:${tagname}_${arch}
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push reversing AMD64 image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./dockerfiles/reversing/Dockerfile
+          platforms: ${{ env.PLATFORM }}
+          push: true
+          tags: |
+            ${{ env.RELEASE_REGISTRY }}:reversing_${{ steps.get_version.outputs.version }}_amd64
+            ${{ env.RELEASE_REGISTRY }}:reversing_amd64
+          cache-from: type=registry,ref=${{ env.RELEASE_REGISTRY }}:reversing_amd64
+          cache-to: type=inline
+          build-args: |
+            BASE_IMAGE=${{ env.RELEASE_REGISTRY }}:corebuild_${{ steps.get_version.outputs.version }}_amd64
