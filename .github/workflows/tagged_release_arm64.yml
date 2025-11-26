@@ -1,7 +1,7 @@
 name: Tagged Release - Retag ARM64
 
 env:
-  DEV_REGISTRY: penthertz/rfswiftdev
+  DEV_REGISTRY: penthertz/rfswiftdev_noble
   RELEASE_REGISTRY: penthertz/rfswift_noble_test
   ARCH: arm64
 
