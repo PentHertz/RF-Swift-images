@@ -1,9 +1,9 @@
-name: Tagged Release - Retag AMD64
+name: Tagged Release - Retag ARM64
 
 env:
   DEV_REGISTRY: penthertz/rfswiftdev_noble
   RELEASE_REGISTRY: penthertz/rfswift_noble_test
-  ARCH: amd64
+  ARCH: arm64
 
 on:
   push:
