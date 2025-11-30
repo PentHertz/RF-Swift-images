@@ -338,3 +338,66 @@ function trufflehog_script_install() {
     
     curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh -s -- -b /usr/local/bin
 }
+
+function burpsuite_community_install() {
+    local version="${1:-2025.10.6}"
+    local download_url="https://portswigger.net/burp/releases/download?product=community&version=${version}&type=Linux"
+    local install_dir="/opt/burpsuite"
+    local installer_file="/tmp/burpsuite_community_linux_v${version}.sh"
+    
+    colorecho "[+] Installing Burp Suite Community Edition v${version}"
+    
+    # Create installation directory if it doesn't exist
+    if [ ! -d "$install_dir" ]; then
+        sudo mkdir -p "$install_dir"
+    fi
+    
+    # Check if already installed
+    if [ -f "${install_dir}/BurpSuiteCommunity" ]; then
+        colorecho "[!] Burp Suite Community Edition appears to be already installed at ${install_dir}"
+        read -p "Do you want to reinstall? (y/n): " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            goodecho "[+] Skipping Burp Suite installation"
+            return 0
+        fi
+    fi
+    
+    # Download the installer using curl
+    colorecho "[+] Downloading Burp Suite Community Edition installer..."
+    installfromnet "curl -L -o ${installer_file} ${download_url}"
+    
+    if [ ! -f "$installer_file" ]; then
+        criticalecho "[-] Failed to download Burp Suite installer"
+    fi
+    
+    # Make installer executable
+    chmod +x "$installer_file"
+    
+    # Run installer in unattended mode
+    colorecho "[+] Running Burp Suite installer (unattended mode)..."
+    sudo "$installer_file" -q -dir "$install_dir" || {
+        criticalecho-noexit "[-] Installation failed"
+        rm -f "$installer_file"
+        return 1
+    }
+    
+    # Clean up installer
+    rm -f "$installer_file"
+    
+    # Create symbolic link for easy access
+    if [ -f "${install_dir}/BurpSuiteCommunity" ]; then
+        sudo ln -sf "${install_dir}/BurpSuiteCommunity" /usr/local/bin/burpsuite 2>/dev/null || true
+        
+        # Log installation
+        if [ ! -d "/var/lib/db/" ]; then
+            sudo mkdir -p /var/lib/db/
+        fi
+        echo "burpsuite:${install_dir}:binary" | sudo tee -a /var/lib/db/rfswift_github.lst > /dev/null
+        
+        goodecho "[+] Burp Suite Community Edition v${version} installed successfully!"
+        goodecho "[+] Launch with: burpsuite or ${install_dir}/BurpSuiteCommunity"
+    else
+        criticalecho "[-] Installation completed but binary not found at expected location"
+    fi
+}

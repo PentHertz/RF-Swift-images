@@ -53,7 +53,8 @@ RUN ./entrypoint.sh hashcat_soft_install && \
 	./entrypoint.sh john_soft_install
 
 # Web pentesting tools
-RUN ./entrypoint.sh caido_soft_install
+RUN ./entrypoint.sh caido_soft_install &&
+	./entrypoint.sh burpsuite_community_install
 
 RUN mkdir -p /sdrtools/
 COPY run /sdrtools/run
