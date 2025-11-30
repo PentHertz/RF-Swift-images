@@ -468,4 +468,115 @@ function SigPloit_soft_install() {
 	cd SigPloit
 	pip3install -r requirements.txt
 }
+
+function 5greplay_soft_install() {
+    local install_dir="/telecom/5G"
+    local repo_url="https://github.com/Montimage/5Greplay"
+    local dpi_repo_url="https://github.com/Montimage/mmt-dpi.git"
+    
+    colorecho "[+] Installing 5Greplay and dependencies"
+    
+    # Install required dependencies
+    local dependencies="git gcc g++ make libxml2-dev libpcap-dev libconfuse-dev libsctp-dev"
+    install_dependencies "$dependencies"
+    
+    # Create installation directory
+    if [ ! -d "$install_dir" ]; then
+        sudo mkdir -p "$install_dir"
+    fi
+    
+    cd "$install_dir" || exit
+    
+    # Step 1: Install mmt-dpi (required dependency)
+    colorecho "[+] Installing mmt-dpi dependency..."
+    
+    # Remove any existing mmt-dpi directory
+    if [ -d "mmt-dpi" ]; then
+        colorecho "[!] Removing existing mmt-dpi directory..."
+        rm -rf mmt-dpi
+    fi
+    
+    # Clone mmt-dpi with depth 1
+    installfromnet "git clone --depth 1 ${dpi_repo_url}"
+    
+    if [ ! -d "mmt-dpi" ]; then
+        criticalecho "[-] Failed to clone mmt-dpi repository"
+    fi
+    
+    # Build and install mmt-dpi
+    cd mmt-dpi/sdk || criticalecho "[-] mmt-dpi/sdk directory not found"
+    
+    colorecho "[+] Building mmt-dpi..."
+    make -j$(nproc) || {
+        criticalecho-noexit "[-] Failed to build mmt-dpi"
+        cd "$install_dir"
+        return 1
+    }
+    
+    colorecho "[+] Installing mmt-dpi..."
+    sudo make install || {
+        criticalecho-noexit "[-] Failed to install mmt-dpi"
+        cd "$install_dir"
+        return 1
+    }
+    
+    goodecho "[+] mmt-dpi installed successfully"
+    
+    # Go back to install directory and cleanup mmt-dpi source
+    cd "$install_dir" || exit
+    rm -rf mmt-dpi
+    
+    # Step 2: Install 5Greplay
+    colorecho "[+] Installing 5Greplay..."
+    
+    # Check if 5Greplay already exists
+    if [ -d "5Greplay" ]; then
+        colorecho "[!] 5Greplay directory already exists. Pulling latest changes..."
+        cd 5Greplay || exit
+        installfromnet "git pull"
+        if [ $? -ne 0 ]; then
+            criticalecho-noexit "[-] Failed to update 5Greplay repository"
+        fi
+    else
+        # Clone 5Greplay repository
+        gitinstall "$repo_url" "make" ""
+        cd 5Greplay || criticalecho "[-] Failed to enter 5Greplay directory"
+    fi
+    
+    # Build 5Greplay
+    colorecho "[+] Building 5Greplay..."
+    make -j$(nproc) || {
+        criticalecho-noexit "[-] Failed to build 5Greplay"
+        cd "$install_dir"
+        return 1
+    }
+    
+    # Install 5Greplay (if there's an install target)
+    if grep -q "^install:" Makefile 2>/dev/null; then
+        colorecho "[+] Installing 5Greplay..."
+        sudo make install || {
+            criticalecho-noexit "[-] Failed to install 5Greplay"
+            cd "$install_dir"
+            return 1
+        }
+    else
+        colorecho "[!] No install target found in Makefile, binaries remain in build directory"
+        # Create symbolic links for common binaries if they exist
+        if [ -f "5greplay" ]; then
+            sudo ln -sf "${install_dir}/5Greplay/5greplay" /usr/local/bin/5greplay 2>/dev/null || true
+            goodecho "[+] Created symlink: /usr/local/bin/5greplay"
+        fi
+    fi
+    
+    cd "$install_dir" || exit
+    
+    goodecho "[+] 5Greplay installation completed successfully!"
+    goodecho "[+] Installation directory: ${install_dir}/5Greplay"
+    
+    # Find and display available binaries
+    if [ -d "5Greplay" ]; then
+        colorecho "[+] Available binaries:"
+        find 5Greplay -maxdepth 2 -type f -executable | head -10
+    fi
+}
 ### TODO: more More!
