@@ -38,6 +38,7 @@ RUN ./entrypoint.sh ad_devices_install && \
 	./entrypoint.sh libresdr_b2x0_devices_install && \
 	./entrypoint.sh litexm2sdr_devices_install && \
 	./entrypoint.sh hydrasdr_rfone_install && \
+	./entrypoint.sh kalibrate_hydrasdr_device && \
 	./entrypoint.sh usdr_lib_install
 
 ## Installing peripherals with optional drivers

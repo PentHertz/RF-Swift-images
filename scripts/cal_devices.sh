@@ -170,3 +170,9 @@ function lotus_budc_tune_device() {
     cd /root/thirdparty
 	cmake_clone_and_build "https://github.com/PentHertz/lotus_budc_controler.git" "build" "" "" "lotus_budc_tune_device"
 }
+
+function kalibrate_hydrasdr_device() {
+	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
+    cd /root/thirdparty
+	cmake_clone_and_build "https://github.com/hydrasdr/kalibrate-hydrasdr.git" "build" "" "" "kalibrate_hydrasdr_device"
+}
