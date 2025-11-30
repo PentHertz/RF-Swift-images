@@ -405,7 +405,7 @@ function UERANSIM_nullciph_soft_install() {
 	[ -d /telecom/5G ] || mkdir -p /telecom/5G
 	cd /telecom/5G
 	goodecho "[+] Cloninig and installing UERANSIM"
-	gitinstall "https://github.com/aligungr/UERANSIM" "UERANSIM_nullciph_soft_install" "nullciph"
+	gitinstall "https://github.com/FlUxIuS/UERANSIM.git" "UERANSIM_nullciph_soft_install" "nullciph"
 	cd UERANSIM
 	make
 }
