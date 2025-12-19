@@ -335,7 +335,7 @@ EOF
     chmod +x /usr/local/bin/beef
     gitinstall "https://github.com/beefproject/beef" "beef_soft_install"
     cd beef
-    yes | ./install
+    yes | ./install || true  # Ignore SIGPIPE exit code
     
     colorecho "[+] BeEF installed successfully"
 }
