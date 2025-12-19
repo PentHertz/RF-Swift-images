@@ -437,14 +437,20 @@ function eaphammer_soft_install() {
 	pip3install -r pip.req
 }
 
-function airgeddon_soft_install() { # TODO: install all dependencies
+function airgeddon_soft_install() { # TODO: still hostapd-wpe missing
 	goodecho "[+] Installing airgeddon"
 	[ -d /rftools/wifi ] || mkdir -p /rftools/wifi
 	cd /rftools/wifi
 	gitinstall "https://github.com/v1s1t0r1sh3r3/airgeddon.git" "airgeddon_soft_install"
 	cd airgeddon/
-	install_dependencies "crunch mdk4 isc-dhcp-server hostapd lighttpd beef"
+	install_dependencies "crunch mdk4 isc-dhcp-server hostapd lighttpd hashcat ettercap-text-only john"
 	goodecho "[+] Installing pluggins for airgeddon"
+	# Create a wrapper script
+	cat > /usr/local/sbin/airgeddon << 'EOF'
+#!/bin/bash
+cd /rftools/wifi/airgeddon
+exec ./airgeddon.sh "$@"
+EOF
 	gitinstall "https://github.com/OscarAkaElvis/airgeddon-plugins.git" "airgeddon_soft_install"
 	cp -R airgeddon-plugins/wpa3_online_attack/* plugins/
 	cp -R airgeddon-plugins/allchars_captiveportal/* plugins/
@@ -459,6 +465,36 @@ function wifite2_soft_install () {
 	cd wifite2/
 	pipx install .
 	pipx ensurepath
+}
+
+function roguehostapd_soft_install () {
+	goodecho "[+] Installing roguehostapd"
+	[ -d /rftools/wifi ] || mkdir -p /rftools/wifi
+	cd /rftools/wifi
+	gitinstall "https://github.com/FlUxIuS/roguehostapd.git" "roguehostapd_soft_install"
+	cd roguehostapd
+	python3 setup.py install
+}
+
+function wifiphisher_soft_install () {
+	goodecho "[+] Installing wifiphisher"
+	[ -d /rftools/wifi ] || mkdir -p /rftools/wifi
+	cd /rftools/wifi
+	gitinstall "https://github.com/wifiphisher/wifiphisher.git" "wifiphisher_soft_install"
+	cd wifiphisher
+	python3 setup.py install
+	pip3install "pyric tornado"
+}
+
+function hostapdmana_soft_install () {
+	goodecho "[+] Installing hostapd-mana"
+	install_dependencies "build-essential git libnl-genl-3-dev libssl-dev"
+	[ -d /rftools/wifi ] || mkdir -p /rftools/wifi
+	cd /rftools/wifi
+	gitinstall "https://github.com/FlUxIuS/hostapd-mana.git" "hostapdmana_soft_install"
+	cd hostapd-mana
+	make -C hostapd
+	ln -s $(pwd)/hostapd/hostapd /usr/local/bin/hostapd-mana
 }
 
 function sparrowwifi_sdr_soft_install () { # TODO: to debug

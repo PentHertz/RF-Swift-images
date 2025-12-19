@@ -35,6 +35,12 @@ RUN ./entrypoint.sh reaver_soft_install && \
 	./entrypoint.sh sparrowwifi_sdr_soft_install && \
 	./entrypoint.sh krackattacks_script_soft_install
 
+RUN ./entrypoint.sh beef_soft_install && \
+	./entrypoint.sh asleap_soft_install && \
+	./entrypoint.sh roguehostapd_soft_install && \
+	./entrypoint.sh wifiphisher_soft_install && \
+	./entrypoint.sh hostapdmana_soft_install
+
 RUN ./entrypoint.sh wpa3_dragonslayer_soft_install && \
 	./entrypoint.sh wpa3_dragonforce_soft_install && \
 	./entrypoint.sh wpa3_dragondrain_and_time_soft_install && \

@@ -259,29 +259,43 @@ function Open5GS_soft_install() {
 
 function Open5GS_nohttp2_soft_install() {
 	goodecho "[+] Installing Open5GS dependencies"
+	# Create GPG config for root
+	mkdir -p /root/.gnupg/
+	echo "no-tty" >> /root/.gnupg/gpg.conf
+	chmod 700 /root/.gnupg/
+	
 	install_dependencies "ca-certificates curl gnupg"
 	install_dependencies "meson libmongoc-1.0-0 libmongoc-dev"
 	install_dependencies "python3-pip python3-setuptools python3-wheel ninja-build build-essential flex bison git cmake libsctp-dev libgnutls28-dev libgcrypt-dev libssl-dev libidn11-dev libmongoc-dev libbson-dev libyaml-dev libnghttp2-dev libmicrohttpd-dev libcurl4-gnutls-dev libnghttp2-dev libtins-dev libtalloc-dev meson"
 	ldconfig
-	curl -fsSL https://pgp.mongodb.com/server-6.0.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-6.0.gpg --dearmor
-	echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-6.0.gpg] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
+	
+	# MongoDB GPG key - remove first if exists, then create
+	mkdir -p /usr/share/keyrings
+	rm -f /usr/share/keyrings/mongodb-server-6.0.gpg
+	curl -fsSL https://pgp.mongodb.com/server-6.0.asc | gpg --batch --dearmor -o /usr/share/keyrings/mongodb-server-6.0.gpg
+	echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-6.0.gpg] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-6.0.list
+	
 	installfromnet "apt-fast -y update"
-	install_dependencies "mongodb-org python3-pip python3-setuptools python3-wheel ninja-build build-essential flex bison git cmake libsctp-dev libgnutls28-dev libgcrypt-dev libssl-dev libidn11-dev libmongoc-dev libbson-dev libyaml-dev libnghttp2-dev libmicrohttpd-dev libcurl4-gnutls-dev libnghttp2-dev libtins-dev libtalloc-dev meson"
-	goodecho "[+] Feching Open5GS"
+	install_dependencies "mongodb-org"
+	
+	goodecho "[+] Fetching Open5GS"
 	[ -d /telecom/5G ] || mkdir -p /telecom/5G
 	cd /telecom/5G
-	goodecho "[+] Cloninig and installing Open5GS"
+	goodecho "[+] Cloning and installing Open5GS"
 	installfromnet "git clone -b nohttp2 https://github.com/FlUxIuS/open5gs.git"
 	cd open5gs
-	meson build --prefix=`pwd`/install
+	meson build --prefix=$(pwd)/install
 	ninja -C build
-	ln -s $(pwd)/build/tests/app/5gc /usr/bin/Open5Gs_deployall # Making a quick command
-	mkdir -p /data/db # making directory for MongoDB
+	ln -s $(pwd)/build/tests/app/5gc /usr/bin/Open5Gs_deployall
+	mkdir -p /data/db
+	
 	goodecho "[+] Building Web GUI"
 	mkdir -p /etc/apt/keyrings
-	curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+	rm -f /etc/apt/keyrings/nodesource.gpg
+	curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --batch --dearmor -o /etc/apt/keyrings/nodesource.gpg
 	NODE_MAJOR=20
-	echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
+	echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
+	
 	installfromnet "apt-fast update"
 	install_dependencies "nodejs"
 	cd webui
@@ -290,14 +304,19 @@ function Open5GS_nohttp2_soft_install() {
 
 function Open5GS_0caps_soft_install() {
 	goodecho "[+] Installing Open5GS 0caps dependencies"
+	# Create GPG config for root
+	#mkdir -p /root/.gnupg/
+	#echo "no-tty" >> /root/.gnupg/gpg.conf
+	#chmod 700 /root/.gnupg/
+
 	install_dependencies "ca-certificates curl gnupg"
 	install_dependencies "meson libmongoc-1.0-0 libmongoc-dev"
 	install_dependencies "python3-pip python3-setuptools python3-wheel ninja-build build-essential flex bison git cmake libsctp-dev libgnutls28-dev libgcrypt-dev libssl-dev libidn11-dev libmongoc-dev libbson-dev libyaml-dev libnghttp2-dev libmicrohttpd-dev libcurl4-gnutls-dev libnghttp2-dev libtins-dev libtalloc-dev meson"
 	ldconfig
-	curl -fsSL https://pgp.mongodb.com/server-6.0.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-6.0.gpg --dearmor
-	echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-6.0.gpg] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
-	installfromnet "apt-fast -y update"
-	install_dependencies "mongodb-org python3-pip python3-setuptools python3-wheel ninja-build build-essential flex bison git cmake libsctp-dev libgnutls28-dev libgcrypt-dev libssl-dev libidn11-dev libmongoc-dev libbson-dev libyaml-dev libnghttp2-dev libmicrohttpd-dev libcurl4-gnutls-dev libnghttp2-dev libtins-dev libtalloc-dev meson"
+	#curl -fsSL https://pgp.mongodb.com/server-6.0.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-6.0.gpg --dearmor
+	#echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-6.0.gpg] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
+	#installfromnet "apt-fast -y update"
+	#install_dependencies "mongodb-org python3-pip python3-setuptools python3-wheel ninja-build build-essential flex bison git cmake libsctp-dev libgnutls28-dev libgcrypt-dev libssl-dev libidn11-dev libmongoc-dev libbson-dev libyaml-dev libnghttp2-dev libmicrohttpd-dev libcurl4-gnutls-dev libnghttp2-dev libtins-dev libtalloc-dev meson"
 	goodecho "[+] Feching Open5GS"
 	[ -d /telecom/5G ] || mkdir -p /telecom/5G
 	cd /telecom/5G
@@ -309,12 +328,12 @@ function Open5GS_0caps_soft_install() {
 	ln -s $(pwd)/build/tests/app/5gc /usr/bin/Open5Gs_nullciph_deployall # Making a quick command
 	mkdir -p /data/db # making directory for MongoDB
 	goodecho "[+] Building Web GUI"
-	mkdir -p /etc/apt/keyrings
-	curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+	#mkdir -p /etc/apt/keyrings
+	#curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
 	NODE_MAJOR=20
-	echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
-	installfromnet "apt-fast update"
-	install_dependencies "nodejs"
+	#echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
+	#installfromnet "apt-fast update"
+	#install_dependencies "nodejs"
 	cd webui
 	npm ci
 }
@@ -397,7 +416,7 @@ function UERANSIM_soft_install() {
 	goodecho "[+] Cloninig and installing UERANSIM"
 	gitinstall "https://github.com/aligungr/UERANSIM" "UERANSIM_soft_install"
 	cd UERANSIM
-	make
+	make -j$(nproc)
 }
 
 function UERANSIM_nullciph_soft_install() {
@@ -408,6 +427,16 @@ function UERANSIM_nullciph_soft_install() {
 	gitinstall "https://github.com/FlUxIuS/UERANSIM.git" "UERANSIM_nullciph_soft_install" "nullciph"
 	cd UERANSIM
 	make
+}
+
+function bromelia_soft_install() {
+	goodecho "[+] Installing bromelia"
+	pip3install "bromelia"
+}
+
+function pyhss_soft_install() {
+	goodecho "[+] Installing bromelia"
+	pip3install "bromelia"
 }
 
 function pysim_soft_install() {
@@ -467,6 +496,13 @@ function SigPloit_soft_install() {
 	gitinstall "https://github.com/FlUxIuS/SigPloit.git" "SigPloit"
 	cd SigPloit
 	pip3install -r requirements.txt
+}
+
+function Modmobmap_soft_install() {
+    [ -d /telecom ] || mkdir -p /telecom
+    cd /telecom
+    goodecho "[+] Installing Modmobmap"
+    gitinstall "https://github.com/PentHertz/Modmobmap.git" "Modmobmap_soft_install" "rfswift"
 }
 
 function 5greplay_soft_install() {

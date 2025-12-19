@@ -1,0 +1,68 @@
+
+# This DockerFile is part of the RFSwift project
+# Install type: Telecom
+# Author(s): Sébastien Dudek (@FlUxIuS) @Penthertz
+# website: penthertz.com
+
+ARG BASE_IMAGE=telecom_4G_5GNSA
+FROM ${BASE_IMAGE}
+
+LABEL "org.container.project"="rfswift"
+LABEL "org.container.author"="Sébastien Dudek (FlUxIuS)"
+
+RUN echo 'APT::Install-Suggests "0";' >> /etc/apt/apt.conf.d/00-docker
+RUN echo 'APT::Install-Recommends "0";' >> /etc/apt/apt.conf.d/00-docker
+
+RUN apt-fast update
+
+COPY scripts /root/scripts/
+COPY rules /root/rules/
+COPY config /root/config
+
+WORKDIR /root/scripts/
+RUN chmod +x entrypoint.sh
+
+RUN rm -rf /telecom/5G/open5gs
+RUN rm -rf /telecom/5G/UERANSIM
+
+RUN rm /usr/bin/Open5Gs_deployall
+
+ENV GPG_TTY=/dev/console
+
+# Tools for Telecom
+RUN ./entrypoint.sh burpsuite_community_install && \
+	./entrypoint.sh nmap_soft_install && \
+	./entrypoint.sh jupyter_soft_install && \
+	./entrypoint.sh Open5GS_nohttp2_soft_install && \
+	./entrypoint.sh Open5GS_0caps_soft_install && \
+	./entrypoint.sh UERANSIM_nullciph_soft_install
+
+RUN ./entrypoint.sh wireshark_soft_install && \
+	./entrypoint.sh tshark_soft_install
+
+RUN ./entrypoint.sh gnuradio_soft_install && \
+	./entrypoint.sh common_sources_and_sinks
+
+RUN apt-fast install -y build-essential libosmocore libosmocore-dev libtool libtalloc-dev libsctp-dev shtool autoconf automake git-core pkg-config make gcc gnutls-dev libusb-1.0-0-dev libmnl-dev
+RUN apt-fast install -y soapysdr-module-osmosdr soapysdr-module-rtlsdr
+
+# For AMD64
+RUN mkdir -p /usr/lib/aarch64-linux-gnu/wireshark/plugins/rls/protocol
+RUN cp /telecom/5G/UERANSIM/tools/rls-wireshark-dissector.lua /usr/lib/aarch64-linux-gnu/wireshark/plugins/rls/protocol
+RUN wget -O /usr/lib/aarch64-linux-gnu/wireshark/plugins/scat.lua https://raw.githubusercontent.com/PentHertz/scat/refs/heads/master/wireshark/scat.lua
+#RUN mkdir -p /usr/lib/x86_64-linux-gnu/wireshark/plugins/rls/protocol
+#RUN cp /telecom/5G/UERANSIM/tools/rls-wireshark-dissector.lua /usr/lib/x86_64-linux-gnu/wireshark/plugins/rls/protocol
+#RUN wget -O /usr/lib/x86_64-linux-gnu/wireshark/plugins/scat.lua https://raw.githubusercontent.com/PentHertz/scat/refs/heads/master/wireshark/scat.lua
+
+# More to come!
+
+RUN mkdir -p /sdrtools/
+COPY run /sdrtools/run
+
+# Cleaning and quitting
+WORKDIR /root/
+#RUN rm -rf /root/scripts/
+RUN rm -rf /root/rules/
+RUN rm -rf /root/thirdparty
+RUN apt-fast clean
+RUN DEBIAN_FRONTEND=noninteractive rm -rf /var/lib/apt/lists/*

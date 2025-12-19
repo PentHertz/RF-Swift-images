@@ -100,8 +100,8 @@ function ghidra_soft_install() {
 	[ -d /reverse ] || mkdir /reverse
 	cd /reverse
 
-    ghidra_version="11.4.2"
-    ghidra_date="20250826"
+    ghidra_version="12.0"
+    ghidra_date="20251205"
 	prog="ghidra_${ghidra_version}_PUBLIC_${ghidra_date}"
 
 	installfromnet "wget https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_${ghidra_version}_build/${prog}.zip"
@@ -155,7 +155,7 @@ function imhex_soft_install() {
     
     ARCH=$(uname -m)
 
-    IMH_VERSION="1.37.4"
+    IMH_VERSION="1.38.0"
     
     if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then
         goodecho "[+] Installing ImHex for x86_64"
