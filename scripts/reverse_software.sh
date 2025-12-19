@@ -155,7 +155,7 @@ function imhex_soft_install() {
     
     ARCH=$(uname -m)
 
-    IMH_VERSION="1.38.0"
+    IMH_VERSION="1.37.4"
     
     if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then
         goodecho "[+] Installing ImHex for x86_64"
