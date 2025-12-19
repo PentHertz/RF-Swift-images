@@ -322,6 +322,8 @@ EOF
 
 function beef_soft_install() {
     colorecho "[+] Installing BeEF"
+    export TERM=xterm
+    
     [ -d /opt/network ] || mkdir -p /opt/network
     cd /opt/network
     # Create a wrapper script
