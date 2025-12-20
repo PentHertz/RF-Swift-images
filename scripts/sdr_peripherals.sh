@@ -373,7 +373,7 @@ function sdrpp_extramodules_install() {
 
 function usdr_lib_install() {
     install_dependencies "libusb-1.0-0-dev check dkms build-essential cmake python3 python3-venv python3-yaml dwarves check"
-    gitinstall "https://github.com/wavelet-lab/usdr-lib.git" "soapyusdr_grmod_install"
+    gitinstall "https://github.com/wavelet-lab/usdr-lib.git" "usdr_lib_install"
     cd usdr-lib
     mkdir build
     cd build
