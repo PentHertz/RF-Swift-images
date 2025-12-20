@@ -9,6 +9,7 @@ function esp32_bluetooth_classic_sniffer_soft_install () {
     cd esp32_bluetooth_classic_sniffer
     ./requirements.sh
     ./build.sh
+    ln -s $(pwd)/BTSnifferBREDR.py /usr/sbin/BTSnifferBREDR
 }
 
 function blueztools_soft_install() {
