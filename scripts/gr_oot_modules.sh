@@ -506,10 +506,6 @@ function grhtra_grmod_install() {
     fi
 }
 
-function soapyusdr_grmod_install() {
-    install_dependencies "soapysdr-module-usdr"
-}
-
 function grradioastro_grmod_install() {
     install_dependencies "python3-ephem git cmake liborc-0.4-dev"
     grclone_and_build "https://github.com/WVURAIL/gr-radio_astro.git" "" "grradioastro_grmod_install"

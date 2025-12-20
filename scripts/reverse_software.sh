@@ -78,6 +78,22 @@ function binwalk_soft_install() {
 }
 
 function cutter_soft_install() { # TODO: fix installation
+	ARCH=$(uname -m)
+
+    case "$ARCH" in
+        x86_64|amd64)
+            goodecho "[+] Architecture: x86_64"
+            goodecho "[+] Installing Cutter for x86_64"
+            ;;
+        #aarch64|arm64) # TODO: fix arm64 install
+        #    goodecho "[+] Architecture: aarch64"
+        #    goodecho "[+] Installing qiling for aarch64"
+        #    ;;
+        *)
+            criticalecho-noexit "[-] Unsupported architecture: $ARCH"
+            exit 0
+            ;;
+    esac
 	goodecho "[+] Installing Cutter dependencies"
 	install_dependencies "ninja-build qt6-base-dev libqt6opengl6-dev cmake meson pkgconf libzip-dev zlib1g-dev qt6-base-dev qt6-tools-dev qt6-tools-dev-tools libqt6svg6-dev libqt6core5compat6-dev libqt6svgwidgets6 qt6-l10n-tools libqt6opengl6-dev"
 	pip3install "meson"
