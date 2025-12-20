@@ -1,6 +1,16 @@
 #!/bin/bash
 
 # Bluetooth Classic and LE
+function esp32_bluetooth_classic_sniffer_soft_install () {
+	goodecho "[+] Installing esp32_bluetooth_classic_sniffer"
+	[ -d /rftools/bluetooth ] || mkdir -p /rftools/bluetooth
+    cd /rftools/bluetooth
+    gitinstall "https://github.com/FlUxIuS/esp32_bluetooth_classic_sniffer.git" "esp32_bluetooth_classic_sniffer_soft_install"
+    cd esp32_bluetooth_classic_sniffer
+    ./requirements.sh
+    ./build.sh
+}
+
 function blueztools_soft_install() {
 	goodecho "[+] Installing bluez tools"
 	install_dependencies "bluez bluez-tools bluez-hcidump bluez-btsco bluez-obexd libbluetooth-dev"
