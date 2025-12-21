@@ -66,7 +66,7 @@ function binwalkv3_soft_install() {
 	[ -d /reverse ] || mkdir -p /reverse
 	cd /reverse
 	goodecho "[+] Installing Binwalk v3"
-	gitinstall "https://github.com/ReFirmLabs/binwalk.git" "binwalkv3_soft_install" "binwalkv3"
+	gitinstall "https://github.com/ReFirmLabs/binwalk.git" "binwalkv3_soft_install"
 	cd binwalk
 	cargo build --release
 	ln -s $(pwd)/target/release/binwalk /usr/bin/binwalkv3
@@ -269,6 +269,35 @@ function bytecaster_install() {
     ln -sf /reverse/ByteCaster/ByteCaster /usr/bin/ByteCaster
     
     goodecho "[+] ByteCaster installed at /usr/bin/ByteCaster"
+}
+
+function sasquatch_soft_install() {
+	goodecho "[+] Installing sasquatch"
+	[ -d /root/thirdparty ] || mkdir /root/thirdparty
+    cd /root/thirdparty
+	gitinstall "https://github.com/FlUxIuS/sasquatch.git" "sasquatch_soft_install"
+	install_dependencies "build-essential liblzma-dev liblzo2-dev zlib1g-dev"
+	./build.sh
+}
+
+function qnx6extractor_soft_install() {
+	goodecho "[+] Installing qnx6-extractor"
+	[ -d /reverse ] || mkdir /reverse
+    cd /reverse
+	gitinstall "https://github.com/ReFirmLabs/qnx6-extractor.git" "qnx6extractor_soft_install"
+	cd qnx6-extractor
+	chmod +x main.py
+	ln -s $(pwd)/main.py /usr/local/sbin/qnx6-extractor
+}
+
+function unblob_soft_install() {
+    goodecho "[+] Installing unblob"
+    install_dependencies "android-sdk-libsparse-utils e2fsprogs p7zip-full unar zlib1g-dev liblzo2-dev lzop lziprecover libhyperscan-dev zstd lz4"
+    [ -d /reverse ] || mkdir /reverse
+    cd /reverse
+    gitinstall "https://github.com/onekey-sec/unblob.git" "unblob_soft_install"
+    cd unblob
+    pipx install .
 }
 
 ### TODO: more More!

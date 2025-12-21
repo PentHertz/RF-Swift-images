@@ -228,4 +228,7 @@ function uvpython_install() { # Avoid terrible long builds
     installfromnet "wget https://github.com/astral-sh/uv/releases/download/$UV_VERSION/uv-installer.sh"
     chmod +x uv-installer.sh
     ./uv-installer.sh
+    ln -s /root/.local/bin/uv /usr/local/bin/uv
+    echo 'export PATH="/root/.local/bin:$PATH"' >> ~/.zshrc
+    echo 'export PATH="/root/.local/bin:$PATH"' >> ~/.bashrc
 }
