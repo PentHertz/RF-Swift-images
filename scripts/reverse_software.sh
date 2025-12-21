@@ -61,17 +61,33 @@ function radare2_soft_install() {
 }
 
 function binwalkv3_soft_install() {
-	goodecho "[+] Installing Binwalk v3 dependencies"
-	install_dependencies "p7zip-full zstd unzip tar sleuthkit cabextract lz4 lzop device-tree-compiler unrar"
-	[ -d /reverse ] || mkdir -p /reverse
-	cd /reverse
-	goodecho "[+] Installing Binwalk v3"
-	gitinstall "https://github.com/ReFirmLabs/binwalk.git" "binwalkv3_soft_install"
-	cd binwalk
-	cargo build --release
-	ln -s $(pwd)/target/release/binwalk /usr/bin/binwalkv3
+    goodecho "[+] Installing Binwalk v3 dependencies"
+    install_dependencies "p7zip-full zstd unzip tar sleuthkit cabextract lz4 lzop device-tree-compiler unrar"
+    
+    # Ensure we're using rustup's cargo, not system cargo
+    export PATH="/root/.cargo/bin:${PATH}"
+    source $HOME/.cargo/env 2>/dev/null || true
+    
+    # Verify Rust version
+    cargo --version
+    if ! cargo --version | grep -qE "1\.(8[2-9]|9[0-9]|[0-9]{3})"; then
+        goodecho "[+] Updating Rust to latest stable"
+        rustup update stable
+        rustup default stable
+    fi
+    
+    [ -d /reverse ] || mkdir -p /reverse
+    cd /reverse
+    goodecho "[+] Installing Binwalk v3"
+    gitinstall "https://github.com/ReFirmLabs/binwalk.git" "binwalkv3_soft_install"
+    cd binwalk
+    
+    # Build with explicit edition support
+    cargo build --release
+    ln -sf $(pwd)/target/release/binwalk /usr/bin/binwalkv3
+    
+    goodecho "[+] Binwalk v3 installed successfully"
 }
-
 function binwalk_soft_install() {
 	goodecho "[+] Installing Binwalk"
 	install_dependencies "binwalk"
