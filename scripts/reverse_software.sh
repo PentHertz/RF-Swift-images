@@ -295,22 +295,27 @@ function unblob_soft_install() {
     goodecho "[+] Installing unblob"
     install_dependencies "android-sdk-libsparse-utils e2fsprogs p7zip-full unar zlib1g-dev liblzo2-dev lzop lziprecover libhyperscan-dev zstd lz4 build-essential curl"
     
-    # Install Rust (required for unblob's Rust components)
+    # Install Rust if not present
     if ! command -v cargo &> /dev/null; then
-        goodecho "[+] Installing Rust toolchain"
+        goodecho "[+] Installing Rust toolchain (required for unblob)"
         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
+        export PATH="/root/.cargo/bin:${PATH}"
         source $HOME/.cargo/env
+    else
+        goodecho "[+] Rust already installed"
+        export PATH="/root/.cargo/bin:${PATH}"
     fi
+    
+    # Verify Rust is available
+    cargo --version || { goodecho "[-] Rust installation failed"; return 1; }
     
     [ -d /reverse ] || mkdir /reverse
     cd /reverse
     gitinstall "https://github.com/onekey-sec/unblob.git" "unblob_soft_install"
     cd unblob
     
-    # Install with pipx (creates unblob command automatically)
+    # Install with pipx
     pipx install .
-    
-    goodecho "[+] unblob installed successfully"
 }
 
 ### TODO: more More!
