@@ -276,6 +276,7 @@ function sasquatch_soft_install() {
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
     cd /root/thirdparty
 	gitinstall "https://github.com/FlUxIuS/sasquatch.git" "sasquatch_soft_install"
+	cd sasquatch
 	install_dependencies "build-essential liblzma-dev liblzo2-dev zlib1g-dev"
 	./build.sh
 }
