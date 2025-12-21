@@ -530,6 +530,29 @@ function krackattacks_script_soft_install () {
 	./pysetup.sh
 }
 
+function fernwificracker_soft_install() {
+	goodecho "[+] Installing Fern WiFi Cracker"
+	install_dependencies "aircrack-ng"
+	gitinstall "https://github.com/savio-code/fern-wifi-cracker.git" "fernwificracker_soft_install"
+	cd fern-wifi-cracker
+	cd Fern-Wifi-Cracker
+	
+	# Create wrapper script
+	cat > /usr/sbin/Fern-Wifi-Cracker << 'EOF'
+#!/bin/bash
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+FERN_DIR="/root/thirdparty/fern-wifi-cracker/Fern-Wifi-Cracker"
+
+# Change to the Fern directory and execute
+cd "$FERN_DIR"
+exec python3 execute.py "$@"
+EOF
+	
+	# Make wrapper executable
+	chmod +x /usr/sbin/Fern-Wifi-Cracker
+	goodecho "[+] Fern WiFi Cracker wrapper installed"
+}
+
 ## Other softs
 
 function whad_soft_install () {
