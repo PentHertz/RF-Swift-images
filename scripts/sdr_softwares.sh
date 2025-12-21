@@ -646,3 +646,16 @@ function dumphfdl_soft_install () {
 	cd /root/thirdparty
 	cmake_clone_and_build "https://github.com/szpajder/dumphfdl.git" "build" "" "" "dumphfdl_soft_install"
 }
+
+function qradiolink_soft_install () {
+	goodecho "[+] Installing qradiolink"
+	install_dependencies "libftdi1-dev libftdi-dev libusb-1.0-0-dev libzmq3-dev cppzmq-dev"
+	install_dependencies "qtmultimedia5-dev libqt5multimedia5-plugins"
+	install_dependencies "libspeex-dev libspeexdsp-dev libcodec2-dev libopus-dev libpulse-dev libasound2-dev portaudio19-dev libsndfile1-dev libvorbis-dev libflac-dev libftdi1-dev gnuradio-dev gr-osmosdr libvolk-dev libboost-all-dev libconfig++-dev libprotobuf-dev protobuf-compiler libsamplerate0-dev libjpeg-dev"
+	[ -d /rftools/sdr ] || mkdir /rftools/sdr
+	cd /rftools/sdr
+	gitinstall "https://codeberg.org/qradiolink/qradiolink" "qradiolink_soft_install"
+	cd qradiolink
+	sh ./build_debian.sh
+	ln -s build/qradiolink /usr/local/bin/qradiolink
+}

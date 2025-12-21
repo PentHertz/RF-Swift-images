@@ -302,7 +302,7 @@ function qnx6extractor_soft_install() {
 	[ -d /reverse ] || mkdir /reverse
     cd /reverse
 	gitinstall "https://github.com/ReFirmLabs/qnx6-extractor.git" "qnx6extractor_soft_install"
-	cd qnx6-extractor
+	cd qnx6-extractor/qnx6_extractor
 	chmod +x main.py
 	ln -s $(pwd)/main.py /usr/local/sbin/qnx6-extractor
 }

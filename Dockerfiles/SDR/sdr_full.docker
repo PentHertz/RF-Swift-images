@@ -76,7 +76,8 @@ RUN ./entrypoint.sh grrds_grmod_install && \
 	./entrypoint.sh grrftap_grmod_install && \
 	./entrypoint.sh grieee802-11ah_grmod_install && \
 	./entrypoint.sh grieee80211-grwifi_grmod_install && \
-	./entrypoint.sh grradioastro_grmod_install
+	./entrypoint.sh grradioastro_grmod_install && \
+	./entrypoint.sh grcessb_grmod_install
 
 #RUN ./entrypoint.sh grccsds_move_rtsa_grmod_install #TODO: fix problem with strtod_l dependency
 #RUN ./entrypoint.sh deeptempest_grmod_install
@@ -103,7 +104,7 @@ RUN	./entrypoint.sh sigdigger_soft_install && \
 	./entrypoint.sh gpredict_sdr_soft_install && \
 	./entrypoint.sh v2verifier_sdr_soft_install && \
 	./entrypoint.sh wavingz_sdr_soft_install && \
-	./entrypoint.sh pyspecsdr_sdr_soft_install
+	./entrypoint.sh pyspecsdr_sdr_soft_install 
 
 RUN ./entrypoint.sh satdump_sdr_soft_install
 RUN ./entrypoint.sh sdrangel_soft_fromsource_install
