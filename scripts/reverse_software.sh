@@ -293,12 +293,24 @@ function qnx6extractor_soft_install() {
 
 function unblob_soft_install() {
     goodecho "[+] Installing unblob"
-    install_dependencies "android-sdk-libsparse-utils e2fsprogs p7zip-full unar zlib1g-dev liblzo2-dev lzop lziprecover libhyperscan-dev zstd lz4"
+    install_dependencies "android-sdk-libsparse-utils e2fsprogs p7zip-full unar zlib1g-dev liblzo2-dev lzop lziprecover libhyperscan-dev zstd lz4 build-essential curl"
+    
+    # Install Rust (required for unblob's Rust components)
+    if ! command -v cargo &> /dev/null; then
+        goodecho "[+] Installing Rust toolchain"
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
+        source $HOME/.cargo/env
+    fi
+    
     [ -d /reverse ] || mkdir /reverse
     cd /reverse
     gitinstall "https://github.com/onekey-sec/unblob.git" "unblob_soft_install"
     cd unblob
+    
+    # Install with pipx (creates unblob command automatically)
     pipx install .
+    
+    goodecho "[+] unblob installed successfully"
 }
 
 ### TODO: more More!
