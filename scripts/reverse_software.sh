@@ -170,7 +170,6 @@ function imhex_soft_install() {
     cd /root/thirdparty
     
     ARCH=$(uname -m)
-
     IMH_VERSION="1.37.4"
     
     if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then
@@ -181,23 +180,40 @@ function imhex_soft_install() {
         
     elif [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
         goodecho "[+] Installing ImHex for arm64"
-        install_dependencies "libmbedtls14t64 libmbedx509-1t64 libglfw3-dev"
+        install_dependencies "libmbedtls14t64 libmbedx509-1t64 libglfw3-dev libfuse2"
         
         # Download the AppImage
         installfromnet "wget https://github.com/WerWolv/ImHex/releases/download/v$IMH_VERSION/imhex-$IMH_VERSION-arm64.AppImage"
         chmod +x imhex-$IMH_VERSION-arm64.AppImage
         
-        # Extract AppImage without FUSE
-        ./imhex-$IMH_VERSION-arm64.AppImage --appimage-extract
-        
-        # Move extracted contents to proper location
-        cp -r squashfs-root /opt/imhex
+        # Try extraction with better error handling
+        if ! ./imhex-$IMH_VERSION-arm64.AppImage --appimage-extract 2>/dev/null; then
+            goodecho "[!] AppImage extraction failed, trying manual extraction..."
+            
+            # Fallback: manual extraction using offset
+            # AppImages are ISO9660 filesystems at a specific offset
+            offset=$(./imhex-$IMH_VERSION-arm64.AppImage --appimage-offset 2>/dev/null || echo "")
+            
+            if [ -n "$offset" ]; then
+                dd if=imhex-$IMH_VERSION-arm64.AppImage of=imhex.iso bs=1 skip=$offset
+                mkdir -p squashfs-root
+                mount -o loop imhex.iso squashfs-root
+                cp -r squashfs-root /opt/imhex
+                umount squashfs-root
+            else
+                criticalecho-noexit "[-] Could not extract ImHex AppImage, skipping..."
+                return 1
+            fi
+        else
+            # Normal extraction succeeded
+            cp -r squashfs-root /opt/imhex
+        fi
         
         # Create symlink in /usr/local/bin
         ln -sf /opt/imhex/AppRun /usr/local/bin/imhex
         
         # Clean up
-        rm -f imhex-$IMH_VERSION-arm64.AppImage
+        rm -f imhex-$IMH_VERSION-arm64.AppImage imhex.iso
         rm -rf squashfs-root
         
     else
