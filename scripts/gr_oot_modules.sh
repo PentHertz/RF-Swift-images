@@ -494,6 +494,10 @@ function grrftap_grmod_install() {
     grclone_and_build "https://github.com/FlUxIuS/gr-rftap.git" "" "grrftap_grmod_install"
 }
 
+function grcessb_grmod_install() {
+    grclone_and_build "https://github.com/drmpeg/gr-cessb.git" "" "grcessb_grmod_install"
+}
+
 function grhtra_grmod_install() {
     ARCH=$(uname -m)
     if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then
