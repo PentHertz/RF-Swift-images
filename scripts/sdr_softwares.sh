@@ -662,7 +662,9 @@ function qradiolink_soft_install () {
 
 function AIScatcher_soft_install () {
 	goodecho "[+] Installing AIS Catcher"
-	cmake_clone_and_build "https://github.com/jvde-github/AIS-catcher.git" "build" "" "" "AIScatcher_soft_install"
+	[ -d /rftools/sdr ] || mkdir /rftools/sdr
+	cd /rftools/sdr
+	cmake_clone_and_build "https://github.com/FlUxIuS/AIS-catcher.git" "build" "" "" "AIScatcher_soft_install"
 }
 
 function tetrakit_soft_install () {
