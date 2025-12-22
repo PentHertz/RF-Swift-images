@@ -657,5 +657,10 @@ function qradiolink_soft_install () {
 	gitinstall "https://codeberg.org/qradiolink/qradiolink" "qradiolink_soft_install"
 	cd qradiolink
 	sh ./build_debian.sh
-	ln -s build/qradiolink /usr/local/bin/qradiolink
+	ln -s $(pwd)/build/qradiolink /usr/local/bin/qradiolink
+}
+
+function AIScatcher_soft_install () {
+	goodecho "[+] Installing AIS Catcher"
+	cmake_clone_and_build "https://github.com/hydrasdr/AIS-catcher.git" "build" "" "" "AIScatcher_soft_install"
 }
