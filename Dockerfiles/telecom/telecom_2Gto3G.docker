@@ -3,7 +3,7 @@
 # Author(s): Sébastien Dudek (@FlUxIuS) @Penthertz
 # website: penthertz.com
 
-ARG BASE_IMAGE=sdrsa_devices
+ARG BASE_IMAGE=telecom_utils
 FROM ${BASE_IMAGE}
 
 LABEL "org.container.project"="rfswift"

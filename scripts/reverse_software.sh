@@ -61,23 +61,55 @@ function radare2_soft_install() {
 }
 
 function binwalkv3_soft_install() {
-	goodecho "[+] Installing Binwalk v3 dependencies"
-	install_dependencies "p7zip-full zstd unzip tar sleuthkit cabextract lz4 lzop device-tree-compiler unrar"
-	[ -d /reverse ] || mkdir -p /reverse
-	cd /reverse
-	goodecho "[+] Installing Binwalk v3"
-	gitinstall "https://github.com/ReFirmLabs/binwalk.git" "binwalkv3_soft_install" "binwalkv3"
-	cd binwalk
-	cargo build --release
-	ln -s $(pwd)/target/release/binwalk /usr/bin/binwalkv3
+    goodecho "[+] Installing Binwalk v3 dependencies"
+    install_dependencies "p7zip-full zstd unzip tar sleuthkit cabextract lz4 lzop device-tree-compiler unrar"
+    
+    # Ensure we're using rustup's cargo, not system cargo
+    export PATH="/root/.cargo/bin:${PATH}"
+    source $HOME/.cargo/env 2>/dev/null || true
+    
+    # Verify Rust version
+    cargo --version
+    if ! cargo --version | grep -qE "1\.(8[2-9]|9[0-9]|[0-9]{3})"; then
+        goodecho "[+] Updating Rust to latest stable"
+        rustup update stable
+        rustup default stable
+    fi
+    
+    [ -d /reverse ] || mkdir -p /reverse
+    cd /reverse
+    goodecho "[+] Installing Binwalk v3"
+    gitinstall "https://github.com/ReFirmLabs/binwalk.git" "binwalkv3_soft_install"
+    cd binwalk
+    
+    # Build with explicit edition support
+    cargo build --release
+    ln -sf $(pwd)/target/release/binwalk /usr/bin/binwalkv3
+    
+    goodecho "[+] Binwalk v3 installed successfully"
 }
-
 function binwalk_soft_install() {
 	goodecho "[+] Installing Binwalk"
 	install_dependencies "binwalk"
 }
 
 function cutter_soft_install() { # TODO: fix installation
+	ARCH=$(uname -m)
+
+    case "$ARCH" in
+        x86_64|amd64)
+            goodecho "[+] Architecture: x86_64"
+            goodecho "[+] Installing Cutter for x86_64"
+            ;;
+        #aarch64|arm64) # TODO: fix arm64 install
+        #    goodecho "[+] Architecture: aarch64"
+        #    goodecho "[+] Installing qiling for aarch64"
+        #    ;;
+        *)
+            criticalecho-noexit "[-] Unsupported architecture: $ARCH"
+            exit 0
+            ;;
+    esac
 	goodecho "[+] Installing Cutter dependencies"
 	install_dependencies "ninja-build qt6-base-dev libqt6opengl6-dev cmake meson pkgconf libzip-dev zlib1g-dev qt6-base-dev qt6-tools-dev qt6-tools-dev-tools libqt6svg6-dev libqt6core5compat6-dev libqt6svgwidgets6 qt6-l10n-tools libqt6opengl6-dev"
 	pip3install "meson"
@@ -100,8 +132,8 @@ function ghidra_soft_install() {
 	[ -d /reverse ] || mkdir /reverse
 	cd /reverse
 
-    ghidra_version="11.4.2"
-    ghidra_date="20250826"
+    ghidra_version="12.0"
+    ghidra_date="20251205"
 	prog="ghidra_${ghidra_version}_PUBLIC_${ghidra_date}"
 
 	installfromnet "wget https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_${ghidra_version}_build/${prog}.zip"
@@ -154,7 +186,6 @@ function imhex_soft_install() {
     cd /root/thirdparty
     
     ARCH=$(uname -m)
-
     IMH_VERSION="1.37.4"
     
     if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then
@@ -165,23 +196,40 @@ function imhex_soft_install() {
         
     elif [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
         goodecho "[+] Installing ImHex for arm64"
-        install_dependencies "libmbedtls14t64 libmbedx509-1t64 libglfw3-dev"
+        install_dependencies "libmbedtls14t64 libmbedx509-1t64 libglfw3-dev libfuse2"
         
         # Download the AppImage
         installfromnet "wget https://github.com/WerWolv/ImHex/releases/download/v$IMH_VERSION/imhex-$IMH_VERSION-arm64.AppImage"
         chmod +x imhex-$IMH_VERSION-arm64.AppImage
         
-        # Extract AppImage without FUSE
-        ./imhex-$IMH_VERSION-arm64.AppImage --appimage-extract
-        
-        # Move extracted contents to proper location
-        cp -r squashfs-root /opt/imhex
+        # Try extraction with better error handling
+        if ! ./imhex-$IMH_VERSION-arm64.AppImage --appimage-extract 2>/dev/null; then
+            goodecho "[!] AppImage extraction failed, trying manual extraction..."
+            
+            # Fallback: manual extraction using offset
+            # AppImages are ISO9660 filesystems at a specific offset
+            offset=$(./imhex-$IMH_VERSION-arm64.AppImage --appimage-offset 2>/dev/null || echo "")
+            
+            if [ -n "$offset" ]; then
+                dd if=imhex-$IMH_VERSION-arm64.AppImage of=imhex.iso bs=1 skip=$offset
+                mkdir -p squashfs-root
+                mount -o loop imhex.iso squashfs-root
+                cp -r squashfs-root /opt/imhex
+                umount squashfs-root
+            else
+                criticalecho-noexit "[-] Could not extract ImHex AppImage, skipping..."
+                return 1
+            fi
+        else
+            # Normal extraction succeeded
+            cp -r squashfs-root /opt/imhex
+        fi
         
         # Create symlink in /usr/local/bin
         ln -sf /opt/imhex/AppRun /usr/local/bin/imhex
         
         # Clean up
-        rm -f imhex-$IMH_VERSION-arm64.AppImage
+        rm -f imhex-$IMH_VERSION-arm64.AppImage imhex.iso
         rm -rf squashfs-root
         
     else
@@ -237,6 +285,53 @@ function bytecaster_install() {
     ln -sf /reverse/ByteCaster/ByteCaster /usr/bin/ByteCaster
     
     goodecho "[+] ByteCaster installed at /usr/bin/ByteCaster"
+}
+
+function sasquatch_soft_install() {
+	goodecho "[+] Installing sasquatch"
+	[ -d /root/thirdparty ] || mkdir /root/thirdparty
+    cd /root/thirdparty
+	gitinstall "https://github.com/FlUxIuS/sasquatch.git" "sasquatch_soft_install"
+	cd sasquatch
+	install_dependencies "build-essential liblzma-dev liblzo2-dev zlib1g-dev"
+	./build.sh
+}
+
+function qnx6extractor_soft_install() {
+	goodecho "[+] Installing qnx6-extractor"
+	[ -d /reverse ] || mkdir /reverse
+    cd /reverse
+	gitinstall "https://github.com/ReFirmLabs/qnx6-extractor.git" "qnx6extractor_soft_install"
+	cd qnx6-extractor/qnx6_extractor
+	chmod +x main.py
+	ln -s $(pwd)/main.py /usr/local/sbin/qnx6-extractor
+}
+
+function unblob_soft_install() {
+    goodecho "[+] Installing unblob"
+    install_dependencies "android-sdk-libsparse-utils e2fsprogs p7zip-full unar zlib1g-dev liblzo2-dev lzop lziprecover libhyperscan-dev zstd lz4 build-essential curl"
+    
+    # Install Rust if not present
+    if ! command -v cargo &> /dev/null; then
+        goodecho "[+] Installing Rust toolchain (required for unblob)"
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
+        export PATH="/root/.cargo/bin:${PATH}"
+        source $HOME/.cargo/env
+    else
+        goodecho "[+] Rust already installed"
+        export PATH="/root/.cargo/bin:${PATH}"
+    fi
+    
+    # Verify Rust is available
+    cargo --version || { goodecho "[-] Rust installation failed"; return 1; }
+    
+    [ -d /reverse ] || mkdir /reverse
+    cd /reverse
+    gitinstall "https://github.com/onekey-sec/unblob.git" "unblob_soft_install"
+    cd unblob
+    
+    # Install with pipx
+    pipx install .
 }
 
 ### TODO: more More!

@@ -259,31 +259,81 @@ function Open5GS_soft_install() {
 
 function Open5GS_nohttp2_soft_install() {
 	goodecho "[+] Installing Open5GS dependencies"
+	# Create GPG config for root
+	mkdir -p /root/.gnupg/
+	echo "no-tty" >> /root/.gnupg/gpg.conf
+	chmod 700 /root/.gnupg/
+	
 	install_dependencies "ca-certificates curl gnupg"
 	install_dependencies "meson libmongoc-1.0-0 libmongoc-dev"
 	install_dependencies "python3-pip python3-setuptools python3-wheel ninja-build build-essential flex bison git cmake libsctp-dev libgnutls28-dev libgcrypt-dev libssl-dev libidn11-dev libmongoc-dev libbson-dev libyaml-dev libnghttp2-dev libmicrohttpd-dev libcurl4-gnutls-dev libnghttp2-dev libtins-dev libtalloc-dev meson"
 	ldconfig
-	curl -fsSL https://pgp.mongodb.com/server-6.0.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-6.0.gpg --dearmor
-	echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-6.0.gpg] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
+	
+	# MongoDB GPG key - remove first if exists, then create
+	mkdir -p /usr/share/keyrings
+	rm -f /usr/share/keyrings/mongodb-server-6.0.gpg
+	curl -fsSL https://pgp.mongodb.com/server-6.0.asc | gpg --batch --dearmor -o /usr/share/keyrings/mongodb-server-6.0.gpg
+	echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-6.0.gpg] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-6.0.list
+	
 	installfromnet "apt-fast -y update"
-	install_dependencies "mongodb-org python3-pip python3-setuptools python3-wheel ninja-build build-essential flex bison git cmake libsctp-dev libgnutls28-dev libgcrypt-dev libssl-dev libidn11-dev libmongoc-dev libbson-dev libyaml-dev libnghttp2-dev libmicrohttpd-dev libcurl4-gnutls-dev libnghttp2-dev libtins-dev libtalloc-dev meson"
+	install_dependencies "mongodb-org"
+	
+	goodecho "[+] Fetching Open5GS"
+	[ -d /telecom/5G ] || mkdir -p /telecom/5G
+	cd /telecom/5G
+	goodecho "[+] Cloning and installing Open5GS"
+	installfromnet "git clone -b nohttp2 https://github.com/FlUxIuS/open5gs.git"
+	cd open5gs
+	meson build --prefix=$(pwd)/install
+	ninja -C build
+	ln -s $(pwd)/build/tests/app/5gc /usr/bin/Open5Gs_deployall
+	mkdir -p /data/db
+	
+	goodecho "[+] Building Web GUI"
+	mkdir -p /etc/apt/keyrings
+	rm -f /etc/apt/keyrings/nodesource.gpg
+	curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --batch --dearmor -o /etc/apt/keyrings/nodesource.gpg
+	NODE_MAJOR=20
+	echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
+	
+	installfromnet "apt-fast update"
+	install_dependencies "nodejs"
+	cd webui
+	npm ci
+}
+
+function Open5GS_0caps_soft_install() {
+	goodecho "[+] Installing Open5GS 0caps dependencies"
+	# Create GPG config for root
+	#mkdir -p /root/.gnupg/
+	#echo "no-tty" >> /root/.gnupg/gpg.conf
+	#chmod 700 /root/.gnupg/
+
+	install_dependencies "ca-certificates curl gnupg"
+	install_dependencies "meson libmongoc-1.0-0 libmongoc-dev"
+	install_dependencies "python3-pip python3-setuptools python3-wheel ninja-build build-essential flex bison git cmake libsctp-dev libgnutls28-dev libgcrypt-dev libssl-dev libidn11-dev libmongoc-dev libbson-dev libyaml-dev libnghttp2-dev libmicrohttpd-dev libcurl4-gnutls-dev libnghttp2-dev libtins-dev libtalloc-dev meson"
+	ldconfig
+	#curl -fsSL https://pgp.mongodb.com/server-6.0.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-6.0.gpg --dearmor
+	#echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-6.0.gpg] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
+	#installfromnet "apt-fast -y update"
+	#install_dependencies "mongodb-org python3-pip python3-setuptools python3-wheel ninja-build build-essential flex bison git cmake libsctp-dev libgnutls28-dev libgcrypt-dev libssl-dev libidn11-dev libmongoc-dev libbson-dev libyaml-dev libnghttp2-dev libmicrohttpd-dev libcurl4-gnutls-dev libnghttp2-dev libtins-dev libtalloc-dev meson"
 	goodecho "[+] Feching Open5GS"
 	[ -d /telecom/5G ] || mkdir -p /telecom/5G
 	cd /telecom/5G
 	goodecho "[+] Cloninig and installing Open5GS"
-	installfromnet "git clone -b nohttp2 https://github.com/FlUxIuS/open5gs.git"
-	cd open5gs
+	installfromnet "git clone -b 0caps https://github.com/FlUxIuS/open5gs.git open5gs_0caps"
+	cd open5gs_0caps
 	meson build --prefix=`pwd`/install
 	ninja -C build
-	ln -s $(pwd)/build/tests/app/5gc /usr/bin/Open5Gs_deployall # Making a quick command
+	ln -s $(pwd)/build/tests/app/5gc /usr/bin/Open5Gs_nullciph_deployall # Making a quick command
 	mkdir -p /data/db # making directory for MongoDB
 	goodecho "[+] Building Web GUI"
-	mkdir -p /etc/apt/keyrings
-	curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+	#mkdir -p /etc/apt/keyrings
+	#curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
 	NODE_MAJOR=20
-	echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
-	installfromnet "apt-fast update"
-	install_dependencies "nodejs"
+	#echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
+	#installfromnet "apt-fast update"
+	#install_dependencies "nodejs"
 	cd webui
 	npm ci
 }
@@ -295,7 +345,8 @@ function pycrate_soft_install() {
 
 function cryptomobile_soft_install() {
     goodecho "[+] Installing CryptoMobile"
-    gitinstall "https://github.com/FlUxIuS/CryptoMobile.git" "cryptomobile_soft_install"
+    pip3install pycryptodome
+    gitinstall "https://github.com/mitshell/CryptoMobile.git" "cryptomobile_soft_install"
     cd CryptoMobile
     pip3install .
 }
@@ -363,9 +414,29 @@ function UERANSIM_soft_install() {
 	[ -d /telecom/5G ] || mkdir -p /telecom/5G
 	cd /telecom/5G
 	goodecho "[+] Cloninig and installing UERANSIM"
-	gitinstall "https://github.com/aligungr/UERANSIM" "UERANSIM"
+	gitinstall "https://github.com/aligungr/UERANSIM" "UERANSIM_soft_install"
+	cd UERANSIM
+	make -j$(nproc)
+}
+
+function UERANSIM_nullciph_soft_install() {
+	install_dependencies "libsctp-dev lksctp-tools iproute2"
+	[ -d /telecom/5G ] || mkdir -p /telecom/5G
+	cd /telecom/5G
+	goodecho "[+] Cloninig and installing UERANSIM"
+	gitinstall "https://github.com/FlUxIuS/UERANSIM.git" "UERANSIM_nullciph_soft_install" "nullciph"
 	cd UERANSIM
 	make
+}
+
+function bromelia_soft_install() {
+	goodecho "[+] Installing bromelia"
+	pip3install "bromelia"
+}
+
+function pyhss_soft_install() {
+	goodecho "[+] Installing bromelia"
+	pip3install "bromelia"
 }
 
 function pysim_soft_install() {
@@ -411,6 +482,13 @@ function SCAT_soft_install() {
     pip3install signalcat[fastcrc]@git+https://github.com/fgsect/scat
 }
 
+function py5sig_soft_install() {
+    [ -d /telecom ] || mkdir -p /telecom
+    cd /telecom
+    goodecho "[+] Installing py5sig"
+    pipx install git+https://github.com/ANSSI-FR/py5sig.git
+}
+
 function SigPloit_soft_install() {
 	[ -d /telecom/2G ] || mkdir -p /telecom/2G
 	cd /telecom/2G
@@ -418,5 +496,123 @@ function SigPloit_soft_install() {
 	gitinstall "https://github.com/FlUxIuS/SigPloit.git" "SigPloit"
 	cd SigPloit
 	pip3install -r requirements.txt
+}
+
+function Modmobmap_soft_install() {
+    [ -d /telecom ] || mkdir -p /telecom
+    cd /telecom
+    goodecho "[+] Installing Modmobmap"
+    gitinstall "https://github.com/PentHertz/Modmobmap.git" "Modmobmap_soft_install" "rfswift"
+}
+
+function 5greplay_soft_install() {
+    local install_dir="/telecom/5G"
+    local repo_url="https://github.com/Montimage/5Greplay"
+    local dpi_repo_url="https://github.com/Montimage/mmt-dpi.git"
+    
+    colorecho "[+] Installing 5Greplay and dependencies"
+    
+    # Install required dependencies
+    local dependencies="git gcc g++ make libxml2-dev libpcap-dev libconfuse-dev libsctp-dev"
+    install_dependencies "$dependencies"
+    
+    # Create installation directory
+    if [ ! -d "$install_dir" ]; then
+        sudo mkdir -p "$install_dir"
+    fi
+    
+    cd "$install_dir" || exit
+    
+    # Step 1: Install mmt-dpi (required dependency)
+    colorecho "[+] Installing mmt-dpi dependency..."
+    
+    # Remove any existing mmt-dpi directory
+    if [ -d "mmt-dpi" ]; then
+        colorecho "[!] Removing existing mmt-dpi directory..."
+        rm -rf mmt-dpi
+    fi
+    
+    # Clone mmt-dpi with depth 1
+    installfromnet "git clone --depth 1 ${dpi_repo_url}"
+    
+    if [ ! -d "mmt-dpi" ]; then
+        criticalecho "[-] Failed to clone mmt-dpi repository"
+    fi
+    
+    # Build and install mmt-dpi
+    cd mmt-dpi/sdk || criticalecho "[-] mmt-dpi/sdk directory not found"
+    
+    colorecho "[+] Building mmt-dpi..."
+    make -j$(nproc) || {
+        criticalecho-noexit "[-] Failed to build mmt-dpi"
+        cd "$install_dir"
+        return 1
+    }
+    
+    colorecho "[+] Installing mmt-dpi..."
+    sudo make install || {
+        criticalecho-noexit "[-] Failed to install mmt-dpi"
+        cd "$install_dir"
+        return 1
+    }
+    
+    goodecho "[+] mmt-dpi installed successfully"
+    
+    # Go back to install directory and cleanup mmt-dpi source
+    cd "$install_dir" || exit
+    rm -rf mmt-dpi
+    
+    # Step 2: Install 5Greplay
+    colorecho "[+] Installing 5Greplay..."
+    
+    # Check if 5Greplay already exists
+    if [ -d "5Greplay" ]; then
+        colorecho "[!] 5Greplay directory already exists. Pulling latest changes..."
+        cd 5Greplay || exit
+        installfromnet "git pull"
+        if [ $? -ne 0 ]; then
+            criticalecho-noexit "[-] Failed to update 5Greplay repository"
+        fi
+    else
+        # Clone 5Greplay repository
+        gitinstall "$repo_url" "make" ""
+        cd 5Greplay || criticalecho "[-] Failed to enter 5Greplay directory"
+    fi
+    
+    # Build 5Greplay
+    colorecho "[+] Building 5Greplay..."
+    make -j$(nproc) || {
+        criticalecho-noexit "[-] Failed to build 5Greplay"
+        cd "$install_dir"
+        return 1
+    }
+    
+    # Install 5Greplay (if there's an install target)
+    if grep -q "^install:" Makefile 2>/dev/null; then
+        colorecho "[+] Installing 5Greplay..."
+        sudo make install || {
+            criticalecho-noexit "[-] Failed to install 5Greplay"
+            cd "$install_dir"
+            return 1
+        }
+    else
+        colorecho "[!] No install target found in Makefile, binaries remain in build directory"
+        # Create symbolic links for common binaries if they exist
+        if [ -f "5greplay" ]; then
+            sudo ln -sf "${install_dir}/5Greplay/5greplay" /usr/local/bin/5greplay 2>/dev/null || true
+            goodecho "[+] Created symlink: /usr/local/bin/5greplay"
+        fi
+    fi
+    
+    cd "$install_dir" || exit
+    
+    goodecho "[+] 5Greplay installation completed successfully!"
+    goodecho "[+] Installation directory: ${install_dir}/5Greplay"
+    
+    # Find and display available binaries
+    if [ -d "5Greplay" ]; then
+        colorecho "[+] Available binaries:"
+        find 5Greplay -maxdepth 2 -type f -executable | head -10
+    fi
 }
 ### TODO: more More!

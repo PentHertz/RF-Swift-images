@@ -4,7 +4,7 @@
 # Author(s): Sébastien Dudek (@FlUxIuS) @Penthertz
 # website: penthertz.com
 
-ARG BASE_IMAGE=sdrsa_devices
+ARG BASE_IMAGE=telecom_utils
 FROM ${BASE_IMAGE}
 
 LABEL "org.container.project"="rfswift"
@@ -25,7 +25,8 @@ RUN chmod +x entrypoint.sh
 # Tools for Telecom
 RUN ./entrypoint.sh srsran5GSA_soft_install && \
 	./entrypoint.sh Open5GS_soft_install && \
-	./entrypoint.sh UERANSIM_soft_install
+	./entrypoint.sh UERANSIM_soft_install && \
+	./entrypoint.sh 5greplay_soft_install
 # More to come!
 
 RUN mkdir -p /sdrtools/

@@ -1,6 +1,17 @@
 #!/bin/bash
 
 # Bluetooth Classic and LE
+function esp32_bluetooth_classic_sniffer_soft_install () {
+	goodecho "[+] Installing esp32_bluetooth_classic_sniffer"
+	[ -d /rftools/bluetooth ] || mkdir -p /rftools/bluetooth
+    cd /rftools/bluetooth
+    gitinstall "https://github.com/FlUxIuS/esp32_bluetooth_classic_sniffer.git" "esp32_bluetooth_classic_sniffer_soft_install"
+    cd esp32_bluetooth_classic_sniffer
+    ./requirements.sh
+    ./build.sh
+    ln -s $(pwd)/BTSnifferBREDR.py /usr/sbin/BTSnifferBREDR
+}
+
 function blueztools_soft_install() {
 	goodecho "[+] Installing bluez tools"
 	install_dependencies "bluez bluez-tools bluez-hcidump bluez-btsco bluez-obexd libbluetooth-dev"
@@ -271,8 +282,10 @@ function miLazyCracker_soft_install() {
 	goodecho "[+] Cloning miLazyCracker repo"
 	gitinstall "https://github.com/nfc-tools/miLazyCracker.git" "miLazyCracker"
 	cd miLazyCracker
-	[ -f craptev1-v1.1.tar.xz ] || installfromnet "wget https://web.archive.org/web/20190221140220if_/https://www2.vaneay.fr/mifare/craptev1-v1.1.tar.xz"
-	[ -f crapto1-v3.3.tar.xz ] || installfromnet "wget https://web.archive.org/web/20190221140255if_/https://www2.vaneay.fr/mifare/crapto1-v3.3.tar.xz"
+	#[ -f craptev1-v1.1.tar.xz ] || installfromnet "wget https://web.archive.org/web/20190221140220if_/https://www2.vaneay.fr/mifare/craptev1-v1.1.tar.xz"
+	#[ -f crapto1-v3.3.tar.xz ] || installfromnet "wget https://web.archive.org/web/20190221140255if_/https://www2.vaneay.fr/mifare/crapto1-v3.3.tar.xz"
+	[ -f crapto1-v3.3.tar.xz ] || installfromnet "wget https://github.com/PentHertz/rfid-proj/releases/download/v0/crapto1-v3.3.tar.xz"
+	[ -f craptev1-v1.1.tar.xz ] || installfromnet "wget https://github.com/PentHertz/rfid-proj/releases/download/v0/craptev1-v1.1.tar.xz"
 	goodecho "[+] Installing crypto1_bs for miLazyCracker"
 	gitinstall "https://github.com/aczid/crypto1_bs" "crypto1_bs"
 	cd crypto1_bs
@@ -437,14 +450,20 @@ function eaphammer_soft_install() {
 	pip3install -r pip.req
 }
 
-function airgeddon_soft_install() { # TODO: install all dependencies
+function airgeddon_soft_install() { # TODO: still hostapd-wpe missing
 	goodecho "[+] Installing airgeddon"
 	[ -d /rftools/wifi ] || mkdir -p /rftools/wifi
 	cd /rftools/wifi
 	gitinstall "https://github.com/v1s1t0r1sh3r3/airgeddon.git" "airgeddon_soft_install"
 	cd airgeddon/
-	install_dependencies "crunch mdk4 isc-dhcp-server hostapd lighttpd beef"
+	install_dependencies "crunch mdk4 isc-dhcp-server hostapd lighttpd hashcat ettercap-text-only john"
 	goodecho "[+] Installing pluggins for airgeddon"
+	# Create a wrapper script
+	cat > /usr/local/sbin/airgeddon << 'EOF'
+#!/bin/bash
+cd /rftools/wifi/airgeddon
+exec ./airgeddon.sh "$@"
+EOF
 	gitinstall "https://github.com/OscarAkaElvis/airgeddon-plugins.git" "airgeddon_soft_install"
 	cp -R airgeddon-plugins/wpa3_online_attack/* plugins/
 	cp -R airgeddon-plugins/allchars_captiveportal/* plugins/
@@ -459,6 +478,36 @@ function wifite2_soft_install () {
 	cd wifite2/
 	pipx install .
 	pipx ensurepath
+}
+
+function roguehostapd_soft_install () {
+	goodecho "[+] Installing roguehostapd"
+	[ -d /rftools/wifi ] || mkdir -p /rftools/wifi
+	cd /rftools/wifi
+	gitinstall "https://github.com/FlUxIuS/roguehostapd.git" "roguehostapd_soft_install"
+	cd roguehostapd
+	python3 setup.py install
+}
+
+function wifiphisher_soft_install () {
+	goodecho "[+] Installing wifiphisher"
+	[ -d /rftools/wifi ] || mkdir -p /rftools/wifi
+	cd /rftools/wifi
+	gitinstall "https://github.com/wifiphisher/wifiphisher.git" "wifiphisher_soft_install"
+	cd wifiphisher
+	python3 setup.py install
+	pip3install "pyric tornado"
+}
+
+function hostapdmana_soft_install () {
+	goodecho "[+] Installing hostapd-mana"
+	install_dependencies "build-essential git libnl-genl-3-dev libssl-dev"
+	[ -d /rftools/wifi ] || mkdir -p /rftools/wifi
+	cd /rftools/wifi
+	gitinstall "https://github.com/FlUxIuS/hostapd-mana.git" "hostapdmana_soft_install"
+	cd hostapd-mana
+	make -C hostapd
+	ln -s $(pwd)/hostapd/hostapd /usr/local/bin/hostapd-mana
 }
 
 function sparrowwifi_sdr_soft_install () { # TODO: to debug
@@ -481,6 +530,29 @@ function krackattacks_script_soft_install () {
 	cd krackattacks-scripts/krackattack
 	./build.sh
 	./pysetup.sh
+}
+
+function fernwificracker_soft_install() {
+	goodecho "[+] Installing Fern WiFi Cracker"
+	install_dependencies "aircrack-ng"
+	gitinstall "https://github.com/savio-code/fern-wifi-cracker.git" "fernwificracker_soft_install"
+	cd fern-wifi-cracker
+	cd Fern-Wifi-Cracker
+	
+	# Create wrapper script
+	cat > /usr/sbin/Fern-Wifi-Cracker << 'EOF'
+#!/bin/bash
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+FERN_DIR="/root/thirdparty/fern-wifi-cracker/Fern-Wifi-Cracker"
+
+# Change to the Fern directory and execute
+cd "$FERN_DIR"
+exec python3 execute.py "$@"
+EOF
+	
+	# Make wrapper executable
+	chmod +x /usr/sbin/Fern-Wifi-Cracker
+	goodecho "[+] Fern WiFi Cracker wrapper installed"
 }
 
 ## Other softs

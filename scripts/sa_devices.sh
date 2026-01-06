@@ -139,7 +139,10 @@ function harogic_sa_device() {
     cd "$prog"
     currentpath=$(pwd)
     mkdir -p /root/Desktop
-    sh -c USER=root LOGNAME=root ./install.sh
+    mkdir -p /home/root/Desktop/
+    sed -i 's/actual_user=$(logname)/actual_user="root"/g' install.sh
+    sed -i 's/$SUDO_USER/root/g' install.sh
+    ./install.sh
     case "$arch" in
         aarch64|unknown) 
             ln -s /usr/lib/aarch64-linux-gnu/libffi.so.8 /usr/lib/libffi.so.6;;

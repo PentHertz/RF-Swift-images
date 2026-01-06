@@ -24,9 +24,16 @@ RUN chmod +x entrypoint.sh
 RUN ./entrypoint.sh kataistruct_soft_install && \
  	./entrypoint.sh unicorn_soft_install && \
  	./entrypoint.sh keystone_soft_install && \
- 	./entrypoint.sh radare2_soft_install && \
- 	./entrypoint.sh binwalk_soft_install
+ 	./entrypoint.sh radare2_soft_install
+
 RUN ./entrypoint.sh ghidra_soft_install
+
+# Installing format extrating tools
+RUN ./entrypoint.sh sasquatch_soft_install && \
+	./entrypoint.sh unblob_soft_install && \
+	./entrypoint.sh binwalk_soft_install && \
+	./entrypoint.sh binwalkv3_soft_install && \
+	./entrypoint.sh qnx6extractor_soft_install
 
 # adding some SAST / DAST tools
 RUN ./entrypoint.sh LLVM_install && \

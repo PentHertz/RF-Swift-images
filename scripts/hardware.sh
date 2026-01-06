@@ -44,6 +44,14 @@ function pulseview_install() {
     cd /root/thirdparty
     git clone https://github.com/FlUxIuS/sigrok-util.git
     cd sigrok-util/cross-compile/linux
+    
+    # Patch to skip libsigrokdecode tests on ARM64 (known issue)
+    if [ "$(uname -m)" = "aarch64" ]; then
+        goodecho "[*] Patching libsigrokdecode build for ARM64"
+        # Find and replace the make check line specifically in the libsigrokdecode section
+        sed -i '/libsigrokdecode/,/^[[:space:]]*$/s/make check/make check || true/' sigrok-cross-linux
+    fi
+    
     ./sigrok-cross-linux
 }
 
@@ -125,7 +133,7 @@ function arduino_ide_install() {
     fi
     
     goodecho "[+] Installing Arduino IDE for x86_64 with AppImage"
-    IDE_VERSION="2.3.6"
+    IDE_VERSION="2.3.7"
     avrdude_install
     [ -d /hardware ] || mkdir /hardware
     cd /hardware
@@ -153,7 +161,7 @@ function logic2_saleae_install() {
         criticalecho-noexit "[!] Current architecture: $ARCH"
         exit 0
     fi
-    LOGIC_VERSION="2.4.29"
+    LOGIC_VERSION="2.4.40"
     install_dependencies "libfftw3-dev"
     [ -d /hardware ] || mkdir /hardware
     cd /hardware

@@ -117,7 +117,7 @@ function pocketvna_sa_device() {
 
 function librevna_cal_device() {
 	goodecho "[+] Installing dependencies for LibreVNA"
-	install_dependencies "qt6-base-dev libqt6svg6 libusb-1.0-0-dev qt6-svg-dev"
+  install_dependencies "qt6-base-dev libqt6svg6 libusb-1.0-0-dev"
 	[ -d /rftools/calibration ] || mkdir -p /rftools/calibration
 	cd /rftools/calibration
 	gitinstall "https://github.com/jankae/LibreVNA.git" "librevna_cal_device"
@@ -169,4 +169,10 @@ function lotus_budc_tune_device() {
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
     cd /root/thirdparty
 	cmake_clone_and_build "https://github.com/PentHertz/lotus_budc_controler.git" "build" "" "" "lotus_budc_tune_device"
+}
+
+function kalibrate_hydrasdr_device() {
+	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
+    cd /root/thirdparty
+	cmake_clone_and_build "https://github.com/hydrasdr/kalibrate-hydrasdr.git" "build" "" "" "kalibrate_hydrasdr_device"
 }

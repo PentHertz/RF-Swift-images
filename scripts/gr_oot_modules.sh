@@ -3,9 +3,9 @@
 function common_sources_and_sinks() {
     grclone_and_build "https://github.com/PentHertz/gr-osmosdr.git" "" "common_sources_and_sinks"
     cd /rftools/sdr/oot/gr-osmosdr
-    cd thirdparty
-    chmod +x ./hydrasdr_pkg-confile.sh
-    ./hydrasdr_pkg-confile.sh
+    #cd thirdparty
+    #chmod +x ./hydrasdr_pkg-confile.sh
+    #./hydrasdr_pkg-confile.sh
 }
 
 function grgsm_grmod_install() {
@@ -411,7 +411,7 @@ function grm17_grmod_install() {
 function grgrnet_grmod_install() {
     ARCH=$(uname -m)
     if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ] || [ "$ARCH" = "arm64" ] || [ "$ARCH" = "aarch64" ]; then
-        install_dependencies "libpthread-dev libpthread-stubs0-dev"
+        install_dependencies "libpthread-stubs0-dev"
         grclone_and_build "https://github.com/ghostop14/gr-grnet.git" "" "grgrnet_grmod_install"
     fi
 }
@@ -494,6 +494,10 @@ function grrftap_grmod_install() {
     grclone_and_build "https://github.com/FlUxIuS/gr-rftap.git" "" "grrftap_grmod_install"
 }
 
+function grcessb_grmod_install() {
+    grclone_and_build "https://github.com/drmpeg/gr-cessb.git" "" "grcessb_grmod_install"
+}
+
 function grhtra_grmod_install() {
     ARCH=$(uname -m)
     if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then
@@ -504,10 +508,6 @@ function grhtra_grmod_install() {
         #    -DCMAKE_CXX_FLAGS="-fno-lto -O2" \
         #    -DCMAKE_C_FLAGS="-fno-lto -O2" // TODO: support ARM64 
     fi
-}
-
-function soapyusdr_grmod_install() {
-    install_dependencies "soapysdr-module-usdr"
 }
 
 function grradioastro_grmod_install() {

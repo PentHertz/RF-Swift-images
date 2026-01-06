@@ -73,7 +73,7 @@ function kismet_soft_install() {
     
     if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
         goodecho "[+] Installing Kismet from official repository for $ARCH"
-        installfromnet "wget -O - https://www.kismetwireless.net/repos/kismet-release.gpg.key --quiet | gpg --dearmor | sudo tee /usr/share/keyrings/kismet-archive-keyring.gpg >/dev/null"
+        installfromnet "wget -qO- https://www.kismetwireless.net/repos/kismet-release.gpg.key | gpg --dearmor | sudo tee /usr/share/keyrings/kismet-archive-keyring.gpg >/dev/null"
         installfromnet "echo 'deb [signed-by=/usr/share/keyrings/kismet-archive-keyring.gpg] https://www.kismetwireless.net/repos/apt/release/noble noble main' | sudo tee /etc/apt/sources.list.d/kismet.list >/dev/null"
         sudo apt update
         install_dependencies "kismet"
@@ -320,6 +320,45 @@ EOF
     goodecho "[+] Usage: caido (launches with --no-sandbox automatically)"
 }
 
+function beef_soft_install() {
+    colorecho "[+] Installing BeEF"
+    export TERM=xterm
+    
+    [ -d /opt/network ] || mkdir -p /opt/network
+    cd /opt/network
+    # Create a wrapper script
+    cat > /usr/local/bin/beef << 'EOF'
+#!/bin/bash
+cd /opt/network/beef
+exec ./beef "$@"
+EOF
+    chmod +x /usr/local/bin/beef
+    gitinstall "https://github.com/beefproject/beef" "beef_soft_install"
+    cd beef
+    yes | ./install || true  # Ignore SIGPIPE exit code
+    
+    colorecho "[+] BeEF installed successfully"
+}
+
+function asleap_soft_install() {
+    colorecho "[+] Installing asleap dependencies"
+    [ -d /root/thirdparty ] || mkdir /root/thirdparty
+    cd /root/thirdparty
+    git clone https://github.com/besser82/libxcrypt.git
+    cd libxcrypt
+    ./autogen.sh
+    ./configure
+    make -j $(nproc)
+    make install
+    colorecho "[+] Installing asleap now!"
+    [ -d /opt/network ] || mkdir -p /opt/network
+    cd /opt/network
+    gitinstall "https://github.com/FlUxIuS/asleap.git" "asleap_soft_install" "des_fix"
+    cd asleap
+    make
+    ln -s $(pwd)/asleap /usr/local/bin/asleap
+}
+
 function trufflehog_script_install() {
     # Check architecture
     ARCH=$(uname -m)
@@ -337,4 +376,157 @@ function trufflehog_script_install() {
     esac
     
     curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh -s -- -b /usr/local/bin
+}
+
+function burpsuite_community_install() { # TODO: only working well on x86_64 with the GUI :/
+    local version="${1:-2025.10.6}"
+    local install_dir="/opt/burpsuite"
+    local arch=$(uname -m)
+    
+    colorecho "[+] Installing Burp Suite Community Edition v${version} for ${arch}"
+    
+    # Create installation directory if it doesn't exist
+    if [ ! -d "$install_dir" ]; then
+        sudo mkdir -p "$install_dir"
+    fi
+    
+    # Check if already installed
+    if [ -f "${install_dir}/BurpSuiteCommunity" ] || [ -f "${install_dir}/burpsuite_community.jar" ]; then
+        colorecho "[!] Burp Suite Community Edition appears to be already installed at ${install_dir}"
+        read -p "Do you want to reinstall? (y/n): " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            goodecho "[+] Skipping Burp Suite installation"
+            return 0
+        fi
+    fi
+    
+    # Architecture-specific installation
+    case "$arch" in
+        x86_64|amd64)
+            # Use official installer for x86_64
+            local download_url="https://portswigger.net/burp/releases/download?product=community&version=${version}&type=Linux"
+            local installer_file="/tmp/burpsuite_community_linux_v${version}.sh"
+            
+            colorecho "[+] Downloading Burp Suite Community Edition installer..."
+            installfromnet "curl -L -o ${installer_file} ${download_url}"
+            
+            if [ ! -f "$installer_file" ]; then
+                criticalecho "[-] Failed to download Burp Suite installer"
+            fi
+            
+            chmod +x "$installer_file"
+            
+            colorecho "[+] Running Burp Suite installer (unattended mode)..."
+            sudo "$installer_file" -q -dir "$install_dir" || {
+                criticalecho-noexit "[-] Installation failed"
+                rm -f "$installer_file"
+                return 1
+            }
+            
+            rm -f "$installer_file"
+            
+            if [ -f "${install_dir}/BurpSuiteCommunity" ]; then
+                sudo ln -sf "${install_dir}/BurpSuiteCommunity" /usr/local/bin/burpsuite 2>/dev/null || true
+            fi
+            ;;
+            
+        aarch64|arm64)
+            colorecho "[+] ARM64 detected - installing JAR with compatible JRE"
+            install_burpsuite_jar "$version" "$install_dir" "arm64"
+            ;;
+            
+        riscv64)
+            colorecho "[+] RISC-V64 detected - installing JAR with compatible JRE"
+            install_burpsuite_jar "$version" "$install_dir" "riscv64"
+            ;;
+            
+        *)
+            colorecho "[!] Unsupported architecture: ${arch}"
+            colorecho "[+] Attempting JAR installation with system JRE..."
+            install_burpsuite_jar "$version" "$install_dir" "generic"
+            ;;
+    esac
+    
+    # Log installation
+    if [ ! -d "/var/lib/db/" ]; then
+        sudo mkdir -p /var/lib/db/
+    fi
+    echo "burpsuite:${install_dir}:binary" | sudo tee -a /var/lib/db/rfswift_github.lst > /dev/null
+    
+    goodecho "[+] Burp Suite Community Edition v${version} installed successfully!"
+    goodecho "[+] Launch with: burpsuite"
+}
+
+function install_burpsuite_jar() {
+    local version="$1"
+    local install_dir="$2"
+    local arch_type="$3"
+    local jar_url="https://portswigger-cdn.net/burp/releases/download?product=community&version=${version}&type=Jar"
+    local jar_file="${install_dir}/burpsuite_community.jar"
+    
+    # Install appropriate JRE
+    colorecho "[+] Installing Java Runtime Environment..."
+    case "$arch_type" in
+        arm64)
+            # For ARM64 - prefer native packages
+            if command -v apt-get &> /dev/null; then
+                sudo apt-get update && sudo apt-get install -y openjdk-17-jre-headless || \
+                sudo apt-get install -y openjdk-11-jre-headless
+            elif command -v apk &> /dev/null; then
+                sudo apk add --no-cache openjdk17-jre || sudo apk add --no-cache openjdk11-jre
+            elif command -v yum &> /dev/null; then
+                sudo yum install -y java-17-openjdk-headless || sudo yum install -y java-11-openjdk-headless
+            fi
+            ;;
+        riscv64)
+            # For RISC-V64 - limited JRE options
+            colorecho "[!] RISC-V64 JRE support is limited. Attempting installation..."
+            if command -v apt-get &> /dev/null; then
+                sudo apt-get update && sudo apt-get install -y openjdk-17-jre-headless || \
+                sudo apt-get install -y openjdk-11-jre-headless
+            elif command -v apk &> /dev/null; then
+                sudo apk add --no-cache openjdk17-jre || sudo apk add --no-cache openjdk11-jre
+            fi
+            ;;
+        *)
+            # Generic - try to install any available JRE
+            if command -v apt-get &> /dev/null; then
+                sudo apt-get update && sudo apt-get install -y default-jre-headless
+            elif command -v apk &> /dev/null; then
+                sudo apk add --no-cache openjdk17-jre
+            elif command -v yum &> /dev/null; then
+                sudo yum install -y java-17-openjdk-headless
+            fi
+            ;;
+    esac
+    
+    # Verify Java is available
+    if ! command -v java &> /dev/null; then
+        criticalecho "[-] Failed to install Java Runtime Environment"
+    fi
+    
+    # Download JAR file
+    colorecho "[+] Downloading Burp Suite JAR..."
+    installfromnet "curl -L -o ${jar_file} ${jar_url}"
+    
+    if [ ! -f "$jar_file" ]; then
+        criticalecho "[-] Failed to download Burp Suite JAR"
+    fi
+    
+    # Create wrapper script
+    colorecho "[+] Creating launcher script..."
+    sudo tee "${install_dir}/BurpSuiteCommunity" > /dev/null <<'EOF'
+#!/bin/bash
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+exec java -jar "${SCRIPT_DIR}/burpsuite_community.jar" "$@"
+EOF
+    
+    sudo chmod +x "${install_dir}/BurpSuiteCommunity"
+    sudo ln -sf "${install_dir}/BurpSuiteCommunity" /usr/local/bin/burpsuite 2>/dev/null || true
+    
+    # Verify installation
+    if [ ! -f "$jar_file" ] || [ ! -f "${install_dir}/BurpSuiteCommunity" ]; then
+        criticalecho "[-] Installation verification failed"
+    fi
 }

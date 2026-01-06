@@ -212,6 +212,9 @@ telecom_4Gto5G:
 telecom_4G_5GNSA:
 	$(call build_and_push,telecom_4G_5GNSA,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):telecom_utils_$(ARCH),$(CURDIR)/telecom/telecom_4G_5GNSA.docker)
 
+telecom_5G_train:
+	$(call build_and_push,telecom_5G_train,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):telecom_4G_5GNSA_$(ARCH),$(CURDIR)/telecom/telecom_4Gto5G_extended.docker)
+
 telecom_5G:
 	$(call build_and_push,telecom_5G,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):telecom_utils_$(ARCH),$(CURDIR)/telecom/telecom_5G.docker)
 

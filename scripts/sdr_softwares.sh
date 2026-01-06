@@ -131,7 +131,7 @@ function sdrpp_soft_fromsource_install () {
         HAROGIC_FLAG="-DOPT_BUILD_HAROGIC_SOURCE=ON"
     fi
     
-    cmake_clone_and_build "https://github.com/AlexandreRouma/SDRPlusPlus.git" "build" "" ""  "sdrpp_soft_fromsource_install" -DOPT_BUILD_HYDRASDR_SOURCE=ON -DOPT_BUILD_SOAPY_SOURCE=ON -DOPT_BUILD_AIRSPY_SOURCE=ON -DOPT_BUILD_AIRSPYHF_SOURCE=ON -DOPT_BUILD_NETWORK_SINK=ON \
+    cmake_clone_and_build "https://github.com/PentHertz/SDRPlusPlus_hydrapatch.git" "build" "" ""  "sdrpp_soft_fromsource_install" -DOPT_BUILD_HYDRASDR_SOURCE=ON -DOPT_BUILD_SOAPY_SOURCE=ON -DOPT_BUILD_AIRSPY_SOURCE=ON -DOPT_BUILD_AIRSPYHF_SOURCE=ON -DOPT_BUILD_NETWORK_SINK=ON \
         -DOPT_BUILD_FREQUENCY_MANAGER=ON -DOPT_BUILD_IQ_EXPORTER=ON -DOPT_BUILD_RECORDER=ON -DOPT_BUILD_RIGCTL_SERVER=ON -DOPT_BUILD_METEOR_DEMODULATOR=ON $HAROGIC_FLAG \
         -DOPT_BUILD_RADIO=ON -DOPT_BUILD_USRP_SOURCE=ON -DOPT_BUILD_FILE_SOURCE=ON -DOPT_BUILD_HACKRF_SOURCE=ON -DOPT_BUILD_RTL_SDR_SOURCE=ON -DOPT_BUILD_RTL_TCP_SOURCE=ON \
         -DOPT_BUILD_SDRPP_SERVER_SOURCE=ON -DOPT_BUILD_SOAPY_SOURCE=ON -DOPT_BUILD_SPECTRAN_SOURCE=OFF -DOPT_BUILD_SPECTRAN_HTTP_SOURCE=OFF -DOPT_BUILD_LIMESDR_SOURCE=ON \
@@ -645,4 +645,112 @@ function dumphfdl_soft_install () {
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
 	cmake_clone_and_build "https://github.com/szpajder/dumphfdl.git" "build" "" "" "dumphfdl_soft_install"
+}
+
+function qradiolink_soft_install () {
+	goodecho "[+] Installing qradiolink"
+	install_dependencies "libftdi1-dev libftdi-dev libusb-1.0-0-dev libzmq3-dev cppzmq-dev"
+	install_dependencies "qtmultimedia5-dev libqt5multimedia5-plugins"
+	install_dependencies "libspeex-dev libspeexdsp-dev libcodec2-dev libopus-dev libpulse-dev libasound2-dev portaudio19-dev libsndfile1-dev libvorbis-dev libflac-dev libftdi1-dev gnuradio-dev gr-osmosdr libvolk-dev libboost-all-dev libconfig++-dev libprotobuf-dev protobuf-compiler libsamplerate0-dev libjpeg-dev"
+	[ -d /rftools/sdr ] || mkdir /rftools/sdr
+	cd /rftools/sdr
+	gitinstall "https://codeberg.org/qradiolink/qradiolink" "qradiolink_soft_install"
+	cd qradiolink
+	sh ./build_debian.sh
+	ln -s $(pwd)/build/qradiolink /usr/local/bin/qradiolink
+}
+
+function AIScatcher_soft_install () {
+	goodecho "[+] Installing AIS Catcher"
+	[ -d /rftools/sdr ] || mkdir /rftools/sdr
+	cd /rftools/sdr
+	cmake_clone_and_build "https://github.com/jvde-github/AIS-catcher.git" "build" "" "" "AIScatcher_soft_install"
+}
+
+function tetrakit_soft_install () {
+	goodecho "[+] Installing tetra-kit"
+	[ -d /rftools/sdr ] || mkdir /rftools/sdr
+	cd /rftools/sdr
+	gitinstall "https://gitlab.com/larryth/tetra-kit.git" "tetrakit_soft_install"
+	cd tetra-kit
+	install_dependencies "rapidjson-dev"
+	./build.sh 
+	ln -s $(pwd)/decoder/decoder /usr/local/bin/tetra-kit-decoder
+	ln -s $(pwd)/decoder/recorder /usr/local/bin/tetra-kit-recorder
+}
+
+function tetrakitplayer_soft_install () {
+	goodecho "[+] Installing tetra-kit-player"
+	[ -d /rftools/sdr ] || mkdir /rftools/sdr
+	cd /rftools/sdr
+	gitinstall "https://github.com/sonictruth/tetra-kit-player.git" "tetrakitplayer_soft_install"
+}
+
+function tetra_suite_install () {
+    goodecho "[+] Installing Complete TETRA Suite"
+    
+    # Install all dependencies in one go
+    local deps="git build-essential cmake libtool autoconf automake pkg-config \
+                libtalloc-dev libpcsclite-dev libsctp-dev libusb-1.0-0-dev \
+                libncurses5-dev libsqlite3-dev libglib2.0-dev rtl-sdr librtlsdr-dev \
+                gnuradio gnuradio-dev gr-osmosdr sox python3 python3-pip"
+    install_dependencies "$deps"
+    
+    [ -d /rftools/sdr ] || mkdir -p /rftools/sdr
+    
+    
+    # Install libosmo-dsp
+    goodecho "[+] Installing libosmo-dsp"
+    cd /tmp
+    if [ ! -f "/usr/local/lib/libosmosdr.so" ]; then
+        installfromnet "git clone --depth 1 https://github.com/osmocom/libosmo-dsp.git"
+        cd libosmo-dsp
+        autoreconf -fi
+        ./configure --prefix=/usr/local
+        make -j$(nproc)
+        sudo make install
+        sudo ldconfig
+        cd /tmp
+        rm -rf libosmo-dsp
+    fi
+    
+    # Install osmo-tetra
+    goodecho "[+] Installing osmo-tetra"
+    cd /rftools/sdr
+    gitinstall "https://gitea.osmocom.org/tetra/osmo-tetra.git" "tetra_suite_install"
+    cd osmo-tetra/src
+    make -j$(nproc)
+    cd ../..
+    
+    # Install telive
+    goodecho "[+] Installing telive"
+    cd /rftools/sdr
+    gitinstall "https://github.com/sq5bpf/telive.git" "tetra_suite_install"
+    cd telive
+    make -j$(nproc)
+    
+    # Create symlinks
+    sudo mkdir -p /usr/local/bin /usr/local/share/doc
+    sudo ln -sf /rftools/sdr/telive/telive /usr/local/bin/telive
+    sudo ln -sf /rftools/sdr/telive/telive_doc.txt /usr/local/share/doc/telive.txt
+    
+    goodecho "[+] TETRA Suite installation complete"
+}
+
+function op25_soft_install () {
+	goodecho "[+] Installing op25"
+	[ -d /rftools/sdr ] || mkdir /rftools/sdr
+	cd /rftools/sdr
+	gitinstall "https://github.com/boatbod/op25.git" "op25_soft_install"
+	cd op25
+	yes | ./install || true
+}
+
+function trunkrecorder_soft_install () {
+	goodecho "[+] Installing trunk-recorder"
+	[ -d /rftools/sdr ] || mkdir /rftools/sdr
+	cd /rftools/sdr
+	gitinstall "https://github.com/TrunkRecorder/trunk-recorder.git" "trunkrecorder_soft_install"
+	cd trunk-recorder
+	yes | ./install || true
 }
