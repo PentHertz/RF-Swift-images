@@ -1,0 +1,589 @@
+name: Tagged Release - Retag AMD64
+
+env:
+  DEV_REGISTRY: penthertz/rfswiftdev_noble
+  RELEASE_REGISTRY: penthertz/rfswift_noble_test
+  ARCH: amd64
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  retag-corebuild:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Retag corebuild
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          
+          # Create versioned tag
+          docker buildx imagetools create \
+            --tag ${{ env.RELEASE_REGISTRY }}:corebuild_${VERSION}_${{ env.ARCH }} \
+            ${{ env.DEV_REGISTRY }}:corebuild_${{ env.ARCH }}
+          
+          # Create latest tag
+          docker buildx imagetools create \
+            --tag ${{ env.RELEASE_REGISTRY }}:corebuild_${{ env.ARCH }} \
+            ${{ env.DEV_REGISTRY }}:corebuild_${{ env.ARCH }}
+
+  retag-sdrsa_devices:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    needs: retag-corebuild
+    steps:
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Retag sdrsa_devices
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          
+          docker buildx imagetools create \
+            --tag ${{ env.RELEASE_REGISTRY }}:sdrsa_devices_${VERSION}_${{ env.ARCH }} \
+            ${{ env.DEV_REGISTRY }}:sdrsa_devices_${{ env.ARCH }}
+          
+          docker buildx imagetools create \
+            --tag ${{ env.RELEASE_REGISTRY }}:sdrsa_devices_${{ env.ARCH }} \
+            ${{ env.DEV_REGISTRY }}:sdrsa_devices_${{ env.ARCH }}
+
+  retag-sdrsa_devices_antsdr:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    needs: retag-corebuild
+    steps:
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Retag sdrsa_devices_antsdr
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          
+          docker buildx imagetools create \
+            --tag ${{ env.RELEASE_REGISTRY }}:sdrsa_devices_antsdr_${VERSION}_${{ env.ARCH }} \
+            ${{ env.DEV_REGISTRY }}:sdrsa_devices_antsdr_${{ env.ARCH }}
+          
+          docker buildx imagetools create \
+            --tag ${{ env.RELEASE_REGISTRY }}:sdrsa_devices_antsdr_${{ env.ARCH }} \
+            ${{ env.DEV_REGISTRY }}:sdrsa_devices_antsdr_${{ env.ARCH }}
+
+  retag-sdr_light:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    needs: retag-sdrsa_devices
+    steps:
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Retag sdr_light
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          
+          docker buildx imagetools create \
+            --tag ${{ env.RELEASE_REGISTRY }}:sdr_light_${VERSION}_${{ env.ARCH }} \
+            ${{ env.DEV_REGISTRY }}:sdr_light_${{ env.ARCH }}
+          
+          docker buildx imagetools create \
+            --tag ${{ env.RELEASE_REGISTRY }}:sdr_light_${{ env.ARCH }} \
+            ${{ env.DEV_REGISTRY }}:sdr_light_${{ env.ARCH }}
+
+  retag-hardware:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    needs: retag-sdrsa_devices
+    steps:
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Retag hardware
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          
+          docker buildx imagetools create \
+            --tag ${{ env.RELEASE_REGISTRY }}:hardware_${VERSION}_${{ env.ARCH }} \
+            ${{ env.DEV_REGISTRY }}:hardware_${{ env.ARCH }}
+          
+          docker buildx imagetools create \
+            --tag ${{ env.RELEASE_REGISTRY }}:hardware_${{ env.ARCH }} \
+            ${{ env.DEV_REGISTRY }}:hardware_${{ env.ARCH }}
+
+  retag-deeptempest:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    needs: retag-sdrsa_devices
+    steps:
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Retag deeptempest
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          
+          docker buildx imagetools create \
+            --tag ${{ env.RELEASE_REGISTRY }}:deeptempest_${VERSION}_${{ env.ARCH }} \
+            ${{ env.DEV_REGISTRY }}:deeptempest_${{ env.ARCH }}
+          
+          docker buildx imagetools create \
+            --tag ${{ env.RELEASE_REGISTRY }}:deeptempest_${{ env.ARCH }} \
+            ${{ env.DEV_REGISTRY }}:deeptempest_${{ env.ARCH }}
+
+  retag-sdr_full:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    needs: retag-sdr_light
+    steps:
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Retag sdr_full
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          
+          docker buildx imagetools create \
+            --tag ${{ env.RELEASE_REGISTRY }}:sdr_full_${VERSION}_${{ env.ARCH }} \
+            ${{ env.DEV_REGISTRY }}:sdr_full_${{ env.ARCH }}
+          
+          docker buildx imagetools create \
+            --tag ${{ env.RELEASE_REGISTRY }}:sdr_full_${{ env.ARCH }} \
+            ${{ env.DEV_REGISTRY }}:sdr_full_${{ env.ARCH }}
+
+  retag-telecom_utils:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    needs: retag-sdrsa_devices
+    steps:
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Retag telecom_utils
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          
+          docker buildx imagetools create \
+            --tag ${{ env.RELEASE_REGISTRY }}:telecom_utils_${VERSION}_${{ env.ARCH }} \
+            ${{ env.DEV_REGISTRY }}:telecom_utils_${{ env.ARCH }}
+          
+          docker buildx imagetools create \
+            --tag ${{ env.RELEASE_REGISTRY }}:telecom_utils_${{ env.ARCH }} \
+            ${{ env.DEV_REGISTRY }}:telecom_utils_${{ env.ARCH }}
+
+  retag-telecom_2Gto3G:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    needs: retag-telecom_utils
+    steps:
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Retag telecom_2Gto3G
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          
+          docker buildx imagetools create \
+            --tag ${{ env.RELEASE_REGISTRY }}:telecom_2Gto3G_${VERSION}_${{ env.ARCH }} \
+            ${{ env.DEV_REGISTRY }}:telecom_2Gto3G_${{ env.ARCH }}
+          
+          docker buildx imagetools create \
+            --tag ${{ env.RELEASE_REGISTRY }}:telecom_2Gto3G_${{ env.ARCH }} \
+            ${{ env.DEV_REGISTRY }}:telecom_2Gto3G_${{ env.ARCH }}
+
+  retag-telecom_4G_5GNSA:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    needs: retag-telecom_utils
+    steps:
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Retag telecom_4G_5GNSA
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          
+          docker buildx imagetools create \
+            --tag ${{ env.RELEASE_REGISTRY }}:telecom_4G_5GNSA_${VERSION}_${{ env.ARCH }} \
+            ${{ env.DEV_REGISTRY }}:telecom_4G_5GNSA_${{ env.ARCH }}
+          
+          docker buildx imagetools create \
+            --tag ${{ env.RELEASE_REGISTRY }}:telecom_4G_5GNSA_${{ env.ARCH }} \
+            ${{ env.DEV_REGISTRY }}:telecom_4G_5GNSA_${{ env.ARCH }}
+
+  retag-telecom_5G_bladerf:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    needs: retag-telecom_utils
+    steps:
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Retag telecom_5G_bladerf
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          
+          docker buildx imagetools create \
+            --tag ${{ env.RELEASE_REGISTRY }}:telecom_5G_bladerf_${VERSION}_${{ env.ARCH }} \
+            ${{ env.DEV_REGISTRY }}:telecom_5G_bladerf_${{ env.ARCH }}
+          
+          docker buildx imagetools create \
+            --tag ${{ env.RELEASE_REGISTRY }}:telecom_5G_bladerf_${{ env.ARCH }} \
+            ${{ env.DEV_REGISTRY }}:telecom_5G_bladerf_${{ env.ARCH }}
+
+  retag-telecom_5G:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    needs: retag-telecom_utils
+    steps:
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Retag telecom_5G
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          
+          docker buildx imagetools create \
+            --tag ${{ env.RELEASE_REGISTRY }}:telecom_5G_${VERSION}_${{ env.ARCH }} \
+            ${{ env.DEV_REGISTRY }}:telecom_5G_${{ env.ARCH }}
+          
+          docker buildx imagetools create \
+            --tag ${{ env.RELEASE_REGISTRY }}:telecom_5G_${{ env.ARCH }} \
+            ${{ env.DEV_REGISTRY }}:telecom_5G_${{ env.ARCH }}
+
+  retag-network:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    needs: retag-sdrsa_devices
+    steps:
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Retag network
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          
+          docker buildx imagetools create \
+            --tag ${{ env.RELEASE_REGISTRY }}:network_${VERSION}_${{ env.ARCH }} \
+            ${{ env.DEV_REGISTRY }}:network_${{ env.ARCH }}
+          
+          docker buildx imagetools create \
+            --tag ${{ env.RELEASE_REGISTRY }}:network_${{ env.ARCH }} \
+            ${{ env.DEV_REGISTRY }}:network_${{ env.ARCH }}
+
+  retag-wifi:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    needs: retag-network
+    steps:
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Retag wifi
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          
+          docker buildx imagetools create \
+            --tag ${{ env.RELEASE_REGISTRY }}:wifi_${VERSION}_${{ env.ARCH }} \
+            ${{ env.DEV_REGISTRY }}:wifi_${{ env.ARCH }}
+          
+          docker buildx imagetools create \
+            --tag ${{ env.RELEASE_REGISTRY }}:wifi_${{ env.ARCH }} \
+            ${{ env.DEV_REGISTRY }}:wifi_${{ env.ARCH }}
+
+  retag-bluetooth:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    needs: retag-sdrsa_devices
+    steps:
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Retag bluetooth
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          
+          docker buildx imagetools create \
+            --tag ${{ env.RELEASE_REGISTRY }}:bluetooth_${VERSION}_${{ env.ARCH }} \
+            ${{ env.DEV_REGISTRY }}:bluetooth_${{ env.ARCH }}
+          
+          docker buildx imagetools create \
+            --tag ${{ env.RELEASE_REGISTRY }}:bluetooth_${{ env.ARCH }} \
+            ${{ env.DEV_REGISTRY }}:bluetooth_${{ env.ARCH }}
+
+  retag-rfid:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    needs: retag-corebuild
+    steps:
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Retag rfid
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          
+          docker buildx imagetools create \
+            --tag ${{ env.RELEASE_REGISTRY }}:rfid_${VERSION}_${{ env.ARCH }} \
+            ${{ env.DEV_REGISTRY }}:rfid_${{ env.ARCH }}
+          
+          docker buildx imagetools create \
+            --tag ${{ env.RELEASE_REGISTRY }}:rfid_${{ env.ARCH }} \
+            ${{ env.DEV_REGISTRY }}:rfid_${{ env.ARCH }}
+
+  retag-automotive:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    needs: retag-corebuild
+    steps:
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Retag automotive
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          
+          docker buildx imagetools create \
+            --tag ${{ env.RELEASE_REGISTRY }}:automotive_${VERSION}_${{ env.ARCH }} \
+            ${{ env.DEV_REGISTRY }}:automotive_${{ env.ARCH }}
+          
+          docker buildx imagetools create \
+            --tag ${{ env.RELEASE_REGISTRY }}:automotive_${{ env.ARCH }} \
+            ${{ env.DEV_REGISTRY }}:automotive_${{ env.ARCH }}
+
+  retag-reversing:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    needs: retag-corebuild
+    steps:
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Retag reversing
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          
+          docker buildx imagetools create \
+            --tag ${{ env.RELEASE_REGISTRY }}:reversing_${VERSION}_${{ env.ARCH }} \
+            ${{ env.DEV_REGISTRY }}:reversing_${{ env.ARCH }}
+          
+          docker buildx imagetools create \
+            --tag ${{ env.RELEASE_REGISTRY }}:reversing_${{ env.ARCH }} \
+            ${{ env.DEV_REGISTRY }}:reversing_${{ env.ARCH }}
