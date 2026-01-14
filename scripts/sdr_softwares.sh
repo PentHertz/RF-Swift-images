@@ -754,3 +754,21 @@ function trunkrecorder_soft_install () {
 	cd trunk-recorder
 	yes | ./install || true
 }
+
+function trunkrecorder_soft_install () {
+	goodecho "[+] Installing trunk-recorder"
+	[ -d /rftools/sdr ] || mkdir /rftools/sdr
+	cd /rftools/sdr
+	gitinstall "https://github.com/TrunkRecorder/trunk-recorder.git" "trunkrecorder_soft_install"
+	cd trunk-recorder
+	yes | ./install || true
+}
+
+function intercept_soft_install () {
+	goodecho "[+] Installing intercept"
+	[ -d /rftools/sdr ] || mkdir /rftools/sdr
+	cd /rftools/sdr
+	gitinstall "https://github.com/smittix/intercept.git" "intercept_soft_install"
+	cd intercept
+	./setup.sh
+}
