@@ -540,6 +540,7 @@ function argus_soft_install_fromsource() {
 function curlie_soft_install_fromsource() {
     goodecho "[+] Installing curlie"
     export GOSUMDB=sum.golang.org
+    export GOPROXY=direct
     go install github.com/rs/curlie@latest
     ln -s /root/go/bin/curlie /usr/sbin/curlie
 }
