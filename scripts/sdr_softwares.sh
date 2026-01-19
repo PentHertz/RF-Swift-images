@@ -772,3 +772,14 @@ function intercept_soft_install () {
 	cd intercept
 	./setup.sh
 }
+
+function web_spectrum_soft_install () {
+	goodecho "[+] Installing web-spectrum"
+	install_dependencies "nodejs nodejs"
+	[ -d /rftools/sdr ] || mkdir /rftools/sdr
+	cd /rftools/sdr
+	gitinstall "https://github.com/meshuga/web-spectrum.git" "web_spectrum_soft_install"
+	cd web-spectrum
+	npm install
+	pip3install -r requirements.txt
+}
