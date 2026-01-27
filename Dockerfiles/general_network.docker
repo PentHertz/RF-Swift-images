@@ -22,7 +22,7 @@ RUN chmod +x entrypoint.sh
 
 RUN ./entrypoint.sh burpsuite_community_install
 
-# General monitoring and audit software
+# General monitoring, recon and audit software
 RUN ./entrypoint.sh nmap_soft_install && \
 	./entrypoint.sh wireshark_soft_install && \
 	./entrypoint.sh metasploit_soft_install && \
@@ -33,7 +33,9 @@ RUN ./entrypoint.sh nmap_soft_install && \
 	./entrypoint.sh trufflehog_script_install && \
 	./entrypoint.sh hping3_soft_install && \
 	./entrypoint.sh arping_soft_install && \
-	./entrypoint.sh netexec_soft_install
+	./entrypoint.sh netexec_soft_install && \
+	./entrypoint.sh argus_soft_install_fromsource && \
+	./entrypoint.sh curlie_soft_install_fromsource
 	
 RUN ./entrypoint.sh subenum_soft_install &&\
 	./entrypoint.sh webcopilot_soft_install &&\

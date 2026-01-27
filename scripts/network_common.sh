@@ -530,3 +530,17 @@ EOF
         criticalecho "[-] Installation verification failed"
     fi
 }
+
+function argus_soft_install_fromsource() {
+    goodecho "[+] Installing Argus - Information Gathering & Reconnaissance"
+    pipx install argus-recon
+    ln -s /root/.local/bin/argus /usr/sbin/argus
+}
+
+function curlie_soft_install_fromsource() {
+    goodecho "[+] Installing curlie"
+    export GOSUMDB=sum.golang.org
+    export GOPROXY=direct
+    go install github.com/rs/curlie@latest
+    ln -s /root/go/bin/curlie /usr/sbin/curlie
+}

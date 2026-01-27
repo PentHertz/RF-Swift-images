@@ -135,14 +135,15 @@ function sniffle_soft_install() {
 }
 
 function bluing_soft_install() {
-    echo "[+] Installing necessary packages"
+    echo "[+] Installing bluing"
     
-    if [ "$(uname -m)" = "riscv64" ]; then # TODO: Keep until supported on RISC-V repos
-    	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
-		cd /root/thirdparty
-        # RISC-V: Build Python 3.10 from source
+    install_dependencies "software-properties-common libgirepository1.0-dev libgirepository-2.0-dev libcairo2-dev libdbus-1-dev libbluetooth-dev pkg-config python3-dev"
+    
+    if [ "$(uname -m)" = "riscv64" ]; then
+        [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
+        cd /root/thirdparty
         sudo apt-get update
-        install_dependencies "build-essential libssl-dev zlib1g-dev libncurses-dev libncursesw6-dev libreadline-dev libsqlite3-dev libgdbm-dev libdb5.3-dev libbz2-dev libexpat1-dev liblzma-dev libffi-dev libgirepository1.0-dev libbluetooth-dev"
+        install_dependencies "build-essential libssl-dev zlib1g-dev libncurses-dev libncursesw6-dev libreadline-dev libsqlite3-dev libgdbm-dev libdb5.3-dev libbz2-dev libexpat1-dev liblzma-dev libffi-dev"
         wget https://www.python.org/ftp/python/3.10.13/Python-3.10.13.tgz
         tar xzf Python-3.10.13.tgz
         cd Python-3.10.13
@@ -152,42 +153,49 @@ function bluing_soft_install() {
         cd ..
         rm -rf Python-3.10.13*
     else
-        # x86/ARM: Use package manager
-        add-apt-repository ppa:deadsnakes/ppa
+        add-apt-repository -y ppa:deadsnakes/ppa
         sudo apt-get update
         install_dependencies "python3.10 python3.10-venv python3.10-dev"
     fi
-
-    install_dependencies "libgirepository1.0-dev libgirepository-2.0-dev libbluetooth-dev"
-
-     [ -d /rftools/bluetooth/bluing ] || mkdir -p /rftools/bluetooth/bluing
+    
+    [ -d /rftools/bluetooth/bluing ] || mkdir -p /rftools/bluetooth/bluing
     cd /rftools/bluetooth/bluing
     python3.10 -m venv bluing
     source bluing/bin/activate
-    python3.10 -m pip install dbus-python==1.2.18
-    python3.10 -m pip install --no-dependencies bluing PyGObject docopt btsm btatt bluepy configobj btl2cap pkginfo xpycommon halo pyserial bthci btgatt log_symbols colorama spinners six termcolor
-   
-    # Define the name of the script to create
-	SCRIPT_FILE="bluing_run"
-
-	# Create the script with execution permissions
-	cat > $SCRIPT_FILE << 'EOF'
+    
+    pip install --upgrade pip
+    
+    # Install ALL quarantined dependencies with --no-deps first (they depend on each other)
+    echo "[+] Installing quarantined dependencies from direct URLs..."
+    pip install --no-deps https://files.pythonhosted.org/packages/80/47/a9e2dfc8acb8a134fed62b0ef28282229728c99f63ae957b4bad20b907a7/xpycommon-0.0.25-py3-none-any.whl
+    pip install --no-deps https://files.pythonhosted.org/packages/c5/6b/ecc4a62772fd2af49b0c5245b0beef9fe7b01f1ea642c2a69c859783ace1/bthci-0.0.44-py3-none-any.whl
+    pip install --no-deps https://files.pythonhosted.org/packages/e0/b8/4339dfd7b98360510f0efb1d8f1b475a4e289f1f4a3e7ffd50ddeb0bd030/btl2cap-0.0.11-py3-none-any.whl
+    pip install --no-deps https://files.pythonhosted.org/packages/8d/38/77e3f4f3eae7cb5950d0993a5ead81993f86e45b97691177df44b4586056/btatt-0.0.19-py3-none-any.whl
+    pip install --no-deps https://files.pythonhosted.org/packages/bd/19/a8f9bd80e40654bf5f170a60cc98e00a64bfc3f8d3fc40804a23a50b7651/btgatt-0.0.22-py3-none-any.whl
+    pip install --no-deps https://files.pythonhosted.org/packages/3a/3d/2467113e463f903cf9fe12f621744c1fab634d9f95e654fa3ad05c793281/btsm-0.0.16-py3-none-any.whl
+    
+    # Now install their non-quarantined dependencies
+    echo "[+] Installing remaining dependencies..."
+    pip install configobj ntplib pkginfo dbus-python PyGObject
+    
+    # Install bluing from GitHub (quarantined deps already satisfied)
+    pip install --no-deps git+https://github.com/fO-000/bluing.git
+    
+    # Install bluing's other dependencies
+    pip install docopt bluepy halo pyserial
+    
+    deactivate
+    
+    # Create wrapper script to run bluing directly
+    cat > /usr/local/bin/bluing << 'EOF'
 #!/bin/bash
-
-# Activate the bluing environment
-/rftools/bluetooth/bluing/bluing/bin/activate
-
-# Print a message to confirm activation
-echo "Bluing environment has been activated inside a Python environment"
+source /rftools/bluetooth/bluing/bluing/bin/activate
+exec bluing "$@"
 EOF
-
-	# Make the script executable
-	chmod +x $SCRIPT_FILE
-
-	echo "Created $SCRIPT_FILE with execution permissions"
-	echo "You can run it with: ./$SCRIPT_FILE"
+    chmod +x /usr/local/bin/bluing
+    
+    echo "[+] Bluing installed - run 'bluing' directly"
 }
-
 
 function bdaddr_soft_install() {
 	goodecho "[+] Installing bdaddr"

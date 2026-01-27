@@ -754,3 +754,32 @@ function trunkrecorder_soft_install () {
 	cd trunk-recorder
 	yes | ./install || true
 }
+
+function trunkrecorder_soft_install () {
+	goodecho "[+] Installing trunk-recorder"
+	[ -d /rftools/sdr ] || mkdir /rftools/sdr
+	cd /rftools/sdr
+	gitinstall "https://github.com/TrunkRecorder/trunk-recorder.git" "trunkrecorder_soft_install"
+	cd trunk-recorder
+	yes | ./install || true
+}
+
+function intercept_soft_install () {
+	goodecho "[+] Installing intercept"
+	[ -d /rftools/sdr ] || mkdir /rftools/sdr
+	cd /rftools/sdr
+	gitinstall "https://github.com/smittix/intercept.git" "intercept_soft_install"
+	cd intercept
+	./setup.sh
+}
+
+function web_spectrum_soft_install () {
+	goodecho "[+] Installing web-spectrum"
+	install_dependencies "nodejs nodejs"
+	[ -d /rftools/sdr ] || mkdir /rftools/sdr
+	cd /rftools/sdr
+	gitinstall "https://github.com/meshuga/web-spectrum.git" "web_spectrum_soft_install"
+	cd web-spectrum
+	npm install
+	pip3install -r requirements.txt
+}
