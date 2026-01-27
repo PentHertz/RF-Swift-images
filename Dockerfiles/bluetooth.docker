@@ -32,6 +32,10 @@ RUN ./entrypoint.sh mirage_soft_install && \
 	./entrypoint.sh sniffle_soft_install && \
 	./entrypoint.sh whad_soft_install
 
+# BLE exploits
+RUN ./entrypoint.sh CVE_2025_36911_whisperpair_install && \
+	./entrypoint.sh race_toolkit_exploit_install
+
 # Cleaning and quitting
 WORKDIR /root/
 #RUN rm -rf /root/scripts/
