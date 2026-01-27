@@ -9,7 +9,7 @@ env:
 on:
   push:
     branches:
-      - multistagedev
+      - ubuntu_noble
     paths:
       - '**'
 
