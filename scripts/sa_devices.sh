@@ -43,7 +43,7 @@ function signalhound_spike_sa_device() {
         colorecho "[+] Downloading Spike bin from SignalHound"
         [ -d /rftools/analysers ] || mkdir -p /rftools/analysers
         cd /rftools/analysers
-        filename="Spike(Ubuntu22.04x64)_4_0_10"
+        filename="Spike(Ubuntu22.04x64)_4_0_11"
         installfromnet "wget https://signalhound.com/sigdownloads/Spike/$filename.zip"
         unzip ${filename}.zip
         rm ${filename}.zip
@@ -56,7 +56,7 @@ function signalhound_spike_sa_device() {
 #!/bin/sh
 
 # Set the fixed path
-BASE_DIR="/rftools/analysers/Spike(Ubuntu22.04x64)_4_0_10"
+BASE_DIR="/rftools/analysers/Spike(Ubuntu22.04x64)_4_0_11"
 APPNAME="Spike"
 
 # Set up the environment variables
@@ -127,9 +127,9 @@ function harogic_sa_device() {
     sdkarch=""
     case "$arch" in
         x86_64|amd64)
-            prog="SAStudio4_4.3.55.29_x86_64";;
+            prog="SAStudio4_4.3.55.30_x86_64";;
         aarch64|unknown|arm64)
-            prog="SAStudio4_4.3.55.29_arm64";;
+            prog="SAStudio4_4.3.55.30_arm64";;
         *)
             printf 'Unsupported architecture: "%s"!\n' "$arch" >&2; exit 0;;
     esac

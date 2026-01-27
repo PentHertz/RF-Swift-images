@@ -42,12 +42,19 @@ function KCSDI_cal_device() {
    [ -d /rftools/calibration/Deepace ] || mkdir -p /rftools/calibration/Deepace 
    cd /rftools/calibration/Deepace
 
-   # Set image name based on architecture
-   if [ "$(uname -m)" = "aarch64" ]; then
-       image_name="KCSDI-v0.5.8-69-linux-arm64.appimage"
-   else
-       image_name="KCSDI-v0.5.8-69-linux-x86_64.appimage"
-   fi
+	local ARCH=$(uname -m)
+
+    case "$ARCH" in
+        x86_64|amd64)
+            image_name="KCSDI-v0.4.8-49-linux-x86_64.appimage"
+            ;;
+        aarch64)
+            image_name="KCSDI-v0.4.8-49-linux-x86_64.appimage"
+            ;;
+        *)
+            criticalecho-noexit "[-] Unsupported architecture: $ARCH. KCSDI installation is not supported on this architecture."
+            ;;
+    esac
 
    install_dependencies "libnss3-dev libfuse-dev"
    goodecho "[+] Downloading KCSDI from penthertz repo"

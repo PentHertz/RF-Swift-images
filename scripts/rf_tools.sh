@@ -217,6 +217,25 @@ function bluekit_soft_install() {
 	./install.sh
 }
 
+### Bluetooth Exploits
+function CVE_2025_36911_whisperpair_install() {
+    goodecho "[+] Installing WhisperPair cli"
+    [ -d /rftools/bluetooth/exploits ] || mkdir /rftools/bluetooth/exploits
+    cd /rftools/bluetooth/exploits
+    gitinstall "https://github.com/PentHertz/CVE-2025-36911-exploit.git" "CVE_2025_36911_whisperpair_install"
+    cd CVE-2025-36911-exploit
+    pip3install bleak cryptography
+}
+
+function race_toolkit_exploit_install() {
+    goodecho "[+] Installing race-toolkit for CVE-2025-20700, CVE-2025-20701, and CVE-2025-20702"
+    [ -d /rftools/bluetooth/exploits ] || mkdir /rftools/bluetooth/exploits
+    cd /rftools/bluetooth/exploits
+    gitinstall "https://github.com/auracast-research/race-toolkit.git" "race_toolkit_exploit_install"
+    cd race-toolkit
+    pip3install -r requirements.txt
+}
+
 # RFID package
 function proxmark3_soft_install() {
 	set +e # TODO: debug that function
