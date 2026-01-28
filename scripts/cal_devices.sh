@@ -39,28 +39,35 @@ function gnsslogger_cal_device() {
 
 function KCSDI_cal_device() {
    goodecho "[+] Installing dependencies for KCSDI"
-   [ -d /rftools/calibration/Deepace ] || mkdir -p /rftools/calibration/Deepace 
+   [ -d /rftools/calibration/Deepace ] || mkdir -p /rftools/calibration/Deepace
    cd /rftools/calibration/Deepace
-
-	local ARCH=$(uname -m)
-
+   local ARCH=$(uname -m)
     case "$ARCH" in
         x86_64|amd64)
             image_name="KCSDI-v0.4.8-49-linux-x86_64.appimage"
             ;;
         aarch64)
-            image_name="KCSDI-v0.4.8-49-linux-x86_64.appimage"
+            image_name="KCSDI-v0.5.8-69-linux-arm64.appimage"
             ;;
         *)
             criticalecho-noexit "[-] Unsupported architecture: $ARCH. KCSDI installation is not supported on this architecture."
+            return 0
             ;;
     esac
-
    install_dependencies "libnss3-dev libfuse-dev"
    goodecho "[+] Downloading KCSDI from penthertz repo"
    installfromnet "wget https://github.com/PentHertz/rfswift_deepace_install/releases/download/nightly/${image_name}"
    chmod +x ${image_name}
-   ln -s $(pwd)/${image_name} /usr/bin/KCSDI
+   goodecho "[+] Extracting AppImage"
+   ./${image_name} --appimage-extract
+   rm ${image_name}
+   goodecho "[+] Creating wrapper script"
+   rm -f /usr/bin/KCSDI
+   cat << 'EOF' > /usr/bin/KCSDI
+#!/bin/bash
+exec /rftools/calibration/Deepace/squashfs-root/kcsdi --no-sandbox "$@"
+EOF
+   chmod +x /usr/bin/KCSDI
 }
 
 function NanoVNASaver_cal_device() {

@@ -59,12 +59,18 @@ function autorecon_soft_install() {
 }
 
 function responder_soft_install() {
-	goodecho "[+] Installing Autorecon from GitHub"
+	goodecho "[+] Installing Responder from GitHub"
 	[ -d /opt/network ] || mkdir -p /opt/network
 	cd /opt/network
-	gitinstall "https://github.com/lgandx/Responder.git" "responder_soft_install"
-	cd Responder
-	pip3install -r requirements.txt
+    ARCH=$(uname -m)
+    
+    if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
+        gitinstall "https://github.com/lgandx/Responder.git" "responder_soft_install"
+        cd Responder
+        pip3install -r requirements.txt
+    else
+        goodecho "[-] Unsupported architecture: $ARCH" # TODO: check why RISC-V is failling
+    fi
 }
 
 
