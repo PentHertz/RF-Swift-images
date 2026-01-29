@@ -44,7 +44,7 @@ function KCSDI_cal_device() {
    local ARCH=$(uname -m)
     case "$ARCH" in
         x86_64|amd64)
-            image_name="KCSDI-v0.4.8-49-linux-x86_64.appimage"
+            image_name="KCSDI-v0.5.8-69-linux-x86_64.appimage"
             ;;
         aarch64)
             image_name="KCSDI-v0.5.8-69-linux-arm64.appimage"
