@@ -54,23 +54,25 @@ function KCSDI_cal_device() {
             return 0
             ;;
     esac
-   install_dependencies "libnss3-dev libfuse-dev squashfs-tools"
+   install_dependencies "libnss3-dev libfuse-dev"
    goodecho "[+] Downloading KCSDI from penthertz repo"
    installfromnet "wget https://github.com/PentHertz/rfswift_deepace_install/releases/download/nightly/${image_name}"
-   goodecho "[+] Extracting AppImage using unsquashfs (QEMU-safe)"
-   offset=$(grep -aobm1 'hsqs' ${image_name} | cut -d: -f1)
-   if [ -z "$offset" ]; then
-       criticalecho-noexit "[-] Could not find squashfs offset in AppImage"
-       return 1
-   fi
-   dd if=${image_name} of=kcsdi.squashfs bs=1M skip=$offset iflag=skip_bytes
-   unsquashfs -d squashfs-root kcsdi.squashfs
-   rm -f kcsdi.squashfs ${image_name}
-   goodecho "[+] Creating wrapper script"
+   chmod +x ${image_name}
+   goodecho "[+] Creating wrapper script (extraction deferred to runtime)"
    rm -f /usr/bin/KCSDI
-   cat << 'EOF' > /usr/bin/KCSDI
+   cat << EOF > /usr/bin/KCSDI
 #!/bin/bash
-exec /rftools/calibration/Deepace/squashfs-root/kcsdi --no-sandbox "$@"
+APPDIR="/rftools/calibration/Deepace"
+APPIMAGE="\${APPDIR}/${image_name}"
+EXTRACTED="\${APPDIR}/squashfs-root"
+
+if [ ! -d "\${EXTRACTED}" ]; then
+    echo "[+] First run: extracting AppImage..."
+    cd "\${APPDIR}"
+    "\${APPIMAGE}" --appimage-extract > /dev/null 2>&1
+fi
+
+exec "\${EXTRACTED}/kcsdi" --no-sandbox "\$@"
 EOF
    chmod +x /usr/bin/KCSDI
 }
