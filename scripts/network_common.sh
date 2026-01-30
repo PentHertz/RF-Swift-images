@@ -73,15 +73,20 @@ function responder_soft_install() {
     fi
 }
 
-
 function kismet_soft_install() {
     ARCH=$(uname -m)
-    
     if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
         goodecho "[+] Installing Kismet from official repository for $ARCH"
-        installfromnet "wget -qO- https://www.kismetwireless.net/repos/kismet-release.gpg.key | gpg --dearmor | sudo tee /usr/share/keyrings/kismet-archive-keyring.gpg >/dev/null"
-        installfromnet "echo 'deb [signed-by=/usr/share/keyrings/kismet-archive-keyring.gpg] https://www.kismetwireless.net/repos/apt/release/noble noble main' | sudo tee /etc/apt/sources.list.d/kismet.list >/dev/null"
-        sudo apt update
+        
+        # Download and install GPG key
+        installfromnet "wget -qO /tmp/kismet-release.gpg.key https://www.kismetwireless.net/repos/kismet-release.gpg.key"
+        gpg --dearmor < /tmp/kismet-release.gpg.key > /usr/share/keyrings/kismet-archive-keyring.gpg
+        rm -f /tmp/kismet-release.gpg.key
+        
+        # Add repository
+        echo 'deb [signed-by=/usr/share/keyrings/kismet-archive-keyring.gpg] https://www.kismetwireless.net/repos/apt/release/noble noble main' > /etc/apt/sources.list.d/kismet.list
+        
+        apt-get update
         install_dependencies "kismet"
         
     elif [ "$ARCH" = "riscv64" ]; then
