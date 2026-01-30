@@ -239,7 +239,7 @@ function urh_soft_install() {
     cd /root/thirdparty
     ARCH=$(uname -m)
     VERSION_URH="2.9.8"
-    GITBUILD="git20251109.d528343"
+    GITBUILD="git20260119.d528343"
     case "$ARCH" in
         x86_64|amd64)
             ARCH="amd64"
