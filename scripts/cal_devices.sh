@@ -38,7 +38,7 @@ function gnsslogger_cal_device() {
 }
 
 function KCSDI_cal_device() {
-   goodecho "[+] Installing KCSDI"
+   goodecho "[+] Installing dependencies for KCSDI"
    [ -d /rftools/calibration/Deepace ] || mkdir -p /rftools/calibration/Deepace
    cd /rftools/calibration/Deepace
    local ARCH=$(uname -m)
@@ -59,7 +59,11 @@ function KCSDI_cal_device() {
    installfromnet "wget https://github.com/PentHertz/rfswift_deepace_install/releases/download/nightly/${image_name}"
    goodecho "[+] Extracting AppImage using unsquashfs (QEMU-safe)"
    offset=$(grep -aobm1 'hsqs' ${image_name} | cut -d: -f1)
-   tail -c +$((offset + 1)) ${image_name} > kcsdi.squashfs
+   if [ -z "$offset" ]; then
+       criticalecho-noexit "[-] Could not find squashfs offset in AppImage"
+       return 1
+   fi
+   dd if=${image_name} of=kcsdi.squashfs bs=1M skip=$offset iflag=skip_bytes
    unsquashfs -d squashfs-root kcsdi.squashfs
    rm -f kcsdi.squashfs ${image_name}
    goodecho "[+] Creating wrapper script"
