@@ -38,7 +38,7 @@ function gnsslogger_cal_device() {
 }
 
 function KCSDI_cal_device() {
-   goodecho "[+] Installing dependencies for KCSDI"
+   goodecho "[+] Installing KCSDI"
    [ -d /rftools/calibration/Deepace ] || mkdir -p /rftools/calibration/Deepace
    cd /rftools/calibration/Deepace
    local ARCH=$(uname -m)
@@ -54,13 +54,14 @@ function KCSDI_cal_device() {
             return 0
             ;;
     esac
-   install_dependencies "libnss3-dev libfuse-dev"
+   install_dependencies "libnss3-dev libfuse-dev squashfs-tools"
    goodecho "[+] Downloading KCSDI from penthertz repo"
    installfromnet "wget https://github.com/PentHertz/rfswift_deepace_install/releases/download/nightly/${image_name}"
-   chmod +x ${image_name}
-   goodecho "[+] Extracting AppImage"
-   ./${image_name} --appimage-extract
-   rm ${image_name}
+   goodecho "[+] Extracting AppImage using unsquashfs (QEMU-safe)"
+   offset=$(grep -aobm1 'hsqs' ${image_name} | cut -d: -f1)
+   tail -c +$((offset + 1)) ${image_name} > kcsdi.squashfs
+   unsquashfs -d squashfs-root kcsdi.squashfs
+   rm -f kcsdi.squashfs ${image_name}
    goodecho "[+] Creating wrapper script"
    rm -f /usr/bin/KCSDI
    cat << 'EOF' > /usr/bin/KCSDI
