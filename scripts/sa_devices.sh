@@ -7,7 +7,7 @@ function kc908_sa_device() {
         colorecho "[+] Downloading bin from DEEPACE"
         [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
         cd /root/thirdparty
-        installfromnet "wget https://deepace.net/wp-content/uploads/2024/04/KC908-GNURadio24.4.06.zip"
+        installfromnet "wget https://github.com/PentHertz/rfswift_deepace_install/releases/download/nightly/KC908-GNURadio24.4.06.zip"
         unzip KC908-GNURadio24.4.06.zip
         rm KC908-GNURadio24.4.06.zip
         cd KC908-GNURadio/lib
