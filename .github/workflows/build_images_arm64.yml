@@ -179,7 +179,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} UHD_BASE=antsdr_uhd RTLSDR_BASE=rtlsdr make sdrsadevicesantsdr
 
   sdr_light:
-    runs-on: ARM64L
+    runs-on: ${{ matrix.arch == 'arm64' && 'ARM' || 'ubuntu-latest' }}
     timeout-minutes: 340
     needs: sdrsa_devices
     strategy:
