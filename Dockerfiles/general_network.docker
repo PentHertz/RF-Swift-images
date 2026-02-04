@@ -35,7 +35,8 @@ RUN ./entrypoint.sh nmap_soft_install && \
 	./entrypoint.sh arping_soft_install && \
 	./entrypoint.sh netexec_soft_install && \
 	./entrypoint.sh argus_soft_install_fromsource && \
-	./entrypoint.sh curlie_soft_install_fromsource
+	./entrypoint.sh curlie_soft_install_fromsource && \
+	./entrypoint.sh vortix_soft_install_fromsource
 	
 RUN ./entrypoint.sh subenum_soft_install &&\
 	./entrypoint.sh webcopilot_soft_install &&\
@@ -59,6 +60,9 @@ RUN ./entrypoint.sh hashcat_soft_install && \
 # Web pentesting tools
 RUN ./entrypoint.sh caido_soft_install ##&& \
 ##	./entrypoint.sh burpsuite_community_install
+
+# OSINT
+RUN ./entrypoint.sh wiretapper_soft_install_fromsource
 
 RUN mkdir -p /sdrtools/
 COPY run /sdrtools/run

@@ -271,3 +271,8 @@ function ngscopeclient_install() { # TODO: Optimize install starting from git cl
     make -j$(nproc)
     ln -s /hardware/scopehal-apps/build/src/ngscopeclient/ngscopeclient /usr/bin/ngscopeclient
 }
+
+function pyhydrabus_install() {
+    goodecho "[+] Installing Python3 module for HydraBus"
+    pip3install pyHydrabus
+}

@@ -555,3 +555,19 @@ function curlie_soft_install_fromsource() {
     go install github.com/rs/curlie@latest
     ln -s /root/go/bin/curlie /usr/sbin/curlie
 }
+
+function vortix_soft_install_fromsource() {
+    goodecho "[+] Installing Vortix for real-time telemetry"
+    cargo install vortix
+}
+
+function wiretapper_soft_install_fromsource() {
+    goodecho "[+] Installing WireTapper"
+    [ -d /opt/network ] || mkdir -p /opt/network
+    cd /opt/network
+    git clone https://github.com/h9zdev/WireTapper.git
+    cd WireTapper
+    pip3install -r WireTapper.txt
+    chmod +x app.py
+    ln -s $(pwd)/app.py /usr/sbin/WireTapper
+}

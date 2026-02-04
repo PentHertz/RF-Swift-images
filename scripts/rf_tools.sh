@@ -236,6 +236,43 @@ function race_toolkit_exploit_install() {
     pip3install -r requirements.txt
 }
 
+function pybluez_soft_install() {
+    goodecho "[+] Installing pybluez "
+    [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
+    cd /root/thirdparty
+    install_dependencies "bluez-tools bluez-hcidump libbluetooth-dev git gcc python3-pip python3-setuptools python3-pydbus"
+    gitinstall "https://github.com/pybluez/pybluez.git" "pybluez_soft_install"
+    cd pybluez
+    pip3install .
+}
+
+function blueducky_soft_install() {
+    goodecho "[+] Installing BlueDucky"
+    [ -d /rftools/bluetooth/exploits ] || mkdir -p /rftools/bluetooth/exploits
+    cd /rftools/bluetooth/exploits
+    gitinstall "https://github.com/pentestfunctions/BlueDucky.git" "blueducky_soft_install"
+    cd BlueDucky
+    python3 -m venv venv
+    source venv/bin/activate
+    pip3 install -r requirements.txt
+    deactivate
+    cat << 'EOF' > /usr/sbin/BlueDucky
+#!/bin/bash
+cd /rftools/bluetooth/exploits/BlueDucky
+source venv/bin/activate
+python3 BlueDucky.py "$@"
+EOF
+    chmod +x /usr/sbin/BlueDucky
+}
+
+function breaktooth_soft_install() {
+    goodecho "[+] Installing Breaktooth"
+    [ -d /rftools/bluetooth/exploits ] || mkdir /rftools/bluetooth/exploits
+    cd /rftools/bluetooth/exploits
+    gitinstall "https://github.com/FlUxIuS/breaktooth-unofficial.git" "breaktooth_soft_install"
+}
+
+
 # RFID package
 function proxmark3_soft_install() {
 	set +e # TODO: debug that function
@@ -260,6 +297,11 @@ function libnfc_soft_install() {
 	install_dependencies "autoconf libtool libusb-dev libpcsclite-dev build-essential pcsc-tools"
 	goodecho "[+] Installing libnfc"
 	install_dependencies "libnfc-dev libnfc-bin"
+}
+
+function libfreeware_soft_install() {
+    goodecho "[+] Installing libfreeware"
+    install_dependencies "libfreefare-bin libfreefare-dev"
 }
 
 function mfoc_soft_install() {
@@ -340,6 +382,35 @@ function miLazyCracker_soft_install() {
     make
     sudo cp -a libnfc_crypto1_crack /usr/local/bin
 }
+
+function nfcpy_soft_install() {
+    goodecho "[+] Installing nfcpy"
+    pip3install nfcpy
+}
+
+function chameleon_ultra_soft_install() {
+    goodecho "[+] Installing ChameleonUltra CLI"
+    [ -d /rftools/nfc ] || mkdir -p /rftools/nfc
+    cd /rftools/nfc
+    gitinstall "https://github.com/RfidResearchGroup/ChameleonUltra.git" "chameleon_ultra_soft_install"
+    cd ChameleonUltra/software
+    uv sync
+    cd script
+    make
+    cd ..
+    cat << 'EOF' > /usr/sbin/chameleon_cli
+#!/bin/bash
+cd /rftools/nfc/ChameleonUltra/software
+uv run script/chameleon_cli_main.py "$@"
+EOF
+    chmod +x /usr/sbin/chameleon_cli
+}
+
+function chameleon_ultra_soft_install() {
+    goodecho "[+] Installing ChameleonUltra"
+    pip3install nfcpy
+}
+
 
 # Wi-Fi Package
 function common_nettools() {
@@ -586,7 +657,8 @@ EOF
 
 function whad_soft_install () {
 	goodecho "[+] Installing WHAD from PIP"
-	pip3install "whad"
+	pipx install "whad"
+    pipx ensurepath
 }
 
 function rfquak_soft_install () {

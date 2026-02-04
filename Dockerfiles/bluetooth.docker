@@ -23,7 +23,8 @@ RUN chmod +x entrypoint.sh
 # Tools for Bluetooth #TODO: more more!
 RUN ./entrypoint.sh blueztools_soft_install && \
 	./entrypoint.sh bluing_soft_install && \
-	./entrypoint.sh bdaddr_soft_install
+	./entrypoint.sh bdaddr_soft_install && \
+	./entrypoint.sh pybluez_soft_install
 
 RUN ./entrypoint.sh esp32_bluetooth_classic_sniffer_soft_install
 
@@ -34,7 +35,9 @@ RUN ./entrypoint.sh mirage_soft_install && \
 
 # BLE exploits
 RUN ./entrypoint.sh CVE_2025_36911_whisperpair_install && \
-	./entrypoint.sh race_toolkit_exploit_install
+	./entrypoint.sh race_toolkit_exploit_install && \
+	./entrypoint.sh blueducky_soft_install && \
+	./entrypoint.sh breaktooth_soft_install
 
 # Cleaning and quitting
 WORKDIR /root/
