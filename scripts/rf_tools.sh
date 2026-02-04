@@ -395,13 +395,16 @@ function chameleon_ultra_soft_install() {
     gitinstall "https://github.com/RfidResearchGroup/ChameleonUltra.git" "chameleon_ultra_soft_install"
     cd ChameleonUltra/software
     uv sync
-    cd script
+    cd src
+    mkdir -p build && cd build
+    cmake ..
     make
-    cd ..
+    make install
+    cd /rftools/nfc/ChameleonUltra/software
     cat << 'EOF' > /usr/sbin/chameleon_cli
 #!/bin/bash
-cd /rftools/nfc/ChameleonUltra/software
-uv run script/chameleon_cli_main.py "$@"
+cd /rftools/nfc/ChameleonUltra/software/script
+uv run chameleon_cli_main.py "$@"
 EOF
     chmod +x /usr/sbin/chameleon_cli
 }

@@ -558,6 +558,7 @@ function curlie_soft_install_fromsource() {
 
 function vortix_soft_install_fromsource() {
     goodecho "[+] Installing Vortix for real-time telemetry"
+    rustup update stable
     cargo install vortix
 }
 
