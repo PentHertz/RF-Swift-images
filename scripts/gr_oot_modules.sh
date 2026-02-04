@@ -399,7 +399,7 @@ function grsignalhound_Receiver_grmod_install() {
     cd $INIT_PATH
 
     # Clone and build the gr-signal-hound repository
-    grclone_and_build "https://github.com/SignalHound/gr-signal-hound.git" "" "grsignalhound_Receiver_grmod_install"
+    grclone_and_build "https://github.com/SignalHound/gr-signal-hound.git" "" "grsignalhound_Receiver_grmod_install" -c ddbce74f7559931045eadde4710ef9221d45e9bf #todo fix official repo
 
     echo "[+] Signal Hound installation completed for $ARCH architecture"
 }
