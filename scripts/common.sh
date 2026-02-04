@@ -61,6 +61,12 @@ function grclone_and_build() {
         shift 2
     fi
 
+    local reset_commit=""
+    if [[ $1 == "-c" ]]; then
+        reset_commit=$2
+        shift 2
+    fi
+
     local cmake_args=("$@")  # Capture all remaining arguments as CMake arguments
 
     # Create the base directory if it doesn't exist
@@ -75,7 +81,7 @@ function grclone_and_build() {
     fi
 
     # Clone the repository and switch to the specified branch if provided
-    cmake_clone_and_build "$repo_url" "$repo_subdir" "$branch" "" "$method" "-DCMAKE_INSTALL_PREFIX=/usr/local" "${cmake_args[@]}"
+    cmake_clone_and_build "$repo_url" "$repo_subdir" "$branch" "$reset_commit" "$method" "-DCMAKE_INSTALL_PREFIX=/usr/local" "${cmake_args[@]}"
 }
 
 function gitinstall() {
