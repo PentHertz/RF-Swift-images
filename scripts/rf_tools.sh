@@ -256,6 +256,8 @@ function blueducky_soft_install() {
     source venv/bin/activate
     sed -i '/PyBluez/d' requirements.txt
     sed -i '/pybluez/d' requirements.txt
+    sed -i '/pyobjc/d' requirements.txt
+    sed -i '/setuptools/d' requirements.txt
     pip3 install -r requirements.txt
     deactivate
     cat << 'EOF' > /usr/sbin/BlueDucky
