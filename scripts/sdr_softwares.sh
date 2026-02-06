@@ -233,7 +233,37 @@ function urh_soft_pip_install() {
    	install_dependencies "libhackrf-dev"
 }
 
+
 function urh_soft_install() {
+    goodecho "[+] Installing URH from HydraSDR fork"
+    [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
+    cd /root/thirdparty
+    install_dependencies "qt6-base-dev libgl1-mesa-dev libxkbcommon-x11-0 libegl1 libxcb-cursor0 python3-pyqt6 python3-pyqt6.sip python3-pyqt6.qtsvg pyqt6-dev-tools"
+    ARCH=$(uname -m)
+    VERSION_URH="2.10.0"
+    GITBUILD="git20260206.3909e27"
+    case "$ARCH" in
+        x86_64|amd64)
+            ARCH="amd64"
+            ;;
+        aarch64|arm64)
+            ARCH="arm64"
+            ;;
+        riscv64) 
+            ARCH="riscv64"
+            ;;
+        *)
+            criticalecho-noexit "[-] Unsupported architecture: $ARCH"
+            return 0
+            ;;
+    esac
+    # Use curly braces to properly delimit variable names
+    FILENAME="urh-penthertz_${ARCH}_${VERSION_URH}+${GITBUILD}.deb"
+    installfromnet "wget https://github.com/PentHertz/urh/releases/download/v$VERSION_URH/$FILENAME"
+    dpkg -i $FILENAME
+}
+
+function urh_soft_install_2_9_8() {
     goodecho "[+] Installing URH from HydraSDR fork"
     [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
     cd /root/thirdparty
@@ -247,7 +277,7 @@ function urh_soft_install() {
         aarch64|arm64)
             ARCH="arm64"
             ;;
-        riscv64)  # Fixed typo: was "risv64"
+        riscv64)
             ARCH="riscv64"
             ;;
         *)

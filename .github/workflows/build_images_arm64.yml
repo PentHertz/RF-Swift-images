@@ -239,7 +239,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrlight
 
   hardware:
-    runs-on: ARM64L
+    runs-on: Linux
     timeout-minutes: 340
     needs: sdrsa_devices
     strategy:
@@ -377,7 +377,7 @@ jobs:
             #${{ env.REGISTRY_IMAGE }}:${tagname}_riscv64@$arch_digest_riscv64
 
   deeptempest:
-    runs-on: ARM64L
+    runs-on: Linux
     timeout-minutes: 340
     needs: sdrsa_devices
     strategy:
@@ -556,7 +556,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make telecom_utils
 
   telecom_2Gto3G:
-    runs-on: ARM64L
+    runs-on: Linux
     timeout-minutes: 340
     needs: telecom_utils
     strategy:
@@ -621,7 +621,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make telecom_2Gto3G
 
   telecom_4G_5GNSA:
-    runs-on: ARM64L
+    runs-on: Linux
     timeout-minutes: 340
     needs: telecom_utils
     strategy:
@@ -686,7 +686,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make telecom_4G_5GNSA
 
   telecom_5G:
-    runs-on: ARM64L
+    runs-on: Linux
     timeout-minutes: 340
     needs: telecom_utils
     strategy:
@@ -751,7 +751,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make telecom_5G
 
   telecom_5G_bladerf:
-    runs-on: ARM64L
+    runs-on: Linux
     timeout-minutes: 340
     needs: telecom_utils
     strategy:
@@ -816,7 +816,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make telecom_5G_bladerf
 
   wifi:
-    runs-on: ARM64L
+    runs-on: Linux
     timeout-minutes: 340
     needs: network
     strategy:
@@ -876,7 +876,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make wifi
 
   bluetooth:
-    runs-on: ARM64L
+    runs-on: Linux
     timeout-minutes: 340
     needs: sdrsa_devices
     strategy:
@@ -990,7 +990,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make rfid
 
   network:
-    runs-on: ARM64L
+    runs-on: Linux
     timeout-minutes: 340
     needs: sdrsa_devices
     strategy:

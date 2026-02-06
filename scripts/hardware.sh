@@ -99,7 +99,8 @@ function openocd_install() {
       --enable-xlnx-pcie-xvc \
       --enable-linuxgpiod \
       --enable-dmem-adv \
-      --enable-boundary-scan
+      --enable-boundary-scan \
+      --disable-werror
     make -j$(nproc)
     make install
 }

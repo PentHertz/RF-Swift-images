@@ -544,6 +544,7 @@ EOF
 
 function argus_soft_install_fromsource() {
     goodecho "[+] Installing Argus - Information Gathering & Reconnaissance"
+    install_dependencies "libxml2-dev libxslt1-dev"
     pipx install argus-recon
     ln -s /root/.local/bin/argus /usr/sbin/argus
 }
