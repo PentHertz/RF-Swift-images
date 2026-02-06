@@ -259,7 +259,7 @@ function urh_soft_install() {
     esac
     # Use curly braces to properly delimit variable names
     FILENAME="urh-penthertz_${ARCH}_${VERSION_URH}+${GITBUILD}.deb"
-    installfromnet "wget https://github.com/PentHertz/urh/releases/download/v$VERSION_URH/$FILENAME"
+    installfromnet "wget https://github.com/PentHertz/urh-2/releases/download/v$VERSION_URH/$FILENAME"
     dpkg -i $FILENAME
 }
 
