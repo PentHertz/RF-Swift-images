@@ -61,7 +61,7 @@ python3-ruamel.yaml"
     	installfromnet "uhd_images_downloader"
 }
 
-function antsdr_uhd_devices_install() { # Is replacing original one for now
+function antsdr_uhd_devices_install_fromsources() { # Is replacing original one for now
 	goodecho "[+] Installing dependencies for ANTSDR UHD"
 	install_dependencies "autoconf automake build-essential ccache cmake cpufrequtils doxygen ethtool libpthread-stubs0-dev"
 	install_dependencies "g++ git inetutils-tools libboost-all-dev libncurses6 libncurses-dev libusb-1.0-0 libusb-1.0-0-dev"
@@ -78,6 +78,28 @@ function antsdr_uhd_devices_install() { # Is replacing original one for now
 	make -j$(nproc)
 	make install
 	#ldconfig
+}
+
+function antsdr_uhd_devices_install() {
+    goodecho "[+] Installing ANTSDR UHD"
+    ARCH=$(uname -m)
+    case "$ARCH" in
+        x86_64)  DEB_ARCH="amd64" ;;
+        aarch64) DEB_ARCH="arm64" ;;
+        riscv64) DEB_ARCH="riscv64" ;;
+        *)
+            criticalecho-noexit "[-] ANTSDR UHD: unsupported architecture $ARCH, skipping"
+            return 0
+            ;;
+    esac
+    ANTSDR_VERSION="4.1.0.0"
+    DEB_NAME="antsdr-uhd_${ANTSDR_VERSION}-1_${DEB_ARCH}.deb"
+    DEB_URL="https://github.com/PentHertz/antsdr_uhd/releases/download/v${ANTSDR_VERSION}/${DEB_NAME}"
+    [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
+    cd /root/thirdparty
+    installfromnet "wget ${DEB_URL}"
+    dpkg -i "${DEB_NAME}" || apt-get install -f -y
+    rm -f "${DEB_NAME}"
 }
 
 function nuand_devices_install() {

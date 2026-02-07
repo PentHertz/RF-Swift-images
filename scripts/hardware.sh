@@ -1,18 +1,40 @@
 #!/bin/bash
 
 function dsview_install() {
-	goodecho "[+] Installing DSView for DSLogic"
-	install_dependencies "libfftw3-dev"
+    goodecho "[+] Installing DSView"
+    ARCH=$(uname -m)
+    case "$ARCH" in
+        x86_64)  DEB_ARCH="amd64" ;;
+        aarch64) DEB_ARCH="arm64" ;;
+        riscv64) DEB_ARCH="riscv64" ;;
+        *)
+            criticalecho-noexit "[-] DSView: unsupported architecture $ARCH, skipping"
+            return 0
+            ;;
+    esac
+    DSVIEW_VERSION="1.3.1"
+    DEB_NAME="dsview_${DSVIEW_VERSION}-1_${DEB_ARCH}.deb"
+    DEB_URL="https://github.com/PentHertz/DSView/releases/download/v${DSVIEW_VERSION}/${DEB_NAME}"
+    [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
+    cd /root/thirdparty
+    installfromnet "wget ${DEB_URL}"
+    dpkg -i "${DEB_NAME}" || apt-get install -f -y
+    rm -f "${DEB_NAME}"
+}
+
+function dsview_install_fromsources() {
+    goodecho "[+] Installing DSView for DSLogic"
+    install_dependencies "libfftw3-dev"
     ldconfig
-	[ -d /root/thirdparty ] || mkdir /root/thirdparty
-	cd /root/thirdparty
-	installfromnet "git clone https://github.com/DreamSourceLab/DSView.git"
-	cd DSView
-	mkdir build
-	cd build
-	cmake ..
-	make -j$(nproc)
-	make install
+    [ -d /root/thirdparty ] || mkdir /root/thirdparty
+    cd /root/thirdparty
+    installfromnet "git clone https://github.com/DreamSourceLab/DSView.git"
+    cd DSView
+    mkdir build
+    cd build
+    cmake ..
+    make -j$(nproc)
+    make install
 }
 
 function avrdude_install() {
@@ -37,7 +59,7 @@ function flashrom_install() {
     meson install -C builddir
 }
 
-function pulseview_install() {
+function pulseview_install_fromsources() {
     goodecho "[+] Installing Sigrok pulseview"
     install_dependencies "sdcc libzip-dev libglibmm-2.4-dev libieee1284-3-dev libnettle8"
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
@@ -53,6 +75,30 @@ function pulseview_install() {
     fi
     
     ./sigrok-cross-linux
+}
+
+
+function pulseview_install() {
+    goodecho "[+] Installing PulseView (sigrok stack)"
+    ARCH=$(uname -m)
+    case "$ARCH" in
+        x86_64)  DEB_ARCH="amd64" ;;
+        aarch64) DEB_ARCH="arm64" ;;
+        riscv64) DEB_ARCH="riscv64" ;;
+        *)
+            criticalecho-noexit "[-] PulseView: unsupported architecture $ARCH, skipping"
+            return 0
+            ;;
+    esac
+    PULSEVIEW_VERSION="0.4.2"
+    DEB_NAME="sigrok-pulseview_${PULSEVIEW_VERSION}-1_${DEB_ARCH}.deb"
+    DEB_URL="https://github.com/PentHertz/pulseview/releases/download/v${PULSEVIEW_VERSION}/${DEB_NAME}"
+    [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
+    cd /root/thirdparty
+    installfromnet "wget ${DEB_URL}"
+    dpkg -i "${DEB_NAME}" || apt-get install -f -y
+    udevadm control --reload-rules && udevadm trigger
+    rm -f "${DEB_NAME}"
 }
 
 function openocd_install() {
@@ -256,7 +302,7 @@ function esptool_install() {
     ln -s /root/.local/bin/esptool.py /usr/sbin/esptool.py
 }
 
-function ngscopeclient_install() { # TODO: Optimize install starting from git clone
+function ngscopeclient_install() {
     goodecho "[+] Installing ngscopeclient"
     [ -d /hardware ] || mkdir /hardware
     cd /hardware
@@ -266,10 +312,18 @@ function ngscopeclient_install() { # TODO: Optimize install starting from git cl
     install_dependencies "texlive texlive-fonts-extra texlive-extra-utils"
     installfromnet "git clone --recursive https://github.com/ngscopeclient/scopehal-apps.git"
     cd scopehal-apps
-    mkdir build 
-    cd build 
-    cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF 
-    make -j$(nproc)
+    mkdir -p build
+    cd build
+    # RISC-V GCC doesn't support -mtune=native / -march=native
+    export CXXFLAGS="${CXXFLAGS//-mtune=native/}"
+    export CFLAGS="${CFLAGS//-mtune=native/}"
+    cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
+        -DCMAKE_C_FLAGS_RELEASE="-O2 -DNDEBUG" \
+        -DCMAKE_CXX_FLAGS_RELEASE="-O2 -DNDEBUG"
+    make -j$(nproc) || {
+        criticalecho-noexit "[-] ngscopeclient build failed (known issue on RISC-V), skipping"
+        return 0
+    }
     ln -s /hardware/scopehal-apps/build/src/ngscopeclient/ngscopeclient /usr/bin/ngscopeclient
 }
 
