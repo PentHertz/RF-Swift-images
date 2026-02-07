@@ -167,7 +167,7 @@ function hydranfc_trace_plugin_install() {
     [ -d /hardware ] || mkdir /hardware
     cd /hardware
     git clone https://github.com/hydrabus/hydranfc_v2_sniffer_decoder.git
-    ln -s "$(pwd)/hydranfc_v2_sniffer_decoder" /usr/local/share/libsigrokdecode4DSL/decoders/ # installing for DSView
+    ln -s "$(pwd)/hydranfc_v2_sniffer_decoder" /usr/share/libsigrokdecode4DSL/decoders/ # installing for DSView
     ln -s "$(pwd)/hydranfc_v2_sniffer_decoder" /usr/share/libsigrokdecode/decoders/
 }
 
