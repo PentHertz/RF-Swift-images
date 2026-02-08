@@ -36,7 +36,8 @@ RUN ./entrypoint.sh nmap_soft_install && \
 	./entrypoint.sh netexec_soft_install && \
 	./entrypoint.sh argus_soft_install_fromsource && \
 	./entrypoint.sh curlie_soft_install_fromsource && \
-	./entrypoint.sh vortix_soft_install_fromsource
+	./entrypoint.sh vortix_soft_install_fromsource && \
+	./entrypoint.sh snitch_soft_install
 	
 RUN ./entrypoint.sh subenum_soft_install &&\
 	./entrypoint.sh webcopilot_soft_install &&\

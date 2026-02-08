@@ -574,3 +574,11 @@ function wiretapper_soft_install_fromsource() {
     chmod +x app.py
     ln -s $(pwd)/app.py /usr/sbin/WireTapper
 }
+
+function snitch_soft_install() {
+    goodecho "[+] Installing snitch"
+    export GOSUMDB=sum.golang.org
+    export GOPROXY=direct
+    go install github.com/karol-broda/snitch@latest
+    ln -s /root/go/bin/snitch /usr/sbin/snitch
+}
