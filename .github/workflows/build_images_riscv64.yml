@@ -822,7 +822,7 @@ jobs:
     needs: network
     strategy:
       matrix:
-        platform: [riscv64]
+        platform: [amd64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -846,6 +846,13 @@ jobs:
           else
             echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
+
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/general_network.docker"* || "$MODIFIED_FILES" == *"scripts/tools_for_network.sh"* ]]; then
+            echo "run_job_network=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_network=false" >> $GITHUB_OUTPUT
+          fi
+          
           if [[ "$MODIFIED_FILES" == *"Dockerfiles/wifi_basic.docker"* || "$MODIFIED_FILES" == *"scripts/rf_tools.sh"* ]]; then
             echo "run_job_wifi=true" >> $GITHUB_OUTPUT
           else
@@ -855,23 +862,23 @@ jobs:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          image: tonistiigi/binfmt:qemu-v7.0.0-28
+          image: tonistiigi/binfmt:latest
 
       - name: Set up Docker Buildx
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_wifi == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_wifi == 'true' || steps.file_check.outputs.run_job_network == 'true'
         uses: docker/setup-buildx-action@v3
         with:
           install: true
 
       - name: Log in to Docker Hub
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_wifi == 'true'
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_wifi == 'true' || steps.file_check.outputs.run_job_network == 'true'
         uses: docker/login-action@v3
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push wifi_basic image with caching
-        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_wifi == 'true'
+      - name: Build and push wifi image with caching
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_wifi == 'true' || steps.file_check.outputs.run_job_network == 'true'
         run: |
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make wifi
