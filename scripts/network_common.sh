@@ -582,3 +582,19 @@ function snitch_soft_install() {
     go install github.com/karol-broda/snitch@latest
     ln -s /root/go/bin/snitch /usr/sbin/snitch
 }
+
+function sslyze_soft_install() {
+    goodecho "[+] Installing sslyze"
+    pipx install sslyze
+    pipx ensurepath
+}
+
+function netcatopenbsd_soft_install() {
+    goodecho "[+] Installing Netcat (openbsd)"
+    install_dependencies "netcat-openbsd" 
+}
+
+function telnet_soft_install() {
+    goodecho "[+] Installing Telnet"
+    install_dependencies "telnet" 
+}
