@@ -815,6 +815,8 @@ jobs:
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make telecom_5G_bladerf
 
+  wifi:
+    runs-on: Linux
     timeout-minutes: 340
     needs: network
     strategy:
