@@ -723,7 +723,7 @@ function tetra_suite_install () {
     local deps="git build-essential cmake libtool autoconf automake pkg-config \
                 libtalloc-dev libpcsclite-dev libsctp-dev libusb-1.0-0-dev \
                 libncurses5-dev libsqlite3-dev libglib2.0-dev rtl-sdr librtlsdr-dev \
-                gnuradio gnuradio-dev gr-osmosdr sox python3 python3-pip"
+                sox python3 python3-pip"
     install_dependencies "$deps"
     
     [ -d /rftools/sdr ] || mkdir -p /rftools/sdr
