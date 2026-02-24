@@ -704,30 +704,34 @@ function tetsuo_h3sec_soft_install() {
     goodecho "[+] Building quictls/openssl"
     git clone --depth 1 -b openssl-3.1.5+quic https://github.com/quictls/openssl.git /opt/quictls
     cd /opt/quictls
-    ./config --prefix=/opt/quictls/install --libdir=lib
+    ./config --prefix=/opt/quictls/install
     make -j$(nproc)
-    make install
+    make install_sw install_ssldirs
+
+    # Make quictls available at runtime
+    echo "/opt/quictls/install/lib64" > /etc/ld.so.conf.d/quictls.conf
+    ldconfig
 
     [ -d /opt/network ] || mkdir -p /opt/network
     cd /opt/network
     gitinstall "https://github.com/tetsuo-ai/tetsuo-h3sec.git" "tetsuo_h3sec_soft_install"
     cd tetsuo-h3sec
 
-    # Build tetsuo-pulse against quictls
+    export OPENSSL_ROOT_DIR=/opt/quictls/install
+    export PKG_CONFIG_PATH="/opt/quictls/install/lib64/pkgconfig:$PKG_CONFIG_PATH"
+
+    # Build tetsuo-pulse (required dependency)
     cmake -S tetsuo-pulse -B tetsuo-pulse/build \
         -DENABLE_TLS=ON \
         -DOPENSSL_ROOT_DIR=/opt/quictls/install \
-        -DOPENSSL_CRYPTO_LIBRARY=/opt/quictls/install/lib/libcrypto.so \
-        -DOPENSSL_SSL_LIBRARY=/opt/quictls/install/lib/libssl.so \
-        -DOPENSSL_INCLUDE_DIR=/opt/quictls/install/include
+        -DOPENSSL_INCLUDE_DIR=/opt/quictls/install/include \
+        -DCMAKE_C_FLAGS="-Wno-error=unused-value"
     cmake --build tetsuo-pulse/build -j$(nproc)
-
     # Build the scanner
     cmake -S scanner -B scanner/build \
         -DOPENSSL_ROOT_DIR=/opt/quictls/install \
-        -DOPENSSL_CRYPTO_LIBRARY=/opt/quictls/install/lib/libcrypto.so \
-        -DOPENSSL_SSL_LIBRARY=/opt/quictls/install/lib/libssl.so \
-        -DOPENSSL_INCLUDE_DIR=/opt/quictls/install/include
+        -DOPENSSL_INCLUDE_DIR=/opt/quictls/install/include \
+        -DCMAKE_C_FLAGS="-Wno-error=unused-value"
     cmake --build scanner/build -j$(nproc)
 
     ln -s $(pwd)/scanner/build/h3sec /usr/local/bin/
