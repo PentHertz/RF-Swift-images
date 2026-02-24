@@ -680,6 +680,7 @@ function nmapautomator_soft_install() {
 function install_pyGoldenGMSA() {
     goodecho "[+] Installing pyGoldenGMSA"
     [ -d /opt/network ] || mkdir -p /opt/network
+    install_dependencies "libldap2-dev libsasl2-dev"
     cd /opt/network
     gitinstall "https://github.com/felixbillieres/pyGoldenGMSA.git" "install_pyGoldenGMSA"
     cd pyGoldenGMSA
