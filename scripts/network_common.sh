@@ -683,3 +683,20 @@ python3 /opt/network/pyGoldenGMSA/main.py "$@"
 EOF
     chmod +x /usr/local/bin/pygoldengmsa
 }
+
+function tetsuo_h3sec_soft_install() {
+    goodecho "[+] Installing tetsuo-h3sec"
+    [ -d /opt/network ] || mkdir -p /opt/network
+    cd /opt/network
+    gitinstall "https://github.com/tetsuo-ai/tetsuo-h3sec.git" "tetsuo_h3sec_soft_install"
+    cd tetsuo-h3sec
+
+    # Build tetsuo-pulse (required dependency)
+    cmake -S tetsuo-pulse -B tetsuo-pulse/build -DENABLE_TLS=ON
+    cmake --build tetsuo-pulse/build -j$(nproc)
+
+    # Build the scanner
+    cmake -S scanner -B scanner/build
+    cmake --build scanner/build -j$(nproc)
+    ln -s $(pwd)/scanner/build/h3sec /usr/local/bin/h3sec
+}
