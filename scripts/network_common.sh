@@ -603,6 +603,8 @@ function titus_soft_install() {
     goodecho "[+] Installing titus"
     [ -d /opt/network ] || mkdir -p /opt/network
     cd /opt/network
+    export GOSUMDB=sum.golang.org
+    export GOPROXY=direct
     gitinstall "https://github.com/praetorian-inc/titus.git" "titus_soft_install"
     cd titus
     make build
@@ -614,6 +616,8 @@ function titus_soft_install() {
 
 function brutus_soft_install() {
     goodecho "[+] Installing brutus"
+    export GOSUMDB=sum.golang.org
+    export GOPROXY=direct
     go install github.com/praetorian-inc/brutus/cmd/brutus@latest
     ln -s ~/go/bin/brutus /usr/sbin/brutus
     ln -s ~/go/bin/nabuu /usr/sbin/nabuu
@@ -634,6 +638,8 @@ function mic_soft_install() {
     goodecho "[+] Installing mic"
     [ -d /opt/network ] || mkdir -p /opt/network
     cd /opt/network
+    export GOSUMDB=sum.golang.org
+    export GOPROXY=direct
     gitinstall "https://github.com/djnnvx/mic.git" "mic_soft_install"
     cd mic
     go build -o mic .
