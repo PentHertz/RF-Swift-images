@@ -31,7 +31,9 @@ RUN	./entrypoint.sh avrdude_install && \
 	./entrypoint.sh seergdb_install && \
 	./entrypoint.sh openocd_install && \
 	./entrypoint.sh dfu_util_install && \
-	./entrypoint.sh pyhydrabus_install
+	./entrypoint.sh pyhydrabus_install && \
+	./entrypoint.sh spitkey_install && \
+	./entrypoint.sh spitpm_trace_plugin_install
 	
 RUN	./entrypoint.sh openFPGALoader_install && \
 	./entrypoint.sh mtkclient_install && \
