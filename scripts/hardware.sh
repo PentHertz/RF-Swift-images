@@ -331,3 +331,21 @@ function pyhydrabus_install() {
     goodecho "[+] Installing Python3 module for HydraBus"
     pip3install pyHydrabus
 }
+
+function spitkey_install() {
+    goodecho "[+] Installing Python3 module for HydraBus"
+    [ -d /hardware ] || mkdir /hardware
+    cd /hardware
+    gitinstall "https://github.com/en4rab/SPITkey.git" "spitkey_install"
+    cd SPITkey
+    pip3install -r requirements.txt
+}
+
+function spitpm_trace_plugin_install() {
+    goodecho "[+] Installing dsl2sigrok"
+    [ -d /hardware ] || mkdir /hardware
+    cd /hardware
+    gitinstall "https://github.com/ghecko/libsigrokdecoder_spi-tpm.git" "spitpm_trace_plugin_install"
+    ln -s "$(pwd)/libsigrokdecoder_spi-tpm" /usr/share/libsigrokdecode4DSL/decoders/ # installing for DSView
+    ln -s "$(pwd)/libsigrokdecoder_spi-tpm" /usr/share/libsigrokdecode/decoders/
+}
