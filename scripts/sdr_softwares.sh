@@ -728,7 +728,6 @@ function tetra_suite_install () {
     
     [ -d /rftools/sdr ] || mkdir -p /rftools/sdr
     
-    
     # Install libosmo-dsp
     goodecho "[+] Installing libosmo-dsp"
     cd /tmp
@@ -744,11 +743,11 @@ function tetra_suite_install () {
         rm -rf libosmo-dsp
     fi
     
-    # Install osmo-tetra
-    goodecho "[+] Installing osmo-tetra"
+    # Install osmo-tetra (sq5bpf fork with telive integration, SDS parsing, UDP streaming, AFC)
+    goodecho "[+] Installing osmo-tetra (sq5bpf fork)"
     cd /rftools/sdr
-    gitinstall "https://gitea.osmocom.org/tetra/osmo-tetra.git" "tetra_suite_install"
-    cd osmo-tetra/src
+    gitinstall "https://github.com/sq5bpf/osmo-tetra-sq5bpf.git" "tetra_suite_install"
+    cd osmo-tetra-sq5bpf/src
     make -j$(nproc)
     cd ../..
     
@@ -759,12 +758,20 @@ function tetra_suite_install () {
     cd telive
     make -j$(nproc)
     
+    # Clone ACELP codec installer (not built — user runs it manually due to ETSI licensing)
+    goodecho "[+] Cloning TETRA ACELP codec installer (run 'install-tetra-codec' to enable voice decoding)"
+    cd /rftools/sdr
+    gitinstall "https://github.com/sq5bpf/install-tetra-codec.git" "tetra_suite_install"
+    
     # Create symlinks
     sudo mkdir -p /usr/local/bin /usr/local/share/doc
+    sudo ln -sf /rftools/sdr/osmo-tetra-sq5bpf/src/tetra-rx /usr/local/bin/tetra-rx
+    sudo ln -sf /rftools/sdr/osmo-tetra-sq5bpf/src/float_to_bits /usr/local/bin/float_to_bits
     sudo ln -sf /rftools/sdr/telive/telive /usr/local/bin/telive
     sudo ln -sf /rftools/sdr/telive/telive_doc.txt /usr/local/share/doc/telive.txt
+    sudo ln -sf /rftools/sdr/install-tetra-codec/install.sh /usr/local/bin/install-tetra-codec
     
-    goodecho "[+] TETRA Suite installation complete"
+    goodecho "[+] TETRA Suite installation complete (voice codec not included, run 'install-tetra-codec' to enable)"
 }
 
 function op25_soft_install () {
