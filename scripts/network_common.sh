@@ -559,9 +559,14 @@ function curlie_soft_install_fromsource() {
 
 function vortix_soft_install_fromsource() {
     goodecho "[+] Installing Vortix for real-time telemetry"
+    rm -rf /root/.rustup /root/.cargo
+    export RUSTUP_HOME=/tmp/rustup
+    export CARGO_HOME=/tmp/cargo
+    export PATH="$CARGO_HOME/bin:$PATH"
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-    source "$HOME/.cargo/env"
     cargo install vortix
+    cp "$CARGO_HOME/bin/vortix" /usr/local/bin/
+    rm -rf /tmp/rustup /tmp/cargo
 }
 
 function wiretapper_soft_install_fromsource() {
@@ -694,17 +699,36 @@ EOF
 
 function tetsuo_h3sec_soft_install() {
     goodecho "[+] Installing tetsuo-h3sec"
+
+    # Build quictls (OpenSSL with QUIC support)
+    goodecho "[+] Building quictls/openssl"
+    git clone --depth 1 -b openssl-3.1.5+quic https://github.com/quictls/openssl.git /opt/quictls
+    cd /opt/quictls
+    ./config --prefix=/opt/quictls/install --libdir=lib
+    make -j$(nproc)
+    make install
+
     [ -d /opt/network ] || mkdir -p /opt/network
     cd /opt/network
     gitinstall "https://github.com/tetsuo-ai/tetsuo-h3sec.git" "tetsuo_h3sec_soft_install"
     cd tetsuo-h3sec
 
-    # Build tetsuo-pulse (required dependency)
-    cmake -S tetsuo-pulse -B tetsuo-pulse/build -DENABLE_TLS=ON
+    # Build tetsuo-pulse against quictls
+    cmake -S tetsuo-pulse -B tetsuo-pulse/build \
+        -DENABLE_TLS=ON \
+        -DOPENSSL_ROOT_DIR=/opt/quictls/install \
+        -DOPENSSL_CRYPTO_LIBRARY=/opt/quictls/install/lib/libcrypto.so \
+        -DOPENSSL_SSL_LIBRARY=/opt/quictls/install/lib/libssl.so \
+        -DOPENSSL_INCLUDE_DIR=/opt/quictls/install/include
     cmake --build tetsuo-pulse/build -j$(nproc)
 
     # Build the scanner
-    cmake -S scanner -B scanner/build
+    cmake -S scanner -B scanner/build \
+        -DOPENSSL_ROOT_DIR=/opt/quictls/install \
+        -DOPENSSL_CRYPTO_LIBRARY=/opt/quictls/install/lib/libcrypto.so \
+        -DOPENSSL_SSL_LIBRARY=/opt/quictls/install/lib/libssl.so \
+        -DOPENSSL_INCLUDE_DIR=/opt/quictls/install/include
     cmake --build scanner/build -j$(nproc)
+
     ln -s $(pwd)/scanner/build/h3sec /usr/local/bin/
 }
