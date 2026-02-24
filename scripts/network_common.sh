@@ -625,6 +625,7 @@ function trippy_soft_install() {
     cd /opt/network
     gitinstall "https://github.com/fujiapple852/trippy.git" "trippy_soft_install"
     cd trippy
+    rustup update stable
     cargo install trippy --locked
 }
 
@@ -664,7 +665,7 @@ function nmapautomator_soft_install() {
     ln -s $(pwd)/nmapAutomator.sh /usr/sbin/nmapAutomator
 }
 
-function v() {
+function install_pyGoldenGMSA() {
     goodecho "[+] Installing pyGoldenGMSA"
     [ -d /opt/network ] || mkdir -p /opt/network
     cd /opt/network
@@ -698,5 +699,5 @@ function tetsuo_h3sec_soft_install() {
     # Build the scanner
     cmake -S scanner -B scanner/build
     cmake --build scanner/build -j$(nproc)
-    ln -s $(pwd)/scanner/build/h3sec /usr/local/bin/h3sec
+    ln -s $(pwd)/scanner/build/h3sec /usr/local/bin/
 }
