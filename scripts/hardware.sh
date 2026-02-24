@@ -12,7 +12,7 @@ function dsview_install() {
             return 0
             ;;
     esac
-    DSVIEW_VERSION="1.3.1"
+    DSVIEW_VERSION="1.3.2"
     DEB_NAME="dsview_${DSVIEW_VERSION}-1_${DEB_ARCH}.deb"
     DEB_URL="https://github.com/PentHertz/DSView/releases/download/v${DSVIEW_VERSION}/${DEB_NAME}"
     [ -d /root/thirdparty ] || mkdir -p /root/thirdparty

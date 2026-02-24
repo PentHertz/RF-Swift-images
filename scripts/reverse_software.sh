@@ -132,8 +132,8 @@ function ghidra_soft_install() {
 	[ -d /reverse ] || mkdir /reverse
 	cd /reverse
 
-    ghidra_version="12.0.2"
-    ghidra_date="20260129"
+    ghidra_version="12.0.3"
+    ghidra_date="20260210"
 	prog="ghidra_${ghidra_version}_PUBLIC_${ghidra_date}"
 
 	installfromnet "wget https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_${ghidra_version}_build/${prog}.zip"
@@ -333,5 +333,18 @@ function unblob_soft_install() {
     # Install with pipx
     pipx install .
 }
+
+function angr_soft_install() {
+	goodecho "[+] Installing angrop"
+	pip3install "angr"
+}
+
+function angrop_soft_install() {
+	goodecho "[+] Installing angrop"
+	pipx install git+https://github.com/angr/angrop.git
+}
+
+
+
 
 ### TODO: more More!

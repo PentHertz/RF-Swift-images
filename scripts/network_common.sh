@@ -390,7 +390,7 @@ function trufflehog_script_install() {
 }
 
 function burpsuite_community_install() { # TODO: only working well on x86_64 with the GUI :/
-    local version="${1:-2025.10.6}"
+    local version="${1:-2026.1.5}"
     local install_dir="/opt/burpsuite"
     local arch=$(uname -m)
     
@@ -568,7 +568,7 @@ function wiretapper_soft_install_fromsource() {
     goodecho "[+] Installing WireTapper"
     [ -d /opt/network ] || mkdir -p /opt/network
     cd /opt/network
-    git clone https://github.com/h9zdev/WireTapper.git
+    gitinstall "https://github.com/h9zdev/WireTapper.git" "wiretapper_soft_install_fromsource"
     cd WireTapper
     pip3install -r WireTapper.txt
     chmod +x app.py
@@ -597,4 +597,89 @@ function netcatopenbsd_soft_install() {
 function telnet_soft_install() {
     goodecho "[+] Installing Telnet"
     install_dependencies "telnet" 
+}
+
+function titus_soft_install() {
+    goodecho "[+] Installing titus"
+    [ -d /opt/network ] || mkdir -p /opt/network
+    cd /opt/network
+    gitinstall "https://github.com/praetorian-inc/titus.git" "titus_soft_install"
+    cd titus
+    make build
+    make install
+    ln -s /root/.titus/titus /usr/sbin/titus
+    install_dependencies "default-jre-headless"
+    make install-burp # compile the burp extension
+}
+
+function brutus_soft_install() {
+    goodecho "[+] Installing brutus"
+    go install github.com/praetorian-inc/brutus/cmd/brutus@latest
+    ln -s ~/go/bin/brutus /usr/sbin/brutus
+    ln -s ~/go/bin/nabuu /usr/sbin/nabuu
+}
+
+function trippy_soft_install() {
+    goodecho "[+] Installing trippy"
+    [ -d /opt/network ] || mkdir -p /opt/network
+    cd /opt/network
+    gitinstall "https://github.com/fujiapple852/trippy.git" "trippy_soft_install"
+    cd trippy
+    cargo install trippy --locked
+}
+
+function mic_soft_install() {
+    goodecho "[+] Installing mic"
+    [ -d /opt/network ] || mkdir -p /opt/network
+    cd /opt/network
+    gitinstall "https://github.com/djnnvx/mic.git" "mic_soft_install"
+    cd mic
+    go build -o mic .
+    ln -s $(pwd)/mic /usr/bin/mic
+}
+
+function reconftw_soft_install() {
+    goodecho "[+] Installing reconftw"
+    [ -d /opt/network ] || mkdir -p /opt/network
+    cd /opt/network
+    export GOSUMDB=sum.golang.org
+    export GOPROXY=direct
+    gitinstall "https://github.com/six2dez/reconftw.git" "reconftw_soft_install"
+    cd reconftw
+    ./install.sh --verbose
+    ln -s $(pwd)/reconftw.sh /usr/sbin/reconftw
+}
+
+function cryptocondor_soft_install() {
+    goodecho "[+] Installing crypto-condor"
+    pipx install crypto-condor
+    pipx ensurepath
+}
+
+function nmapautomator_soft_install() {
+    goodecho "[+] Installing nmapAutomator"
+    [ -d /opt/network ] || mkdir -p /opt/network
+    cd /opt/network
+    gitinstall "https://github.com/21y4d/nmapAutomator.git" "nmapautomator_soft_install"
+    ln -s $(pwd)/nmapAutomator.sh /usr/sbin/nmapAutomator
+}
+
+function v() {
+    goodecho "[+] Installing pyGoldenGMSA"
+    [ -d /opt/network ] || mkdir -p /opt/network
+    cd /opt/network
+    gitinstall "https://github.com/felixbillieres/pyGoldenGMSA.git" "install_pyGoldenGMSA"
+    cd pyGoldenGMSA
+    python3 -m venv venv
+    source venv/bin/activate
+    pip install -r requirements.txt
+    deactivate
+
+    # Create wrapper script
+    cat <<'EOF' > /usr/local/bin/pygoldengmsa
+#!/bin/bash
+source /opt/network/pyGoldenGMSA/venv/bin/activate
+python3 /opt/network/pyGoldenGMSA/main.py "$@"
+EOF
+    chmod +x /usr/local/bin/pygoldengmsa
 }

@@ -813,3 +813,9 @@ function web_spectrum_soft_install () {
 	npm install
 	pip3install -r requirements.txt
 }
+
+
+function hydrasdr433_soft_install() {
+	goodecho "[+] Installing hydrasdr_433"
+	cmake_clone_and_build "https://github.com/hydrasdr/hydrasdr_433.git" "build" "" "" "hydrasdr433_soft__install" || true
+}

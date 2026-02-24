@@ -660,6 +660,20 @@ EOF
 	goodecho "[+] Fern WiFi Cracker wrapper installed"
 }
 
+function airgorah_soft_install() {
+    goodecho "[+] Installing airgorah"
+    [ -d /rftools/wifi ] || mkdir -p /rftools/wifi
+    cd /rftools/wifi
+    install_dependencies "libgtk-4-1 dbus-x11 wireshark-common iproute2 mdk4 crunch"
+    install_dependencies "dbus build-essential libgtk-4-dev libglib2.0-dev macchanger"
+    gitinstall "https://github.com/martin-olivier/airgorah.git" "airgorah_soft_install ruby ruby-dev rubygems rpm zstd libarchive-tools"
+    gem install fpm
+    rustup component add clippy
+    rustup component add rustfmt
+    cd airgorah
+    cargo install airgorah
+}
+
 ## Other softs
 
 function whad_soft_install () {
