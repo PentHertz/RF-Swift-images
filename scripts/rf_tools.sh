@@ -276,6 +276,42 @@ function breaktooth_soft_install() {
     gitinstall "https://github.com/FlUxIuS/breaktooth-unofficial.git" "breaktooth_soft_install"
 }
 
+function blerp_soft_install() {
+    goodecho "[+] Installing BLERP - BLE Re-Pairing Attacks PoC (NDSS 26')"
+    install_dependencies "tio bluez"
+    [ -d /rftools/bluetooth/exploits ] || mkdir -p /rftools/bluetooth/exploits
+    cd /rftools/bluetooth/exploits
+    gitinstall "https://github.com/FlUxIuS/blerp.git" "blerp_soft_install"
+    cd blerp
+    # Download pre-built firmware from release
+    local BLERP_VER="v1.0.0"
+    local RELEASE_URL="https://github.com/FlUxIuS/blerp/releases/download/${BLERP_VER}"
+    mkdir -p firmware
+    goodecho "[+] Downloading pre-built firmware ${BLERP_VER}"
+    for f in bleshell-${BLERP_VER}.elf bleshell-${BLERP_VER}.hex bleshell-${BLERP_VER}.img \
+             blehci-${BLERP_VER}.elf blehci-${BLERP_VER}.hex blehci-${BLERP_VER}.img; do
+        installfromnet "wget -q -O firmware/$f ${RELEASE_URL}/$f"
+    done
+    goodecho "[+] Firmware downloaded to $(pwd)/firmware/"
+    # Python venv to avoid conflicts with system Scapy (BLERP uses a custom Scapy fork)
+    goodecho "[+] Creating isolated Python venv for BLERP"
+    python3 -m venv .venv
+    source .venv/bin/activate
+    pip install --upgrade pip setuptools wheel
+    pip install -r python-host/requirements.txt
+    deactivate
+    # Convenience wrapper for MitM attack
+    cat > /usr/local/bin/blerp-mitm <<'EOF'
+#!/bin/bash
+BLERP_DIR="/rftools/bluetooth/exploits/blerp"
+exec "${BLERP_DIR}/.venv/bin/python" "${BLERP_DIR}/python-host/mitm.py" "$@"
+EOF
+    chmod +x /usr/local/bin/blerp-mitm
+    goodecho "[+] BLERP installed:"
+    goodecho "    Firmware: $(pwd)/firmware/"
+    goodecho "    Flash:    nrfjprog --program firmware/bleshell-${BLERP_VER}.hex --sectorerase --snr <SERIAL>"
+    goodecho "    MitM:     sudo blerp-mitm --help"
+}
 
 # RFID package
 function proxmark3_soft_install() {
@@ -668,6 +704,10 @@ function airgorah_soft_install() {
     install_dependencies "dbus build-essential libgtk-4-dev libglib2.0-dev macchanger"
     gitinstall "https://github.com/martin-olivier/airgorah.git" "airgorah_soft_install ruby ruby-dev rubygems rpm zstd libarchive-tools"
     gem install fpm
+    if ! command -v rustup &> /dev/null; then
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+        . "/root/.cargo/env"
+    fi
     rustup component add clippy
     rustup component add rustfmt
     cd airgorah
