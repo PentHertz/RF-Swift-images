@@ -73,7 +73,6 @@ RUN ./entrypoint.sh hashcat_soft_install && \
 
 # Web pentesting tools
 RUN ./entrypoint.sh caido_soft_install && \
-	./entrypoint.sh burpsuite_community_install && \
 	./entrypoint.sh mic_soft_install
 
 # OSINT
