@@ -753,3 +753,18 @@ function artemis_soft_install () {
     chmod +x app.py
     ln -s $(pwd)/app.py /usr/sbin/Artemis
 }
+
+function airsnitch_soft_install() {
+    goodecho "[+] Installing AirSnitch"
+    [ -d /rftools/wifi ] || mkdir -p /rftools/wifi
+    cd /rftools/wifi
+    install_dependencies "libnl-3-dev libnl-genl-3-dev libnl-route-3-dev libssl-dev libdbus-1-dev pkg-config build-essential net-tools python3-venv aircrack-ng rfkill git dnsmasq tcpreplay macchanger"
+    gitinstall "https://github.com/vanhoefm/airsnitch.git" "airsnitch_soft_install"
+    cd airsnitch
+    # Compile modified hostap
+    bash setup.sh
+    cd airsnitch/research
+    bash build.sh
+    bash pysetup.sh
+    goodecho "[+] AirSnitch installed. Use 'airsnitch' wrapper to run."
+}

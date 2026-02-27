@@ -45,7 +45,8 @@ RUN ./entrypoint.sh beef_soft_install && \
 RUN ./entrypoint.sh wpa3_dragonslayer_soft_install && \
 	./entrypoint.sh wpa3_dragonforce_soft_install && \
 	./entrypoint.sh wpa3_dragondrain_and_time_soft_install && \
-	./entrypoint.sh wpa3_wacker_soft_install
+	./entrypoint.sh wpa3_wacker_soft_install && \
+	./entrypoint.sh airsnitch_soft_install
 
 # To fix for full Python3 support ./entrypoint.sh Pyrit_soft_install && \
 
