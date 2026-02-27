@@ -628,6 +628,14 @@ function brutus_soft_install() {
     ln -s ~/go/bin/nabuu /usr/sbin/nabuu
 }
 
+function nerva_soft_install() {
+    goodecho "[+] Installing nerva"
+    export GOSUMDB=sum.golang.org
+    export GOPROXY=direct
+    go install github.com/praetorian-inc/nerva/cmd/nerva@latest
+    ln -s ~/go/bin/nerva /usr/bin/nerva
+}
+
 function trippy_soft_install() {
     goodecho "[+] Installing trippy"
     [ -d /opt/network ] || mkdir -p /opt/network
