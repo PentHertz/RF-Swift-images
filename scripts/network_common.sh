@@ -588,10 +588,15 @@ function snitch_soft_install() {
     ln -s /root/go/bin/snitch /usr/sbin/snitch
 }
 
-function sslyze_soft_install() {
+function sslyze_soft_install() { # TODO: make it work with RISC-V
     goodecho "[+] Installing sslyze"
-    pipx install sslyze
-    pipx ensurepath
+    ARCH=$(uname -m)
+    if [ "$ARCH" != "riscv64" ]; then
+            pipx install sslyze
+            pipx ensurepath
+    else
+        echo "[!] Skipping sslyze: nassl not supported on riscv64"
+    fi
 }
 
 function netcatopenbsd_soft_install() {

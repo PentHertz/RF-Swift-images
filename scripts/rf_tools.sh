@@ -147,6 +147,7 @@ function bluing_soft_install() {
         wget https://www.python.org/ftp/python/3.10.13/Python-3.10.13.tgz
         tar xzf Python-3.10.13.tgz
         cd Python-3.10.13
+        export LDFLAGS="-lm -lpthread -ldl -lutil" # TODO: for RISC-V but need to check if good for ARM and x86
         ./configure --enable-optimizations
         make -j $(nproc)
         sudo make altinstall
