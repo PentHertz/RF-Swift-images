@@ -148,7 +148,7 @@ function bluing_soft_install() {
         tar xzf Python-3.10.13.tgz
         cd Python-3.10.13
         export LDFLAGS="-lm -lpthread -ldl -lutil" # TODO: for RISC-V but need to check if good for ARM and x86
-        ./configure --enable-optimizations
+        ./configure #--enable-optimizations
         make -j $(nproc)
         sudo make altinstall
         cd ..
