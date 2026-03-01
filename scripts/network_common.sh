@@ -750,3 +750,35 @@ function tetsuo_h3sec_soft_install() {
 
     ln -s $(pwd)/scanner/build/h3sec /usr/local/bin/
 }
+
+function sstimap_soft_install() {
+    goodecho "[+] Installing SSTImap"
+    [ -d /opt/network ] || mkdir -p /opt/network
+    cd /opt/network
+    gitinstall "https://github.com/vladko312/SSTImap.git" "sstimap_soft_install"
+    cd SSTImap
+    python3 -m venv venv
+    source venv/bin/activate
+    pip install -r requirements.txt
+    deactivate
+    # Create wrapper script
+    cat <<'EOF' > /usr/local/bin/sstimap
+#!/bin/bash
+source /opt/network/SSTImap/venv/bin/activate
+python3 /opt/network/SSTImap/sstimap.py "$@"
+EOF
+    chmod +x /usr/local/bin/sstimap
+}
+
+function sqlmap_soft_install() {
+    goodecho "[+] Installing sqlmap"
+    [ -d /opt/web ] || mkdir -p /opt/web
+    cd /opt/web
+    gitinstall "https://github.com/sqlmapproject/sqlmap.git" "install_sqlmap"
+    # Create wrapper script
+    cat <<'EOF' > /usr/local/bin/sqlmap
+#!/bin/bash
+python3 /opt/web/sqlmap/sqlmap.py "$@"
+EOF
+    chmod +x /usr/local/bin/sqlmap
+}

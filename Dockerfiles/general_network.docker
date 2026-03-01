@@ -74,7 +74,8 @@ RUN ./entrypoint.sh hashcat_soft_install && \
 
 # Web pentesting tools
 RUN ./entrypoint.sh caido_soft_install && \
-	./entrypoint.sh mic_soft_install
+	./entrypoint.sh mic_soft_install && \
+	./entrypoint.sh sstimap_soft_install && \
 
 # OSINT
 RUN ./entrypoint.sh wiretapper_soft_install_fromsource

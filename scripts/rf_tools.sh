@@ -716,6 +716,26 @@ function airgorah_soft_install() {
     cargo install airgorah
 }
 
+function macstealer_soft_install() {
+    goodecho "[+] Installing MacStealer"
+    [ -d /rftools/wifi ] || mkdir -p /rftools/wifi
+    install_dependencies "libnl-3-dev libnl-genl-3-dev libnl-route-3-dev libssl-dev libdbus-1-dev pkg-config build-essential net-tools aircrack-ng rfkill"
+    cd /rftools/wifi
+    gitinstall "https://github.com/vanhoefm/macstealer.git" "macstealer_soft_install"
+    cd macstealer/research
+    ./build.sh
+    ./pysetup.sh
+    # Create wrapper script
+    cat <<'EOF' > /usr/local/bin/macstealer
+#!/bin/bash
+cd /rftools/wifi/macstealer/research
+source venv/bin/activate
+python3 /rftools/wifi/macstealer/research/macstealer.py "$@"
+EOF
+    chmod +x /usr/local/bin/macstealer
+}
+
+
 ## Other softs
 
 function whad_soft_install () {
