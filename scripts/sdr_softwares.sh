@@ -823,6 +823,15 @@ function web_spectrum_soft_install () {
 
 
 function hydrasdr433_soft_install() {
-	goodecho "[+] Installing hydrasdr_433"
-	cmake_clone_and_build "https://github.com/hydrasdr/hydrasdr_433.git" "build" "" "" "hydrasdr433_soft__install" || true
+    goodecho "[+] Installing hydrasdr_433"
+    [ -d /rftools/sdr ] || mkdir /rftools/sdr
+    cd /rftools/sdr
+    gitinstall "https://github.com/hydrasdr/hydrasdr_433.git" "hydrasdr433_soft_install"
+    cd hydrasdr_433
+    mkdir build
+    cd build
+    cmake ../
+    make -j$(nproc)
+    mkdir -p $(pwd)/../man
+    make install
 }
