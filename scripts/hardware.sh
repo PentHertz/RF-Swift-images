@@ -180,7 +180,7 @@ function arduino_ide_install() {
     fi
     
     goodecho "[+] Installing Arduino IDE for x86_64 with AppImage"
-    IDE_VERSION="2.3.7"
+    IDE_VERSION="2.3.8"
     avrdude_install
     [ -d /hardware ] || mkdir /hardware
     cd /hardware
@@ -208,7 +208,7 @@ function logic2_saleae_install() {
         criticalecho-noexit "[!] Current architecture: $ARCH"
         exit 0
     fi
-    LOGIC_VERSION="2.4.40"
+    LOGIC_VERSION="2.4.42"
     install_dependencies "libfftw3-dev"
     [ -d /hardware ] || mkdir /hardware
     cd /hardware
