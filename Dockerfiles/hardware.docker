@@ -33,11 +33,15 @@ RUN	./entrypoint.sh avrdude_install && \
 	./entrypoint.sh dfu_util_install && \
 	./entrypoint.sh pyhydrabus_install && \
 	./entrypoint.sh spitkey_install && \
-	./entrypoint.sh spitpm_trace_plugin_install
+	./entrypoint.sh spitpm_trace_plugin_install && \
+	./entrypoint.sh pythonfindus_install && \
+	./entrypoint.sh pythonrd6006_install
 	
 RUN	./entrypoint.sh openFPGALoader_install && \
 	./entrypoint.sh mtkclient_install && \
 	./entrypoint.sh esptool_install
+
+RUN ./entrypoint.sh slogic_pulseview_install_fromsources
 
 RUN ./entrypoint.sh ngscopeclient_install
 

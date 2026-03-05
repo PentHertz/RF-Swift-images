@@ -77,7 +77,6 @@ function pulseview_install_fromsources() {
     ./sigrok-cross-linux
 }
 
-
 function pulseview_install() {
     goodecho "[+] Installing PulseView (sigrok stack)"
     ARCH=$(uname -m)
@@ -342,10 +341,98 @@ function spitkey_install() {
 }
 
 function spitpm_trace_plugin_install() {
-    goodecho "[+] Installing dsl2sigrok"
+    goodecho "[+] Installing SPITPM Trace plugin"
     [ -d /hardware ] || mkdir /hardware
     cd /hardware
     gitinstall "https://github.com/ghecko/libsigrokdecoder_spi-tpm.git" "spitpm_trace_plugin_install"
     ln -s "$(pwd)/libsigrokdecoder_spi-tpm" /usr/share/libsigrokdecode4DSL/decoders/ # installing for DSView
     ln -s "$(pwd)/libsigrokdecoder_spi-tpm" /usr/share/libsigrokdecode/decoders/
+}
+
+function slogic_pulseview_install_fromsources() {
+    goodecho "[+] Installing Sipeed SLogic PulseView (prefix-isolated in /opt/slogic)"
+    SLOGIC_PREFIX="/opt/slogic"
+    SLOGIC_PKG="$SLOGIC_PREFIX/lib/pkgconfig"
+    SLOGIC_PYPATH="$SLOGIC_PREFIX/lib/python3/dist-packages"
+
+    install_dependencies "sdcc libzip-dev libglibmm-2.4-dev libieee1284-3-dev nettle-dev \
+        libglib2.0-dev libusb-1.0-0-dev libftdi1-dev libtool automake autoconf \
+        libboost-all-dev libqt5svg5-dev qtbase5-dev qttools5-dev \
+        swig python3-dev check doxygen"
+
+    mkdir -p "$SLOGIC_PREFIX" "$SLOGIC_PYPATH"
+    [ -d /root/thirdparty/slogic-build ] && rm -rf /root/thirdparty/slogic-build
+    mkdir -p /root/thirdparty/slogic-build
+    cd /root/thirdparty/slogic-build
+
+    # Build Sipeed's forked libsigrok (slogic-dev branch)
+    goodecho "[+] Building Sipeed libsigrok (slogic-dev)"
+    installfromnet "git clone --depth=1 -b slogic-dev https://github.com/sipeed/libsigrok.git"
+    cd libsigrok
+    ./autogen.sh
+    mkdir -p build && cd build
+    PKG_CONFIG_PATH="$SLOGIC_PKG" ../configure --prefix="$SLOGIC_PREFIX"
+    make -j$(nproc)
+    PYTHONPATH="$SLOGIC_PYPATH" make install
+    cd /root/thirdparty/slogic-build
+
+    # Build libsigrokdecode
+    goodecho "[+] Building libsigrokdecode for SLogic"
+    installfromnet "git clone --depth=1 https://github.com/sigrokproject/libsigrokdecode.git"
+    cd libsigrokdecode
+    ./autogen.sh
+    mkdir -p build && cd build
+    PKG_CONFIG_PATH="$SLOGIC_PKG" ../configure --prefix="$SLOGIC_PREFIX"
+    make -j$(nproc)
+    make install
+    cd /root/thirdparty/slogic-build
+
+    # Build PulseView linked against Sipeed's libsigrok
+    goodecho "[+] Building PulseView for SLogic"
+    installfromnet "git clone --depth=1 https://github.com/sigrokproject/pulseview.git"
+    cd pulseview
+    mkdir -p build && cd build
+    PKG_CONFIG_PATH="$SLOGIC_PKG" cmake \
+        -DCMAKE_INSTALL_PREFIX:PATH="$SLOGIC_PREFIX" \
+        -DCMAKE_PREFIX_PATH="$SLOGIC_PREFIX" \
+        -DDISABLE_WERROR=y \
+        ..
+    make -j$(nproc)
+    make install
+    cd /root/thirdparty/slogic-build
+
+    # Create wrapper script
+    goodecho "[+] Creating slogic-pulseview launcher"
+    cat > /usr/local/bin/slogic-pulseview << 'WRAPPER'
+#!/bin/bash
+export LD_LIBRARY_PATH="/opt/slogic/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+export XDG_DATA_DIRS="/opt/slogic/share${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}"
+exec /opt/slogic/bin/pulseview "$@"
+WRAPPER
+    chmod +x /usr/local/bin/slogic-pulseview
+
+    # Create sigrok-cli wrapper too
+    if [ -f "$SLOGIC_PREFIX/bin/sigrok-cli" ]; then
+        cat > /usr/local/bin/slogic-cli << 'WRAPPER'
+#!/bin/bash
+export LD_LIBRARY_PATH="/opt/slogic/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+export XDG_DATA_DIRS="/opt/slogic/share${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}"
+exec /opt/slogic/bin/sigrok-cli "$@"
+WRAPPER
+        chmod +x /usr/local/bin/slogic-cli
+    fi
+
+    # Cleanup build sources
+    rm -rf /root/thirdparty/slogic-build
+    goodecho "[+] SLogic PulseView installed. Use 'slogic-pulseview' to launch."
+}
+
+function pythonfindus_install() {
+    goodecho "[+] Installing Python3 module for PicoGlitcher"
+    pip3install findus
+}
+
+function pythonrd6006_install() {
+    goodecho "[+] Installing Python3 module for rd6006"
+    pip3install rd6006
 }
