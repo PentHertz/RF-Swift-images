@@ -24,7 +24,8 @@ RUN chmod +x entrypoint.sh
 RUN ./entrypoint.sh common_nettools && \
 	./entrypoint.sh aircrack_soft_install && \
 	./entrypoint.sh hcxdumptool_soft_install && \
-	./entrypoint.sh hcxtools_soft_install
+	./entrypoint.sh hcxtools_soft_install && \
+	./entrypoint.sh mdk3_soft_install
 
 RUN ./entrypoint.sh reaver_soft_install && \
 	./entrypoint.sh bully_soft_install && \
@@ -40,7 +41,9 @@ RUN ./entrypoint.sh beef_soft_install && \
 	./entrypoint.sh roguehostapd_soft_install && \
 	./entrypoint.sh wifiphisher_soft_install && \
 	./entrypoint.sh hostapdmana_soft_install && \
-	./entrypoint.sh airgorah_soft_install
+	./entrypoint.sh airgorah_soft_install && \
+	./entrypoint.sh wifipumpkin3_soft_install && \
+	./entrypoint.sh fernwificracker_soft_install
 
 RUN ./entrypoint.sh wpa3_dragonslayer_soft_install && \
 	./entrypoint.sh wpa3_dragonforce_soft_install && \

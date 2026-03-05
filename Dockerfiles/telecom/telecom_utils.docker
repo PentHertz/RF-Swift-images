@@ -30,7 +30,9 @@ RUN ./entrypoint.sh pycrate_soft_install && \
 	./entrypoint.sh SCAT_soft_install && \
 	./entrypoint.sh SigPloit_soft_install && \
 	./entrypoint.sh pyhss_soft_install && \
-	./entrypoint.sh bromelia_soft_install
+	./entrypoint.sh bromelia_soft_install && \
+	./entrypoint.sh py5sig_soft_install && \
+	./entrypoint.sh Modmobmap_soft_install
 
 RUN ./entrypoint.sh jss7_soft_install
 # More to come!

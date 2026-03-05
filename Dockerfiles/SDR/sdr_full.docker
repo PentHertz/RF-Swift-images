@@ -123,7 +123,10 @@ RUN	./entrypoint.sh sigdigger_soft_install && \
 	./entrypoint.sh tetrakitplayer_soft_install && \
 	./entrypoint.sh tetra_suite_install && \
 	./entrypoint.sh op25_soft_install && \
-	./entrypoint.sh trunkrecorder_soft_install
+	./entrypoint.sh trunkrecorder_soft_install && \
+	./entrypoint.sh qradiolink_soft_install
+
+# RUN ./entrypoint.sh acarsdec_soft_install # fix that install
 
 RUN ./entrypoint.sh satdump_sdr_soft_install
 RUN ./entrypoint.sh sdrangel_soft_fromsource_install

@@ -500,7 +500,7 @@ function acarsdec_soft_install () {
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
 	install_dependencies "zlib1g-dev libjansson-dev libxml2-dev"
-	cmake_clone_and_build "https://github.com/szpajder/libacars.git" "build"
+	cmake_clone_and_build "https://github.com/szpajder/libacars.git" "build" "" "" "acarsdec_soft_install" 
 	ldconfig
 
 	goodecho "[+] Installing acarsdec"
