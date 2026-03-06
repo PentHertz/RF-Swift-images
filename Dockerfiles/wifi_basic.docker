@@ -43,7 +43,8 @@ RUN ./entrypoint.sh beef_soft_install && \
 	./entrypoint.sh hostapdmana_soft_install && \
 	./entrypoint.sh airgorah_soft_install && \
 	./entrypoint.sh wifipumpkin3_soft_install && \
-	./entrypoint.sh fernwificracker_soft_install
+	./entrypoint.sh fernwificracker_soft_install && \
+	./entrypoint.sh fluxion_soft_install
 
 RUN ./entrypoint.sh wpa3_dragonslayer_soft_install && \
 	./entrypoint.sh wpa3_dragonforce_soft_install && \

@@ -482,18 +482,28 @@ function bully_soft_install() {
 }
 
 function wifipumpkin3_soft_install() {
-	goodecho "[+] Installing wifipumpkin3"
-	[ -d /rftools/wifi ] || mkdir -p /rftools/wifi
-	cd /rftools/wifi
-	install_dependencies "python3-dev libssl-dev libffi-dev build-essential python3"
-	gitinstall "https://github.com/P0cL4bs/wifipumpkin3.git" "wifipumpkin3_soft_install"
-	cd wifipumpkin3
-	pipx install .
-	ln -s /usr/local/bin/captiveflask /usr/sbin/captiveflask
-	ln -s /usr/local/bin/evilqr3 /usr/sbin/evilqr3
-	ln -s /usr/local/bin/phishkin3 /usr/sbin/phishkin3
-	ln -s /usr/local/bin/sslstrip3 /usr/sbin/sslstrip3
-	ln -s /usr/local/bin/wifipumpkin3 /usr/sbin/wifipumpkin3
+    goodecho "[+] Installing wifipumpkin3"
+    [ -d /rftools/wifi ] || mkdir -p /rftools/wifi
+    cd /rftools/wifi
+    install_dependencies "python3-dev libssl-dev libffi-dev build-essential python3"
+    gitinstall "https://github.com/P0cL4bs/wifipumpkin3.git" "wifipumpkin3_soft_install"
+    cd wifipumpkin3
+
+    # Install uv if not already present
+    which uv || curl -LsSf https://astral.sh/uv/install.sh | sh
+    export PATH="$HOME/.cargo/bin:$PATH"
+
+    # Install wifipumpkin3 with uv into an isolated venv
+    uv venv /rftools/wifi/wifipumpkin3/.venv
+    uv pip install --python /rftools/wifi/wifipumpkin3/.venv/bin/python .
+    uv pip install --python /rftools/wifi/wifipumpkin3/.venv/bin/python setuptools
+
+    # Symlink the venv binaries instead of /usr/local/bin
+    ln -sf /rftools/wifi/wifipumpkin3/.venv/bin/captiveflask /usr/sbin/captiveflask
+    ln -sf /rftools/wifi/wifipumpkin3/.venv/bin/evilqr3 /usr/sbin/evilqr3
+    ln -sf /rftools/wifi/wifipumpkin3/.venv/bin/phishkin3 /usr/sbin/phishkin3
+    ln -sf /rftools/wifi/wifipumpkin3/.venv/bin/sslstrip3 /usr/sbin/sslstrip3
+    ln -sf /rftools/wifi/wifipumpkin3/.venv/bin/wifipumpkin3 /usr/sbin/wifipumpkin3
 }
 
 function pixiewps_soft_install() {
@@ -588,9 +598,19 @@ function eaphammer_soft_install() {
 	[ -d /rftools/wifi ] || mkdir -p /rftools/wifi
 	cd /rftools/wifi
 	gitinstall "https://github.com/s0lst1c3/eaphammer.git" "eaphammer_soft_install"
+    install_dependencies "libnl-3-dev libnl-genl-3-dev libnl-route-3-dev libssl-dev libsqlite3-dev pkg-config build-essential"
 	cd eaphammer/
 	./ubuntu-unattended-setup
 	pip3install -r pip.req
+}
+
+function fluxion_soft_install() {
+    goodecho "[+] Installing eaphammer"
+    [ -d /rftools/wifi ] || mkdir -p /rftools/wifi
+    cd /rftools/wifi
+    gitinstall "https://github.com/FluxionNetwork/fluxion.git" "fluxius_soft_install"
+    install_dependencies "bc cowpatty dsniff php-cgi psmisc"
+    cd fluxion
 }
 
 function airgeddon_soft_install() { # TODO: still hostapd-wpe missing
@@ -653,15 +673,38 @@ function hostapdmana_soft_install () {
 	ln -s $(pwd)/hostapd/hostapd /usr/local/bin/hostapd-mana
 }
 
-function sparrowwifi_sdr_soft_install () { # TODO: to debug
-	[ -d /rftools/wifi ] || mkdir -p /rftools/wifi
-	cd /rftools/wifi
-	goodecho "[+] Cloning and installing sparrow-wifi"
-	gitinstall "https://github.com/ghostop14/sparrow-wifi.git" "sparrowwifi"
-	cd sparrow-wifi
-	install_dependencies "pyqt5chart-dev python3-pip gpsd gpsd-clients python3-tk python3-setuptools qt5-qmake qtbase5-dev python3-pyqt5 python3-pyqt5.qsci python3-pyqt5.qtsvg python3-sip-dev pyqt5-dev pyqt5-dev-tools"
-	pip3install "gps3 dronekit manuf python-dateutil matplotlib"
-	pip3install --upgrade manuf
+function sparrowwifi_sdr_soft_install() {
+    goodecho "[+] Installing sparrow-wifi with SDR support"
+    [ -d /rftools/wifi ] || mkdir -p /rftools/wifi
+    cd /rftools/wifi
+
+    # System Qt5 packages
+    install_dependencies "python3-pyqt5 \
+        python3-pyqt5.qtchart \
+        python3-pyqt5.qtsvg \
+        python3-pyqt5.qsci \
+        libqt5charts5 \
+        qt5-qmake \
+        qtbase5-dev \
+        pyqt5-dev \
+        pyqt5-dev-tools \
+        python3-sip-dev \
+        python3-pip \
+        python3-tk \
+        python3-setuptools \
+        gpsd \
+        gpsd-clients"
+
+    gitinstall "https://github.com/ghostop14/sparrow-wifi.git" "sparrowwifi_sdr_soft_install"
+    cd sparrow-wifi
+
+    grep -v -i "pyqt\|pyqtchart\|sip" requirements.txt | \
+        pip3 install -r /dev/stdin --break-system-packages
+
+    pip3install "gps3 dronekit python-dateutil matplotlib"
+
+    pip3install "manuf"
+    pip3 install --upgrade manuf --break-system-packages
 }
 
 function krackattacks_script_soft_install () {
@@ -676,27 +719,30 @@ function krackattacks_script_soft_install () {
 }
 
 function fernwificracker_soft_install() {
-	goodecho "[+] Installing Fern WiFi Cracker"
-	install_dependencies "aircrack-ng"
-	gitinstall "https://github.com/savio-code/fern-wifi-cracker.git" "fernwificracker_soft_install"
-	cd fern-wifi-cracker
-	cd Fern-Wifi-Cracker
-	
-	# Create wrapper script
-	cat > /usr/sbin/Fern-Wifi-Cracker << 'EOF'
+    goodecho "[+] Installing Fern WiFi Cracker"
+    [ -d /rftools/wifi ] || mkdir -p /rftools/wifi
+    cd /rftools/wifi
+    install_dependencies "aircrack-ng"
+    gitinstall "https://github.com/savio-code/fern-wifi-cracker.git" "fernwificracker_soft_install"
+    cd fern-wifi-cracker
+    cd Fern-Wifi-Cracker
+
+    # Create wrapper script
+    cat > /usr/sbin/Fern-Wifi-Cracker << 'EOF'
 #!/bin/bash
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-FERN_DIR="/root/thirdparty/fern-wifi-cracker/Fern-Wifi-Cracker"
+FERN_DIR="/rftools/wifi/fern-wifi-cracker/Fern-Wifi-Cracker"
 
 # Change to the Fern directory and execute
 cd "$FERN_DIR"
 exec python3 execute.py "$@"
 EOF
-	
-	# Make wrapper executable
-	chmod +x /usr/sbin/Fern-Wifi-Cracker
-	goodecho "[+] Fern WiFi Cracker wrapper installed"
+
+    # Make wrapper executable
+    chmod +x /usr/sbin/Fern-Wifi-Cracker
+    goodecho "[+] Fern WiFi Cracker wrapper installed"
 }
+
 
 function airgorah_soft_install() {
     goodecho "[+] Installing airgorah"

@@ -567,6 +567,7 @@ function vortix_soft_install_fromsource() {
     cargo install vortix
     cp "$CARGO_HOME/bin/vortix" /usr/local/bin/
     rm -rf /tmp/rustup /tmp/cargo
+    sed -i '/\/tmp\/cargo\/env/d' /root/.zshenv
 }
 
 function wiretapper_soft_install_fromsource() {
