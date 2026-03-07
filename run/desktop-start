@@ -37,6 +37,7 @@ mode=${RFSWIFT_DESKTOP_PROTO:-"http"}
 host=${RFSWIFT_DESKTOP_HOST:-"127.0.0.1"}
 port=${RFSWIFT_DESKTOP_PORT:-"6080"}
 password=${RFSWIFT_DESKTOP_PASS:-""}
+ssl=${RFSWIFT_DESKTOP_SSL:-""}
 
 # Clear X11 env from host sharing to avoid conflicts with VNC display
 unset XDG_RUNTIME_DIR
@@ -58,26 +59,63 @@ else
     fi
 fi
 
+ssl_cert="/root/.vnc/rfswift.pem"
+ssl_key="/root/.vnc/rfswift.key"
+
+# Generate self-signed certificate if SSL is enabled and no cert exists
+if [ -n "$ssl" ]; then
+    if [ ! -f "$ssl_cert" ] || [ ! -f "$ssl_key" ]; then
+        echo "[rfswift-desktop] Generating self-signed SSL certificate..."
+        openssl req -x509 -newkey rsa:2048 -keyout "$ssl_key" -out "$ssl_cert" \
+            -days 365 -nodes -subj "/CN=rfswift-desktop" 2>/dev/null
+        chmod 600 "$ssl_key" "$ssl_cert"
+    fi
+    echo "[rfswift-desktop] SSL/TLS enabled"
+fi
+
+# Build VNC security types string
+if [ -n "$ssl" ]; then
+    if [ -n "$password" ]; then
+        vnc_security="X509Vnc"
+    else
+        vnc_security="X509None"
+    fi
+    vnc_ssl_args="-X509Cert $ssl_cert -X509Key $ssl_key"
+else
+    vnc_security="$security_type"
+    vnc_ssl_args=""
+fi
+
 display_id=$(find_available_display)
 echo "[rfswift-desktop] Starting desktop ($mode) on display :$display_id"
 
 case "$mode" in
     vnc)
         if [[ "$host" == "127.0.0.1" || "$host" == "localhost" ]]; then
-            vncserver -localhost yes -rfbport "$port" -geometry 1920x1080 -SecurityTypes "$security_type" ":$display_id"
+            vncserver -localhost yes -rfbport "$port" -geometry 1920x1080 -SecurityTypes "$vnc_security" $vnc_ssl_args ":$display_id"
         elif [[ "$host" == "0.0.0.0" ]]; then
-            vncserver -localhost no -rfbport "$port" -geometry 1920x1080 -SecurityTypes "$security_type" ":$display_id"
+            vncserver -localhost no -rfbport "$port" -geometry 1920x1080 -SecurityTypes "$vnc_security" $vnc_ssl_args ":$display_id"
         else
             vnc_port=$(comm -23 <(seq 49152 65535 | sort) <(ss -Htan | awk '{print $4}' | cut -d':' -f2 | sort -u) | shuf | head -n 1)
-            vncserver -localhost yes -rfbport "$vnc_port" -geometry 1920x1080 -SecurityTypes "$security_type" ":$display_id"
+            vncserver -localhost yes -rfbport "$vnc_port" -geometry 1920x1080 -SecurityTypes "$vnc_security" $vnc_ssl_args ":$display_id"
             socat TCP4-LISTEN:"$port",fork,bind="$host" TCP4:127.0.0.1:"$vnc_port" &
         fi
         ;;
     http)
         random_port=$(python3 -c 'import socket; s=socket.socket(); s.bind(("", 0)); print(s.getsockname()[1]); s.close()')
-        vncserver -localhost yes -rfbport "$random_port" -geometry 1920x1080 -SecurityTypes "$security_type" ":$display_id" && \
+        vncserver -localhost yes -rfbport "$random_port" -geometry 1920x1080 -SecurityTypes "$security_type" ":$display_id"
+        if [ -n "$ssl" ]; then
+            websockify -D --cert "$ssl_cert" --key "$ssl_key" --web /usr/share/novnc/ "$host:$port" "127.0.0.1:$random_port"
+            echo "[rfswift-desktop] Desktop accessible at https://$host:$port"
+        else
             websockify -D --web /usr/share/novnc/ "$host:$port" "127.0.0.1:$random_port"
+            echo "[rfswift-desktop] Desktop accessible at http://$host:$port"
+        fi
         ;;
 esac
 
-echo "[rfswift-desktop] Desktop accessible at $mode://$host:$port"
+if [ "$mode" = "vnc" ]; then
+    proto="vnc"
+    [ -n "$ssl" ] && proto="vncs"
+    echo "[rfswift-desktop] Desktop accessible at $proto://$host:$port"
+fi
