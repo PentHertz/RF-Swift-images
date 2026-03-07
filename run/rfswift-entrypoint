@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# RF Swift container entrypoint
+# Starts optional services (desktop) before launching the user shell.
+
+# Start desktop if configured via environment variable
+if [ -n "$RFSWIFT_DESKTOP_PROTO" ] && command -v desktop-start &>/dev/null; then
+    mkdir -p /tmp/rfswift-logs
+    desktop-start &>> /tmp/rfswift-logs/desktop.log &
+    sleep 2
+fi
+
+# Execute the user's shell or command
+exec "$@"

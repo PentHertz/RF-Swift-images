@@ -1,0 +1,83 @@
+#!/bin/bash
+
+# RF Swift desktop-start: starts VNC/noVNC desktop environment
+# Reads configuration from environment variables set by the rfswift wrapper.
+
+# Function to find the first available display ID
+find_available_display() {
+    if [ -d /tmp/.X11-unix/ ]; then
+        readarray -t x11_sockets < <(find "/tmp/.X11-unix/" -type s -printf "%f\n" 2>/dev/null | cut -d 'X' -f2)
+    else
+        readarray -t x11_sockets < <(ss -x 2>/dev/null | grep X11 | cut -d 'X' -f3 | cut -d ' ' -f 1 | sort -u)
+    fi
+
+    local max_num=1
+    for num in "${x11_sockets[@]}"; do
+        if (( num > max_num )); then
+            max_num=$num
+        fi
+    done
+
+    for (( i = 2; i <= max_num + 1; i++ )); do
+        found=0
+        for num in "${x11_sockets[@]}"; do
+            if (( num == i )); then
+                found=1
+                break
+            fi
+        done
+        if (( found == 0 )); then
+            echo "$i"
+            return
+        fi
+    done
+}
+
+mode=${RFSWIFT_DESKTOP_PROTO:-"http"}
+host=${RFSWIFT_DESKTOP_HOST:-"127.0.0.1"}
+port=${RFSWIFT_DESKTOP_PORT:-"6080"}
+password=${RFSWIFT_DESKTOP_PASS:-""}
+
+# Clear X11 env from host sharing to avoid conflicts with VNC display
+unset XDG_RUNTIME_DIR
+unset XDG_SESSION_TYPE
+unset WAYLAND_DISPLAY
+# Keep DISPLAY if set by host X11 forwarding; VNC will use a different display ID
+
+# Configure VNC security based on password
+if [ -n "$password" ]; then
+    mkdir -p /root/.vnc
+    echo "$password" | vncpasswd -f > /root/.vnc/passwd
+    chmod 600 /root/.vnc/passwd
+    security_type="VncAuth"
+    echo "[rfswift-desktop] VNC password protection enabled"
+else
+    security_type="None"
+    if [[ "$host" == "0.0.0.0" ]]; then
+        echo "[rfswift-desktop] WARNING: Desktop exposed on all interfaces without password!"
+    fi
+fi
+
+display_id=$(find_available_display)
+echo "[rfswift-desktop] Starting desktop ($mode) on display :$display_id"
+
+case "$mode" in
+    vnc)
+        if [[ "$host" == "127.0.0.1" || "$host" == "localhost" ]]; then
+            vncserver -localhost yes -rfbport "$port" -geometry 1920x1080 -SecurityTypes "$security_type" ":$display_id"
+        elif [[ "$host" == "0.0.0.0" ]]; then
+            vncserver -localhost no -rfbport "$port" -geometry 1920x1080 -SecurityTypes "$security_type" ":$display_id"
+        else
+            vnc_port=$(comm -23 <(seq 49152 65535 | sort) <(ss -Htan | awk '{print $4}' | cut -d':' -f2 | sort -u) | shuf | head -n 1)
+            vncserver -localhost yes -rfbport "$vnc_port" -geometry 1920x1080 -SecurityTypes "$security_type" ":$display_id"
+            socat TCP4-LISTEN:"$port",fork,bind="$host" TCP4:127.0.0.1:"$vnc_port" &
+        fi
+        ;;
+    http)
+        random_port=$(python3 -c 'import socket; s=socket.socket(); s.bind(("", 0)); print(s.getsockname()[1]); s.close()')
+        vncserver -localhost yes -rfbport "$random_port" -geometry 1920x1080 -SecurityTypes "$security_type" ":$display_id" && \
+            websockify -D --web /usr/share/novnc/ "$host:$port" "127.0.0.1:$random_port"
+        ;;
+esac
+
+echo "[rfswift-desktop] Desktop accessible at $mode://$host:$port"

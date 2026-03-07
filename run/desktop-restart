@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# RF Swift desktop-restart: restarts desktop services
+desktop-stop
+sleep 1
+desktop-start

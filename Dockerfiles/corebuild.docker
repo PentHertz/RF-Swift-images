@@ -18,6 +18,10 @@ COPY config /root/config/
 COPY run/update_rfscripts /usr/sbin
 COPY run/libresdr_swapfpga /usr/sbin
 COPY run/avahicontainer_start /usr/sbin
+COPY run/rfswift-entrypoint /usr/sbin
+COPY run/desktop-start /usr/sbin
+COPY run/desktop-stop /usr/sbin
+COPY run/desktop-restart /usr/sbin
 
 WORKDIR /root/scripts/
 RUN chmod +x entrypoint.sh
@@ -41,6 +45,9 @@ RUN ./entrypoint.sh fzf_soft_install && \
 	./entrypoint.sh atuin_soft_install
 
 RUN ./entrypoint.sh uvpython_install
+
+# Installing Desktop/VNC packages for remote GUI access
+RUN ./entrypoint.sh install_desktop_packages
 
 COPY config/.zshrc /root/.zshrc
 

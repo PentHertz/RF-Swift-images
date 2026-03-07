@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# RF Swift desktop-stop: stops VNC/noVNC desktop services
+vncserver -kill '*' 2>/dev/null
+pkill websockify 2>/dev/null
+pkill socat 2>/dev/null
+echo "[rfswift-desktop] Desktop stopped"
