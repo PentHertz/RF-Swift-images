@@ -2,7 +2,7 @@
 
 function install_desktop_packages() {
     goodecho "[+] Installing desktop/VNC packages for remote GUI access"
-    install_dependencies "tigervnc-standalone-server tigervnc-tools novnc websockify socat dbus-x11 lxqt-core openbox breeze-icon-theme"
+    install_dependencies "tigervnc-standalone-server tigervnc-tools novnc websockify socat dbus-x11 lxqt-core openbox breeze-icon-theme fonts-powerline terminator"
 
     # VNC config
     mkdir -p /root/.vnc
@@ -30,6 +30,7 @@ QuickExec=true
 
 [System]
 IconThemeName=breeze
+Terminal=terminator
 
 [Desktop]
 DesktopShortcuts=
@@ -37,6 +38,43 @@ Wallpaper=/usr/share/rfswift/wallpaper.png
 WallpaperMode=stretch
 BgColor=#2d2d2d
 PCMANEOF
+
+    # Rebuild font cache for Powerline glyphs in VNC terminals
+    fc-cache -f
+
+    # Openbox menu: use terminator as the terminal, add useful entries
+    mkdir -p /root/.config/openbox
+    cat > /root/.config/openbox/menu.xml <<'MENUEOF'
+<?xml version="1.0" encoding="utf-8"?>
+<openbox_menu xmlns="http://openbox.org/3.4/menu">
+  <menu id="root-menu" label="RF Swift">
+    <item label="Terminal"><action name="Execute"><command>terminator</command></action></item>
+    <separator />
+    <item label="File Manager"><action name="Execute"><command>pcmanfm-qt</command></action></item>
+    <separator />
+    <item label="Reconfigure Openbox"><action name="Reconfigure" /></item>
+  </menu>
+</openbox_menu>
+MENUEOF
+
+    # Terminator config: Powerline font + zsh shell
+    mkdir -p /root/.config/terminator
+    cat > /root/.config/terminator/config <<'TERMEOF'
+[global_config]
+[keybindings]
+[profiles]
+  [[default]]
+    font = DejaVu Sans Mono 11
+    use_system_font = False
+    login_shell = True
+[layouts]
+  [[default]]
+    [[[window0]]]
+      type = Window
+    [[[child1]]]
+      type = Terminal
+      parent = window0
+TERMEOF
 
     # Trust all desktop shortcut files so they can be launched from the desktop
     if [ -d /root/Desktop ]; then
