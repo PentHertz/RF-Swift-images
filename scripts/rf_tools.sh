@@ -673,6 +673,26 @@ function hostapdmana_soft_install () {
 	ln -s $(pwd)/hostapd/hostapd /usr/local/bin/hostapd-mana
 }
 
+function hostapdwpe_soft_install () {
+    goodecho "[+] Installing hostapd-wpe"
+    install_dependencies "build-essential wget git libnl-genl-3-dev libnl-3-dev libssl-dev libsqlite3-dev pkg-config"
+    [ -d /rftools/wifi ] || mkdir -p /rftools/wifi
+    cd /rftools/wifi
+
+    # Fetch the WPE patch from aircrack-ng (canonical upstream)
+    wget https://raw.githubusercontent.com/aircrack-ng/aircrack-ng/master/patches/wpe/hostapd-wpe/hostapd-2.11-wpe.patch
+
+    # Fetch matching vanilla hostapd tarball from w1.fi
+    wget https://w1.fi/releases/hostapd-2.11.tar.gz
+    tar -zxf hostapd-2.11.tar.gz
+    cd hostapd-2.11
+    patch -p1 < ../hostapd-2.11-wpe.patch
+    cd hostapd
+    make
+    ln -s $(pwd)/hostapd /usr/local/bin/hostapd-wpe
+    ln -s $(pwd)/hostapd-wpe.conf /etc/hostapd-wpe.conf
+}
+
 function sparrowwifi_sdr_soft_install() {
     goodecho "[+] Installing sparrow-wifi with SDR support"
     [ -d /rftools/wifi ] || mkdir -p /rftools/wifi
