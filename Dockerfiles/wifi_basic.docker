@@ -41,6 +41,7 @@ RUN ./entrypoint.sh beef_soft_install && \
 	./entrypoint.sh roguehostapd_soft_install && \
 	./entrypoint.sh wifiphisher_soft_install && \
 	./entrypoint.sh hostapdmana_soft_install && \
+	./entrypoint.sh hostapdwpe_soft_install && \
 	./entrypoint.sh airgorah_soft_install && \
 	./entrypoint.sh wifipumpkin3_soft_install && \
 	./entrypoint.sh fernwificracker_soft_install && \
