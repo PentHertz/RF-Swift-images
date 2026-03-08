@@ -49,6 +49,9 @@ RUN ./entrypoint.sh uvpython_install
 # Installing Desktop/VNC packages for remote GUI access
 RUN ./entrypoint.sh install_desktop_packages
 
+# Installing VPN tools (WireGuard, OpenVPN, Tailscale, Netbird)
+RUN ./entrypoint.sh vpn_tools_install
+
 COPY config/.zshrc /root/.zshrc
 
 # RF Swift shell integration (must be last to append at end of rc files)

@@ -1,5 +1,51 @@
 #!/bin/bash
 
+# ---------------------------------------------------------------------------
+# VPN tools
+# ---------------------------------------------------------------------------
+
+function wireguard_install() {
+    goodecho "[+] Installing WireGuard tools"
+    install_dependencies "wireguard-tools"
+}
+
+function openvpn_install() {
+    goodecho "[+] Installing OpenVPN"
+    install_dependencies "openvpn"
+}
+
+function tailscale_install() {
+    goodecho "[+] Installing Tailscale"
+    ARCH=$(uname -m)
+    case "$ARCH" in
+        x86_64|amd64) TS_ARCH="amd64" ;;
+        aarch64|arm64) TS_ARCH="arm64" ;;
+        riscv64) TS_ARCH="riscv64" ;;
+        *)
+            criticalecho-noexit "[-] Unsupported architecture for Tailscale: $ARCH"
+            return 0
+            ;;
+    esac
+    installfromnet "curl -fsSL https://tailscale.com/install.sh | sh"
+}
+
+function netbird_install() {
+    goodecho "[+] Installing Netbird"
+    installfromnet "curl -fsSL https://pkgs.netbird.io/install.sh | sh"
+}
+
+function vpn_tools_install() {
+    goodecho "[+] Installing all VPN tools (WireGuard, OpenVPN, Tailscale, Netbird)"
+    wireguard_install
+    openvpn_install
+    tailscale_install
+    netbird_install
+}
+
+# ---------------------------------------------------------------------------
+# Network tools
+# ---------------------------------------------------------------------------
+
 function nmap_soft_install() {
 	goodecho "[+] Installing Nmap from package manager"
 	install_dependencies "nmap"
