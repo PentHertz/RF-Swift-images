@@ -16,22 +16,18 @@ function openvpn_install() {
 
 function tailscale_install() {
     goodecho "[+] Installing Tailscale"
-    ARCH=$(uname -m)
-    case "$ARCH" in
-        x86_64|amd64) TS_ARCH="amd64" ;;
-        aarch64|arm64) TS_ARCH="arm64" ;;
-        riscv64) TS_ARCH="riscv64" ;;
-        *)
-            criticalecho-noexit "[-] Unsupported architecture for Tailscale: $ARCH"
-            return 0
-            ;;
-    esac
-    installfromnet "curl -fsSL https://tailscale.com/install.sh | sh"
+    [ -d /root/thirdparty ] || mkdir /root/thirdparty
+    installfromnet "curl -fsSL https://tailscale.com/install.sh -o /root/thirdparty/tailscale_install.sh"
+    chmod +x /root/thirdparty/tailscale_install.sh
+    APT_SYSTEMCTL_START=false /root/thirdparty/tailscale_install.sh
 }
 
 function netbird_install() {
     goodecho "[+] Installing Netbird"
-    installfromnet "curl -fsSL https://pkgs.netbird.io/install.sh | sh"
+    [ -d /root/thirdparty ] || mkdir /root/thirdparty
+    installfromnet "curl -fsSL https://pkgs.netbird.io/install.sh -o /root/thirdparty/netbird_install.sh"
+    chmod +x /root/thirdparty/netbird_install.sh
+    /root/thirdparty/netbird_install.sh
 }
 
 function vpn_tools_install() {
