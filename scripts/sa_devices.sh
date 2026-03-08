@@ -143,7 +143,6 @@ function harogic_sa_device() {
     sed -i 's/actual_user=$(logname)/actual_user="root"/g' install.sh
     sed -i 's/$SUDO_USER/root/g' install.sh
     ./install.sh
-    cp SAStudio4.desktop /root/Desktop/
     case "$arch" in
         aarch64|unknown) 
             ln -s /usr/lib/aarch64-linux-gnu/libffi.so.8 /usr/lib/libffi.so.6;;
