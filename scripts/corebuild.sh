@@ -232,3 +232,23 @@ function uvpython_install() { # Avoid terrible long builds
     echo 'export PATH="/root/.local/bin:$PATH"' >> ~/.zshrc
     echo 'export PATH="/root/.local/bin:$PATH"' >> ~/.bashrc
 }
+
+function rfswift_shell_setup() {
+    goodecho "[+] Setting up RF Swift shell integration"
+    # Recording indicator — must be at the very end of zshrc/bashrc
+    # so it runs after the prompt theme is fully loaded
+    cat >> ~/.zshrc << 'RFEOF'
+
+# RF Swift recording indicator
+if [ -n "$RFSWIFT_RECORDING" ]; then
+    PROMPT="%F{red}⏺ REC%f $PROMPT"
+fi
+RFEOF
+    cat >> ~/.bashrc << 'RFEOF'
+
+# RF Swift recording indicator
+if [ -n "$RFSWIFT_RECORDING" ]; then
+    PS1="\[\e[31m\]⏺ REC\[\e[0m\] $PS1"
+fi
+RFEOF
+}

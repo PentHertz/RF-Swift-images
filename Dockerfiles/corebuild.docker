@@ -51,6 +51,9 @@ RUN ./entrypoint.sh install_desktop_packages
 
 COPY config/.zshrc /root/.zshrc
 
+# RF Swift shell integration (must be last to append at end of rc files)
+RUN ./entrypoint.sh rfswift_shell_setup
+
 # Cleaning and quitting
 WORKDIR /root/
 RUN rm -rf /root/thirdparty && \
