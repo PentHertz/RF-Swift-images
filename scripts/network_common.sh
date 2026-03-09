@@ -17,6 +17,7 @@ function openvpn_install() {
 function tailscale_install() {
     goodecho "[+] Installing Tailscale"
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
+    cd /root/thirdparty
     installfromnet "curl -fsSL https://tailscale.com/install.sh -o /root/thirdparty/tailscale_install.sh"
     chmod +x /root/thirdparty/tailscale_install.sh
     APT_SYSTEMCTL_START=false /root/thirdparty/tailscale_install.sh
@@ -24,7 +25,15 @@ function tailscale_install() {
 
 function netbird_install() {
     goodecho "[+] Installing Netbird"
+    
+    # Netbird does not provide RISC-V64 packages yet
+    if [ "$(uname -m)" = "riscv64" ]; then
+        warningecho "[-] Netbird is not yet available for RISC-V64, skipping."
+        return 0
+    fi
+    
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
+    cd /root/thirdparty
     installfromnet "curl -fsSL https://pkgs.netbird.io/install.sh -o /root/thirdparty/netbird_install.sh"
     chmod +x /root/thirdparty/netbird_install.sh
     /root/thirdparty/netbird_install.sh
