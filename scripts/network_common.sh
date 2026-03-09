@@ -618,9 +618,20 @@ function wiretapper_soft_install_fromsource() {
     cd /opt/network
     gitinstall "https://github.com/h9zdev/WireTapper.git" "wiretapper_soft_install_fromsource"
     cd WireTapper
-    pip3install -r WireTapper.txt
-    chmod +x app.py
-    ln -s $(pwd)/app.py /usr/sbin/WireTapper
+    python3 -m venv venv
+    source venv/bin/activate
+    pip install -r WireTapper.txt
+    deactivate
+    rm -f /usr/sbin/WireTapper
+    cat <<'EOF' > /usr/sbin/WireTapper
+#!/bin/bash
+# Usage: WireTapper [wigle_api_name] [wigle_api_token] [opencellid_key] [shodan_key]
+# Or set env vars: WIGLE_API_NAME, WIGLE_API_TOKEN, OPENCELLID_API_KEY, SHODAN_API_KEY
+source /opt/network/WireTapper/venv/bin/activate
+cd /opt/network/WireTapper
+exec python3 app-env.py
+EOF
+    chmod +x /usr/sbin/WireTapper
 }
 
 function snitch_soft_install() {

@@ -127,6 +127,98 @@ function harogic_sa_device() {
     sdkarch=""
     case "$arch" in
         x86_64|amd64)
+            prog="SAStudio4_4.3.55.30_x86_64";;
+        aarch64|unknown|arm64)
+            prog="SAStudio4_4.3.55.30_arm64";;
+        *)
+            printf 'Unsupported architecture: "%s"!\n' "$arch" >&2; exit 0;;
+    esac
+    installfromnet "wget https://github.com/PentHertz/rfswift_harogic_install/releases/download/v0.55.63/$prog.zip"
+    unzip "$prog.zip"
+    rm "$prog.zip"
+    cd "$prog"
+    currentpath=$(pwd)
+    mkdir -p /root/Desktop
+    mkdir -p /home/root/Desktop/
+    sed -i 's/actual_user=$(logname)/actual_user="root"/g' install.sh
+    sed -i 's/$SUDO_USER/root/g' install.sh
+    ./install.sh
+    case "$arch" in
+        aarch64|unknown) 
+            ln -s /usr/lib/aarch64-linux-gnu/libffi.so.8 /usr/lib/libffi.so.6;;
+    esac
+    ln -s /usr/local/bin/sastudio/.sastudio.sh /usr/sbin/sastudio
+    goodecho "[+] Installing htraapi"
+    installfromnet "wget https://github.com/PentHertz/rfswift_harogic_install/releases/download/v0.55.63/Install_HTRA_SDK.zip"
+    unzip Install_HTRA_SDK.zip
+    rm Install_HTRA_SDK.zip
+    cd Install_HTRA_SDK/
+    cp htraapi/configs/htrausb.conf /etc/
+    cp htraapi/configs/htra-cyusb.rules /etc/udev/rules.d/
+    rm -rf /opt/htraapi/
+    cp -r htraapi/ /opt/
+    
+    case "$arch" in
+        x86_64|amd64)
+            sdkarch="x86_64"
+            ;;
+        aarch64|unknown)
+            sdkarch="aarch64"
+            ;;
+        *)
+            printf 'Unsupported architecture: "%s"!\n' "$arch" >&2
+            exit 0
+            ;;
+    esac
+    
+    # Extract library version from the actual architecture path
+    file=$( ls htraapi/lib/${sdkarch}/libhtraapi.so.* | head -1 )
+    [ -z "$file" ] && { echo "Error: libhtraapi.so not found for $sdkarch"; exit 1; }
+    file=$( basename $file )
+    version=${file#*so.}
+    majornum=${version%%.*}
+    
+    # Create version symlinks in SDK directory
+    case "$arch" in
+        x86_64|amd64)
+            ln -sf /opt/htraapi/lib/x86_64/libhtraapi.so.${version} /opt/htraapi/lib/x86_64/libhtraapi.so.${majornum}
+            ln -sf /opt/htraapi/lib/x86_64/libhtraapi.so.${majornum} /opt/htraapi/lib/x86_64/libhtraapi.so
+            ln -sf /opt/htraapi/lib/x86_64/libusb-1.0.so.0.2.0 /opt/htraapi/lib/x86_64/libusb-1.0.so.0
+            ln -sf /opt/htraapi/lib/x86_64/libusb-1.0.so.0 /opt/htraapi/lib/x86_64/libusb-1.0.so
+            ;;
+        aarch64|unknown)
+            ln -sf /opt/htraapi/lib/aarch64/libhtraapi.so.${version} /opt/htraapi/lib/aarch64/libhtraapi.so.${majornum}
+            ln -sf /opt/htraapi/lib/aarch64/libhtraapi.so.${majornum} /opt/htraapi/lib/aarch64/libhtraapi.so
+            ln -sf /opt/htraapi/lib/aarch64/libusb-1.0.so.0.2.0 /opt/htraapi/lib/aarch64/libusb-1.0.so.0
+            ln -sf /opt/htraapi/lib/aarch64/libusb-1.0.so.0 /opt/htraapi/lib/aarch64/libusb-1.0.so
+            ;;
+    esac
+    
+    # Copy libraries to system paths
+    cd "/opt/htraapi/lib/${sdkarch}"
+    [ -f libhtraapi.so ] || { echo "Error: symlink setup failed"; exit 1; }
+    cp libh* /usr/lib/
+    ln -sf $(pwd)/libliquid.so /usr/lib/libliquid.so
+    cp /opt/htraapi/inc/htra_api.h /usr/include
+    
+    # Update linker cache
+    ldconfig
+    
+    colorecho "[+] Note: you'll have to put your calibration data after!"
+    mkdir -p /rftools/analysers/${prog}/bin/CalFile
+    ln -s /rftools/analysers/${prog}/bin/CalFile /usr/bin/CalFile
+
+}
+
+function harogic_sa_device_new() {
+    goodecho "[+] Downloading SAStudio4"
+    [ -d /rftools/analysers ] || mkdir -p /rftools/analysers
+    cd /rftools/analysers
+    arch=`uname -i`
+    prog=""
+    sdkarch=""
+    case "$arch" in
+        x86_64|amd64)
             prog="SAStudio4_4.3.55.35_amd64";;
         aarch64|unknown|arm64)
             prog="SAStudio4_4.3.55.35_arm64";;

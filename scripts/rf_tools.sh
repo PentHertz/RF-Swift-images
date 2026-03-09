@@ -627,6 +627,7 @@ function airgeddon_soft_install() { # TODO: still hostapd-wpe missing
 cd /rftools/wifi/airgeddon
 exec ./airgeddon.sh "$@"
 EOF
+    chmod +x /usr/local/sbin/airgeddon
 	gitinstall "https://github.com/OscarAkaElvis/airgeddon-plugins.git" "airgeddon_soft_install"
 	cp -R airgeddon-plugins/wpa3_online_attack/* plugins/
 	cp -R airgeddon-plugins/allchars_captiveportal/* plugins/
