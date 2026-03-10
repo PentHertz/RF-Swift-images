@@ -41,7 +41,8 @@ RUN ./entrypoint.sh nmap_soft_install && \
 	./entrypoint.sh telnet_soft_install && \
 	./entrypoint.sh nmapautomator_soft_install && \
 	./entrypoint.sh trippy_soft_install && \
-	./entrypoint.sh titus_soft_install
+	./entrypoint.sh titus_soft_install && \
+	./entrypoint.sh whosthere_soft_install
 
 RUN ./entrypoint.sh donpapi_soft_install && \
 	./entrypoint.sh beef_soft_install && \
@@ -50,6 +51,8 @@ RUN ./entrypoint.sh donpapi_soft_install && \
 
 #RUN ./entrypoint.sh tetsuo_h3sec_soft_install
 #RUN  ./entrypoint.sh  reconftw_soft_install # takes too much time
+
+RUN ./entrypoint.sh johntheripperjumbo_soft_install
 	
 RUN ./entrypoint.sh subenum_soft_install &&\
 	./entrypoint.sh webcopilot_soft_install &&\

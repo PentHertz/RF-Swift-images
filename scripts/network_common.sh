@@ -696,6 +696,14 @@ function brutus_soft_install() {
     ln -s ~/go/bin/nabuu /usr/sbin/nabuu
 }
 
+function whosthere_soft_install() {
+    goodecho "[+] Installing whosthere"
+    export GOSUMDB=sum.golang.org
+    export GOPROXY=direct
+    go install github.com/ramonvermeulen/whosthere@latest
+    ln -s /root/go/bin/whosthere /usr/local/bin/whosthere
+}
+
 function nerva_soft_install() {
     goodecho "[+] Installing nerva"
     export GOSUMDB=sum.golang.org
@@ -737,6 +745,20 @@ function reconftw_soft_install() {
     cd reconftw
     ./install.sh --verbose
     ln -s $(pwd)/reconftw.sh /usr/sbin/reconftw
+}
+
+function johntheripperjumbo_soft_install() {
+    goodecho "[+] Installing John Jumbo"
+    [ -d /opt/network ] || mkdir -p /opt/network
+    cd /opt/network
+    gitinstall "https://github.com/openwall/john.git" "johntheripperjumbo_soft_install"
+    cd john/src
+    ./configure
+    make -j$(nproc)
+    cd ../run
+    ln -s $(pwd)/john /usr/local/bin/john
+    cp *.sh /usr/local/sbin/
+    pip3install dpkt
 }
 
 function cryptocondor_soft_install() {
