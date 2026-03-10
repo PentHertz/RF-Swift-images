@@ -8,5 +8,6 @@ function jupyter_soft_install() {
 
 function ml_and_dl_soft_install() {
     goodecho "[+] Installing ML/DL tools"
-    pip3 install "numpy>=1.26.0,<2.0" scikit-learn pandas seaborn tensorflow --break-system-packages
+    pip3 install --break-system-packages --ignore-installed typing_extensions \
+        "numpy>=1.26.0,<2.0" scikit-learn pandas seaborn tensorflow
 }
