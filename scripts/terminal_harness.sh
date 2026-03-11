@@ -19,7 +19,7 @@ function zsh_tools_install() {
 function arsenal_soft_install() {
 	goodecho "[+] Installing arsenal"
 	cd /opt
-	installfromnet "git clone https://github.com/Orange-Cyberdefense/arsenal.git"
+	gitinstall "https://github.com/PentHertz/arsenal.git" "arsenal_soft_install"
 	cd arsenal
 	pip3install -r requirements.txt
 	#./addalias.sh
