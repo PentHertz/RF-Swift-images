@@ -291,7 +291,19 @@ function hashcat_soft_install() {
 	install_dependencies "pixiewps"
 }
 
-function john_soft_install() {
+function hashcat_soft_install() {
+    goodecho "[+] Installing hashcat"
+    install_dependencies "pixiewps"
+}
+
+function seclist_soft_install() {
+    goodecho "[+] Installing SecList resources"
+    [ -d /opt/fuzzing ] || mkdir -p /opt/fuzzing
+    cd /opt/fuzzing
+    gitinstall "https://github.com/danielmiessler/SecLists.git" "seclist_soft_install"
+}
+
+function johnjumbo_soft_install() {
     goodecho "[+] Installing SIPPTS"
     [ -d /opt/crack ] || mkdir -p /opt/crack
     cd /opt/crack
@@ -301,6 +313,10 @@ function john_soft_install() {
     ./configure
     make -j$(nproc)
     make install
+    cd ../run
+    pip3install -r requirements.txt
+    cp *.py /usr/local/bin
+    ln -s $(pwd)/john /usr/local/bin/JohnJumbo
 }
 
 function caido_soft_install() {
@@ -745,20 +761,6 @@ function reconftw_soft_install() {
     cd reconftw
     ./install.sh --verbose
     ln -s $(pwd)/reconftw.sh /usr/sbin/reconftw
-}
-
-function johntheripperjumbo_soft_install() {
-    goodecho "[+] Installing John Jumbo"
-    [ -d /opt/network ] || mkdir -p /opt/network
-    cd /opt/network
-    gitinstall "https://github.com/openwall/john.git" "johntheripperjumbo_soft_install"
-    cd john/src
-    ./configure
-    make -j$(nproc)
-    cd ../run
-    ln -s $(pwd)/john /usr/local/bin/john
-    cp *.sh /usr/local/sbin/
-    pip3install dpkt
 }
 
 function cryptocondor_soft_install() {

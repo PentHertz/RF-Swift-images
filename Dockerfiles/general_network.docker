@@ -20,7 +20,8 @@ COPY rules /root/rules/
 WORKDIR /root/scripts/
 RUN chmod +x entrypoint.sh
 
-RUN ./entrypoint.sh burpsuite_community_install
+RUN ./entrypoint.sh burpsuite_community_install && \
+	/entrypoint.sh seclist_soft_install
 
 # General monitoring, recon and audit software
 RUN ./entrypoint.sh nmap_soft_install && \
@@ -51,8 +52,6 @@ RUN ./entrypoint.sh donpapi_soft_install && \
 
 #RUN ./entrypoint.sh tetsuo_h3sec_soft_install
 #RUN  ./entrypoint.sh  reconftw_soft_install # takes too much time
-
-RUN ./entrypoint.sh johntheripperjumbo_soft_install
 	
 RUN ./entrypoint.sh subenum_soft_install &&\
 	./entrypoint.sh webcopilot_soft_install &&\
@@ -76,7 +75,7 @@ RUN ./entrypoint.sh bettercap_soft_install
 
 # Cracking tools & crypto audit
 RUN ./entrypoint.sh hashcat_soft_install && \
-	./entrypoint.sh john_soft_install && \
+	./entrypoint.sh johnjumbo_soft_install && \
 	./entrypoint.sh cryptocondor_soft_install && \
 	./entrypoint.sh brutus_soft_install && \
 	./entrypoint.sh nerva_soft_install
