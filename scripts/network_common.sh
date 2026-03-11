@@ -307,6 +307,7 @@ function johnjumbo_soft_install() {
     goodecho "[+] Installing SIPPTS"
     [ -d /opt/crack ] || mkdir -p /opt/crack
     cd /opt/crack
+    install_dependencies "libdb-dev"
     gitinstall "https://github.com/openwall/john.git" "john_soft_install"
     cd john
     cd src
