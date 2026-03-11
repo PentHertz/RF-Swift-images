@@ -21,7 +21,7 @@ WORKDIR /root/scripts/
 RUN chmod +x entrypoint.sh
 
 RUN ./entrypoint.sh burpsuite_community_install && \
-	/entrypoint.sh seclist_soft_install
+	./entrypoint.sh seclist_soft_install
 
 # General monitoring, recon and audit software
 RUN ./entrypoint.sh nmap_soft_install && \
