@@ -223,8 +223,6 @@ deeptempest:
 telecom_5G_bladerf:
 	$(call build_and_push,telecom_5G_bladerf,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):telecom_utils_$(ARCH),$(CURDIR)/telecom/telecom_5G_bladerf.docker)
 
-
-
 #
 # Convenience targets
 #

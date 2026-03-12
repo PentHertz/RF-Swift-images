@@ -28,7 +28,7 @@ function netbird_install() {
     
     # Netbird does not provide RISC-V64 packages yet
     if [ "$(uname -m)" = "riscv64" ]; then
-        warningecho "[-] Netbird is not yet available for RISC-V64, skipping."
+        criticalecho-noexit "[-] Netbird is not yet available for RISC-V64, skipping."
         return 0
     fi
     
