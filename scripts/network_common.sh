@@ -315,7 +315,7 @@ function johnjumbo_soft_install() {
     make -j$(nproc)
     make install
     cd ../run
-    pip3install -r requirements.txt
+    #pip3install -r requirements.txt
     cp *.py /usr/local/bin
     ln -s $(pwd)/john /usr/local/bin/JohnJumbo
 }
