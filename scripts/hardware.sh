@@ -429,7 +429,16 @@ WRAPPER
 
 function pythonfindus_install() {
     goodecho "[+] Installing Python3 module for PicoGlitcher"
-    pip3install findus
+    ARCH=$(uname -m)
+    if [ "$ARCH" = "riscv64" ]; then
+        # scipy (findus dep) requires gfortran + BLAS/LAPACK to build from source
+        # pandas/scipy/numpy from apt avoids hours-long QEMU source compilation
+        install_dependencies "gfortran libopenblas-dev liblapack-dev python3-numpy python3-pandas python3-scipy python3-matplotlib"
+        pip3install --no-deps findus
+        pip3install adafruit-ampy pyserial plotly dash dash_bootstrap_components dash_ag_grid setuptools
+    else
+        pip3_install "findus"
+    fi
 }
 
 function pythonrd6006_install() {

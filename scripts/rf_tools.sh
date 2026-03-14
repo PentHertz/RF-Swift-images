@@ -484,19 +484,34 @@ function wifipumpkin3_soft_install() {
     [ -d /rftools/wifi ] || mkdir -p /rftools/wifi
     cd /rftools/wifi
     install_dependencies "python3-dev libssl-dev libffi-dev build-essential python3"
+    ARCH=$(uname -m)
+    if [ "$ARCH" = "aarch64" ]; then
+        goodecho "[+] ARM64: installing PyQt5 from system packages (no Linux aarch64 wheel exists on PyPI)"
+        install_dependencies "python3-pyqt5 python3-pyqt5.qtwebengine python3-pyqt5.qtwebsockets"
+    fi
     gitinstall "https://github.com/P0cL4bs/wifipumpkin3.git" "wifipumpkin3_soft_install"
     cd wifipumpkin3
-
-    # Install uv if not already present
     which uv || curl -LsSf https://astral.sh/uv/install.sh | sh
     export PATH="$HOME/.cargo/bin:$PATH"
-
-    # Install wifipumpkin3 with uv into an isolated venv
-    uv venv /rftools/wifi/wifipumpkin3/.venv
-    uv pip install --python /rftools/wifi/wifipumpkin3/.venv/bin/python .
+    if [ "$ARCH" = "aarch64" ]; then
+        # System-site-packages lets the venv see apt-installed PyQt5
+        uv venv --system-site-packages /rftools/wifi/wifipumpkin3/.venv
+        # Patch out PyQt5 from deps so uv doesn't try to pull it from PyPI
+        sed -i 's/PyQt5==5\.15\.2/PyQt5>=5.15.0/g' setup.py 2>/dev/null || true
+        sed -i 's/PyQt5==5\.15\.2/PyQt5>=5.15.0/g' requirements.txt 2>/dev/null || true
+        sed -i 's/pyqt5==5\.15\.2/PyQt5>=5.15.0/gi' setup.cfg 2>/dev/null || true
+        uv pip install --python /rftools/wifi/wifipumpkin3/.venv/bin/python \
+            --no-build-isolation \
+            --no-deps \
+            .
+        # Install remaining deps excluding PyQt5 manually
+        uv pip install --python /rftools/wifi/wifipumpkin3/.venv/bin/python \
+            dnslib twisted scapy cryptography netifaces dhcplib urwid setuptools
+    else
+        uv venv /rftools/wifi/wifipumpkin3/.venv
+        uv pip install --python /rftools/wifi/wifipumpkin3/.venv/bin/python .
+    fi
     uv pip install --python /rftools/wifi/wifipumpkin3/.venv/bin/python setuptools
-
-    # Symlink the venv binaries instead of /usr/local/bin
     ln -sf /rftools/wifi/wifipumpkin3/.venv/bin/captiveflask /usr/sbin/captiveflask
     ln -sf /rftools/wifi/wifipumpkin3/.venv/bin/evilqr3 /usr/sbin/evilqr3
     ln -sf /rftools/wifi/wifipumpkin3/.venv/bin/phishkin3 /usr/sbin/phishkin3
@@ -762,7 +777,6 @@ EOF
     goodecho "[+] Fern WiFi Cracker wrapper installed"
 }
 
-
 function airgorah_soft_install() {
     goodecho "[+] Installing airgorah"
     [ -d /rftools/wifi ] || mkdir -p /rftools/wifi
@@ -800,6 +814,20 @@ EOF
     chmod +x /usr/local/bin/macstealer
 }
 
+function mdk4_soft_install() {
+    goodecho "[+] Installing mdk4"
+    [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
+    cd /root/thirdparty
+    ARCH=$(uname -m)
+    if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
+        # No arm64 package available, build from source
+        install_dependencies "libpcap-dev libnl-3-dev libnl-genl-3-dev build-essential"
+        gitinstall "https://github.com/aircrack-ng/mdk4" "mdk4_soft_install"
+        cd mdk4
+        make -j"$(nproc)"
+        make install
+    fi
+}
 
 ## Other softs
 

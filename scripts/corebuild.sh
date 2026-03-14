@@ -66,11 +66,17 @@ function audio_tools () {
     installfromnet "apt-fast install -y audacity sox"
 }
 
-function rust_tools () {
+function rust_tools() {
     goodecho "[+] Installing RUST tools"
+    # Install system cargo as fallback/build deps only
     installfromnet "apt-fast install -y cargo"
-    curl --proto '=https' --tlsv1.3 https://sh.rustup.rs -sSf | sh -s -- -y
+    # Install rustup with latest stable (>= 1.85 required for edition2024)
+    curl --proto '=https' --tlsv1.3 https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable --profile minimal
     source $HOME/.cargo/env
+    # Force update to ensure we get >= 1.85
+    rustup update stable
+    # Make rustup cargo take precedence over apt cargo (1.75) for all subsequent layers
+    export PATH="$HOME/.cargo/bin:$PATH"
     [[ "$SHELL" =~ "zsh" ]] && { grep -qxF '. "$HOME/.cargo/env"' ~/.zshrc || echo '. "$HOME/.cargo/env"' >> ~/.zshrc; } || { grep -qxF '. "$HOME/.cargo/env"' ~/.bashrc || echo '. "$HOME/.cargo/env"' >> ~/.bashrc; }
 }
 
