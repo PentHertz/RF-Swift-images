@@ -437,7 +437,7 @@ function pythonfindus_install() {
         pip3install --no-deps findus
         pip3install adafruit-ampy pyserial plotly dash dash_bootstrap_components dash_ag_grid setuptools
     else
-        pip3_install "findus"
+        pip3install "findus"
     fi
 }
 
