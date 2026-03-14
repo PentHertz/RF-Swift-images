@@ -10,10 +10,6 @@ LABEL "org.container.author"="Sébastien Dudek (FlUxIuS)"
 
 RUN echo 'APT::Install-Suggests "0";' >> /etc/apt/apt.conf.d/00-docker
 RUN echo 'APT::Install-Recommends "0";' >> /etc/apt/apt.conf.d/00-docker
-RUN apt-fast update && \
-    apt-get install -y software-properties-common && \
-    add-apt-repository universe && \
-    apt-fast update
 
 # Set-up scripts
 COPY scripts /root/scripts/
