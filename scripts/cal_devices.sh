@@ -44,10 +44,10 @@ function KCSDI_cal_device() {
    local ARCH=$(uname -m)
     case "$ARCH" in
         x86_64|amd64)
-            image_name="KCSDI-v0.5.8-69-linux-x86_64.appimage"
+            image_name="KCSDI-v0.5.11-72-linux-x86_64.1.appimage"
             ;;
         aarch64)
-            image_name="KCSDI-v0.5.8-69-linux-arm64.appimage"
+            image_name="KCSDI-v0.5.11-72-linux-arm64.1.appimage"
             ;;
         *)
             criticalecho-noexit "[-] Unsupported architecture: $ARCH. KCSDI installation is not supported on this architecture."
