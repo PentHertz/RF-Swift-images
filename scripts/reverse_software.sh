@@ -81,13 +81,33 @@ function binwalkv3_soft_install() {
     goodecho "[+] Installing Binwalk v3"
     gitinstall "https://github.com/ReFirmLabs/binwalk.git" "binwalkv3_soft_install"
     cd binwalk
-    
+
+    ARCH=$(uname -m)
+    if [ "$ARCH" = "riscv64" ]; then
+        # Populate cargo registry before patching
+        cargo fetch 2>/dev/null || true
+        # plotly_kaleido 0.13.1 build.rs only defines KALEIDO_URL for x86_64/aarch64/windows/macos
+        # riscv64 falls through with an undefined symbol — patch aarch64 cfg to include riscv64
+        local KALEIDO_BUILD
+        KALEIDO_BUILD=$(find /root/.cargo/registry/src -name "build.rs" \
+            -path "*/plotly_kaleido*" 2>/dev/null | head -1)
+        if [ -n "$KALEIDO_BUILD" ]; then
+            goodecho "[+] Patching plotly_kaleido build.rs for riscv64"
+            sed -i \
+                's|#\[cfg(all(target_arch = "aarch64", target_os = "linux"))\]|#[cfg(any(all(target_arch = "aarch64", target_os = "linux"), all(target_arch = "riscv64", target_os = "linux")))]|g' \
+                "${KALEIDO_BUILD}"
+        else
+            goodecho "[-] Could not find plotly_kaleido build.rs, build may fail"
+        fi
+    fi
+
     # Build with explicit edition support
     cargo build --release
     ln -sf $(pwd)/target/release/binwalk /usr/bin/binwalkv3
     
     goodecho "[+] Binwalk v3 installed successfully"
 }
+
 function binwalk_soft_install() {
 	goodecho "[+] Installing Binwalk"
 	install_dependencies "binwalk"
@@ -309,8 +329,23 @@ function qnx6extractor_soft_install() {
 
 function unblob_soft_install() {
     goodecho "[+] Installing unblob"
-    install_dependencies "android-sdk-libsparse-utils e2fsprogs p7zip-full unar zlib1g-dev liblzo2-dev lzop lziprecover libhyperscan-dev zstd lz4 build-essential curl"
-    
+    ARCH=$(uname -m)
+
+    if [ "$ARCH" = "riscv64" ]; then
+        goodecho "[!] Skipping unblob on riscv64: hyperscan/vectorscan do not support RISC-V64 (upstream limitation)"
+        return 0
+    fi
+
+    if [ "$ARCH" = "aarch64" ]; then
+        install_dependencies "android-sdk-libsparse-utils e2fsprogs p7zip-full unar \
+            zlib1g-dev liblzo2-dev lzop lziprecover libhyperscan-dev \
+            zstd lz4 build-essential curl"
+    else
+        install_dependencies "android-sdk-libsparse-utils e2fsprogs p7zip-full unar \
+            zlib1g-dev liblzo2-dev lzop lziprecover libhyperscan-dev \
+            zstd lz4 build-essential curl"
+    fi
+
     # Install Rust if not present
     if ! command -v cargo &> /dev/null; then
         goodecho "[+] Installing Rust toolchain (required for unblob)"
@@ -321,16 +356,13 @@ function unblob_soft_install() {
         goodecho "[+] Rust already installed"
         export PATH="/root/.cargo/bin:${PATH}"
     fi
-    
-    # Verify Rust is available
+
     cargo --version || { goodecho "[-] Rust installation failed"; return 1; }
-    
+
     [ -d /reverse ] || mkdir /reverse
     cd /reverse
     gitinstall "https://github.com/onekey-sec/unblob.git" "unblob_soft_install"
     cd unblob
-    
-    # Install with pipx
     pipx install .
 }
 

@@ -169,7 +169,7 @@ function kismet_soft_install_fromsource() {
 }
 
 function gowitnes_soft_install() {
-    goodecho "[+] Installing webcopilot"
+    goodecho "[+] Installing gowitness"
     ARCH=$(uname -m)
     
     if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then # TODO: takes forever to compile on arm64
@@ -180,13 +180,17 @@ function gowitnes_soft_install() {
 }
 
 function webcopilot_soft_install() {
-    goodecho "[+] Installing gowitness"
+    goodecho "[+] Installing webcopilot"
+    if [ "$(uname -m)" = "riscv64" ]; then #TODO: compilation too slow for now
+        criticalecho-noexit "[!] Skipping WebCopilot install on RISC-V64 (not supported)"
+        return 0
+    fi
     [ -d /opt/network ] || mkdir -p /opt/network
     cd /opt/network
     gitinstall "https://github.com/FlUxIuS/webcopilot.git" "webcopilot_soft_install"
     cd webcopilot
     chmod +x install.sh
-	./install.sh
+    ./install.sh
 }
 
 function subenum_soft_install() {
@@ -612,6 +616,10 @@ EOF
 
 function argus_soft_install_fromsource() {
     goodecho "[+] Installing Argus - Information Gathering & Reconnaissance"
+    if [ "$(uname -m)" = "riscv64" ]; then # TODO: fix that for RISC-V 64
+        criticalecho-noexit "[!] Skipping Argus install on RISC-V64 (build too slow)"
+        return 0
+    fi
     install_dependencies "libxml2-dev libxslt1-dev"
     pipx install argus-recon
     ln -s /root/.local/bin/argus /usr/sbin/argus
@@ -697,11 +705,25 @@ function titus_soft_install() {
     export GOPROXY=direct
     gitinstall "https://github.com/praetorian-inc/titus.git" "titus_soft_install"
     cd titus
-    make build
-    make install
-    ln -s /root/.titus/titus /usr/sbin/titus
-    install_dependencies "default-jre-headless"
-    make install-burp # compile the burp extension
+
+    ARCH=$(uname -m)
+    if [ "$ARCH" = "riscv64" ]; then
+        # libhyperscan-dev/vectorscan not available on riscv64
+        # build-pure is the official fallback (slower scanning, no hyperscan dep)
+        # make install-burp triggers make build internally -> vectorscan check fails
+        goodecho "[+] Building titus without vectorscan (riscv64 fallback)"
+        make build-pure
+        make install
+        ln -sf /root/.titus/titus /usr/sbin/titus
+        install_dependencies "default-jre-headless"
+        goodecho "[!] Skipping make install-burp on riscv64 (requires vectorscan)"
+    else
+        make build
+        make install
+        ln -sf /root/.titus/titus /usr/sbin/titus
+        install_dependencies "default-jre-headless"
+        make install-burp
+    fi
 }
 
 function brutus_soft_install() {

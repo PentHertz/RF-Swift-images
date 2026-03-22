@@ -52,6 +52,7 @@ RUN ./entrypoint.sh ${UHD_BASE}_devices_install && \
 # Installing SA device modules
 RUN ./entrypoint.sh signalhound_spike_sa_device && \
 	./entrypoint.sh signalhound_vsg60_sa_device && \
+	./entrypoint.sh signalhound_sdk_install && \
 	./entrypoint.sh harogic_sa_device
 
 # Cleaning and quitting

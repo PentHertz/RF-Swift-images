@@ -96,6 +96,33 @@ function install_GPU_nvidia () {
     install_dependencies "nvidia-opencl-dev nvidia-modprobe nvidia-cuda-dev"
 }
 
+function install_firefox() {
+    ARCH=$(uname -m)
+    case "$ARCH" in
+        x86_64|aarch64)
+            goodecho "[+] Architecture: $ARCH — using Mozilla PPA"
+            add-apt-repository ppa:mozillateam/ppa -y
+            printf 'Package: *\nPin: release o=LP-PPA-mozillateam\nPin-Priority: 1001\n' \
+                > /etc/apt/preferences.d/mozilla-firefox
+            apt-get update -q
+            install_dependencies "firefox"
+            ;;
+        riscv64)
+            criticalecho-noexit "[-] Mozilla PPA does not support riscv64, falling back to firefox-esr"
+            if apt-cache show firefox-esr &>/dev/null; then
+                install_dependencies "firefox-esr"
+            else
+                criticalecho-noexit "[-] firefox-esr not available on this riscv64 repo — skipping"
+                exit 0
+            fi
+            ;;
+        *)
+            criticalecho-noexit "[-] Unsupported architecture: $ARCH"
+            exit 0
+            ;;
+    esac
+}
+
 function install_GPU_Intel() {
     ARCH=$(uname -m)
 
@@ -230,7 +257,7 @@ function uvpython_install() { # Avoid terrible long builds
     install_dependencies "clang libclang-dev llvm-dev build-essential"
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
     cd /root/thirdparty
-    UV_VERSION="0.10.9"
+    UV_VERSION="0.10.12"
     installfromnet "wget https://github.com/astral-sh/uv/releases/download/$UV_VERSION/uv-installer.sh"
     chmod +x uv-installer.sh
     ./uv-installer.sh

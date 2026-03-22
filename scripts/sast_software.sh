@@ -41,25 +41,23 @@ function AFL_install() {
 }
 
 function honggfuzz_install() {
-    echo "[+] Checking system architecture..."
-
+    goodecho "[+] Checking system architecture..."
     ARCH=$(uname -m)
+    if [ "$ARCH" = "riscv64" ]; then
+        criticalecho-noexit "[-] honggfuzz: -mtune=native unsupported under QEMU RISC-V64, skipping"
+        return 0
+    fi
     if [[ "$ARCH" != "x86_64" && "$ARCH" != "aarch64" ]]; then
         criticalecho-noexit "[-] Unsupported architecture: $ARCH"
         criticalecho-noexit "    Honggfuzz installation is supported only on arm64/aarch64 or amd64."
+        return 0
     fi
-
-    echo "[+] Architecture $ARCH supported. Proceeding with installation."
-
-    echo "[+] Installing honggfuzz"
-
+    goodecho "[+] Architecture $ARCH supported. Proceeding with installation."
+    goodecho "[+] Installing honggfuzz"
     install_dependencies "binutils-dev libunwind-dev libblocksruntime-dev git"
-
     [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
     cd /root/thirdparty
-
     git clone https://github.com/google/honggfuzz
-
     cd honggfuzz && make && make install
 }
 

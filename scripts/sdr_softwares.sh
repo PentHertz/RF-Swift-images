@@ -195,13 +195,14 @@ function cyberther_soft_install() {
 	install_dependencies "libgstreamer-plugins-base1.0-dev libgstreamer-plugins-good1.0-dev"
 	install_dependencies "gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly"
 	install_dependencies "python3-yaml"
+	install_dependencies "libsoapysdr-dev soapysdr-module-rtlsdr libgstreamer1.0-dev gstreamer1.0-libav"
 	goodecho "[CyberEther][+] Cloning GitHub repository"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
     #gitinstall "https://github.com/FlUxIuS/CyberEther.git" "cyberther_soft_install" // TODO: broken for now check later
-    installfromnet "wget https://github.com/luigifcruz/CyberEther/archive/refs/tags/v1.0.0-alpha5.zip"
-    unzip v1.0.0-alpha5.zip
-	cd CyberEther-1.0.0-alpha5/
+    installfromnet "wget https://github.com/luigifcruz/CyberEther/archive/refs/tags/v1.0.2.zip"
+    unzip v1.0.2.zip
+	cd CyberEther-1.0.2
 	meson setup -Dbuildtype=debugoptimized build && cd build
 	ninja install
 }

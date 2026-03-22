@@ -36,6 +36,154 @@ function kc908_sa_device() {
     fi
 }
 
+function signalhound_sdk_install() {
+    goodecho "[+] Installing Signal Hound SDK"
+    [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
+    cd /root/thirdparty
+
+    ARCH=$(uname -m)
+    SDK_URL="https://signalhound.com/sigdownloads/SDK/signal_hound_sdk_03_20_26.zip"
+    SDK_DIR="/opt/signalhound"
+
+    installfromnet "wget -q ${SDK_URL} -O signal_hound_sdk.zip"
+    unzip -q signal_hound_sdk.zip
+    rm signal_hound_sdk.zip
+
+    sudo mkdir -p ${SDK_DIR}
+    sudo cp -r signal_hound_sdk/* ${SDK_DIR}/
+
+    case "$ARCH" in
+        x86_64|amd64)
+            goodecho "[+] Installing BB60 API (x86_64)"
+            # BB60 series — pick the latest Ubuntu lib
+            BB_LIB_DIR="${SDK_DIR}/device_apis/bb_series/lib/linux_x64/Ubuntu 18.04"
+            if [ -d "$BB_LIB_DIR" ]; then
+                BB_LIB=$(ls "$BB_LIB_DIR"/libbb_api.so.* 2>/dev/null | head -1)
+                if [ -n "$BB_LIB" ]; then
+                    BB_VER=$(basename "$BB_LIB" | sed 's/libbb_api.so.//')
+                    BB_MAJ=${BB_VER%%.*}
+                    sudo cp "$BB_LIB" /usr/lib/
+                    sudo ln -sf /usr/lib/$(basename "$BB_LIB") /usr/lib/libbb_api.so.${BB_MAJ}
+                    sudo ln -sf /usr/lib/libbb_api.so.${BB_MAJ} /usr/lib/libbb_api.so
+                    goodecho "[+] BB60 API installed: $(basename $BB_LIB)"
+                fi
+                # FTDI driver for BB60
+                FTDI_LIB=$(ls "$BB_LIB_DIR"/libftd2xx.so* 2>/dev/null | head -1)
+                if [ -n "$FTDI_LIB" ]; then
+                    sudo cp "$FTDI_LIB" /usr/lib/
+                    sudo ln -sf /usr/lib/$(basename "$FTDI_LIB") /usr/lib/libftd2xx.so
+                fi
+            fi
+
+            goodecho "[+] Installing SM200 API (x86_64)"
+            SM_LIB_DIR="${SDK_DIR}/device_apis/sm_series/lib/linux_x64/Ubuntu 18.04"
+            if [ -d "$SM_LIB_DIR" ]; then
+                SM_LIB=$(ls "$SM_LIB_DIR"/libsm_api.so.* 2>/dev/null | head -1)
+                if [ -n "$SM_LIB" ]; then
+                    SM_VER=$(basename "$SM_LIB" | sed 's/libsm_api.so.//')
+                    SM_MAJ=${SM_VER%%.*}
+                    sudo cp "$SM_LIB" /usr/lib/
+                    sudo ln -sf /usr/lib/$(basename "$SM_LIB") /usr/lib/libsm_api.so.${SM_MAJ}
+                    sudo ln -sf /usr/lib/libsm_api.so.${SM_MAJ} /usr/lib/libsm_api.so
+                    goodecho "[+] SM200 API installed: $(basename $SM_LIB)"
+                fi
+            fi
+
+            goodecho "[+] Installing SP145 API (x86_64)"
+            SP_LIB_DIR="${SDK_DIR}/device_apis/sp_series/lib/linux_x64/Ubuntu 18.04"
+            if [ -d "$SP_LIB_DIR" ]; then
+                SP_LIB=$(ls "$SP_LIB_DIR"/libsp_api.so.* 2>/dev/null | head -1)
+                if [ -n "$SP_LIB" ]; then
+                    SP_VER=$(basename "$SP_LIB" | sed 's/libsp_api.so.//')
+                    SP_MAJ=${SP_VER%%.*}
+                    sudo cp "$SP_LIB" /usr/lib/
+                    sudo ln -sf /usr/lib/$(basename "$SP_LIB") /usr/lib/libsp_api.so.${SP_MAJ}
+                    sudo ln -sf /usr/lib/libsp_api.so.${SP_MAJ} /usr/lib/libsp_api.so
+                    goodecho "[+] SP145 API installed: $(basename $SP_LIB)"
+                fi
+            fi
+            ;;
+
+        aarch64|arm64)
+            goodecho "[+] Installing BB60 API (aarch64)"
+            BB_LIB_DIR="${SDK_DIR}/device_apis/bb_series/lib/aarch64"
+            if [ -d "$BB_LIB_DIR" ]; then
+                BB_LIB=$(ls "$BB_LIB_DIR"/libbb_api.so.* 2>/dev/null | head -1)
+                if [ -n "$BB_LIB" ]; then
+                    BB_VER=$(basename "$BB_LIB" | sed 's/libbb_api.so.//')
+                    BB_MAJ=${BB_VER%%.*}
+                    sudo cp "$BB_LIB" /usr/lib/
+                    sudo ln -sf /usr/lib/$(basename "$BB_LIB") /usr/lib/libbb_api.so.${BB_MAJ}
+                    sudo ln -sf /usr/lib/libbb_api.so.${BB_MAJ} /usr/lib/libbb_api.so
+                    goodecho "[+] BB60 API installed: $(basename $BB_LIB)"
+                fi
+            fi
+
+            goodecho "[+] Installing SM200 API (aarch64)"
+            SM_LIB_DIR="${SDK_DIR}/device_apis/sm_series/lib/aarch64"
+            if [ -d "$SM_LIB_DIR" ]; then
+                SM_LIB=$(ls "$SM_LIB_DIR"/libsm_api.so.* 2>/dev/null | head -1)
+                if [ -n "$SM_LIB" ]; then
+                    SM_VER=$(basename "$SM_LIB" | sed 's/libsm_api.so.//')
+                    SM_MAJ=${SM_VER%%.*}
+                    sudo cp "$SM_LIB" /usr/lib/
+                    sudo ln -sf /usr/lib/$(basename "$SM_LIB") /usr/lib/libsm_api.so.${SM_MAJ}
+                    sudo ln -sf /usr/lib/libsm_api.so.${SM_MAJ} /usr/lib/libsm_api.so
+                    goodecho "[+] SM200 API installed: $(basename $SM_LIB)"
+                fi
+            fi
+
+            goodecho "[+] Installing SP145 API (aarch64)"
+            SP_LIB_DIR="${SDK_DIR}/device_apis/sp_series/lib/aarch64"
+            if [ -d "$SP_LIB_DIR" ]; then
+                SP_LIB=$(ls "$SP_LIB_DIR"/libsp_api.so.* 2>/dev/null | head -1)
+                if [ -n "$SP_LIB" ]; then
+                    SP_VER=$(basename "$SP_LIB" | sed 's/libsp_api.so.//')
+                    SP_MAJ=${SP_VER%%.*}
+                    sudo cp "$SP_LIB" /usr/lib/
+                    sudo ln -sf /usr/lib/$(basename "$SP_LIB") /usr/lib/libsp_api.so.${SP_MAJ}
+                    sudo ln -sf /usr/lib/libsp_api.so.${SP_MAJ} /usr/lib/libsp_api.so
+                    goodecho "[+] SP145 API installed: $(basename $SP_LIB)"
+                fi
+            fi
+            ;;
+
+        *)
+            criticalecho-noexit "[-] Unsupported architecture: $ARCH"
+            return 0
+            ;;
+    esac
+
+    # Install headers
+    goodecho "[+] Installing SDK headers"
+    for series in bb_series sm_series sp_series; do
+        HEADER_DIR="${SDK_DIR}/device_apis/${series}/include"
+        if [ -d "$HEADER_DIR" ]; then
+            sudo cp "$HEADER_DIR"/*.h /usr/include/ 2>/dev/null
+        fi
+    done
+
+    # Install udev rules
+    goodecho "[+] Installing udev rules"
+    for rules_file in $(find ${SDK_DIR}/device_apis -name "sh_usb.rules" | head -1); do
+        sudo cp "$rules_file" /etc/udev/rules.d/99-signalhound.rules
+        break
+    done
+    sudo udevadm control --reload-rules 2>/dev/null || true
+
+    # Update linker cache
+    sudo ldconfig
+
+    # Verify
+    goodecho "[+] Signal Hound SDK installed:"
+    ldconfig -p | grep -E "(bb_api|sm_api|sp_api)" || echo "  (no libraries detected in ldconfig)"
+    ls -l /usr/include/bb_api.h /usr/include/sm_api.h /usr/include/sp_api.h 2>/dev/null || echo "  (some headers missing)"
+
+    # Cleanup
+    rm -rf /root/thirdparty/signal_hound_sdk
+}
+
+
 function signalhound_spike_sa_device() {
     ARCH=$(uname -m)
     if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then
