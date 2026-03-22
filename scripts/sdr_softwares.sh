@@ -241,8 +241,8 @@ function urh_soft_install() {
     cd /root/thirdparty
     install_dependencies "qt6-base-dev libgl1-mesa-dev libxkbcommon-x11-0 libegl1 libxcb-cursor0 python3-pyqt6 python3-pyqt6.sip python3-pyqt6.qtsvg pyqt6-dev-tools"
     ARCH=$(uname -m)
-    VERSION_URH="2.10.0"
-    GITBUILD="git20260206.3909e27"
+    VERSION_URH="3.0.0"
+    GITBUILD="git20260322.7c48d76"
     case "$ARCH" in
         x86_64|amd64)
             ARCH="amd64"
