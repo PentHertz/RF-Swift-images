@@ -23,7 +23,7 @@ endif
 define build_and_push_registry
     @docker buildx build --platform $(PLATFORM) \
         --cache-from=type=registry,ref=$(CACHE_REPO):cache_$(1)_$(ARCH) \
-        --cache-to=type=registry,ref=$(CACHE_REPO):cache_$(1)_$(ARCH),mode=max \
+        --cache-to=type=registry,ref=$(CACHE_REPO):cache_$(1)_$(ARCH),mode=min \
         $(2) \
         --push \
         -t $(REGISTRY_IMAGE):$(1)_$(ARCH) \
@@ -47,7 +47,7 @@ define build_stage_registry
     @docker buildx build --platform $(PLATFORM) \
         --target $(1) \
         --cache-from=type=registry,ref=$(CACHE_REPO):cache_sdrfull_$(1)_$(ARCH) \
-        --cache-to=type=registry,ref=$(CACHE_REPO):cache_sdrfull_$(1)_$(ARCH),mode=max \
+        --cache-to=type=registry,ref=$(CACHE_REPO):cache_sdrfull_$(1)_$(ARCH),mode=min \
         $(2) \
         --push \
         -t $(REGISTRY_IMAGE):sdrfull_$(1)_$(ARCH) \
