@@ -190,7 +190,7 @@ wifi: clean_cache
 bluetooth: clean_cache
 	$(call build_and_push,bluetooth,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices_$(ARCH),$(CURDIR)/bluetooth.docker)
 
-reversing:
+reversing: clean_cache
 	$(call build_and_push,reversing,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild_$(ARCH),$(CURDIR)/reversing.docker)
 
 automotive:
@@ -225,12 +225,9 @@ telecom_5G_bladerf:
 
 clean_cache:
 	@echo "Cleaning Docker build cache and volumes..."
-	@docker buildx ls --format '{{.Name}}' | grep -v default | xargs -r docker buildx rm || true
-	@docker buildx create --use --name mybuilder --driver docker-container
 	@docker buildx prune -af
 	@docker volume prune -f
 	@docker system prune -af --volumes
-
 
 #
 # Convenience targets
