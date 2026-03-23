@@ -91,8 +91,10 @@ sdrsadevicesantsdr:
 sdrsadevicesrtlsdrv4:
 	$(call build_and_push,sdrsa_devices_rtlsdrv4,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild_$(ARCH) --build-arg UHD_BASE=$(UHD_BASE) --build-arg RTLSDR_BASE=rtlsdrv4,$(CURDIR)/SDR/sdrsa_devices.docker)
 
-sdrlight:
+sdrlight_unclean:
 	$(call build_and_push,sdr_light,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices_$(ARCH),$(CURDIR)/SDR/sdr_light.docker)
+
+sdrlight: clean_cache sdrlight_unclean
 
 sdrlight_intelgpu:
 	$(call build_and_push,sdr_light_intelgpu,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light_$(ARCH),$(CURDIR)/SDR/sdr_light_intelgpu.docker)
@@ -222,6 +224,14 @@ deeptempest:
 
 telecom_5G_bladerf:
 	$(call build_and_push,telecom_5G_bladerf,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):telecom_utils_$(ARCH),$(CURDIR)/telecom/telecom_5G_bladerf.docker)
+
+clean_cache:
+	@echo "Cleaning Docker build cache and volumes..."
+	@docker buildx ls --format '{{.Name}}' | grep -v default | xargs -r docker buildx rm || true
+	@docker buildx create --use --name mybuilder --driver docker-container
+	@docker buildx prune -af
+	@docker volume prune -f
+	@docker system prune -af --volumes
 
 #
 # Convenience targets
