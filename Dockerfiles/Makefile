@@ -91,10 +91,8 @@ sdrsadevicesantsdr:
 sdrsadevicesrtlsdrv4:
 	$(call build_and_push,sdrsa_devices_rtlsdrv4,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild_$(ARCH) --build-arg UHD_BASE=$(UHD_BASE) --build-arg RTLSDR_BASE=rtlsdrv4,$(CURDIR)/SDR/sdrsa_devices.docker)
 
-sdrlight_unclean:
-	$(call build_and_push,sdr_light,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices_$(ARCH),$(CURDIR)/SDR/sdr_light.docker)
-
-sdrlight: clean_cache sdrlight_unclean
+sdrlight: clean_cache
+	 $(call build_and_push,sdr_light,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices_$(ARCH),$(CURDIR)/SDR/sdr_light.docker)
 
 sdrlight_intelgpu:
 	$(call build_and_push,sdr_light_intelgpu,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light_$(ARCH),$(CURDIR)/SDR/sdr_light_intelgpu.docker)
@@ -110,7 +108,7 @@ sdrlight_nvidiagpu:
 #
 
 # Stage 1: Build stage-begin
-sdrfull_stage_begin:
+sdrfull_stage_begin: clean_cache
 	$(call build_stage,stage-begin,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light_$(ARCH),$(CURDIR)/SDR/sdr_full.docker)
 
 # Stage 2: Build stage-extraoot1
@@ -183,13 +181,13 @@ sdrfull_nvidiagpu:
 rfid:
 	$(call build_and_push,rfid,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild_$(ARCH),$(CURDIR)/rfid.docker)
 
-network:
+network: clean_cache
 	$(call build_and_push,network,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices_$(ARCH),$(CURDIR)/general_network.docker)
 
-wifi:
+wifi: clean_cache
 	$(call build_and_push,wifi,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):network_$(ARCH),$(CURDIR)/wifi_basic.docker)
 
-bluetooth:
+bluetooth: clean_cache
 	$(call build_and_push,bluetooth,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices_$(ARCH),$(CURDIR)/bluetooth.docker)
 
 reversing:
@@ -198,7 +196,7 @@ reversing:
 automotive:
 	$(call build_and_push,automotive,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild_$(ARCH),$(CURDIR)/automotive.docker)
 
-hardware:
+hardware: clean_cache
 	$(call build_and_push,hardware,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices_$(ARCH),$(CURDIR)/hardware.docker)
 
 telecom_utils:
