@@ -159,7 +159,7 @@ sdrfull_final:
 	$(call build_and_push,sdr_full,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light_$(ARCH) --cache-from=type=registry$(COMMA)ref=$(CACHE_REPO):cache_sdrfull_stage-mldlsofts_$(ARCH),$(CURDIR)/SDR/sdr_full.docker)
 
 # Standard sdrfull target (builds complete image with all cache layers)
-sdrfull:
+sdrfull_torestore:
 ifeq ($(STORAGE_TYPE),registry)
 	@echo "Building sdr_full with registry caching - using all available cached stages"
 	@docker buildx build --platform $(PLATFORM) \
@@ -170,6 +170,25 @@ ifeq ($(STORAGE_TYPE),registry)
 		--cache-from=type=registry,ref=$(CACHE_REPO):cache_sdrfull_stage-mldlsofts_$(ARCH) \
 		--cache-from=type=registry,ref=$(CACHE_REPO):cache_sdr_full_$(ARCH) \
 		--cache-to=type=registry,ref=$(CACHE_REPO):cache_sdr_full_$(ARCH),mode=max \
+		--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light_$(ARCH) \
+		--push \
+		-t $(REGISTRY_IMAGE):sdr_full_$(ARCH) \
+		-f $(CURDIR)/SDR/sdr_full.docker \
+		..
+else
+	$(call build_and_push,sdr_full,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light_$(ARCH),$(CURDIR)/SDR/sdr_full.docker)
+endif
+
+sdrfull:
+ifeq ($(STORAGE_TYPE),registry)
+	@echo "Building sdr_full with registry caching - using all available cached stages"
+	@docker buildx build --platform $(PLATFORM) \
+		--cache-from=type=registry,ref=$(CACHE_REPO):cache_sdrfull_stage-begin_$(ARCH) \
+		--cache-from=type=registry,ref=$(CACHE_REPO):cache_sdrfull_stage-extraoot1_$(ARCH) \
+		--cache-from=type=registry,ref=$(CACHE_REPO):cache_sdrfull_stage-extraoot2_$(ARCH) \
+		--cache-from=type=registry,ref=$(CACHE_REPO):cache_sdrfull_stage-extrasofts_$(ARCH) \
+		--cache-from=type=registry,ref=$(CACHE_REPO):cache_sdrfull_stage-mldlsofts_$(ARCH) \
+		--cache-from=type=registry,ref=$(CACHE_REPO):cache_sdr_full_$(ARCH) \
 		--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light_$(ARCH) \
 		--push \
 		-t $(REGISTRY_IMAGE):sdr_full_$(ARCH) \
