@@ -98,7 +98,7 @@ function sdrangel_soft_fromsource_install() {
 	goodecho "[+] Installing SDR Angel"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	cmake_clone_and_build "https://github.com/f4exb/sdrangel.git" "build" "" "" "sdrangel_soft_fromsource_install" -Wno-dev -DDEBUG_OUTPUT=ON -DRX_SAMPLE_24BIT=ON \
+	cmake_clone_and_build "https://github.com/PentHertz/sdrangel.git" "build" "" "" "sdrangel_soft_fromsource_install" -Wno-dev -DDEBUG_OUTPUT=ON -DRX_SAMPLE_24BIT=ON \
 		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
 		-DAPT_DIR=/opt/install/aptdec \
 		-DCM256CC_DIR=/opt/install/cm256cc \
@@ -202,13 +202,42 @@ function cyberther_soft_install() {
 	cd /root/thirdparty
 	git clone --depth=1 --branch v1.0.2 https://github.com/luigifcruz/CyberEther.git CyberEther-1.0.2
 	cd CyberEther-1.0.2
-	goodecho "[CyberEther][+] Downloading subprojects"
-	meson subprojects download
-	meson setup -Dbuildtype=debugoptimized build && cd build
-	ninja install
+	goodecho "[CyberEther][+] Configuring build options for architecture"
+	BUILDTYPE="debugoptimized"
+	NINJA_JOBS=$(nproc)
+
+	case "$(uname -m)" in
+	    aarch64|arm64)
+	        goodecho "[CyberEther][+] ARM64 detected: using release build with limited parallelism"
+	        BUILDTYPE="release"
+	        NINJA_JOBS=3
+	        ;;
+	    riscv64)
+	        goodecho "[CyberEther][+] RISC-V 64 detected: using release build with limited parallelism"
+	        BUILDTYPE="release"
+	        NINJA_JOBS=2
+	        ;;
+	    *)
+	        goodecho "[CyberEther][+] x86_64 detected: using full build"
+	        ;;
+	esac
+
+	meson setup -Dbuildtype=${BUILDTYPE} build && cd build
+	ninja -j${NINJA_JOBS} install
 }
 
 function inspectrum_soft_install () {
+	goodecho "[+] Installing inspectrum"
+	gitinstall "https://github.com/hydrasdr/inspectrum.git" "inspectrum_soft_install"
+	cd inspectrum
+	mkdir build 
+	cd build
+	cmake ../
+	make -j$(nproc)
+	make install
+}
+
+function inspectrum_soft_install_old () {
 	goodecho "[+] Installing inspectrum"
 	install_dependencies "inspectrum"
 }
