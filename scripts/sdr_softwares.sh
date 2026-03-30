@@ -228,6 +228,7 @@ function cyberther_soft_install() {
 
 function inspectrum_soft_install () {
 	goodecho "[+] Installing inspectrum"
+	install_dependencies "cmake g++ pkg-config libfftw3-dev libliquid-dev libgl1-mesa-dev qtbase5-dev"
 	gitinstall "https://github.com/hydrasdr/inspectrum.git" "inspectrum_soft_install"
 	cd inspectrum
 	mkdir build 
