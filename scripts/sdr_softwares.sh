@@ -200,7 +200,7 @@ function cyberther_soft_install() {
 	goodecho "[CyberEther][+] Cloning GitHub repository"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	git clone --depth=1 --branch v1.0.2 https://github.com/luigifcruz/CyberEther.git CyberEther-1.0.2
+	git clone --depth=1 --branch v1.0.3 https://github.com/luigifcruz/CyberEther.git CyberEther-1.0.3
 	cd CyberEther-1.0.2
 	goodecho "[CyberEther][+] Configuring build options for architecture"
 	BUILDTYPE="debugoptimized"
