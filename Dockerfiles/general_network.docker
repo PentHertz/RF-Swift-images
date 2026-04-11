@@ -47,7 +47,12 @@ RUN ./entrypoint.sh nmap_soft_install && \
 	./entrypoint.sh nmapautomator_soft_install && \
 	./entrypoint.sh trippy_soft_install && \
 	./entrypoint.sh titus_soft_install && \
-	./entrypoint.sh whosthere_soft_install
+	./entrypoint.sh whosthere_soft_install && \
+	./entrypoint.sh ettercap_soft_install && \
+	./entrypoint.sh isc_dhcp_server_soft_install && \
+	./entrypoint.sh lighttpd_soft_install && \
+	./entrypoint.sh crunch_soft_install && \
+	./entrypoint.sh netwatch_soft_install_fromsource
 
 RUN ./entrypoint.sh donpapi_soft_install && \
 	./entrypoint.sh beef_soft_install && \
@@ -57,9 +62,10 @@ RUN ./entrypoint.sh donpapi_soft_install && \
 #RUN ./entrypoint.sh tetsuo_h3sec_soft_install
 #RUN  ./entrypoint.sh  reconftw_soft_install # takes too much time
 	
-RUN ./entrypoint.sh subenum_soft_install &&\
-	./entrypoint.sh webcopilot_soft_install &&\
-	./entrypoint.sh gowitnes_soft_install
+RUN ./entrypoint.sh subenum_soft_install && \
+	./entrypoint.sh webcopilot_soft_install && \
+	./entrypoint.sh gowitnes_soft_install && \
+	./entrypoint.sh betterleaks_soft_install
 
 RUN ./entrypoint.sh sipvicious_soft_install &&\
 	./entrypoint.sh voipire_soft_install &&\
@@ -88,7 +94,8 @@ RUN ./entrypoint.sh hashcat_soft_install && \
 RUN ./entrypoint.sh caido_soft_install && \
 	./entrypoint.sh mic_soft_install && \
 	./entrypoint.sh sstimap_soft_install && \
-	./entrypoint.sh sqlmap_soft_install
+	./entrypoint.sh sqlmap_soft_install && \
+	./entrypoint.sh  hexhttp_soft_install
 
 # OSINT
 RUN ./entrypoint.sh wiretapper_soft_install_fromsource

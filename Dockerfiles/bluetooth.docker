@@ -42,7 +42,8 @@ RUN ./entrypoint.sh CVE_2025_36911_whisperpair_install && \
 	./entrypoint.sh race_toolkit_exploit_install && \
 	./entrypoint.sh blueducky_soft_install && \
 	./entrypoint.sh breaktooth_soft_install && \
-	./entrypoint.sh blerp_soft_install
+	./entrypoint.sh blerp_soft_install && \
+	./entrypoint.sh bluesploit_soft_install
 
 # Cleaning and quitting
 WORKDIR /root/

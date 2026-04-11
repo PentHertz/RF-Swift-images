@@ -66,6 +66,11 @@ function audio_tools () {
     installfromnet "apt-fast install -y audacity sox"
 }
 
+function flameshot_install() {
+    goodecho "[+] Installing flameshot"
+    install_dependencies "flameshot"
+}
+
 function rust_tools() {
     goodecho "[+] Installing RUST tools"
     # Install system cargo as fallback/build deps only
@@ -184,7 +189,7 @@ install_go() {
     ARCH=$(uname -m)
     
     # Define URL and version
-    GO_VERSION="1.26.1" # Replace with the latest version if needed
+    GO_VERSION="1.26.2" # Replace with the latest version if needed
     BASE_URL="https://golang.org/dl/"
 
     case "$ARCH" in
@@ -257,13 +262,56 @@ function uvpython_install() { # Avoid terrible long builds
     install_dependencies "clang libclang-dev llvm-dev build-essential"
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
     cd /root/thirdparty
-    UV_VERSION="0.11.2"
+    UV_VERSION="0.11.6"
     installfromnet "wget https://github.com/astral-sh/uv/releases/download/$UV_VERSION/uv-installer.sh"
     chmod +x uv-installer.sh
     ./uv-installer.sh
     ln -s /root/.local/bin/uv /usr/local/bin/uv
     echo 'export PATH="/root/.local/bin:$PATH"' >> ~/.zshrc
     echo 'export PATH="/root/.local/bin:$PATH"' >> ~/.bashrc
+}
+
+function littlesnitch_soft_install() {
+    local arch
+    local version="1.0.1"
+    arch="$(uname -m)"
+    case "$arch" in
+        x86_64|amd64)
+            local pkg="littlesnitch_${version}_amd64.deb"
+            ;;
+        aarch64|arm64)
+            local pkg="littlesnitch_${version}_arm64.deb"
+            ;;
+        riscv64)
+            local pkg="littlesnitch_${version}_riscv64.deb"
+            ;;
+        *)
+            criticalecho-noexit "[-] Unsupported architecture: $arch"
+            return 1
+            ;;
+    esac
+
+    goodecho "[+] Installing Little Snitch for Linux ${version} ($arch)"
+    [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
+    cd /root/thirdparty
+    installfromnet "wget -q https://obdev.at/downloads/littlesnitch-linux/${pkg}"
+    dpkg-deb -x "${pkg}" /tmp/littlesnitch_extracted
+    cp -r /tmp/littlesnitch_extracted/* /
+    rm -rf /tmp/littlesnitch_extracted "${pkg}"
+
+    goodecho "[+] Installing littlesnitch wrapper"
+    cat > /usr/local/bin/littlesnitch << 'EOF'
+#!/bin/bash
+if ! mountpoint -q /sys/kernel/tracing; then
+    mkdir -p /sys/kernel/tracing
+    mount -t tracefs tracefs /sys/kernel/tracing
+fi
+exec /usr/bin/littlesnitch "$@"
+EOF
+    chmod +x /usr/local/bin/littlesnitch
+
+    goodecho "[+] Little Snitch ${version} installed successfully"
+    goodecho "[!] Note: container must be run with --cap-add SYS_ADMIN --cap-add DAC_READ_SEARCH"
 }
 
 function rfswift_shell_setup() {

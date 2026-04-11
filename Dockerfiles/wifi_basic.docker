@@ -29,7 +29,8 @@ RUN ./entrypoint.sh common_nettools && \
 	./entrypoint.sh aircrack_soft_install && \
 	./entrypoint.sh hcxdumptool_soft_install && \
 	./entrypoint.sh hcxtools_soft_install && \
-	./entrypoint.sh mdk3_soft_install
+	./entrypoint.sh mdk3_soft_install && \
+	./entrypoint.sh mdk4_soft_installfromsource
 
 RUN ./entrypoint.sh reaver_soft_install && \
 	./entrypoint.sh bully_soft_install && \

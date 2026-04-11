@@ -215,6 +215,26 @@ function mbtget_soft_install() {
 	make install
 }
 
+function ettercap_soft_install() {
+    goodecho "[+] Installing ettercap"
+    install_dependencies "ettercap-text-only"
+}
+
+function isc_dhcp_server_soft_install() {
+    goodecho "[+] Installing isc-dhcp-server"
+    install_dependencies "isc-dhcp-server"
+}
+
+function lighttpd_soft_install() {
+    goodecho "[+] Installing lighttpd"
+    install_dependencies "lighttpd"
+}
+
+function crunch_soft_install() {
+    goodecho "[+] Installing crunch"
+    install_dependencies "crunch"
+}
+
 function bettercap_soft_install() {
 	goodecho "[+] Installing bettercap"
 	rm -rf ~/.cache/go-build #TODO: trying to solve build exit for ARM on GitHub
@@ -308,7 +328,7 @@ function seclist_soft_install() {
 }
 
 function johnjumbo_soft_install() {
-    goodecho "[+] Installing SIPPTS"
+    goodecho "[+] Installing johnjumbo"
     [ -d /opt/crack ] || mkdir -p /opt/crack
     cd /opt/crack
     install_dependencies "libdb-dev"
@@ -462,7 +482,7 @@ function trufflehog_script_install() {
 }
 
 function burpsuite_community_install() { # TODO: only working well on x86_64 with the GUI :/
-    local version="${1:-2026.1.5}"
+    local version="${1:-2026.3.2}"
     local install_dir="/opt/burpsuite"
     local arch=$(uname -m)
     
@@ -646,6 +666,19 @@ function vortix_soft_install_fromsource() {
     sed -i '/\/tmp\/cargo\/env/d' /root/.zshenv
 }
 
+function netwatch_soft_install_fromsource() {
+    goodecho "[+] Installing NetWatch"
+    rm -rf /root/.rustup /root/.cargo
+    export RUSTUP_HOME=/tmp/rustup
+    export CARGO_HOME=/tmp/cargo
+    export PATH="$CARGO_HOME/bin:$PATH"
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+    cargo install netwatch-tui
+    cp "$CARGO_HOME/bin/netwatch" /usr/local/bin/
+    rm -rf /tmp/rustup /tmp/cargo
+    sed -i '/\/tmp\/cargo\/env/d' /root/.zshenv
+}
+
 function wiretapper_soft_install_fromsource() {
     goodecho "[+] Installing WireTapper"
     [ -d /opt/network ] || mkdir -p /opt/network
@@ -772,6 +805,30 @@ function mic_soft_install() {
     cd mic
     go build -o mic .
     ln -s $(pwd)/mic /usr/bin/mic
+}
+
+function betterleaks_soft_install() {
+    goodecho "[+] Installing betterleaks"
+    [ -d /root/thirdparty ] || mkdir /root/thirdparty
+    cd /root/thirdparty
+    export GOSUMDB=sum.golang.org
+    export GOPROXY=direct
+    gitinstall "https://github.com/betterleaks/betterleaks.git" "betterleaks_soft_install"
+    cd betterleaks
+    make build
+    mkdir -p /opt/network/betterleaks
+    cp betterleaks /opt/network/betterleaks
+    ln -s /opt/network/betterleaks /usr/local/bin/betterleaks
+}
+
+function hexhttp_soft_install() {
+    goodecho "[+] Installing HExHTTP"
+    [ -d /root/thirdparty ] || mkdir /root/thirdparty
+    cd /root/thirdparty
+    gitinstall "https://github.com/c0dejump/HExHTTP.git" "hexhttp_soft_install"
+    cd HExHTTP
+    pipx install .
+    pipx ensurepath
 }
 
 function reconftw_soft_install() {

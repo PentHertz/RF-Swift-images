@@ -464,19 +464,58 @@ function common_nettools() {
 	installfromnet "apt-fast install -y -q tshark"
 }
 
-function aircrack_soft_install() {
-	goodecho "[+] Installing aircrack-ng"
-	install_dependencies "aircrack-ng"
-}
-
 function reaver_soft_install() {
 	goodecho "[+] Installing reaver"
 	install_dependencies "reaver"
 }
 
+function aircrack_soft_install() {
+    if [[ "$(uname -m)" == "x86_64" || "$(uname -m)" == "amd64" ]]; then
+        goodecho "[+] Installing aircrack-ng"
+        install_dependencies "aircrack-ng"
+    else
+        aircrack_soft_installfromsource
+    fi
+}
+
+function aircrack_soft_installfromsource() {
+    goodecho "[+] Installing aircrack-ng from sources"
+    [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
+    cd /root/thirdparty
+    install_dependencies "build-essential autoconf automake libtool pkg-config libnl-3-dev libnl-genl-3-dev libssl-dev ethtool shtool rfkill zlib1g-dev libpcap-dev libsqlite3-dev libpcre2-dev libhwloc-dev libcmocka-dev hostapd wpasupplicant tcpdump screen iw usbutils expect"
+    gitinstall "https://github.com/aircrack-ng/aircrack-ng.git" "aircrack_soft_installfromsource"
+    cd aircrack-ng
+    ./autogen.sh
+    ./configure
+    make -j$(nproc) && make install
+}
+
 function bully_soft_install() {
-	goodecho "[+] Installing bully"
-	install_dependencies "bully"
+    if [[ "$(uname -m)" == "x86_64" || "$(uname -m)" == "amd64" ]]; then
+        goodecho "[+] Installing bully"
+        install_dependencies "bully"
+    else
+        bully_soft_installfromsource
+    fi
+}
+
+function bully_soft_installfromsource() {
+    goodecho "[+] Installing bully from sources"
+    [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
+    cd /root/thirdparty
+    gitinstall "https://github.com/aanarchyy/bully.git" "bully_soft_installfromsource"
+    cd bully/src
+    make -j$(nproc) && make install
+}
+
+function mdk4_soft_installfromsource() {
+    goodecho "[+] Installing mdk4 from sources"
+    [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
+    cd /root/thirdparty
+    install_dependencies "pkg-config libnl-3-dev libnl-genl-3-dev libpcap-dev"
+    gitinstall "https://github.com/aircrack-ng/mdk4.git" "mdk4_soft_installfromsource"
+    cd mdk4
+    make -j$(nproc) && make install
 }
 
 function wifipumpkin3_soft_install() {

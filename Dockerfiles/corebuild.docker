@@ -45,7 +45,9 @@ RUN ./entrypoint.sh fzf_soft_install && \
 	./entrypoint.sh atuin_soft_install
 
 RUN ./entrypoint.sh uvpython_install && \
-	./entrypoint.sh install_firefox
+	./entrypoint.sh install_firefox && \
+	./entrypoint.sh flameshot_install && \
+	./entrypoint.sh littlesnitch_soft_install
 
 # Installing Desktop/VNC packages for remote GUI access
 RUN ./entrypoint.sh install_desktop_packages
