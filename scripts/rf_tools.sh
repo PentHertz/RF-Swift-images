@@ -133,7 +133,6 @@ function sniffle_soft_install() {
         goodecho "[!] Skipping Sniffle installation: unsupported architecture ($arch)"
     fi
 }
-
 function bluesploit_soft_install() {
     goodecho "[+] Installing BlueSploit from sources"
     [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
@@ -141,7 +140,9 @@ function bluesploit_soft_install() {
     install_dependencies "bluetooth bluez libbluetooth-dev"
     gitinstall "https://github.com/V33RU/bluesploit.git" "bluesploit_soft_installfromsource"
     cd bluesploit
-    pip3install -r requirements.txt
+    # Filter out pybluez2 - broken build system, use bleak for BLE instead
+    grep -v "pybluez2" requirements.txt > requirements_filtered.txt
+    pip3install -r requirements_filtered.txt
     pip3install "rich cmd2 scapy bleak"
     chmod +x bluesploit.py
     ln -sf "$(pwd)/bluesploit.py" /usr/local/bin/bluesploit
