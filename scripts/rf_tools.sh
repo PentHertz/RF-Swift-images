@@ -134,6 +134,21 @@ function sniffle_soft_install() {
     fi
 }
 
+function bluesploit_soft_install() {
+    goodecho "[+] Installing BlueSploit from sources"
+    [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
+    cd /root/thirdparty
+    install_dependencies "bluetooth bluez libbluetooth-dev"
+    gitinstall "https://github.com/V33RU/bluesploit.git" "bluesploit_soft_installfromsource"
+    cd bluesploit
+    pip3install -r requirements.txt
+    pip3install "rich cmd2 scapy bleak"
+    chmod +x bluesploit.py
+    ln -sf "$(pwd)/bluesploit.py" /usr/local/bin/bluesploit
+    mkdir -p data/wordlists data/oui data/profiles data/signatures
+    for i in $(seq -w 0 9999); do echo "$i"; done > data/wordlists/pins_4digit.txt
+}
+
 function bluing_soft_install() {
     echo "[+] Installing bluing"
     
