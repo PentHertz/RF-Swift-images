@@ -444,6 +444,7 @@ function grnfc_grmod_install() {
 }
 
 function soapyrfnm_grmod_install() {
+    install_dependencies "libsoapysdr-dev"
     ARCH=$(uname -m)
     if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then
         grclone_and_build "https://github.com/rfnm/soapy-rfnm.git" "" "soapyrfnm_grmod_install"
