@@ -163,17 +163,21 @@ function sdrpp_soft_install () { # Working but not compatible with aarch64
 	cd /root
 }
 
-function sigdigger_soft_install () {
-	goodecho "[+] Installing dependencies"
-	install_dependencies "libxml2-dev libxml2-utils libfftw3-dev libasound-dev"
-	goodecho "[+] Downloading and launching auto-script"
-	[ -d /rftools/sdr ] || mkdir -p /rftools/sdr
-	cd /rftools/sdr
-	installfromnet "wget https://actinid.org/blsd"
-	chmod +x blsd
-	./blsd
-	cd /root
-	ln -s /rftools/sdr/blsd-dir/SigDigger/SigDigger /usr/sbin/SigDigger
+function sigdigger_soft_install() {
+    if [[ "$(uname -m)" == "x86_64" || "$(uname -m)" == "amd64" ]]; then
+        goodecho "[+] Installing dependencies"
+        install_dependencies "libxml2-dev libxml2-utils libfftw3-dev libasound-dev"
+        goodecho "[+] Downloading and launching auto-script"
+        [ -d /rftools/sdr ] || mkdir -p /rftools/sdr
+        cd /rftools/sdr
+        installfromnet "wget --no-check-certificate https://actinid.org/blsd"
+        chmod +x blsd
+        ./blsd
+        cd /root
+        ln -s /rftools/sdr/blsd-dir/SigDigger/SigDigger /usr/sbin/SigDigger
+    else
+        sigdigger_soft_installfromsource
+    fi
 }
 
 function cyberther_soft_install() {
