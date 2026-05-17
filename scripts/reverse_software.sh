@@ -152,8 +152,8 @@ function ghidra_soft_install() {
 	[ -d /reverse ] || mkdir /reverse
 	cd /reverse
 
-    ghidra_version="12.0.4"
-    ghidra_date="20260303"
+    ghidra_version="12.1"
+    ghidra_date="20260513"
 	prog="ghidra_${ghidra_version}_PUBLIC_${ghidra_date}"
 
 	installfromnet "wget https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_${ghidra_version}_build/${prog}.zip"
