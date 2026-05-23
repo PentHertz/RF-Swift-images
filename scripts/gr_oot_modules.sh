@@ -285,21 +285,21 @@ function grsignalhound_Receiver_grmod_install() {
 
     # Download and install the FTDI library based on architecture
     if [[ "$ARCH" == "x86_64" ]]; then
-        installfromnet "wget https://ftdichip.com/wp-content/uploads/2025/03/libftd2xx-linux-x86_64-1.4.33.tgz"
-        tar xvfz libftd2xx-linux-x86_64-1.4.33.tgz
+        installfromnet "wget https://ftdichip.com/wp-content/uploads/2025/11/libftd2xx-linux-x86_64-1.4.34.tgz"
+        tar xvfz libftd2xx-linux-x86_64-1.4.34.tgz
         cd linux-x86_64
         cp libftd2xx.* /usr/local/lib
-        chmod 0755 /usr/local/lib/libftd2xx.so.1.4.33
+        chmod 0755 /usr/local/lib/libftd2xx.so.1.4.34
         cp ftd2xx.h /usr/local/include
         cp WinTypes.h /usr/local/include
         ldconfig -v
         cd /root/thirdparty
     elif [[ "$ARCH" == "aarch64" ]]; then
-        installfromnet "wget https://ftdichip.com/wp-content/uploads/2025/03/libftd2xx-linux-arm-v8-1.4.33.tgz"
-        tar xvfz libftd2xx-linux-arm-v8-1.4.33.tgz
+        installfromnet "wget https://ftdichip.com/wp-content/uploads/2025/11/libftd2xx-linux-arm-v8-1.4.34.tgz"
+        tar xvfz libftd2xx-linux-arm-v8-1.4.34.tgz
         cd linux-arm-v8
         cp libftd2xx.* /usr/local/lib
-        chmod 0755 /usr/local/lib/libftd2xx.so.1.4.33
+        chmod 0755 /usr/local/lib/libftd2xx.so.1.4.34
         cp ftd2xx.h /usr/local/include
         cp WinTypes.h /usr/local/include
         ldconfig -v
@@ -307,8 +307,8 @@ function grsignalhound_Receiver_grmod_install() {
     fi
 
     # Download and install the Signal Hound SDK
-    installfromnet "wget https://signalhound.com/sigdownloads/SDK/signal_hound_sdk_10_07_25.zip"
-    unzip -q signal_hound_sdk_10_07_25.zip
+    installfromnet "wget https://signalhound.com/sigdownloads/SDK/signal_hound_sdk_05_13_26.zip"
+    unzip -q signal_hound_sdk_05_13_26.zip
     INIT_PATH=$(pwd)
 
     # Install bb_series library
@@ -338,38 +338,38 @@ function grsignalhound_Receiver_grmod_install() {
 
     # Install vsg60_series library (x86_64 only - no aarch64 version available)
     if [[ "$ARCH" == "x86_64" ]]; then
-        cd "$INIT_PATH/signal_hound_sdk/device_apis/vsg60_series/lib/linux/Ubuntu 18.04"
-        cp libvsg_api.so.1.0.9 /usr/local/lib/
-        chmod 0755 /usr/local/lib/libvsg_api.so.1.0.9
-        ln -sf /usr/local/lib/libvsg_api.so.1.0.9 /usr/local/lib/libvsg_api.so
-        ln -sf /usr/local/lib/libvsg_api.so.1.0.9 /usr/lib/libvsg_api.so
+        cd "$INIT_PATH/signal_hound_sdk/device_apis/vsg60_vsg200_series/lib/linux/Ubuntu 18.04"
+        cp libvsg_api.so.1.2.1 /usr/local/lib/
+        chmod 0755 /usr/local/lib/libvsg_api.so.1.2.1
+        ln -sf /usr/local/lib/libvsg_api.so.1.2.1 /usr/local/lib/libvsg_api.so
+        ln -sf /usr/local/lib/libvsg_api.so.1.2.1 /usr/lib/libvsg_api.so
         ldconfig -v
     fi
 
     # Install sm_series library
     if [[ "$ARCH" == "x86_64" ]]; then
         cd "$INIT_PATH/signal_hound_sdk/device_apis/sm_series/lib/linux_x64/Ubuntu 18.04"
-        cp libsm_api.so.2.3.8 /usr/local/lib/
-        chmod 0755 /usr/local/lib/libsm_api.so.2.3.8
-        ln -sf /usr/local/lib/libsm_api.so.2.3.8 /usr/local/lib/libsm_api.so
-        ln -sf /usr/local/lib/libsm_api.so.2.3.8 /usr/lib/libsm_api.so
+        cp libsm_api.so.2.3.10 /usr/local/lib/
+        chmod 0755 /usr/local/lib/libsm_api.so.2.3.10
+        ln -sf /usr/local/lib/libsm_api.so.2.3.10 /usr/local/lib/libsm_api.so
+        ln -sf /usr/local/lib/libsm_api.so.2.3.10 /usr/lib/libsm_api.so
         ldconfig -v
     elif [[ "$ARCH" == "aarch64" ]]; then
         cd "$INIT_PATH/signal_hound_sdk/device_apis/sm_series/lib/aarch64"
-        cp libsm_api.so.2.3.7 /usr/local/lib/
-        chmod 0755 /usr/local/lib/libsm_api.so.2.3.7
-        ln -sf /usr/local/lib/libsm_api.so.2.3.7 /usr/local/lib/libsm_api.so
-        ln -sf /usr/local/lib/libsm_api.so.2.3.7 /usr/lib/libsm_api.so
+        cp libsm_api.so.2.3.9 /usr/local/lib/
+        chmod 0755 /usr/local/lib/libsm_api.so.2.3.9
+        ln -sf /usr/local/lib/libsm_api.so.2.3.9 /usr/local/lib/libsm_api.so
+        ln -sf /usr/local/lib/libsm_api.so.2.3.9 /usr/lib/libsm_api.so
         ldconfig -v
     fi
 
     # Install sp_series library (both architectures available)
     if [[ "$ARCH" == "x86_64" ]]; then
         cd "$INIT_PATH/signal_hound_sdk/device_apis/sp_series/lib/linux_x64/Ubuntu 18.04"
-        cp libsp_api.so.1.0.8 /usr/local/lib/
-        chmod 0755 /usr/local/lib/libsp_api.so.1.0.8
-        ln -sf /usr/local/lib/libsp_api.so.1.0.8 /usr/local/lib/libsp_api.so
-        ln -sf /usr/local/lib/libsp_api.so.1.0.8 /usr/lib/libsp_api.so
+        cp libsp_api.so.1.0.9 /usr/local/lib/
+        chmod 0755 /usr/local/lib/libsp_api.so.1.0.9
+        ln -sf /usr/local/lib/libsp_api.so.1.0.9 /usr/local/lib/libsp_api.so
+        ln -sf /usr/local/lib/libsp_api.so.1.0.9 /usr/lib/libsp_api.so
         ldconfig -v
     elif [[ "$ARCH" == "aarch64" ]]; then
         cd "$INIT_PATH/signal_hound_sdk/device_apis/sp_series/lib/aarch64"

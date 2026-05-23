@@ -508,7 +508,7 @@ function burpsuite_community_install() { # TODO: only working well on x86_64 wit
     case "$arch" in
         x86_64|amd64)
             # Use official installer for x86_64
-            local download_url="https://portswigger.net/burp/releases/download?product=community&version=${version}&type=Linux"
+            local download_url="https://portswigger.net/burp/releases/download?product=desktop&version=${version}&type=Linux"
             local installer_file="/tmp/burpsuite_community_linux_v${version}.sh"
             
             colorecho "[+] Downloading Burp Suite Community Edition installer..."
