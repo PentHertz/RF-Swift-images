@@ -89,11 +89,6 @@ jobs:
           else
             echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
           fi
-
-      - name: Clear stale Docker credentials
-        run: |
-          rm -f ~/.docker/config.json
-          mkdir -p ~/.docker
       
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
@@ -228,11 +223,6 @@ jobs:
           else
             echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
-
-      - name: Clear stale Docker credentials
-        run: |
-          rm -f ~/.docker/config.json
-          mkdir -p ~/.docker
 
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
@@ -380,11 +370,6 @@ jobs:
             echo "run_job_sdrsa_antsdr_devices=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Clear stale Docker credentials
-        run: |
-          rm -f ~/.docker/config.json
-          mkdir -p ~/.docker
-
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
@@ -530,11 +515,6 @@ jobs:
           else
             echo "run_job_sdr_light=false" >> $GITHUB_OUTPUT
           fi
-
-      - name: Clear stale Docker credentials
-        run: |
-          rm -f ~/.docker/config.json
-          mkdir -p ~/.docker
 
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
@@ -682,11 +662,6 @@ jobs:
             echo "run_job_hardware=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Clear stale Docker credentials
-        run: |
-          rm -f ~/.docker/config.json
-          mkdir -p ~/.docker
-
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
@@ -820,11 +795,6 @@ jobs:
           else
             echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
-
-      - name: Clear stale Docker credentials
-        run: |
-          rm -f ~/.docker/config.json
-          mkdir -p ~/.docker
 
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
@@ -984,11 +954,6 @@ jobs:
             echo "run_job_sdrfull=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Clear stale Docker credentials
-        run: |
-          rm -f ~/.docker/config.json
-          mkdir -p ~/.docker
-
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
@@ -1134,11 +1099,6 @@ jobs:
           else
             echo "run_job_telecom=false" >> $GITHUB_OUTPUT
           fi
-
-      - name: Clear stale Docker credentials
-        run: |
-          rm -f ~/.docker/config.json
-          mkdir -p ~/.docker
 
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
@@ -1298,11 +1258,6 @@ jobs:
             echo "run_job_telecom23G=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Clear stale Docker credentials
-        run: |
-          rm -f ~/.docker/config.json
-          mkdir -p ~/.docker
-
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
@@ -1460,11 +1415,6 @@ jobs:
           else
             echo "run_job_telecom4G5GNSA=false" >> $GITHUB_OUTPUT
           fi
-
-      - name: Clear stale Docker credentials
-        run: |
-          rm -f ~/.docker/config.json
-          mkdir -p ~/.docker
 
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
@@ -1624,11 +1574,6 @@ jobs:
             echo "run_job_telecom5GSA=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Clear stale Docker credentials
-        run: |
-          rm -f ~/.docker/config.json
-          mkdir -p ~/.docker
-
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
@@ -1786,11 +1731,6 @@ jobs:
           else
             echo "run_job_telecom5GSA=false" >> $GITHUB_OUTPUT
           fi
-
-      - name: Clear stale Docker credentials
-        run: |
-          rm -f ~/.docker/config.json
-          mkdir -p ~/.docker
 
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
@@ -1950,11 +1890,6 @@ jobs:
             echo "run_job_wifi=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Clear stale Docker credentials
-        run: |
-          rm -f ~/.docker/config.json
-          mkdir -p ~/.docker
-
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
@@ -2101,11 +2036,6 @@ jobs:
             echo "run_job_bt=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Clear stale Docker credentials
-        run: |
-          rm -f ~/.docker/config.json
-          mkdir -p ~/.docker
-
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
@@ -2239,11 +2169,6 @@ jobs:
           else
             echo "run_job_rfid=false" >> $GITHUB_OUTPUT
           fi
-
-      - name: Clear stale Docker credentials
-        run: |
-          rm -f ~/.docker/config.json
-          mkdir -p ~/.docker
 
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
@@ -2379,11 +2304,6 @@ jobs:
             echo "run_job_network=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Clear stale Docker credentials
-        run: |
-          rm -f ~/.docker/config.json
-          mkdir -p ~/.docker
-
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
@@ -2518,11 +2438,6 @@ jobs:
             echo "run_job_automotive=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Clear stale Docker credentials
-        run: |
-          rm -f ~/.docker/config.json
-          mkdir -p ~/.docker
-
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
@@ -2656,11 +2571,6 @@ jobs:
           else
             echo "run_job_reversing=false" >> $GITHUB_OUTPUT
           fi
-
-      - name: Clear stale Docker credentials
-        run: |
-          rm -f ~/.docker/config.json
-          mkdir -p ~/.docker
 
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
