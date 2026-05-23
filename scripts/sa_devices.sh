@@ -42,7 +42,7 @@ function signalhound_sdk_install() {
     cd /root/thirdparty
 
     ARCH=$(uname -m)
-    SDK_URL="https://signalhound.com/sigdownloads/SDK/signal_hound_sdk_03_20_26.zip"
+    SDK_URL="https://signalhound.com/sigdownloads/SDK/signal_hound_sdk_05_13_26.zip"
     SDK_DIR="/opt/signalhound"
 
     installfromnet "wget -q ${SDK_URL} -O signal_hound_sdk.zip"
@@ -148,7 +148,7 @@ function signalhound_spike_sa_device() {
         colorecho "[+] Downloading Spike bin from SignalHound"
         [ -d /rftools/analysers ] || mkdir -p /rftools/analysers
         cd /rftools/analysers
-        filename="Spike(Ubuntu22.04x64)_4_0_12"
+        filename="Spike(Ubuntu22.04x64)_4_0_13"
         installfromnet "wget https://signalhound.com/sigdownloads/Spike/$filename.zip"
         unzip ${filename}.zip
         rm ${filename}.zip
