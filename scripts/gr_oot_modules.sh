@@ -285,7 +285,7 @@ function grsignalhound_Receiver_grmod_install() {
 
     # Download and install the FTDI library based on architecture
     if [[ "$ARCH" == "x86_64" ]]; then
-        installfromnet "wget https://ftdichip.com/wp-content/uploads/2025/11/libftd2xx-linux-x86_64-1.4.34.tgz"
+        installfromnet "wget https://github.com/PentHertz/rfswift_ftdi/releases/download/v1.4.34/libftd2xx-linux-x86_64-1.4.34.tgz"
         tar xvfz libftd2xx-linux-x86_64-1.4.34.tgz
         cd linux-x86_64
         cp libftd2xx.* /usr/local/lib
@@ -295,7 +295,7 @@ function grsignalhound_Receiver_grmod_install() {
         ldconfig -v
         cd /root/thirdparty
     elif [[ "$ARCH" == "aarch64" ]]; then
-        installfromnet "wget https://ftdichip.com/wp-content/uploads/2025/11/libftd2xx-linux-arm-v8-1.4.34.tgz"
+        installfromnet "wget https://github.com/PentHertz/rfswift_ftdi/releases/download/v1.4.34/libftd2xx-linux-arm-v8-1.4.34.tgz"
         tar xvfz libftd2xx-linux-arm-v8-1.4.34.tgz
         cd linux-arm-v8
         cp libftd2xx.* /usr/local/lib
