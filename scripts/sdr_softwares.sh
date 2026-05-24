@@ -144,7 +144,7 @@ function sdrpp_soft_fromsource_install () {
 
 function sdrpp_soft_install () { # Working but not compatible with aarch64
 	goodecho "[+] Installing dependencies"
-	install_dependencies "libfftw3-dev libglfw3-dev libvolk2-dev libzstd-dev libairspyhf-dev libiio-dev libad9361-dev librtaudio-dev libhackrf-dev -y"
+	install_dependencies "libfftw3-dev libglfw3-dev libvolk-dev libzstd-dev libairspyhf-dev libiio-dev libad9361-dev librtaudio-dev libhackrf-dev -y"
 	goodecho "[+] Installing SDR++"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
@@ -204,8 +204,8 @@ function cyberther_soft_install() {
 	goodecho "[CyberEther][+] Cloning GitHub repository"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	git clone --depth=1 --branch v1.0.3 https://github.com/luigifcruz/CyberEther.git CyberEther-1.0.3
-	cd CyberEther-1.0.3
+	git clone --depth=1 --branch v1.4.0 https://github.com/luigifcruz/CyberEther.git CyberEther-1.4.0
+	cd CyberEther-1.4.0
 	goodecho "[CyberEther][+] Configuring build options for architecture"
 	BUILDTYPE="debugoptimized"
 	NINJA_JOBS=$(nproc)
@@ -607,7 +607,7 @@ function satdump_sdr_soft_install () {
 	[ -d /rftools/sdr ] || mkdir -p /rftools/sdr
 	cd /rftools/sdr
 	goodecho "[+] installing dependencies for SatDump"
-	install_dependencies "libvolk2-dev libmbedtls-dev git build-essential cmake g++ pkgconf libfftw3-dev libpng-dev libtiff-dev libcurl4-openssl-dev libglfw3-dev zenity portaudio19-dev libhdf5-dev libomp-dev ocl-icd-opencl-dev"
+	install_dependencies "libvolk-dev libmbedtls-dev git build-essential cmake g++ pkgconf libfftw3-dev libpng-dev libtiff-dev libcurl4-openssl-dev libglfw3-dev zenity portaudio19-dev libhdf5-dev libomp-dev ocl-icd-opencl-dev"
 	# Check system architecture
 	ARCH=$(uname -m)
 
