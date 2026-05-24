@@ -209,7 +209,6 @@ function cyberther_soft_install() {
 	goodecho "[CyberEther][+] Configuring build options for architecture"
 	BUILDTYPE="debugoptimized"
 	NINJA_JOBS=$(nproc)
-
 	case "$(uname -m)" in
 	    aarch64|arm64)
 	        goodecho "[CyberEther][+] ARM64 detected: using release build with limited parallelism"
@@ -225,7 +224,8 @@ function cyberther_soft_install() {
 	        goodecho "[CyberEther][+] x86_64 detected: using full build"
 	        ;;
 	esac
-
+	goodecho "[CyberEther][+] Upgrading meson (Noble ships 1.3.2, CyberEther >= 1.4.0 requires >= 1.11.0)"
+	pip3 install --break-system-packages --upgrade meson
 	meson setup -Dbuildtype=${BUILDTYPE} build && cd build
 	ninja -j${NINJA_JOBS} install
 }
