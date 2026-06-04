@@ -730,9 +730,12 @@ function qradiolink_soft_install () {
 
 function AIScatcher_soft_install () {
 	goodecho "[+] Installing AIS Catcher"
+	install_dependencies "libudev-dev"
 	[ -d /rftools/sdr ] || mkdir /rftools/sdr
 	cd /rftools/sdr
+	export LDFLAGS="-Wl,--no-as-needed -ludev"
 	cmake_clone_and_build "https://github.com/jvde-github/AIS-catcher.git" "build" "" "" "AIScatcher_soft_install"
+	unset LDFLAGS
 }
 
 function tetrakit_soft_install () {
