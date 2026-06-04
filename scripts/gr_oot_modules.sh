@@ -221,7 +221,10 @@ function grdroineid_grmod_install() { # TODO: for turbofec RISCV64:  gcc: error:
 
     cd /root/thirdparty
     echo "[+] Cloning CRCpp"
-    cmake_clone_and_build "https://github.com/d-bahr/CRCpp.git" "build" "" "" "grdroineid_grmod_install"
+    installfromnet "git clone https://github.com/d-bahr/CRCpp.git"
+    install -d /usr/local/include
+    install -m 644 CRCpp/inc/CRC.h /usr/local/include/ \
+        || { criticalecho-noexit "[!] Failed to install CRCpp header"; return 0; }
 
     cd /root/thirdparty
     echo "[+] Cloning dji_droneid"
