@@ -204,8 +204,8 @@ function cyberther_soft_install() {
 	goodecho "[CyberEther][+] Cloning GitHub repository"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	git clone --depth=1 --branch v1.4.0 https://github.com/luigifcruz/CyberEther.git CyberEther-1.4.0
-	cd CyberEther-1.4.0
+	git clone --depth=1 --branch v1.4.1 https://github.com/luigifcruz/CyberEther.git CyberEther-1.4.1
+	cd CyberEther-1.4.1
 	goodecho "[CyberEther][+] Configuring build options for architecture"
 	BUILDTYPE="debugoptimized"
 	NINJA_JOBS=$(nproc)
@@ -224,7 +224,7 @@ function cyberther_soft_install() {
 	        goodecho "[CyberEther][+] x86_64 detected: using full build"
 	        ;;
 	esac
-	goodecho "[CyberEther][+] Upgrading meson (Noble ships 1.3.2, CyberEther >= 1.4.0 requires >= 1.11.0)"
+	goodecho "[CyberEther][+] Upgrading meson (Noble ships 1.3.2, CyberEther >= 1.4.1 requires >= 1.11.0)"
 	pip3 install --break-system-packages --upgrade meson
 	meson setup -Dbuildtype=${BUILDTYPE} build && cd build
 	ninja -j${NINJA_JOBS} install
