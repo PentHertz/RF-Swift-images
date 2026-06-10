@@ -38,9 +38,22 @@ function griridium_grmod_install() {
         install_mpir
     else
         goodecho "x86_64/amd64 architecture detected. Skipping MPIR installation."
-    fi  
+    fi
+
+    # Work around GCC 13 LTO ICE (flags_from_decl_or_type, calls.cc:861)
+    # when linking the pybind11 iridium_python module. Disable LTO locally.
+    local _saved_cxx="$CXXFLAGS" _saved_c="$CFLAGS" _saved_ld="$LDFLAGS"
+    export CXXFLAGS="${CXXFLAGS} -fno-lto"
+    export CFLAGS="${CFLAGS} -fno-lto"
+    export LDFLAGS="${LDFLAGS} -fno-lto"
+
     # Clone and build gr-iridium
     grclone_and_build "https://github.com/muccc/gr-iridium.git" "" "griridium_grmod_install"
+
+    # Restore so the next OOT module build isn't affected
+    export CXXFLAGS="$_saved_cxx"
+    export CFLAGS="$_saved_c"
+    export LDFLAGS="$_saved_ld"
 }
 
 function gruaslink_grmod_install() { 

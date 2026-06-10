@@ -164,20 +164,22 @@ function sdrpp_soft_install () { # Working but not compatible with aarch64
 }
 
 function sigdigger_soft_install() {
-    if [[ "$(uname -m)" == "x86_64" || "$(uname -m)" == "amd64" ]]; then
-        goodecho "[+] Installing dependencies"
-        install_dependencies "libxml2-dev libxml2-utils libfftw3-dev libasound-dev"
-        goodecho "[+] Downloading and launching auto-script"
-        [ -d /rftools/sdr ] || mkdir -p /rftools/sdr
-        cd /rftools/sdr
-        installfromnet "wget --no-check-certificate https://actinid.org/blsd"
-        chmod +x blsd
-        ./blsd
-        cd /root
-        ln -s /rftools/sdr/blsd-dir/SigDigger/SigDigger /usr/sbin/SigDigger
-    else
-        sigdigger_soft_installfromsource
+	# Check architecture
+    ARCH=$(uname -m)
+    if [[ "$ARCH" != "x86_64" && "$ARCH" != "aarch64" ]]; then
+        criticalecho-noexit "[-] Unsupported architecture: $ARCH"
+        exit 0
     fi
+    goodecho "[+] Installing dependencies"
+    install_dependencies "libxml2-dev libxml2-utils libfftw3-dev libasound-dev"
+    goodecho "[+] Downloading and launching auto-script"
+    [ -d /rftools/sdr ] || mkdir -p /rftools/sdr
+    cd /rftools/sdr
+    installfromnet "wget --no-check-certificate https://actinid.org/blsd"
+    chmod +x blsd
+    ./blsd
+    cd /root
+    ln -s /rftools/sdr/blsd-dir/SigDigger/SigDigger /usr/sbin/SigDigger
 }
 
 function cyberther_soft_install() {
