@@ -179,8 +179,9 @@ function install_GPU_latest_Radeon() { # tested with GPD Pocket 4
     install_dependencies "mesa-utils vulkan-tools mesa-vulkan-drivers"
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
     cd /root/thirdparty
-    installfromnet "wget https://repo.radeon.com/amdgpu-install/6.4.2.1/ubuntu/noble/amdgpu-install_6.4.60402-1_all.deb"
-    dpkg -i amdgpu-install_6.4.60402-1_all.deb
+    # Radeon Software for Linux 26.12 (Ubuntu 26.04 HWE)
+    installfromnet "wget https://repo.radeon.com/amdgpu-install/31.30/ubuntu/resolute/amdgpu-install_31.30.313000-1_all.deb"
+    dpkg -i amdgpu-install_31.30.313000-1_all.deb
     amdgpu-install -y --accept-eula
 }
 

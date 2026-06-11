@@ -9,7 +9,7 @@ function ad_devices_install() {
 
 function uhd_devices_install() {
 	goodecho "[+] Installing UHD's libs and tools from package manager"
-	install_dependencies "libuhd4.6.0t64 libuhd-dev uhd-host"
+	install_dependencies "libuhd4.9.0 libuhd-dev uhd-host"
 	goodecho "[+] Copying rules sets"
 	cp /root/rules/uhd-usrp.rules  /etc/udev/rules.d/
 	goodecho "[+] Downloading Hardware Driver firmware/FPGA"
@@ -132,6 +132,9 @@ function nuand_devices_fromsource_install() {
 	cd build
 	cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local -DINSTALL_UDEV_RULES=ON ../
 	make && make install #&& sudo ldconfig
+	goodecho "[+] Installing bladeRF Python bindings"
+	cd /root/thirdparty/bladeRF/host/libraries/libbladeRF_bindings/python
+	python3 setup.py install
 }
 
 function hackrf_devices_install() {
@@ -151,7 +154,7 @@ function limesdr_devices_install() {
 
 function install_soapy_modules() {
 	goodecho "[+] Installing Soapy extra modules"
-	install_dependencies "libsoapysdr-dev soapysdr-module-osmosdr soapysdr-module-rtlsdr soapysdr-module-bladerf soapysdr-module-hackrf soapysdr-module-uhd soapysdr-module-mirisdr soapysdr-module-rfspace soapysdr-module-airspy"
+	install_dependencies "libsoapysdr-dev soapysdr-module-osmosdr soapysdr-module-rtlsdr soapysdr-module-bladerf soapysdr-module-hackrf soapysdr-module-uhd soapysdr-module-mirisdr soapysdr-module-airspy"
 }
 
 function install_soapyPlutoSDR_modules() {
@@ -177,7 +180,7 @@ pkg-config --libs libiio
 
 function rtlsdr_devices_install() {
 	goodecho "[+] Installing RTL-SDR's libs and tools from package manager"
-	install_dependencies "librtlsdr-dev librtlsdr2 rtl-sdr"
+	install_dependencies "librtlsdr-dev librtlsdr0 rtl-sdr"
 }
 
 function rtlsdrv4_devices_install() {
@@ -228,7 +231,7 @@ function xtrx_devices_install() {
 	goodecho "[+] Installing xtrx from package manager"
 	install_dependencies "libusb-1.0-0-dev cmake dkms python3 python3-pip gpsd gpsd-clients pps-tools libboost-all-dev git qtbase5-dev libqcustomplot-dev libqt5printsupport5 doxygen swig"
 	pip3install "cheetah3"
-	install_dependencies "soapysdr-module-xtrx xtrx-dkms xtrx-fft libxtrxll0 libxtrxll-dev libxtrxll-dev libxtrx-dev libxtrxdsp-dev"
+	install_dependencies "soapysdr-module-xtrx xtrx-fft libxtrxll0 libxtrxll-dev libxtrxll-dev libxtrx-dev libxtrxdsp-dev"
 }
 
 function funcube_devices_install() {

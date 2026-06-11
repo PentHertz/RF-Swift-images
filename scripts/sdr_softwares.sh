@@ -17,7 +17,7 @@ function sdrangel_soft_install() {
 	install_dependencies "qtwebengine5-dev qtbase5-private-dev libqt5gamepad5-dev libqt5svg5-dev"
 	install_dependencies "libfaad-dev zlib1g-dev libboost-all-dev libasound2-dev pulseaudio libopencv-dev libxml2-dev bison flex"
 	install_dependencies "ffmpeg libavcodec-dev libavformat-dev libopus-dev doxygen graphviz"
-	install_dependencies "libhamlib4 libgl1-mesa-glx qtspeech5-speechd-plugin gstreamer1.0-libav libairspy0"
+	install_dependencies "libhamlib4 libgl1 libglx-mesa0 qtspeech5-speechd-plugin gstreamer1.0-libav libairspy0"
 
 	goodecho "[+] Downloading and unpacking SDR Angel"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
@@ -142,7 +142,7 @@ function sdrpp_soft_fromsource_install () {
     cp /root/config/sdrpp-config.json "/root/Library/Application Support/sdrpp/config.json"
 }
 
-function sdrpp_soft_install () { # Working but not compatible with aarch64
+function sdrpp_soft_install () {
 	goodecho "[+] Installing dependencies"
 	install_dependencies "libfftw3-dev libglfw3-dev libvolk-dev libzstd-dev libairspyhf-dev libiio-dev libad9361-dev librtaudio-dev libhackrf-dev -y"
 	goodecho "[+] Installing SDR++"
@@ -152,7 +152,9 @@ function sdrpp_soft_install () { # Working but not compatible with aarch64
 	prog=""
 	case "$arch" in
   		x86_64|amd64)
-    		prog="sdrpp_ubuntu_jammy_amd64.deb";;
+    		prog="sdrpp_ubuntu_resolute_amd64.deb";;
+  		aarch64|arm64)
+    		prog="sdrpp_ubuntu_resolute_aarch64.deb";;
   		arm*) # For Raspberry Pi for now
     		prog="sdrpp_raspios_bullseye_armhf.deb";;
   		*)
@@ -199,7 +201,7 @@ function cyberther_soft_install() {
 	install_dependencies "mesa-vulkan-drivers libvulkan-dev vulkan-validationlayers cargo"
 	goodecho "[CyberEther][+] Installing remote caps"
 	install_dependencies "gstreamer1.0-plugins-base libgstreamer-plugins-bad1.0-dev"
-	install_dependencies "libgstreamer-plugins-base1.0-dev libgstreamer-plugins-good1.0-dev"
+	install_dependencies "libgstreamer-plugins-base1.0-dev"
 	install_dependencies "gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly"
 	install_dependencies "python3-yaml"
 	install_dependencies "libsoapysdr-dev soapysdr-module-rtlsdr libgstreamer1.0-dev gstreamer1.0-libav"

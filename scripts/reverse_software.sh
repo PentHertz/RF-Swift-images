@@ -182,7 +182,7 @@ function qiling_soft_install() {
             ;;
     esac
 	goodecho "[+] Installing Qiling's dependencies"
-	install_dependencies "ack antlr3 aria2 asciidoc autoconf automake autopoint binutils bison build-essential bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses-dev libncursesw6 libreadline-dev libssl-dev libtool lrzsz mkisofs msmtp nano ninja-build p7zip p7zip-full patch pkgconf python2.7 python3 python3-pip libpython3-dev qemu-utils rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev"
+	install_dependencies "ack antlr3 aria2 asciidoc autoconf automake autopoint binutils bison build-essential bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses-dev libncursesw6 libreadline-dev libssl-dev libtool lrzsz mkisofs msmtp nano ninja-build p7zip p7zip-full patch pkgconf python3 python3-pip libpython3-dev qemu-utils rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev"
 	goodecho "[+] Cloning and installing Qiling"
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
 	cd /root/thirdparty
@@ -210,13 +210,14 @@ function imhex_soft_install() {
     
     if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then
         goodecho "[+] Installing ImHex for x86_64"
-        install_dependencies "libmbedtls14t64 libmbedx509-1t64 libglfw3-dev"
-        installfromnet "wget https://github.com/WerWolv/ImHex/releases/download/v$IMH_VERSION/imhex-$IMH_VERSION-Ubuntu-24.04-x86_64.deb"
-        dpkg -i imhex-$IMH_VERSION-Ubuntu-24.04-x86_64.deb
+        install_dependencies "libmbedtls21 libmbedx509-7 libglfw3-dev"
+        # No Ubuntu 26.04 build published yet; the 25.04 deb links against the same library sonames
+        installfromnet "wget https://github.com/WerWolv/ImHex/releases/download/v$IMH_VERSION/imhex-$IMH_VERSION-Ubuntu-25.04-x86_64.deb"
+        dpkg -i imhex-$IMH_VERSION-Ubuntu-25.04-x86_64.deb
         
     elif [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
         goodecho "[+] Installing ImHex for arm64"
-        install_dependencies "libmbedtls14t64 libmbedx509-1t64 libglfw3-dev libfuse2"
+        install_dependencies "libmbedtls21 libmbedx509-7 libglfw3-dev libfuse2"
         
         # Download the AppImage
         installfromnet "wget https://github.com/WerWolv/ImHex/releases/download/v$IMH_VERSION/imhex-$IMH_VERSION-arm64.AppImage"
