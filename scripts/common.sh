@@ -30,6 +30,21 @@ function goodecho () {
     echo -e "${GREEN}$*${NOCOLOR}" 2>&1
 }
 
+# Run a privileged command without hard-depending on sudo. During the image
+# build we are root and sudo may not be installed yet (it is one of the
+# packages docker_preinstall installs), so calling sudo directly would fail
+# with "sudo: command not found". Already root -> run directly; sudo present
+# -> use it; otherwise -> run directly.
+function maybe_sudo() {
+    if [ "$(id -u)" -eq 0 ]; then
+        "$@"
+    elif command -v sudo > /dev/null 2>&1; then
+        sudo "$@"
+    else
+        "$@"
+    fi
+}
+
 # ---------------------------------------------------------------------------
 # Build failure reporting
 #
@@ -182,7 +197,7 @@ function gitinstall() {
         if [ -d "$repo_name" ]; then
             # Ensure the directory /var/lib/db/ exists, create if not
             if [ ! -d "/var/lib/db/" ]; then
-                sudo mkdir -p /var/lib/db/
+                maybe_sudo mkdir -p /var/lib/db/
             fi
 
             # Get the absolute path of the repository
@@ -195,7 +210,7 @@ function gitinstall() {
             cd ..
 
             # Append the repository name, absolute path, and method to the file
-            echo "$repo_name:$repo_abs_path:$method" | sudo tee -a /var/lib/db/rfswift_github.lst > /dev/null
+            echo "$repo_name:$repo_abs_path:$method" | maybe_sudo tee -a /var/lib/db/rfswift_github.lst > /dev/null
 
             colorecho "Repository '$repo_name' cloned successfully."
             colorecho "Added '$repo_name $repo_abs_path' to /var/lib/db/rfswift_github.lst"
@@ -373,12 +388,12 @@ function rfswift_register_component() {
     local fn="$1"
     [ -n "$fn" ] || return 0
     declare -f "$fn" > /dev/null 2>&1 || return 0   # only real functions
-    [ -d "$(dirname "$RFSWIFT_COMPONENTS")" ] || sudo mkdir -p "$(dirname "$RFSWIFT_COMPONENTS")"
+    [ -d "$(dirname "$RFSWIFT_COMPONENTS")" ] || maybe_sudo mkdir -p "$(dirname "$RFSWIFT_COMPONENTS")"
     touch "$RFSWIFT_COMPONENTS" "$RFSWIFT_STATE"
-    grep -qxF "$fn" "$RFSWIFT_COMPONENTS" 2>/dev/null || echo "$fn" | sudo tee -a "$RFSWIFT_COMPONENTS" > /dev/null
+    grep -qxF "$fn" "$RFSWIFT_COMPONENTS" 2>/dev/null || echo "$fn" | maybe_sudo tee -a "$RFSWIFT_COMPONENTS" > /dev/null
     # First seal wins (the hash of the recipe actually used to build this image).
     grep -q "^${fn}:" "$RFSWIFT_STATE" 2>/dev/null || \
-        echo "${fn}:$(_rfswift_fnhash "$fn")" | sudo tee -a "$RFSWIFT_STATE" > /dev/null
+        echo "${fn}:$(_rfswift_fnhash "$fn")" | maybe_sudo tee -a "$RFSWIFT_STATE" > /dev/null
 }
 
 # Stable hash of an install function's source, used to detect recipe changes.
@@ -498,7 +513,7 @@ function rfswift_update() {
 
     # Persist updated recipe state.
     if [ "${#state[@]}" -gt 0 ]; then
-        [ -d "$(dirname "$RFSWIFT_STATE")" ] || sudo mkdir -p "$(dirname "$RFSWIFT_STATE")"
+        [ -d "$(dirname "$RFSWIFT_STATE")" ] || maybe_sudo mkdir -p "$(dirname "$RFSWIFT_STATE")"
         local k
         : > "$RFSWIFT_STATE"
         for k in "${!state[@]}"; do echo "$k:${state[$k]}" >> "$RFSWIFT_STATE"; done
