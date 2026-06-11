@@ -2,8 +2,8 @@ name: Tagged Release - Retag RISCV64
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-  DEV_REGISTRY: penthertz/rfswiftdev_noble
-  RELEASE_REGISTRY: penthertz/rfswift_noble
+  DEV_REGISTRY: penthertz/rfswiftdev_resolute
+  RELEASE_REGISTRY: penthertz/rfswift_resolute
   ARCH: riscv64
 
 on:
