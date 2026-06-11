@@ -33,12 +33,14 @@ function docker_preinstall() {
         texlive liblog4cpp5-dev libcurl4-gnutls-dev libpcap-dev libgtk-3-dev avahi-daemon avahi-utils dbus
         qtcreator qtcreator-data qtcreator-doc qtbase5-examples qtbase5-doc-html
         qtbase5-dev qtbase5-private-dev libqt5opengl5-dev libqt5svg5-dev python3-setuptools 
-        libcanberra-gtk-module libcanberra-gtk3-module unity-tweak-tool libhdf5-dev
+        libcanberra-gtk3-module unity-tweak-tool libhdf5-dev
         libreadline-dev automake qtdeclarative5-dev libqt5serialport5-dev libfftw3-single3 libfftw3-bin libfftw3-dev
-        libqt5serialbus5-dev qttools5-dev python3-matplotlib libtalloc-dev
-        pulseaudio-utils libasound2-dev libavahi-client-dev task-lxqt-desktop
+        qt6-serialbus-dev qttools5-dev python3-matplotlib libtalloc-dev
+        # lubuntu-artwork satisfies lxqt-branding so apt skips lxqt-branding-debian,
+        # whose /etc/xdg/lxqt/panel.conf collides with lxqt-panel >= 2.3.2 (resolute dpkg error)
+        pulseaudio-utils libasound2-dev libavahi-client-dev task-lxqt-desktop lubuntu-artwork
         language-pack-en libqwt-qt5-dev python3-click-plugins python3-zmq rsync
-        iw wireless-tools usbutils bluetooth bluez bluez-tools rfkill avahi-daemon iproute2 iptables
+        iw usbutils bluetooth bluez bluez-tools rfkill avahi-daemon iproute2 iptables
         qt6-base-dev qt6-base-dev-tools qt6-tools-dev qt6-tools-dev-tools libc6-dev pipx epiphany-browser
     )
 
