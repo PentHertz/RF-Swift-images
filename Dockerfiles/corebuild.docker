@@ -16,6 +16,7 @@ COPY scripts /root/scripts/
 COPY rules /root/rules/
 COPY config /root/config/
 COPY run/update_rfscripts /usr/sbin
+COPY run/rfswift_update /usr/sbin
 COPY run/libresdr_swapfpga /usr/sbin
 COPY run/avahicontainer_start /usr/sbin
 COPY run/rfswift-entrypoint /usr/sbin
@@ -59,6 +60,10 @@ COPY config/.zshrc /root/.zshrc
 
 # RF Swift shell integration (must be last to append at end of rc files)
 RUN ./entrypoint.sh rfswift_shell_setup
+
+# Print the build report (tools/packages that failed to install). The TSV is
+# kept under /var/lib/db/ for later extraction; the log lines are greppable.
+RUN ./entrypoint.sh print_build_report
 
 # Cleaning and quitting
 WORKDIR /root/

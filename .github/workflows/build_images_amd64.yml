@@ -78,6 +78,34 @@ jobs:
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make common
 
+      # Surface tools/packages that failed to install during the build. Extracts
+      # the report baked into the image; also scans the build log markers above.
+      - name: Build report (failed installs)
+        if: always() && steps.file_check.outputs.run_job_corebuild == 'true'
+        run: |
+          cd Dockerfiles
+          REPORT=$(ARCH=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make report IMG=corebuild 2>/dev/null || echo "(image unavailable)")
+          {
+            echo "## RF-Swift build report — corebuild (${{ matrix.platform }})"
+            echo ""
+            if [ -z "$REPORT" ] || [ "$REPORT" = "(no failures recorded)" ]; then
+              echo "✅ No install failures recorded."
+            else
+              echo "| category | stage | item | detail |"
+              echo "|---|---|---|---|"
+              echo "$REPORT" | awk -F'\t' 'NF>=4 {printf "| %s | %s | %s | %s |\n",$1,$2,$3,$4}'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+          mkdir -p /tmp/rfreport && echo "$REPORT" > /tmp/rfreport/corebuild_${{ matrix.platform }}.tsv
+
+      - name: Upload build report artifact
+        if: always() && steps.file_check.outputs.run_job_corebuild == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-report-corebuild-${{ matrix.platform }}
+          path: /tmp/rfreport/corebuild_${{ matrix.platform }}.tsv
+          if-no-files-found: ignore
+
   corebuild-manifest:
     runs-on: ubuntu-22.04
     timeout-minutes: 340

@@ -270,6 +270,14 @@ clean_cache:
 	@docker buildx prune -af
 	@docker volume prune -f
 	@docker system prune -af --volumes
+# Print the build report (tools/packages that failed to install) baked into an
+# already-built image. Pulls the image if needed.
+#   make report IMG=corebuild ARCH=amd64
+#   make report IMG=automotive ARCH=arm64
+IMG ?= corebuild
+report:
+	@docker run --rm --entrypoint sh $(REGISTRY_IMAGE):$(IMG)_$(ARCH) -c \
+		'cat /var/lib/db/rfswift_build_report.tsv 2>/dev/null || echo "(no failures recorded)"'
 #
 # Convenience targets
 #

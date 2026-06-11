@@ -1,0 +1,62 @@
+#!/bin/bash
+#
+# rfswift_update - incrementally refresh an RF-Swift container in place.
+#
+# Re-pulls every git-tracked tool recorded in /var/lib/db/rfswift_github.lst,
+# rebuilds only the ones whose upstream changed, and (by default) upgrades apt
+# packages first - no full image rebuild or registry pull required.
+#
+# Usage:
+#   rfswift_update [--sync] [--no-apt] [--force] [<tool> ...]
+#
+#   --sync     refresh the install scripts from GitHub first (update_rfscripts),
+#              so newly published install/build fixes are used for the rebuild
+#   --no-apt   skip the apt upgrade phase
+#   --force    rebuild every tracked tool, even if upstream is unchanged
+#   <tool>     limit the run to the named tool(s) from the manifest
+#
+# Anything not tracked in the manifest (pure apt packages, vendor binaries) is
+# refreshed by the apt phase or reported so it can be reinstalled manually.
+
+set -o pipefail
+
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m'
+
+if [[ $EUID -ne 0 ]]; then
+    echo -e "${RED}[!] rfswift_update must be run as root${NC}" >&2
+    exit 1
+fi
+
+# Separate our own --sync flag from the args forwarded to rfswift_update.
+do_sync=false
+forward=()
+for arg in "$@"; do
+    if [ "$arg" = "--sync" ]; then
+        do_sync=true
+    else
+        forward+=("$arg")
+    fi
+done
+
+SCRIPTS_DIR="$HOME/scripts"
+
+if [ "$do_sync" = true ]; then
+    echo -e "${GREEN}[+] Syncing install scripts from GitHub${NC}"
+    if command -v update_rfscripts > /dev/null 2>&1; then
+        update_rfscripts
+    else
+        echo -e "${RED}[!] update_rfscripts not found; continuing with bundled scripts${NC}" >&2
+    fi
+fi
+
+if [ ! -x "$SCRIPTS_DIR/entrypoint.sh" ]; then
+    echo -e "${RED}[!] $SCRIPTS_DIR/entrypoint.sh not found${NC}" >&2
+    exit 1
+fi
+
+# Dispatch through entrypoint.sh so the (possibly just-synced) functions are
+# freshly sourced before rfswift_update runs.
+cd "$SCRIPTS_DIR" || exit 1
+exec ./entrypoint.sh rfswift_update "${forward[@]}"

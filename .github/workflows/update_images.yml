@@ -1,0 +1,159 @@
+name: Incremental update (manual)
+
+# Refresh an already-published image in place by running rfswift_update inside
+# it, instead of rebuilding from scratch. Manual dispatch only.
+#
+# NOTE: this commits a running container, so the result drifts from the
+# Dockerfile (extra layer, less reproducible). It is meant for quick interim
+# refreshes between full `build_images_*` runs, which remain the source of truth.
+# Only works on images built after rfswift_update was added.
+
+env:
+  REGISTRY_IMAGE: penthertz/rfswiftdev_noble
+
+on:
+  workflow_dispatch:
+    inputs:
+      image:
+        description: 'Image to update (the <image> in <image>_<arch>)'
+        type: choice
+        default: corebuild
+        options:
+          - corebuild
+          - sdrsa_devices
+          - sdr_light
+          - sdr_full
+          - automotive
+          - reversing
+          - rfid
+          - network
+          - wifi
+          - bluetooth
+          - hardware
+          - telecom_utils
+          - telecom_2Gto3G
+          - telecom_4G_5GNSA
+          - telecom_5G
+          - deeptempest
+      arch:
+        description: 'Architecture'
+        type: choice
+        default: amd64
+        options: [amd64, arm64, riscv64]
+      mode:
+        description: 'recipe = rebuild only recipe-changed tools; latest = also float git tools; force = rebuild all'
+        type: choice
+        default: recipe
+        options: [recipe, latest, force]
+      sync_scripts:
+        description: 'Sync install scripts from GitHub first (--sync)'
+        type: boolean
+        default: true
+      apt_upgrade:
+        description: 'Run the apt upgrade phase'
+        type: boolean
+        default: true
+      push:
+        description: 'Commit and push the updated image back (off = dry-run, report only)'
+        type: boolean
+        default: true
+      dest_tag_suffix:
+        description: 'Optional suffix for the pushed tag, e.g. -updated (empty = overwrite the same tag)'
+        type: string
+        default: ''
+
+jobs:
+  update:
+    runs-on: ${{ (inputs.arch == 'arm64' && 'ubuntu-24.04-arm') || 'ubuntu-22.04' }}
+    timeout-minutes: 340
+    steps:
+      - name: Set up QEMU (for cross-arch containers)
+        uses: docker/setup-qemu-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Run rfswift_update inside the image
+        run: |
+          set -euo pipefail
+          ARCH='${{ inputs.arch }}'
+          SRC="${REGISTRY_IMAGE}:${{ inputs.image }}_${ARCH}"
+          DEST="${REGISTRY_IMAGE}:${{ inputs.image }}_${ARCH}${{ inputs.dest_tag_suffix }}"
+          echo "Source : $SRC"
+          echo "Dest   : $DEST"
+
+          # Translate inputs into rfswift_update flags
+          FLAGS=""
+          [ '${{ inputs.sync_scripts }}' = 'true' ] && FLAGS="$FLAGS --sync"
+          [ '${{ inputs.apt_upgrade }}'  = 'true' ] || FLAGS="$FLAGS --no-apt"
+          case '${{ inputs.mode }}' in
+            latest) FLAGS="$FLAGS --latest" ;;
+            force)  FLAGS="$FLAGS --force" ;;
+          esac
+          echo "Flags  : $FLAGS"
+
+          docker pull --platform "linux/${ARCH}" "$SRC"
+
+          # Preserve the image's original entrypoint/cmd across the commit.
+          EP=$(docker inspect -f '{{json .Config.Entrypoint}}' "$SRC")
+          CMD=$(docker inspect -f '{{json .Config.Cmd}}' "$SRC")
+
+          # The wrapper must be present (i.e. the image was built with the feature).
+          if ! docker run --rm --platform "linux/${ARCH}" --entrypoint sh "$SRC" \
+                 -c 'command -v rfswift_update >/dev/null'; then
+            echo "::error::$SRC has no rfswift_update — rebuild it with build_images_* first."
+            exit 1
+          fi
+
+          docker run --name rfupdate --platform "linux/${ARCH}" \
+            --entrypoint /usr/sbin/rfswift_update "$SRC" $FLAGS | tee /tmp/update.log
+
+          CHANGES=()
+          [ "$EP"  != "null" ] && CHANGES+=(--change="ENTRYPOINT $EP")
+          [ "$CMD" != "null" ] && CHANGES+=(--change="CMD $CMD")
+
+          if [ '${{ inputs.push }}' = 'true' ]; then
+            docker commit "${CHANGES[@]}" rfupdate "$DEST"
+            docker push "$DEST"
+            echo "Pushed $DEST"
+          else
+            echo "Dry-run: not committing/pushing."
+          fi
+
+          # Pull the build report out of the (still-present) container.
+          docker cp rfupdate:/var/lib/db/rfswift_build_report.tsv /tmp/report.tsv 2>/dev/null || true
+          docker rm -f rfupdate >/dev/null 2>&1 || true
+
+      - name: Summarize update
+        if: always()
+        run: |
+          {
+            echo "## rfswift_update — ${{ inputs.image }} (${{ inputs.arch }}, mode=${{ inputs.mode }})"
+            echo ""
+            echo '### Update summary (rebuilt / current / failed)'
+            echo '```'
+            grep -E '^\[=\]|^\[~\]|rebuilt/updated|already current|floated to HEAD|FAILED' /tmp/update.log 2>/dev/null || echo "(no update.log)"
+            echo '```'
+            echo ""
+            echo '### Failed installs recorded in the image'
+            if [ -s /tmp/report.tsv ]; then
+              echo "| category | stage | item | detail |"
+              echo "|---|---|---|---|"
+              awk -F'\t' 'NF>=4 {printf "| %s | %s | %s | %s |\n",$1,$2,$3,$4}' /tmp/report.tsv
+            else
+              echo "✅ none"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload logs & report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: update-${{ inputs.image }}-${{ inputs.arch }}
+          path: |
+            /tmp/update.log
+            /tmp/report.tsv
+          if-no-files-found: ignore

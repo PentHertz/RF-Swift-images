@@ -23,11 +23,23 @@ function caringcaribou_soft_install() {
 
 function savvycan_soft_install() {
 	goodecho "[+] Cloning and installing SavvyCAN"
+	# Qt5 serialbus is gone in Ubuntu 26.04 — SavvyCAN now builds against Qt6
+	install_dependencies "qmake6 qt6-base-dev qt6-declarative-dev qt6-serialport-dev qt6-serialbus-dev qt6-tools-dev libqt6serialbus6-plugins"
 	[ -d /automotive ] || mkdir /automotive
 	cd /automotive
 	installfromnet "git clone https://github.com/collin80/SavvyCAN.git"
 	cd SavvyCAN
-	qmake -makefile
+	# Qt 6.10 removed QSerialPort::{Parity,Framing,BreakCondition}Error and QChar(uchar);
+	# upstream master still uses them (PR removing the enums was closed unmerged)
+	sed -i '/case QSerialPort::ParityError:/,/break;/d; /case QSerialPort::FramingError:/,/break;/d; /case QSerialPort::BreakConditionError:/,/break;/d' connections/lawicel_serial.cpp
+	sed -i 's/mBuildLine.append(c);/mBuildLine.append(QChar(c));/' connections/lawicel_serial.cpp
+	sed -i 's/std::min(frame.payload().length(), 8)/std::min<qsizetype>(frame.payload().length(), 8)/' canframemodel.cpp
+	sed -i -e 's/#include <QRegExp>/#include <QRegularExpression>/' \
+		-e 's/QRegExp re(/QRegularExpression re(/' \
+		-e 's/if (re.indexIn(file) != -1) {/QRegularExpressionMatch rem = re.match(file);\n        if (rem.hasMatch()) {/' \
+		-e 's/codes << re.cap(1);/codes << rem.captured(1);/' mainsettingsdialog.cpp
+	sed -i 's/maxCount = std::max(maxCount, graph.x.count());/maxCount = std::max<qsizetype>(maxCount, graph.x.count());/' re/graphingwindow.cpp
+	qmake6 -makefile
 	make -j$(nproc)
 	ln -s SavvyCAN /usr/bin/SavvyCAN
 }

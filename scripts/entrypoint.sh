@@ -24,6 +24,12 @@ if [[ $EUID -ne 0 ]]; then
 else
   if declare -f "$1" > /dev/null
   then
+    # Record install functions as managed components so rfswift_update can
+    # rebuild them later (skip the updater's own machinery).
+    case "$1" in
+      rfswift_update|rfswift_register_component|_rfswift_fnhash|print_build_report|record_build_failure) ;;
+      *) rfswift_register_component "$1" ;;
+    esac
     if [[ -f '/.dockerenv' ]]; then
       echo -e "${GREEN}"
       echo "This script is running in docker, as it should :)"
