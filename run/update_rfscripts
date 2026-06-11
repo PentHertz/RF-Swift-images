@@ -7,8 +7,12 @@ RED='\033[0;31m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Set the GitHub repository and the directory you want to synchronize
-REPO_URL="https://github.com/PentHertz/RF-Swift-images"
+# Set the GitHub repository and the directory you want to synchronize.
+# Repo and branch are overridable so you can sync the scripts you actually
+# committed. The default tracks the current release branch (bump it when the
+# active branch changes, e.g. ubuntu_noble -> ubuntu_resolute -> ...).
+REPO_URL="${RFSWIFT_SCRIPTS_REPO:-https://github.com/PentHertz/RF-Swift-images}"
+BRANCH="${RFSWIFT_SCRIPTS_BRANCH:-ubuntu_resolute}"
 SCRIPTS_DIR="scripts"
 cd ~
 TARGET_DIR="$(pwd)/scripts"  # Use current working directory
@@ -24,8 +28,8 @@ TEMP_DIR=$(mktemp -d)
 cd "$TEMP_DIR" || { echo -e "${RED}Failed to create temporary directory${NC}"; exit 1; }
 
 # Download the list of files in the scripts directory
-echo -e "${BLUE}Fetching file list from $REPO_URL${NC}"
-curl -sL "$REPO_URL/tarball/main" | tar -xz --strip=2 --wildcards "*/$SCRIPTS_DIR/*" || { echo -e "${RED}Failed to fetch and extract files${NC}"; exit 1; }
+echo -e "${BLUE}Fetching ${SCRIPTS_DIR} from $REPO_URL (branch: $BRANCH)${NC}"
+curl -fsSL "$REPO_URL/tarball/$BRANCH" | tar -xz --strip=2 --wildcards "*/$SCRIPTS_DIR/*" || { echo -e "${RED}Failed to fetch and extract files from branch '$BRANCH'${NC}"; exit 1; }
 
 # Copy the scripts to the target directory
 echo -e "${BLUE}Updating scripts in $TARGET_DIR${NC}"

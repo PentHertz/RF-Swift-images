@@ -1,14 +1,20 @@
 name: Incremental update (manual)
 
-# Refresh an already-published image in place by running rfswift_update inside
-# it, instead of rebuilding from scratch. Manual dispatch only.
+# Produce a versioned, updated image by running rfswift_update inside the latest
+# FRESH build, instead of rebuilding from scratch. Manual dispatch only.
 #
-# NOTE: this commits a running container, so the result drifts from the
-# Dockerfile (extra layer, less reproducible). It is meant for quick interim
-# refreshes between full `build_images_*` runs, which remain the source of truth.
-# Only works on images built after rfswift_update was added.
+# Layering model: REBASED. The source is always the fresh-build tag
+# (<image>_<arch>), which this workflow never overwrites. Each version is that
+# fresh base + exactly ONE commit layer holding all changes up to that version,
+# so the released image never grows across v1.x updates. Do a fresh
+# `build_images_*` run for major bumps (e.g. v2.0.0) to refresh the base itself.
+#
+# NOTE: a commit-based image drifts from the Dockerfile (less reproducible);
+# full builds remain the source of truth. Only works on images built after
+# rfswift_update was added.
 
 env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   REGISTRY_IMAGE: penthertz/rfswiftdev_noble
 
 on:
@@ -49,16 +55,20 @@ on:
         description: 'Sync install scripts from GitHub first (--sync)'
         type: boolean
         default: true
+      scripts_branch:
+        description: 'Branch to sync scripts from'
+        type: string
+        default: ubuntu_resolute
       apt_upgrade:
         description: 'Run the apt upgrade phase'
         type: boolean
         default: true
       push:
-        description: 'Commit and push the updated image back (off = dry-run, report only)'
+        description: 'Commit and push the versioned image (off = dry-run, report only)'
         type: boolean
         default: true
-      dest_tag_suffix:
-        description: 'Optional suffix for the pushed tag, e.g. -updated (empty = overwrite the same tag)'
+      version:
+        description: 'Version for the produced tag, e.g. 1.0.1 -> <image>_<arch>_1.0.1 (required when pushing)'
         type: string
         default: ''
 
@@ -80,10 +90,28 @@ jobs:
         run: |
           set -euo pipefail
           ARCH='${{ inputs.arch }}'
+          VERSION='${{ inputs.version }}'
+          # Source is ALWAYS the fresh-build tag (rebased model) and is never
+          # overwritten here. The versioned tag is a separate, derived image.
           SRC="${REGISTRY_IMAGE}:${{ inputs.image }}_${ARCH}"
-          DEST="${REGISTRY_IMAGE}:${{ inputs.image }}_${ARCH}${{ inputs.dest_tag_suffix }}"
-          echo "Source : $SRC"
-          echo "Dest   : $DEST"
+          if [ -n "$VERSION" ]; then
+            DEST="${REGISTRY_IMAGE}:${{ inputs.image }}_${ARCH}_${VERSION}"
+          else
+            DEST=""
+          fi
+          echo "Source : $SRC (fresh base, read-only here)"
+          echo "Dest   : ${DEST:-<none / dry-run>}"
+
+          if [ '${{ inputs.push }}' = 'true' ]; then
+            if [ -z "$DEST" ]; then
+              echo "::error::push is enabled but no version was given — refusing to overwrite the fresh base."
+              exit 1
+            fi
+            if [ "$DEST" = "$SRC" ]; then
+              echo "::error::destination equals the fresh base tag — refusing to overwrite it."
+              exit 1
+            fi
+          fi
 
           # Translate inputs into rfswift_update flags
           FLAGS=""
@@ -109,6 +137,7 @@ jobs:
           fi
 
           docker run --name rfupdate --platform "linux/${ARCH}" \
+            -e RFSWIFT_SCRIPTS_BRANCH='${{ inputs.scripts_branch }}' \
             --entrypoint /usr/sbin/rfswift_update "$SRC" $FLAGS | tee /tmp/update.log
 
           CHANGES=()

@@ -364,14 +364,21 @@ RFSWIFT_STATE="${RFSWIFT_STATE:-/var/lib/db/rfswift_state.lst}"
 RFSWIFT_UPDATE_SKIP="${RFSWIFT_UPDATE_SKIP:-rfswift_shell_setup docker_preinstall print_build_report record_build_failure}"
 
 # Record an install function as a managed component (called from entrypoint.sh
-# at build time). Stores just the name; the recipe hash is computed on update.
+# at build time). Also seals the build-time recipe hash as the update baseline,
+# so a freshly built image ships with correct state: a later rfswift_update can
+# tell which tools the scripts changed *since this image was built*, and rebuild
+# exactly those. Without this seal, the first update on a fresh base would see
+# no state, treat it as baseline, and rebuild nothing.
 function rfswift_register_component() {
     local fn="$1"
     [ -n "$fn" ] || return 0
     declare -f "$fn" > /dev/null 2>&1 || return 0   # only real functions
     [ -d "$(dirname "$RFSWIFT_COMPONENTS")" ] || sudo mkdir -p "$(dirname "$RFSWIFT_COMPONENTS")"
-    touch "$RFSWIFT_COMPONENTS"
+    touch "$RFSWIFT_COMPONENTS" "$RFSWIFT_STATE"
     grep -qxF "$fn" "$RFSWIFT_COMPONENTS" 2>/dev/null || echo "$fn" | sudo tee -a "$RFSWIFT_COMPONENTS" > /dev/null
+    # First seal wins (the hash of the recipe actually used to build this image).
+    grep -q "^${fn}:" "$RFSWIFT_STATE" 2>/dev/null || \
+        echo "${fn}:$(_rfswift_fnhash "$fn")" | sudo tee -a "$RFSWIFT_STATE" > /dev/null
 }
 
 # Stable hash of an install function's source, used to detect recipe changes.

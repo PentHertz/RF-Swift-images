@@ -1,6 +1,7 @@
 name: Full build - AMD64 Docker Build with Caching
 
 env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   REGISTRY_IMAGE: penthertz/rfswiftdev_noble
   CACHE_REPO: penthertz/rfswiftdev_noble
   DO_SPACES_ENDPOINT: ${{ secrets.BUCKET_URL }}
@@ -9,7 +10,7 @@ env:
 on:
   push:
     branches:
-      - ubuntu_resolute
+      - ubuntu_noble
     paths:
       - '**'
   workflow_dispatch:
@@ -62,7 +63,6 @@ jobs:
         if: steps.file_check.outputs.run_job_corebuild == 'true'
         uses: docker/setup-buildx-action@v3
         with:
-          install: true
           version: latest
 
       - name: Log in to Docker Hub
@@ -141,7 +141,6 @@ jobs:
         if: steps.file_check.outputs.run_job_corebuild == 'true'
         uses: docker/setup-buildx-action@v3
         with:
-          install: true
           version: latest
 
       - name: Log in to Docker Hub
@@ -226,8 +225,6 @@ jobs:
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true'
         uses: docker/setup-buildx-action@v3
-        with:
-          install: true
 
       - name: Log in to Docker Hub
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true'
@@ -283,7 +280,6 @@ jobs:
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true'
         uses: docker/setup-buildx-action@v3
         with:
-          install: true
           version: latest
 
       - name: Log in to Docker Hub
@@ -374,8 +370,6 @@ jobs:
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_antsdr_devices == 'true'
         uses: docker/setup-buildx-action@v3
-        with:
-          install: true
 
       - name: Log in to Docker Hub
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_antsdr_devices == 'true'
@@ -437,7 +431,6 @@ jobs:
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_antsdr_devices == 'true'
         uses: docker/setup-buildx-action@v3
         with:
-          install: true
           version: latest
 
       - name: Log in to Docker Hub
@@ -528,8 +521,6 @@ jobs:
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true'
         uses: docker/setup-buildx-action@v3
-        with:
-          install: true
 
       - name: Log in to Docker Hub
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true'
@@ -591,7 +582,6 @@ jobs:
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true'
         uses: docker/setup-buildx-action@v3
         with:
-          install: true
           version: latest
 
       - name: Log in to Docker Hub
@@ -682,8 +672,6 @@ jobs:
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_hardware == 'true'
         uses: docker/setup-buildx-action@v3
-        with:
-          install: true
 
       - name: Log in to Docker Hub
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_hardware == 'true'
@@ -745,7 +733,6 @@ jobs:
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_hardware == 'true'
         uses: docker/setup-buildx-action@v3
         with:
-          install: true
           version: latest
 
       - name: Log in to Docker Hub
@@ -830,8 +817,6 @@ jobs:
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' 
         uses: docker/setup-buildx-action@v3
-        with:
-          install: true
 
       - name: Log in to Docker Hub
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true'
@@ -887,7 +872,6 @@ jobs:
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' 
         uses: docker/setup-buildx-action@v3
         with:
-          install: true
           version: latest
 
       - name: Log in to Docker Hub
@@ -984,8 +968,6 @@ jobs:
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true' || steps.file_check.outputs.run_job_sdrfull == 'true'
         uses: docker/setup-buildx-action@v3
-        with:
-          install: true
 
       - name: Log in to Docker Hub
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true' || steps.file_check.outputs.run_job_sdrfull == 'true'
@@ -1053,7 +1035,6 @@ jobs:
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true' || steps.file_check.outputs.run_job_sdrfull == 'true'
         uses: docker/setup-buildx-action@v3
         with:
-          install: true
           version: latest
 
       - name: Log in to Docker Hub
@@ -1144,8 +1125,6 @@ jobs:
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true'
         uses: docker/setup-buildx-action@v3
-        with:
-          install: true
 
       - name: Log in to Docker Hub
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true'
@@ -1207,7 +1186,6 @@ jobs:
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true'
         uses: docker/setup-buildx-action@v3
         with:
-          install: true
           version: latest
 
       - name: Log in to Docker Hub
@@ -1304,8 +1282,6 @@ jobs:
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom23G == 'true'
         uses: docker/setup-buildx-action@v3
-        with:
-          install: true
 
       - name: Log in to Docker Hub
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom23G == 'true'
@@ -1373,7 +1349,6 @@ jobs:
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom23G == 'true'
         uses: docker/setup-buildx-action@v3
         with:
-          install: true
           version: latest
 
       - name: Log in to Docker Hub
@@ -1470,8 +1445,6 @@ jobs:
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom4G5GNSA == 'true'
         uses: docker/setup-buildx-action@v3
-        with:
-          install: true
 
       - name: Log in to Docker Hub
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom4G5GNSA == 'true'
@@ -1539,7 +1512,6 @@ jobs:
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom4G5GNSA == 'true'
         uses: docker/setup-buildx-action@v3
         with:
-          install: true
           version: latest
 
       - name: Log in to Docker Hub
@@ -1636,8 +1608,6 @@ jobs:
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom5GSA == 'true'
         uses: docker/setup-buildx-action@v3
-        with:
-          install: true
 
       - name: Log in to Docker Hub
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom5GSA == 'true'
@@ -1705,7 +1675,6 @@ jobs:
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom5GSA == 'true'
         uses: docker/setup-buildx-action@v3
         with:
-          install: true
           version: latest
 
       - name: Log in to Docker Hub
@@ -1802,8 +1771,6 @@ jobs:
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom5GSA == 'true'
         uses: docker/setup-buildx-action@v3
-        with:
-          install: true
 
       - name: Log in to Docker Hub
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom5GSA == 'true'
@@ -1871,7 +1838,6 @@ jobs:
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_telecom == 'true' || steps.file_check.outputs.run_job_telecom5GSA == 'true'
         uses: docker/setup-buildx-action@v3
         with:
-          install: true
           version: latest
 
       - name: Log in to Docker Hub
@@ -1968,8 +1934,6 @@ jobs:
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_wifi == 'true' || steps.file_check.outputs.run_job_network == 'true'
         uses: docker/setup-buildx-action@v3
-        with:
-          install: true
 
       - name: Log in to Docker Hub
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_wifi == 'true' || steps.file_check.outputs.run_job_network == 'true'
@@ -2037,7 +2001,6 @@ jobs:
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_wifi == 'true' || steps.file_check.outputs.run_job_network == 'true'
         uses: docker/setup-buildx-action@v3
         with:
-          install: true
           version: latest
 
       - name: Log in to Docker Hub
@@ -2128,8 +2091,6 @@ jobs:
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_bt == 'true'
         uses: docker/setup-buildx-action@v3
-        with:
-          install: true
 
       - name: Log in to Docker Hub
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_bt == 'true'
@@ -2191,7 +2152,6 @@ jobs:
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_bt == 'true'
         uses: docker/setup-buildx-action@v3
         with:
-          install: true
           version: latest
 
       - name: Log in to Docker Hub
@@ -2276,8 +2236,6 @@ jobs:
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_rfid == 'true'
         uses: docker/setup-buildx-action@v3
-        with:
-          install: true
 
       - name: Log in to Docker Hub
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_rfid == 'true'
@@ -2333,7 +2291,6 @@ jobs:
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_rfid == 'true'
         uses: docker/setup-buildx-action@v3
         with:
-          install: true
           version: latest
 
       - name: Log in to Docker Hub
@@ -2418,8 +2375,6 @@ jobs:
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_network == 'true'
         uses: docker/setup-buildx-action@v3
-        with:
-          install: true
 
       - name: Log in to Docker Hub
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_network == 'true'
@@ -2475,7 +2430,6 @@ jobs:
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_network == 'true'
         uses: docker/setup-buildx-action@v3
         with:
-          install: true
           version: latest
 
       - name: Log in to Docker Hub
@@ -2560,8 +2514,6 @@ jobs:
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_automotive == 'true'
         uses: docker/setup-buildx-action@v3
-        with:
-          install: true
 
       - name: Log in to Docker Hub
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_automotive == 'true'
@@ -2617,7 +2569,6 @@ jobs:
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_automotive == 'true'
         uses: docker/setup-buildx-action@v3
         with:
-          install: true
           version: latest
 
       - name: Log in to Docker Hub
@@ -2702,8 +2653,6 @@ jobs:
       - name: Set up Docker Buildx
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_reversing == 'true'
         uses: docker/setup-buildx-action@v3
-        with:
-          install: true
 
       - name: Log in to Docker Hub
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_reversing == 'true'
@@ -2759,7 +2708,6 @@ jobs:
         if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_reversing == 'true'
         uses: docker/setup-buildx-action@v3
         with:
-          install: true
           version: latest
 
       - name: Log in to Docker Hub

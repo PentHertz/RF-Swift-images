@@ -1,6 +1,7 @@
 name: Tagged Release - Retag ARM64
 
 env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   DEV_REGISTRY: penthertz/rfswiftdev_noble
   RELEASE_REGISTRY: penthertz/rfswift_noble
   ARCH: arm64
