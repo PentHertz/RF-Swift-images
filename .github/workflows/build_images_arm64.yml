@@ -2,8 +2,8 @@ name: Full build - ARM64 Docker Build with Caching
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-  REGISTRY_IMAGE: penthertz/rfswiftdev_noble
-  CACHE_REPO: penthertz/rfswiftdev_noble
+  REGISTRY_IMAGE: penthertz/rfswiftdev_resolute
+  CACHE_REPO: penthertz/rfswiftdev_resolute
   DO_SPACES_ENDPOINT: ${{ secrets.BUCKET_URL }}
   DO_SPACES_REGION: ${{ secrets.BUCKET_REGION }}
 
