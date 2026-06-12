@@ -36,7 +36,9 @@ function keystone_soft_install() {
 		installfromnet "git clone https://github.com/keystone-engine/keystone.git"
 		cd keystone
 		mkdir build; cd build
-		cmake .. -DCMAKE_BUILD_TYPE=Release
+		# Keystone's CMakeLists declares cmake_minimum_required < 3.5, which CMake 4.x
+		# (Ubuntu 26.04) refuses; this flag restores the old policy behavior.
+		cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 		make -j$(nproc)
 		make install
 		goodecho "[+] Installing Python bindings"
