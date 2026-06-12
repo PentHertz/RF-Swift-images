@@ -62,7 +62,7 @@ function signalhound_sdk_install() {
             ;;
     esac
 
-    # Generic install_lib <series> <lib_prefix> — finds the real .so regardless of subdir naming
+    # Generic install_lib <series> <lib_prefix> - finds the real .so regardless of subdir naming
     install_sh_lib() {
         local series="$1"       # e.g. bb_series
         local prefix="$2"       # e.g. libbb_api
@@ -98,7 +98,7 @@ function signalhound_sdk_install() {
     install_sh_lib sm_series libsm_api SM200
     install_sh_lib sp_series libsp_api SP145
 
-    # FTDI driver (BB60 only, x86_64) — may ship without version suffix
+    # FTDI driver (BB60 only, x86_64) - may ship without version suffix
     if [[ "$ARCH" == "x86_64" || "$ARCH" == "amd64" ]]; then
         FTDI_LIB=$(find "${SDK_DIR}/device_apis/bb_series/lib" \
                         -path "*${LIB_PATTERN}*" \

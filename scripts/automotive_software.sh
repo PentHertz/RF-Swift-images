@@ -23,7 +23,7 @@ function caringcaribou_soft_install() {
 
 function savvycan_soft_install() {
 	goodecho "[+] Cloning and installing SavvyCAN"
-	# Qt5 serialbus is gone in Ubuntu 26.04 — SavvyCAN now builds against Qt6
+	# Qt5 serialbus is gone in Ubuntu 26.04 - SavvyCAN now builds against Qt6
 	install_dependencies "qmake6 qt6-base-dev qt6-declarative-dev qt6-serialport-dev qt6-serialbus-dev qt6-tools-dev libqt6serialbus6-plugins"
 	[ -d /automotive ] || mkdir /automotive
 	cd /automotive

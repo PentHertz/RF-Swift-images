@@ -86,10 +86,10 @@ jobs:
           cd Dockerfiles
           REPORT=$(ARCH=${{ matrix.platform }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make report IMG=corebuild 2>/dev/null || echo "(image unavailable)")
           {
-            echo "## RF-Swift build report — corebuild (${{ matrix.platform }})"
+            echo "## RF-Swift build report - corebuild (${{ matrix.platform }})"
             echo ""
             if [ -z "$REPORT" ] || [ "$REPORT" = "(no failures recorded)" ]; then
-              echo "✅ No install failures recorded."
+              echo "OK No install failures recorded."
             else
               echo "| category | stage | item | detail |"
               echo "|---|---|---|---|"

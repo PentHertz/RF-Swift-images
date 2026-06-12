@@ -94,7 +94,7 @@ function binwalkv3_soft_install() {
         # Populate cargo registry before patching
         cargo fetch 2>/dev/null || true
         # plotly_kaleido 0.13.1 build.rs only defines KALEIDO_URL for x86_64/aarch64/windows/macos
-        # riscv64 falls through with an undefined symbol — patch aarch64 cfg to include riscv64
+        # riscv64 falls through with an undefined symbol - patch aarch64 cfg to include riscv64
         local KALEIDO_BUILD
         KALEIDO_BUILD=$(find /root/.cargo/registry/src -name "build.rs" \
             -path "*/plotly_kaleido*" 2>/dev/null | head -1)

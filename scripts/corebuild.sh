@@ -107,7 +107,7 @@ function install_firefox() {
     ARCH=$(uname -m)
     case "$ARCH" in
         x86_64|aarch64)
-            goodecho "[+] Architecture: $ARCH — using Mozilla PPA"
+            goodecho "[+] Architecture: $ARCH - using Mozilla PPA"
             add-apt-repository ppa:mozillateam/ppa -y
             printf 'Package: *\nPin: release o=LP-PPA-mozillateam\nPin-Priority: 1001\n' \
                 > /etc/apt/preferences.d/mozilla-firefox
@@ -119,7 +119,7 @@ function install_firefox() {
             if apt-cache show firefox-esr &>/dev/null; then
                 install_dependencies "firefox-esr"
             else
-                criticalecho-noexit "[-] firefox-esr not available on this riscv64 repo — skipping"
+                criticalecho-noexit "[-] firefox-esr not available on this riscv64 repo - skipping"
                 exit 0
             fi
             ;;
@@ -319,20 +319,20 @@ EOF
 
 function rfswift_shell_setup() {
     goodecho "[+] Setting up RF Swift shell integration"
-    # Recording indicator — must be at the very end of zshrc/bashrc
+    # Recording indicator - must be at the very end of zshrc/bashrc
     # so it runs after the prompt theme is fully loaded
     cat >> ~/.zshrc << 'RFEOF'
 
 # RF Swift recording indicator
 if [ -n "$RFSWIFT_RECORDING" ]; then
-    PROMPT="%F{red}⏺ REC%f $PROMPT"
+    PROMPT="%F{red} REC%f $PROMPT"
 fi
 RFEOF
     cat >> ~/.bashrc << 'RFEOF'
 
 # RF Swift recording indicator
 if [ -n "$RFSWIFT_RECORDING" ]; then
-    PS1="\[\e[31m\]⏺ REC\[\e[0m\] $PS1"
+    PS1="\[\e[31m\] REC\[\e[0m\] $PS1"
 fi
 RFEOF
 }

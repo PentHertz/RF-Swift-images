@@ -954,3 +954,33 @@ python3 /opt/web/sqlmap/sqlmap.py "$@"
 EOF
     chmod +x /usr/local/bin/sqlmap
 }
+
+function ssrfmap_soft_install() {
+    goodecho "[+] Installing SSRFmap (automatic SSRF fuzzer/exploitation)"
+    install_dependencies "python3-venv git"
+    [ -d /opt/network ] || mkdir -p /opt/network
+    cd /opt/network
+    gitinstall "https://github.com/swisskyrepo/SSRFmap.git" "ssrfmap_soft_install"
+    if [ -d SSRFmap ]; then
+        cd SSRFmap
+        python3 -m venv venv
+        ./venv/bin/pip install -r requirements.txt \
+            || record_build_failure "pip" "SSRFmap" "requirements install failed"
+        cat > /usr/local/bin/ssrfmap <<EOF
+#!/bin/bash
+cd /opt/network/SSRFmap && exec ./venv/bin/python ssrfmap.py "\$@"
+EOF
+        chmod +x /usr/local/bin/ssrfmap
+    else
+        record_build_failure "git" "SSRFmap" "clone failed"
+    fi
+}
+
+function graphqlmap_soft_install() {
+    goodecho "[+] Installing GraphQLmap (GraphQL endpoint scripting engine)"
+    install_dependencies "pipx git"; pipx ensurepath
+    pipx install git+https://github.com/swisskyrepo/GraphQLmap \
+        || record_build_failure "pip" "GraphQLmap" "pipx install failed"
+    [ -e /root/.local/bin/graphqlmap ] && ln -sf /root/.local/bin/graphqlmap /usr/sbin/graphqlmap
+}
+

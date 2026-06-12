@@ -803,7 +803,7 @@ function tetra_suite_install () {
     cd telive
     make -j$(nproc)
     
-    # Clone ACELP codec installer (not built — user runs it manually due to ETSI licensing)
+    # Clone ACELP codec installer (not built - user runs it manually due to ETSI licensing)
     goodecho "[+] Cloning TETRA ACELP codec installer (run 'install-tetra-codec' to enable voice decoding)"
     cd /rftools/sdr
     gitinstall "https://github.com/sq5bpf/install-tetra-codec.git" "tetra_suite_install"

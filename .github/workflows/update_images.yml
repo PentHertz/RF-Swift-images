@@ -107,11 +107,11 @@ jobs:
 
           if [ '${{ inputs.push }}' = 'true' ]; then
             if [ -z "$DEST" ]; then
-              echo "::error::push is enabled but no version was given — refusing to overwrite the fresh base."
+              echo "::error::push is enabled but no version was given - refusing to overwrite the fresh base."
               exit 1
             fi
             if [ "$DEST" = "$SRC" ]; then
-              echo "::error::destination equals the fresh base tag — refusing to overwrite it."
+              echo "::error::destination equals the fresh base tag - refusing to overwrite it."
               exit 1
             fi
           fi
@@ -135,7 +135,7 @@ jobs:
           # The wrapper must be present (i.e. the image was built with the feature).
           if ! docker run --rm --platform "linux/${ARCH}" --entrypoint sh "$SRC" \
                  -c 'command -v rfswift_update >/dev/null'; then
-            echo "::error::$SRC has no rfswift_update — rebuild it with build_images_* first."
+            echo "::error::$SRC has no rfswift_update - rebuild it with build_images_* first."
             exit 1
           fi
 
@@ -163,7 +163,7 @@ jobs:
         if: always()
         run: |
           {
-            echo "## rfswift_update — ${{ inputs.image }} (${{ inputs.arch }}, mode=${{ inputs.mode }})"
+            echo "## rfswift_update - ${{ inputs.image }} (${{ inputs.arch }}, mode=${{ inputs.mode }})"
             echo ""
             echo '### Update summary (rebuilt / current / failed)'
             echo '```'
@@ -176,7 +176,7 @@ jobs:
               echo "|---|---|---|---|"
               awk -F'\t' 'NF>=4 {printf "| %s | %s | %s | %s |\n",$1,$2,$3,$4}' /tmp/report.tsv
             else
-              echo "✅ none"
+              echo "OK none"
             fi
           } >> "$GITHUB_STEP_SUMMARY"
 

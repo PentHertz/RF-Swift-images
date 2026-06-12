@@ -79,3 +79,19 @@ function kerbrute_soft_install() {
         record_build_failure "build" "kerbrute" "go install failed"
     fi
 }
+
+function sharplaps_soft_install() {
+    # SharpLAPS is a C#/.NET tool (reads LAPS passwords from LDAP) meant to run
+    # against Windows targets. We stage the repo (source + any prebuilt binary)
+    # rather than compiling it on Linux; symlink the .exe if one ships in the repo.
+    goodecho "[+] Installing SharpLAPS (LAPS-from-LDAP dumper; staged for target use)"
+    [ -d "$AD_DIR" ] || mkdir -p "$AD_DIR"
+    cd "$AD_DIR"
+    gitinstall "https://github.com/swisskyrepo/SharpLAPS.git" "sharplaps_soft_install"
+    if [ -d SharpLAPS ]; then
+        local exe; exe=$(find "$AD_DIR/SharpLAPS" -iname 'SharpLAPS.exe' 2>/dev/null | head -1)
+        [ -n "$exe" ] && ln -sf "$exe" /usr/local/bin/SharpLAPS.exe
+    else
+        record_build_failure "git" "SharpLAPS" "clone failed"
+    fi
+}

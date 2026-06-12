@@ -2,12 +2,13 @@
 
 function common_sources_and_sinks() {
     # gr-osmosdr does find_package(Boost ... system). In Boost 1.90 (resolute)
-    # boost::system is header-only: it ships NO boost_systemConfig.cmake and NO
-    # libboost_system.so, so CMake 4.2 config mode fails to find the "system"
-    # component. -DBoost_NO_BOOST_CMAKE=ON forces the legacy FindBoost module,
-    # which treats system as header-only and provides the target from headers.
+    # boost::system is header-only, so CMake 4.2's LEGACY FindBoost module reports
+    # "Could NOT find Boost (missing: system)" - there is no libboost_system.so to
+    # locate. The fix is to use Boost's modern CMake package (BoostConfig.cmake),
+    # which exposes Boost::system as a header-only target. Force policy CMP0167=NEW
+    # so find_package(Boost) uses config mode instead of the removed FindBoost.
     install_dependencies "libboost-all-dev"
-    grclone_and_build "https://github.com/PentHertz/gr-osmosdr.git" "" "common_sources_and_sinks" "-DBoost_NO_BOOST_CMAKE=ON"
+    grclone_and_build "https://github.com/PentHertz/gr-osmosdr.git" "" "common_sources_and_sinks" "-DCMAKE_POLICY_DEFAULT_CMP0167=NEW"
     cd /rftools/sdr/oot/gr-osmosdr
     #cd thirdparty
     #chmod +x ./hydrasdr_pkg-confile.sh
