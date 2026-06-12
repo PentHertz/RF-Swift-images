@@ -11,6 +11,7 @@ source cal_devices.sh
 source reverse_software.sh
 source sast_software.sh
 source automotive_software.sh
+source mobile_software.sh
 source telecom_software.sh
 source terminal_harness.sh
 source corebuild.sh

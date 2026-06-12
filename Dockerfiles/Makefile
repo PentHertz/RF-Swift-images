@@ -1,7 +1,7 @@
 # Set default architecture to all if ARCH is not provided
 ARCH ?= amd64
-CACHE_REPO ?= penthertz/rfswiftdev
-REGISTRY_IMAGE ?= penthertz/rfswiftdev
+CACHE_REPO ?= penthertz/rfswiftdev_resolute
+REGISTRY_IMAGE ?= penthertz/rfswiftdev_resolute
 STORAGE_TYPE ?= local  # Set to "registry" to use registry-based caching
 
 # Drivers
@@ -238,6 +238,9 @@ reversing:
 automotive:
 	$(call build_and_push,automotive,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild_$(ARCH),$(CURDIR)/automotive.docker)
 
+android:
+	$(call build_and_push,android,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild_$(ARCH),$(CURDIR)/android.docker)
+
 hardware:
 	$(call build_and_push,hardware,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices_$(ARCH),$(CURDIR)/hardware.docker)
 
@@ -282,7 +285,7 @@ report:
 #
 # Convenience targets
 #
-build: common sdrsadevices sdrlight sdrfull sdrsadevicesantsdr sdrsadevicesrtlsdrv4 rfid network telecom_utils telecom_2Gto3G telecom_4G_5GNSA telecom_5G bluetooth wifi automotive reversing
+build: common sdrsadevices sdrlight sdrfull sdrsadevicesantsdr sdrsadevicesrtlsdrv4 rfid network telecom_utils telecom_2Gto3G telecom_4G_5GNSA telecom_5G bluetooth wifi automotive android reversing
 	@echo "Done!"
 
 # Help target

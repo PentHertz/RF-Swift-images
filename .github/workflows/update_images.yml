@@ -30,6 +30,7 @@ on:
           - sdr_light
           - sdr_full
           - automotive
+          - android
           - reversing
           - rfid
           - network
@@ -74,7 +75,7 @@ on:
 
 jobs:
   update:
-    runs-on: ${{ (inputs.arch == 'arm64' && 'ubuntu-24.04-arm') || 'ubuntu-22.04' }}
+    runs-on: ${{ (inputs.arch == 'arm64' && 'ubuntu-24.04-arm') || 'ubuntu-24.04' }}
     timeout-minutes: 340
     steps:
       - name: Set up QEMU (for cross-arch containers)

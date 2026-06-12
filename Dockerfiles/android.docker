@@ -1,0 +1,49 @@
+# This DockerFile is part of the RFSwift project
+# Install type: Android / mobile security tooling
+# Author(s): Sébastien Dudek (@FlUxIuS) @Penthertz
+# website: penthertz.com
+
+ARG BASE_IMAGE=corebuild
+FROM ${BASE_IMAGE}
+
+LABEL "org.container.project"="rfswift"
+LABEL "org.container.author"="Sébastien Dudek (FlUxIuS)"
+
+RUN echo 'APT::Install-Suggests "0";' >> /etc/apt/apt.conf.d/00-docker
+RUN echo 'APT::Install-Recommends "0";' >> /etc/apt/apt.conf.d/00-docker
+RUN apt-fast update && \
+    apt-get install -y software-properties-common && \
+    add-apt-repository universe && \
+    apt-fast update
+
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+COPY scripts /root/scripts/
+COPY rules /root/rules/
+
+WORKDIR /root/scripts/
+RUN chmod +x entrypoint.sh
+
+# APK tooling (adb/fastboot, apktool, apksigner, zipalign, smali, scrcpy) and
+# static-analysis helpers
+RUN ./entrypoint.sh mobile_apt_tools_install && \
+	./entrypoint.sh dex2jar_soft_install
+
+# Dynamic instrumentation + analysis frameworks
+RUN ./entrypoint.sh frida_soft_install && \
+	./entrypoint.sh objection_soft_install && \
+	./entrypoint.sh androguard_soft_install && \
+	./entrypoint.sh drozer_soft_install
+
+# Mobile Security Framework (heavier; own venv)
+RUN ./entrypoint.sh mobsf_soft_install
+
+# Build report (tools that failed to install)
+RUN ./entrypoint.sh print_build_report
+
+# Cleaning and quitting
+WORKDIR /root/
+RUN rm -rf /root/thirdparty && \
+	rm -rf /root/rules/ && \
+	apt-fast clean
+RUN DEBIAN_FRONTEND=noninteractive rm -rf /var/lib/apt/lists/*

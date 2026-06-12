@@ -880,3 +880,132 @@ function hydrasdr433_soft_install() {
     mkdir -p $(pwd)/../man
     make install
 }
+
+FISSURE_DIR="/rftools/sdr/FISSURE"
+FISSURE_VENV="${FISSURE_DIR}/venv"
+
+function fissure_soft_install() {
+    # FISSURE (AInfoSec RF framework), installed so it reuses the GNU Radio /
+    # SoapySDR / SDR driver stack already present in sdr_light.
+    #
+    # FISSURE's own installer pip-installs a large, version-pinned set
+    # (numpy/protobuf/opencv/tensorflow/...) into the SYSTEM Python, which would
+    # perturb GNU Radio's system bindings. To avoid that we DON'T use that path:
+    # FISSURE's Python deps go into a dedicated venv created with
+    # --system-site-packages (so it still sees the system GNU Radio / PyQt5
+    # bindings), and the `fissure` command is a wrapper that runs from that venv.
+    # The system Python is left untouched. 26.04 isn't an upstream-supported
+    # FISSURE OS; we mirror its Ubuntu 24.04 dependency set.
+    goodecho "[+] Installing FISSURE (isolated venv, reusing existing SDR stack)"
+    [ -d /rftools/sdr ] || mkdir -p /rftools/sdr
+    cd /rftools/sdr
+    gitinstall "https://github.com/ainfosec/FISSURE.git" "fissure_soft_install" "Python3"
+    if [ ! -d FISSURE ]; then
+        record_build_failure "git" "FISSURE" "clone failed"
+        return 1
+    fi
+    cd "$FISSURE_DIR"
+
+    # 1) System apt deps FISSURE needs (GUI toolkit + helpers). apt-managed Python
+    #    modules (PyQt5, tk) are fine system-wide and are visible to the venv via
+    #    --system-site-packages; only the version-pinned pip deps are isolated.
+    install_dependencies "qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools python3-pyqt5 python3-tk libosmocore-dev liborc-0.4-dev expect wireshark-common tshark gpsd python3-venv"
+
+    # 2) Dedicated venv holding FISSURE's pip deps (mirrors FISSURE's
+    #    Installer/OS/ubuntu24_04 "Misc. Dependencies" list). pycrypto -> the
+    #    maintained pycryptodome (same `Crypto` module, builds on modern Python).
+    python3 -m venv --system-site-packages "$FISSURE_VENV"
+    "$FISSURE_VENV/bin/python3" -m pip install --upgrade pip > /dev/null 2>&1 || true
+    local FISSURE_PIP="PyYAML bitarray crcmod pycryptodome pyzmq psutil pyserial gpsd-py3 geopy sounddevice qasync pydotplus netron ipython scikit-learn opencv-python-headless pyzipper mgrs watchdog aiohttp paho-mqtt msgpack eventlet psycopg2-binary python-dotenv"
+    "$FISSURE_VENV/bin/python3" -m pip install $FISSURE_PIP \
+        || record_build_failure "pip" "FISSURE venv deps" "venv pip install reported errors"
+    # tensorflow is only for the optional ML classifier; heavy, install best-effort.
+    "$FISSURE_VENV/bin/python3" -m pip install tensorflow-cpu > /dev/null 2>&1 \
+        || record_build_failure "pip" "tensorflow-cpu (FISSURE classifier)" "optional ML dep skipped"
+
+    # 3) Build the core FISSURE GNU Radio OOT block against the system GNU Radio
+    #    (C++/cmake, system install -- no Python pollution). CMake 4.x policy flag
+    #    for the same reason as Keystone on resolute.
+    local GRA="$FISSURE_DIR/Custom_Blocks/maint-3.10/gr-ainfosec"
+    if [ -d "$GRA" ]; then
+        ( cd "$GRA" && mkdir -p build && cd build && \
+          cmake .. -DCMAKE_POLICY_VERSION_MINIMUM=3.5 && make -j"$(nproc)" && make install && ldconfig ) \
+          || record_build_failure "build" "gr-ainfosec" "FISSURE OOT block build failed"
+    fi
+
+    # 4) Generate FISSURE's ZMQ certificates using the venv python.
+    if [ -f "$FISSURE_DIR/fissure/generate_certificates.py" ]; then
+        ( cd "$FISSURE_DIR" && PYTHONPATH="$FISSURE_DIR" "$FISSURE_VENV/bin/python3" fissure/generate_certificates.py ) \
+          || record_build_failure "build" "FISSURE certificates" "generate_certificates.py failed"
+    fi
+
+    # 5) Wrapper: always launch FISSURE from its venv so its isolated deps are used.
+    cat > /usr/local/bin/fissure <<EOF
+#!/bin/bash
+# RF-Swift launcher: run the FISSURE Dashboard from its isolated venv.
+export PYTHONPATH="${FISSURE_DIR}\${PYTHONPATH:+:\$PYTHONPATH}"
+cd "${FISSURE_DIR}" || exit 1
+exec "${FISSURE_VENV}/bin/python3" fissure/Dashboard/__main__.py "\$@"
+EOF
+    chmod +x /usr/local/bin/fissure
+    goodecho "[+] FISSURE installed (venv: ${FISSURE_VENV}). Launch with: fissure"
+    cd /rftools/sdr
+}
+
+GNURADIO4_HOME="/opt/gnuradio4"
+
+function gnuradio4_soft_install() {
+    # GNU Radio 4.0 (GR4, github.com/fair-acc/gnuradio4) built from source
+    # ALONGSIDE the apt GNU Radio 3.10. GR4 is a separate C++23 codebase with its
+    # own headers/namespace/prefix, so it does not conflict with 3.10. It is a
+    # release candidate (experimental) and its install tooling is still immature
+    # upstream, so we keep it in a dedicated tree under /opt/gnuradio4 and expose
+    # it via /etc/profile.d. Heavy, template-heavy build; best-effort so it never
+    # aborts the image. Resolute provides the needed GCC 15 + CMake 4.2 (C++23).
+    goodecho "[+] Installing GNU Radio 4.0 (GR4) in parallel to 3.10 -- heavy build"
+    # python3.12 (from the deadsnakes PPA already enabled in corebuild) gives GR4
+    # its OWN interpreter: GR4 wants Python >= 3.12 for its embedded PythonBlock,
+    # and resolute's default python3 is 3.14. Keeping GR4 on its own 3.12 venv
+    # isolates it from system Python and from GNU Radio 3.10's bindings.
+    install_dependencies "build-essential g++ cmake ninja-build git pkg-config libfftw3-dev python3.12 python3.12-dev python3.12-venv"
+    [ -d /opt ] || mkdir -p /opt
+    cd /opt
+    # Pin to the latest release candidate tag.
+    gitinstall "https://github.com/fair-acc/gnuradio4.git" "gnuradio4_soft_install" "4.0.0-RC2"
+    if [ ! -d gnuradio4 ]; then
+        record_build_failure "git" "gnuradio4" "clone failed"
+        return 1
+    fi
+    cd "$GNURADIO4_HOME"
+
+    # GR4's own isolated Python env (3.12) for the embedded PythonBlock interpreter.
+    local GR4_VENV="$GNURADIO4_HOME/venv"
+    if command -v python3.12 > /dev/null 2>&1; then
+        python3.12 -m venv "$GR4_VENV"
+        "$GR4_VENV/bin/python" -m pip install --upgrade pip numpy > /dev/null 2>&1 \
+            || record_build_failure "pip" "gnuradio4 venv numpy" "GR4 python env setup failed"
+    else
+        record_build_failure "apt" "python3.12 (GR4)" "python3.12 unavailable; GR4 will build without Python"
+    fi
+
+    # Deps (vir-simd, magic_enum, ExprTk, ...) auto-resolve via system-or-fetch.
+    # SoapySDR from sdr_light is reused (system). PYTHON_FORCE_INCLUDE=ON requires
+    # the embedded-Python support and points it at GR4's own 3.12 venv. Tests off.
+    local PYARGS=""
+    [ -x "$GR4_VENV/bin/python" ] && PYARGS="-DPYTHON_FORCE_INCLUDE=ON -DPython3_EXECUTABLE=$GR4_VENV/bin/python"
+    if cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+            -DGR4_DEPENDENCY_MODE=system-or-fetch -DENABLE_TESTING=OFF $PYARGS \
+       && cmake --build build -j"$(nproc)"; then
+        cmake --install build --prefix "$GNURADIO4_HOME/install" 2>/dev/null || true
+        cat > /etc/profile.d/gnuradio4.sh <<EOF
+# GNU Radio 4.0 (GR4) - parallel to the apt GNU Radio 3.10
+export GNURADIO4_HOME="$GNURADIO4_HOME"
+export GNURADIO4_VENV="$GR4_VENV"
+export PATH="$GNURADIO4_HOME/install/bin:$GNURADIO4_HOME/build/bin:\$PATH"
+EOF
+        goodecho "[+] GNU Radio 4.0 built at $GNURADIO4_HOME (own Python venv: $GR4_VENV; env: /etc/profile.d/gnuradio4.sh). apt GNU Radio 3.10 remains the default."
+    else
+        record_build_failure "build" "gnuradio4" "GR4 source build failed (RC/experimental)"
+    fi
+    cd /opt
+}

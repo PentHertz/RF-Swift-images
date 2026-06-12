@@ -1,6 +1,11 @@
 #!/bin/bash
 
 function common_sources_and_sinks() {
+    # Boost 1.90 + CMake 4.2 (Ubuntu 26.04) use Boost config mode, which needs the
+    # per-component CMake configs (boost_systemConfig.cmake, ...) from the component
+    # dev packages; libboost-all-dev pulls them so gr-osmosdr's
+    # find_package(Boost COMPONENTS system ...) resolves.
+    install_dependencies "libboost-all-dev"
     grclone_and_build "https://github.com/PentHertz/gr-osmosdr.git" "" "common_sources_and_sinks"
     cd /rftools/sdr/oot/gr-osmosdr
     #cd thirdparty

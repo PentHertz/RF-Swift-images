@@ -317,7 +317,22 @@ function sasquatch_soft_install() {
 	gitinstall "https://github.com/FlUxIuS/sasquatch.git" "sasquatch_soft_install"
 	cd sasquatch
 	install_dependencies "build-essential liblzma-dev liblzo2-dev zlib1g-dev"
-	./build.sh
+	# GCC 14/15 (Ubuntu 26.04) promotes -Wincompatible-pointer-types and other
+	# K&R-isms to hard errors, which the bundled squashfs-tools predates and the
+	# Makefile's -Wno-error does not cover. build.sh just runs `make` with no
+	# CFLAGS handling, so inject the relaxing flags via a temporary cc/gcc shim
+	# that the Makefile's hardcoded `cc` recipe picks up.
+	local shim; shim=$(mktemp -d)
+	local c
+	for c in cc gcc; do
+		cat > "$shim/$c" <<EOF
+#!/bin/sh
+exec /usr/bin/$c -fcommon -Wno-incompatible-pointer-types -Wno-implicit-function-declaration -Wno-int-conversion "\$@"
+EOF
+		chmod +x "$shim/$c"
+	done
+	PATH="$shim:$PATH" ./build.sh || record_build_failure "build" "sasquatch" "squashfs-tools build failed"
+	rm -rf "$shim"
 }
 
 function qnx6extractor_soft_install() {
