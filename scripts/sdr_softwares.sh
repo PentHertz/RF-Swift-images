@@ -31,15 +31,16 @@ function sdrangel_soft_install() {
 
 function sdrangel_soft_fromsource_install() {
 	# Check architecture
-    ARCH=$(uname -m)
-    if [[ "$ARCH" != "x86_64" && "$ARCH" != "aarch64" ]]; then
-        criticalecho-noexit "[-] Unsupported architecture: $ARCH"
-        exit 0
-    fi
-    
+	ARCH=$(uname -m)
+	if [[ "$ARCH" != "x86_64" && "$ARCH" != "aarch64" ]]; then
+		criticalecho-noexit "[-] Unsupported architecture: $ARCH"
+		return 0
+	fi
+
 	goodecho "[+] Installing dependencies"
 	installfromnet "apt-fast update"
 	install_dependencies "libsndfile-dev git cmake g++ pkg-config autoconf automake libtool libfftw3-dev libusb-1.0-0-dev libusb-dev libhidapi-dev libopengl-dev qtbase5-dev qtchooser libqt5multimedia5-plugins qtmultimedia5-dev libqt5websockets5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev libqt5quick5 libqt5charts5-dev qml-module-qtlocation qml-module-qtpositioning qml-module-qtquick-window2 qml-module-qtquick-dialogs qml-module-qtquick-controls qml-module-qtquick-controls2 qml-module-qtquick-layouts libqt5serialport5-dev qtdeclarative5-dev qtpositioning5-dev qtlocation5-dev libqt5texttospeech5-dev qtwebengine5-dev qtbase5-private-dev libqt5gamepad5-dev libqt5svg5-dev libfaad-dev zlib1g-dev libboost-all-dev libasound2-dev pulseaudio libopencv-dev libxml2-dev bison flex ffmpeg libavcodec-dev libavformat-dev libopus-dev doxygen graphviz"
+
 	goodecho "[+] APT"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
@@ -77,23 +78,26 @@ function sdrangel_soft_fromsource_install() {
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
 	install_dependencies "libspeexdsp-dev libsamplerate0-dev"
-	cmake_clone_and_build "https://github.com/drowe67/codec2-dev.git" "build" "" "v1.0.3" "sdrangel_soft_fromsource_install"
+	cmake_clone_and_build "https://github.com/drowe67/codec2-dev.git" "build" "" "v1.0.3" "sdrangel_soft_fromsource_install" \
+		-Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/codec2
 
 	goodecho "[+] SGP4"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	cmake_clone_and_build "https://github.com/dnwrnr/sgp4.git" "build" "" ""  "sdrangel_soft_fromsource_install"-Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/sgp4
+	cmake_clone_and_build "https://github.com/dnwrnr/sgp4.git" "build" "" "" "sdrangel_soft_fromsource_install" \
+		-Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/sgp4
 
 	goodecho "[+] libsigmf"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	cmake_clone_and_build "https://github.com/f4exb/libsigmf.git" "build" "new-namespaces" ""  "sdrangel_soft_fromsource_install"-Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/libsigmf
+	cmake_clone_and_build "https://github.com/f4exb/libsigmf.git" "build" "new-namespaces" "" "sdrangel_soft_fromsource_install" \
+		-Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/libsigmf
 
 	goodecho "[+] ggmorse"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	cmake_clone_and_build "https://github.com/ggerganov/ggmorse.git" "build" "" ""  "sdrangel_soft_fromsource_install"-Wno-dev \
-		-DCMAKE_INSTALL_PREFIX=/opt/install/ggmorse -DGGMORSE_BUILD_TESTS=OFF -DGGMORSE_BUILD_EXAMPLES=OFF
+	cmake_clone_and_build "https://github.com/ggerganov/ggmorse.git" "build" "" "" "sdrangel_soft_fromsource_install" \
+		-Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/ggmorse -DGGMORSE_BUILD_TESTS=OFF -DGGMORSE_BUILD_EXAMPLES=OFF
 
 	goodecho "[+] Installing SDR Angel"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
@@ -111,7 +115,7 @@ function sdrangel_soft_fromsource_install() {
 		-DDAB_DIR=/opt/install/libdab \
 		-DGGMORSE_DIR=/opt/install/ggmorse \
 		-DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
-	ln -s /opt/install/sdrangel/bin/sdrangel /usr/bin/sdrangel
+	ln -sf /opt/install/sdrangel/bin/sdrangel /usr/bin/sdrangel
 }
 
 function sdrpp_soft_fromsource_install () {
@@ -131,7 +135,7 @@ function sdrpp_soft_fromsource_install () {
         HAROGIC_FLAG="-DOPT_BUILD_HAROGIC_SOURCE=ON"
     fi
     
-    cmake_clone_and_build "https://github.com/hydrasdr/SDRPlusPlus.git" "build" "" ""  "sdrpp_soft_fromsource_install" -DOPT_BUILD_HYDRASDR_SOURCE=ON -DOPT_BUILD_SOAPY_SOURCE=ON -DOPT_BUILD_AIRSPY_SOURCE=ON -DOPT_BUILD_AIRSPYHF_SOURCE=ON -DOPT_BUILD_NETWORK_SINK=ON \
+    cmake_clone_and_build "https://github.com/AlexandreRouma/SDRPlusPlus.git" "build" "" ""  "sdrpp_soft_fromsource_install" -DOPT_BUILD_HYDRASDR_SOURCE=ON -DOPT_BUILD_SOAPY_SOURCE=ON -DOPT_BUILD_AIRSPY_SOURCE=ON -DOPT_BUILD_AIRSPYHF_SOURCE=ON -DOPT_BUILD_NETWORK_SINK=ON \
         -DOPT_BUILD_FREQUENCY_MANAGER=ON -DOPT_BUILD_IQ_EXPORTER=ON -DOPT_BUILD_RECORDER=ON -DOPT_BUILD_RIGCTL_SERVER=ON -DOPT_BUILD_METEOR_DEMODULATOR=ON $HAROGIC_FLAG \
         -DOPT_BUILD_RADIO=ON -DOPT_BUILD_USRP_SOURCE=ON -DOPT_BUILD_FILE_SOURCE=ON -DOPT_BUILD_HACKRF_SOURCE=ON -DOPT_BUILD_RTL_SDR_SOURCE=ON -DOPT_BUILD_RTL_TCP_SOURCE=ON \
         -DOPT_BUILD_SDRPP_SERVER_SOURCE=ON -DOPT_BUILD_SOAPY_SOURCE=ON -DOPT_BUILD_SPECTRAN_SOURCE=OFF -DOPT_BUILD_SPECTRAN_HTTP_SOURCE=OFF -DOPT_BUILD_LIMESDR_SOURCE=ON \

@@ -140,7 +140,6 @@ function signalhound_sdk_install() {
     rm -rf /root/thirdparty/signal_hound_sdk
 }
 
-
 function signalhound_spike_sa_device() {
     ARCH=$(uname -m)
     if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then
@@ -148,34 +147,30 @@ function signalhound_spike_sa_device() {
         colorecho "[+] Downloading Spike bin from SignalHound"
         [ -d /rftools/analysers ] || mkdir -p /rftools/analysers
         cd /rftools/analysers
-        filename="Spike(Ubuntu22.04x64)_4_0_15"
+        local filename="Spike(Ubuntu22.04x64)_4_0_15"
         installfromnet "wget https://signalhound.com/sigdownloads/Spike/$filename.zip"
-        unzip ${filename}.zip
-        rm ${filename}.zip
-        cd ${filename}
+        unzip "${filename}.zip"
+        rm "${filename}.zip"
+        cd "${filename}"
         chmod +x setup.sh
         sh -c ./setup.sh
-        # Create the script content
+
+        # Stable symlink so the launcher never hardcodes a version
+        ln -sfn "/rftools/analysers/${filename}" /opt/spike
+
+        # Create the launcher (references /opt/spike, not the versioned dir)
         local script_path="/usr/local/bin/Spike"
         cat << 'EOF' | sudo tee "$script_path" > /dev/null
 #!/bin/sh
-
-# Set the fixed path
-BASE_DIR="/rftools/analysers/Spike(Ubuntu22.04x64)_4_0_12"
+BASE_DIR="/opt/spike"
 APPNAME="Spike"
-
-# Set up the environment variables
-LD_LIBRARY_PATH="$BASE_DIR/lib"
-LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/MATLAB/MATLAB_Runtime/v911/runtime/glnxa64
+LD_LIBRARY_PATH="$BASE_DIR/lib:/usr/local/MATLAB/MATLAB_Runtime/v911/runtime/glnxa64:$LD_LIBRARY_PATH"
 export LD_LIBRARY_PATH
 export QT_PLUGIN_PATH="$BASE_DIR/plugins"
-
-# Execute the binary
-"$BASE_DIR/bin/$APPNAME" "$@"
+export QT_QPA_PLATFORM_PLUGIN_PATH="$BASE_DIR/plugins/platforms"
+exec "$BASE_DIR/bin/$APPNAME" "$@"
 EOF
-
-    # Make the script executable
-    sudo chmod +x "$script_path"
+        sudo chmod +x "$script_path"
     else
         criticalecho-noexit "[!] Architecture is not amd64 or x86_64. Skipping installation."
     fi
