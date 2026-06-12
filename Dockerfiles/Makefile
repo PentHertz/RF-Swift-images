@@ -241,6 +241,12 @@ automotive:
 android:
 	$(call build_and_push,android,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild_$(ARCH),$(CURDIR)/android.docker)
 
+osint:
+	$(call build_and_push,osint,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild_$(ARCH),$(CURDIR)/osint.docker)
+
+ad:
+	$(call build_and_push,ad,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):network_$(ARCH),$(CURDIR)/ad.docker)
+
 hardware:
 	$(call build_and_push,hardware,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices_$(ARCH),$(CURDIR)/hardware.docker)
 
@@ -285,7 +291,7 @@ report:
 #
 # Convenience targets
 #
-build: common sdrsadevices sdrlight sdrfull sdrsadevicesantsdr sdrsadevicesrtlsdrv4 rfid network telecom_utils telecom_2Gto3G telecom_4G_5GNSA telecom_5G bluetooth wifi automotive android reversing
+build: common sdrsadevices sdrlight sdrfull sdrsadevicesantsdr sdrsadevicesrtlsdrv4 rfid network ad telecom_utils telecom_2Gto3G telecom_4G_5GNSA telecom_5G bluetooth wifi automotive android osint reversing
 	@echo "Done!"
 
 # Help target

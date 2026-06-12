@@ -1,0 +1,55 @@
+# This DockerFile is part of the RFSwift project
+# Install type: Active Directory (AD) tooling
+# Author(s): Sébastien Dudek (@FlUxIuS) @Penthertz
+# website: penthertz.com
+
+ARG BASE_IMAGE=network
+FROM ${BASE_IMAGE}
+
+LABEL "org.container.project"="rfswift"
+LABEL "org.container.author"="Sébastien Dudek (FlUxIuS)"
+
+RUN echo 'APT::Install-Suggests "0";' >> /etc/apt/apt.conf.d/00-docker
+RUN echo 'APT::Install-Recommends "0";' >> /etc/apt/apt.conf.d/00-docker
+RUN apt-fast update && \
+    apt-get install -y software-properties-common && \
+    add-apt-repository universe && \
+    apt-fast update
+
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+COPY scripts /root/scripts/
+COPY rules /root/rules/
+
+WORKDIR /root/scripts/
+RUN chmod +x entrypoint.sh
+
+# Core AD tooling relocated from the network image
+RUN ./entrypoint.sh ad_apt_tools_install && \
+	./entrypoint.sh impacket_soft_install && \
+	./entrypoint.sh responder_soft_install && \
+	./entrypoint.sh netexec_soft_install && \
+	./entrypoint.sh donpapi_soft_install && \
+	./entrypoint.sh donpwner_soft_install
+
+# Additional AD tooling
+RUN ./entrypoint.sh ldapdomaindump_soft_install && \
+	./entrypoint.sh bloodhound_py_soft_install && \
+	./entrypoint.sh certipy_soft_install && \
+	./entrypoint.sh mitm6_soft_install && \
+	./entrypoint.sh lsassy_soft_install && \
+	./entrypoint.sh bloodyad_soft_install && \
+	./entrypoint.sh certsync_soft_install && \
+	./entrypoint.sh sprayhound_soft_install && \
+	./entrypoint.sh kerbrute_soft_install && \
+	./entrypoint.sh install_pyGoldenGMSA
+
+# Build report (tools that failed to install)
+RUN ./entrypoint.sh print_build_report
+
+# Cleaning and quitting
+WORKDIR /root/
+RUN rm -rf /root/thirdparty && \
+	rm -rf /root/rules/ && \
+	apt-fast clean
+RUN DEBIAN_FRONTEND=noninteractive rm -rf /var/lib/apt/lists/*

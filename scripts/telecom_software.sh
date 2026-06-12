@@ -231,8 +231,23 @@ function Open5GS_soft_install() {
 	cd /telecom/5G
 	goodecho "[+] Cloninig and installing Open5GS"
 	installfromnet "git clone https://github.com/open5gs/open5gs"
-	cd open5gs
-	meson build --prefix=`pwd`/install
+	# Open5GS requires the mongo-c-driver 1.x pkg-config (libmongoc-1.0), but
+	# resolute only ships mongo-c-driver 2.x (libmongoc2-2; pkg-config "mongoc2")
+	# and no 1.x apt package, so build the last 1.x release into /usr/local.
+	if ! pkg-config --exists libmongoc-1.0; then
+		goodecho "[+] Building mongo-c-driver 1.x for Open5GS (resolute ships 2.x only)"
+		cd /telecom/5G
+		installfromnet "git clone -b 1.28.1 --depth 1 https://github.com/mongodb/mongo-c-driver.git"
+		cd mongo-c-driver
+		cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DENABLE_TESTS=OFF -DENABLE_EXAMPLES=OFF \
+			-DENABLE_STATIC=OFF -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+			|| record_build_failure "build" "mongo-c-driver-1.x" "cmake configure failed"
+		cmake --build build -j"$(nproc)" && cmake --install build && ldconfig \
+			|| record_build_failure "build" "mongo-c-driver-1.x" "build/install failed"
+		cd /telecom/5G/open5gs
+	fi
+	cd /telecom/5G/open5gs
+	meson setup build --prefix=`pwd`/install
 	ninja -C build
 	ln -s $(pwd)/build/tests/app/5gc /usr/bin/Open5Gs_deployall # Making a quick command
 	mkdir -p /data/db # making directory for MongoDB

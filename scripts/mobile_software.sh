@@ -1,4 +1,9 @@
 #!/bin/bash
+#
+# Mobile / Android tooling for RF-Swift.
+# Uses RF-Swift helpers (install_dependencies / pip3install / gitinstall) with
+# best-effort build reporting. Reliable sources are chosen where upstreams have
+# gone dead (e.g. the BitBucket smali jar; the Ubuntu `smali` package is used).
 
 MOBILE_DIR="/mobile"
 

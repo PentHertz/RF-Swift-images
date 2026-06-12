@@ -12,6 +12,8 @@ source reverse_software.sh
 source sast_software.sh
 source automotive_software.sh
 source mobile_software.sh
+source ad_software.sh
+source osint_software.sh
 source telecom_software.sh
 source terminal_harness.sh
 source corebuild.sh
@@ -19,7 +21,6 @@ source network_common.sh
 source hardware.sh
 source desktop.sh
 
-# Part picket from Exegol project with love <3 (https://github.com/ThePorgs/Exegol)
 if [[ $EUID -ne 0 ]]; then
   criticalecho "You must be a root user"
 else

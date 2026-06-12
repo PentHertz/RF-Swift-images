@@ -2,8 +2,6 @@
 
 set -eo pipefail
 
-### Part picket from Exegol project with love <3 (https://github.com/ThePorgs/Exegol)
-
 export RED='\033[1;31m'
 export BLUE='\033[1;34m'
 export GREEN='\033[1;32m'
@@ -23,8 +21,6 @@ function criticalecho () {
 function criticalecho-noexit () {
     echo -e "${RED}$*${NOCOLOR}" 2>&1
 }
-
-### </3 Love comes to an end
 
 function goodecho () {
     echo -e "${GREEN}$*${NOCOLOR}" 2>&1

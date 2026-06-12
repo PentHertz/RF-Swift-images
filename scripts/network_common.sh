@@ -619,8 +619,35 @@ function argus_soft_install_fromsource() {
         return 0
     fi
     install_dependencies "libxml2-dev libxslt1-dev"
-    pipx install argus-recon
-    ln -s /root/.local/bin/argus /usr/sbin/argus
+    # lxml has no cp314 wheel yet, so pipx builds it from source where GCC 15
+    # rejects the Cython-generated C (-Wincompatible-pointer-types is now a hard
+    # error). Relax the promoted-to-error diagnostics just for this build.
+    CFLAGS="${CFLAGS:-} -Wno-incompatible-pointer-types -Wno-int-conversion -Wno-implicit-function-declaration" \
+        pipx install argus-recon \
+        || record_build_failure "pip" "argus-recon" "pipx install failed (lxml source build on py3.14?)"
+    [ -e /root/.local/bin/argus ] && ln -sf /root/.local/bin/argus /usr/sbin/argus
+}
+
+function sniffnet_soft_install_fromsource() {
+    # Sniffnet (https://sniffnet.app) network traffic monitor, built from source
+    # with cargo. Needs libpcap (capture), ALSA (notification sounds) and
+    # fontconfig (GUI text). cargo/rust come from corebuild's rust_tools.
+    goodecho "[+] Installing Sniffnet (from source)"
+    install_dependencies "libpcap-dev libasound2-dev libfontconfig1-dev pkg-config"
+    [ -d /nettools ] || mkdir -p /nettools
+    cd /nettools
+    gitinstall "https://github.com/GyulyVGC/sniffnet.git" "sniffnet_soft_install_fromsource"
+    if [ ! -d sniffnet ]; then
+        record_build_failure "git" "sniffnet" "clone failed"
+        return 1
+    fi
+    cd sniffnet
+    if cargo build --release; then
+        install -m 0755 target/release/sniffnet /usr/local/bin/sniffnet
+        goodecho "[+] Sniffnet installed: /usr/local/bin/sniffnet"
+    else
+        record_build_failure "build" "sniffnet" "cargo build --release failed"
+    fi
 }
 
 function curlie_soft_install_fromsource() {

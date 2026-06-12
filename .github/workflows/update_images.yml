@@ -31,9 +31,11 @@ on:
           - sdr_full
           - automotive
           - android
+          - osint
           - reversing
           - rfid
           - network
+          - ad
           - wifi
           - bluetooth
           - hardware

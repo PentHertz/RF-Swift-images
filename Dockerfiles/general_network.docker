@@ -32,7 +32,6 @@ RUN ./entrypoint.sh nmap_soft_install && \
 	./entrypoint.sh wireshark_soft_install && \
 	./entrypoint.sh metasploit_soft_install && \
 	./entrypoint.sh tshark_soft_install && \
-	./entrypoint.sh impacket_soft_install && \
 	./entrypoint.sh autorecon_soft_install && \
 	./entrypoint.sh trufflehog_script_install && \
 	./entrypoint.sh hping3_soft_install && \
@@ -52,11 +51,11 @@ RUN ./entrypoint.sh nmap_soft_install && \
 	./entrypoint.sh isc_dhcp_server_soft_install && \
 	./entrypoint.sh lighttpd_soft_install && \
 	./entrypoint.sh crunch_soft_install && \
-	./entrypoint.sh netwatch_soft_install_fromsource
+	./entrypoint.sh netwatch_soft_install_fromsource && \
+	./entrypoint.sh sniffnet_soft_install_fromsource
 
-RUN ./entrypoint.sh donpapi_soft_install && \
-	./entrypoint.sh beef_soft_install && \
-	./entrypoint.sh donpwner_soft_install && \
+# AD credential tools (DonPAPI, DonPwner) moved to the dedicated `ad` image
+RUN ./entrypoint.sh beef_soft_install && \
 	./entrypoint.sh above_soft_install
 
 #RUN ./entrypoint.sh tetsuo_h3sec_soft_install
@@ -71,10 +70,7 @@ RUN ./entrypoint.sh sipvicious_soft_install &&\
 	./entrypoint.sh voipire_soft_install &&\
 	./entrypoint.sh sippts_soft_install
 
-# Windows env tools
-RUN	./entrypoint.sh responder_soft_install && \
-	./entrypoint.sh netexec_soft_install && \
-	./entrypoint.sh install_pyGoldenGMSA
+# AD/Windows tooling (Responder, NetExec, pyGoldenGMSA) lives in the `ad` image
 
 # Some OT tools
 RUN ./entrypoint.sh mbtget_soft_install
