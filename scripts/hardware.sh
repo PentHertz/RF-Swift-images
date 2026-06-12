@@ -345,8 +345,14 @@ function spitpm_trace_plugin_install() {
     [ -d /hardware ] || mkdir /hardware
     cd /hardware
     gitinstall "https://github.com/ghecko/libsigrokdecoder_spi-tpm.git" "spitpm_trace_plugin_install"
-    ln -s "$(pwd)/libsigrokdecoder_spi-tpm" /usr/share/libsigrokdecode4DSL/decoders/ # installing for DSView
-    ln -s "$(pwd)/libsigrokdecoder_spi-tpm" /usr/share/libsigrokdecode/decoders/
+    # Link the decoder into whichever sigrok decoder dirs exist (DSView's 4DSL
+    # path and/or the stock libsigrokdecode path); best-effort if neither present.
+    local src; src="$(pwd)/libsigrokdecoder_spi-tpm"
+    local linked=0 d
+    for d in /usr/share/libsigrokdecode4DSL/decoders /usr/share/libsigrokdecode/decoders; do
+        [ -d "$d" ] && ln -sf "$src" "$d/" && linked=1
+    done
+    [ "$linked" -eq 1 ] || record_build_failure "build" "spitpm-trace-plugin" "no sigrok decoder dir present to link into"
 }
 
 function slogic_pulseview_install_fromsources() {
