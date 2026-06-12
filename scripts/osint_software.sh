@@ -56,7 +56,8 @@ function spiderfoot_soft_install() {
     if [ -d spiderfoot ]; then
         cd spiderfoot
         python3 -m venv venv
-        ./venv/bin/pip install -r requirements.txt > /dev/null 2>&1 \
+        CFLAGS="${CFLAGS:-} -Wno-incompatible-pointer-types -Wno-int-conversion -Wno-implicit-function-declaration" \
+            ./venv/bin/pip install -r requirements.txt \
             || record_build_failure "pip" "spiderfoot" "requirements install failed"
         cat > /usr/local/bin/spiderfoot <<EOF
 #!/bin/bash
@@ -77,7 +78,8 @@ function reconng_soft_install() {
     if [ -d recon-ng ]; then
         cd recon-ng
         python3 -m venv venv
-        ./venv/bin/pip install -r REQUIREMENTS > /dev/null 2>&1 \
+        CFLAGS="${CFLAGS:-} -Wno-incompatible-pointer-types -Wno-int-conversion -Wno-implicit-function-declaration" \
+            ./venv/bin/pip install -r REQUIREMENTS \
             || record_build_failure "pip" "recon-ng" "requirements install failed"
         cat > /usr/local/bin/recon-ng <<EOF
 #!/bin/bash
@@ -98,7 +100,8 @@ function finalrecon_soft_install() {
     if [ -d FinalRecon ]; then
         cd FinalRecon
         python3 -m venv venv
-        ./venv/bin/pip install -r requirements.txt > /dev/null 2>&1 \
+        CFLAGS="${CFLAGS:-} -Wno-incompatible-pointer-types -Wno-int-conversion -Wno-implicit-function-declaration" \
+            ./venv/bin/pip install -r requirements.txt \
             || record_build_failure "pip" "finalrecon" "requirements install failed"
         cat > /usr/local/bin/finalrecon <<EOF
 #!/bin/bash

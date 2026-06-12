@@ -8,6 +8,16 @@ FROM ubuntu:26.04
 LABEL "org.container.project"="rfswift"
 LABEL "org.container.author"="Sébastien Dudek (FlUxIuS)"
 
+# Ubuntu 26.04 toolchain compatibility for building older third-party sources,
+# inherited by every derived image:
+#  - GCC 14/15 promoted several K&R-isms to hard errors; relax them back to
+#    warnings so old C (and Cython-generated C like lxml) still builds.
+#  - CMake 4.x removed compatibility with cmake_minimum_required(VERSION < 3.5);
+#    this env restores the old policy floor for projects that still declare it.
+ENV CFLAGS="-Wno-incompatible-pointer-types -Wno-int-conversion -Wno-implicit-function-declaration"
+ENV CPPFLAGS="-Wno-incompatible-pointer-types -Wno-int-conversion -Wno-implicit-function-declaration"
+ENV CMAKE_POLICY_VERSION_MINIMUM="3.5"
+
 RUN echo 'APT::Install-Suggests "0";' >> /etc/apt/apt.conf.d/00-docker
 RUN echo 'APT::Install-Recommends "0";' >> /etc/apt/apt.conf.d/00-docker
 

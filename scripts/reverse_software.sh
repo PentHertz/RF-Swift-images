@@ -37,12 +37,17 @@ function keystone_soft_install() {
 		cd keystone
 		mkdir build; cd build
 		# Keystone's CMakeLists declares cmake_minimum_required < 3.5, which CMake 4.x
-		# (Ubuntu 26.04) refuses; this flag restores the old policy behavior.
-		cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_VERSION_MINIMUM=3.5
-		make -j$(nproc)
-		make install
-		goodecho "[+] Installing Python bindings"
-		pip3install "keystone-engine"
+		# (Ubuntu 26.04) refuses; CMAKE_POLICY_VERSION_MINIMUM (set globally in
+		# corebuild, repeated here for clarity) restores the old policy behavior.
+		# Best-effort: keystone bundles an old LLVM that can still trip CMake 4.2, so
+		# record and continue rather than aborting the whole reversing image.
+		if cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+			&& make -j$(nproc) && make install; then
+			goodecho "[+] Installing Python bindings"
+			pip3install "keystone-engine"
+		else
+			record_build_failure "build" "keystone" "cmake/make failed on resolute (CMake 4.2 / bundled LLVM)"
+		fi
     else
         criticalecho-noexit "[-] Unsupported architecture: $ARCH"
     fi
