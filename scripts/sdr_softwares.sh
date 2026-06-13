@@ -29,7 +29,77 @@ function sdrangel_soft_install() {
 	cd /root
 }
 
-goodecho "[+] Installing SDR Angel"
+function sdrangel_soft_fromsource_install() {
+	# Check architecture
+	ARCH=$(uname -m)
+	if [[ "$ARCH" != "x86_64" && "$ARCH" != "aarch64" ]]; then
+		criticalecho-noexit "[-] Unsupported architecture: $ARCH"
+		return 0
+	fi
+
+	goodecho "[+] Installing dependencies"
+	installfromnet "apt-fast update"
+	install_dependencies "libsndfile-dev git cmake g++ pkg-config autoconf automake libtool libfftw3-dev libusb-1.0-0-dev libusb-dev libhidapi-dev libopengl-dev qtbase5-dev qtchooser libqt5multimedia5-plugins qtmultimedia5-dev libqt5websockets5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev libqt5quick5 libqt5charts5-dev qml-module-qtlocation qml-module-qtpositioning qml-module-qtquick-window2 qml-module-qtquick-dialogs qml-module-qtquick-controls qml-module-qtquick-controls2 qml-module-qtquick-layouts libqt5serialport5-dev qtdeclarative5-dev qtpositioning5-dev qtlocation5-dev libqt5texttospeech5-dev qtwebengine5-dev qtbase5-private-dev libqt5gamepad5-dev libqt5svg5-dev libfaad-dev zlib1g-dev libboost-all-dev libasound2-dev pulseaudio libopencv-dev libxml2-dev bison flex ffmpeg libavcodec-dev libavformat-dev libopus-dev doxygen graphviz"
+
+	goodecho "[+] APT"
+	[ -d /root/thirdparty ] || mkdir /root/thirdparty
+	cd /root/thirdparty
+	cmake_clone_and_build "https://github.com/srcejon/aptdec.git" "build" "libaptdec" "" "sdrangel_soft_fromsource_install" -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/aptdec
+
+	goodecho "[+] CM265cc"
+	[ -d /root/thirdparty ] || mkdir /root/thirdparty
+	cd /root/thirdparty
+	cmake_clone_and_build "https://github.com/f4exb/cm256cc.git" "build" "" 6f4a51802f5f302577d6d270a9fc0cb7a1ee28ef "sdrangel_soft_fromsource_install" -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/cm256cc
+
+	goodecho "[+] LibDAB"
+	[ -d /root/thirdparty ] || mkdir /root/thirdparty
+	cd /root/thirdparty
+	cmake_clone_and_build "https://github.com/srcejon/dab-cmdline" "library/build" "msvc" "" "sdrangel_soft_fromsource_install" -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/libdab
+
+	goodecho "[+] MBElib"
+	[ -d /root/thirdparty ] || mkdir /root/thirdparty
+	cd /root/thirdparty
+	cmake_clone_and_build "https://github.com/szechyjs/mbelib.git" "build" "" 9a04ed5c78176a9965f3d43f7aa1b1f5330e771f "sdrangel_soft_fromsource_install" -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/mbelib
+
+	goodecho "[+] serialdv"
+	[ -d /root/thirdparty ] || mkdir /root/thirdparty
+	cd /root/thirdparty
+	cmake_clone_and_build "https://github.com/f4exb/serialDV.git" "build" "" "v1.1.4" "sdrangel_soft_fromsource_install" -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/serialdv
+
+	goodecho "[+] DSDcc"
+	[ -d /root/thirdparty ] || mkdir /root/thirdparty
+	cd /root/thirdparty
+	cmake_clone_and_build "https://github.com/f4exb/dsdcc.git" "build" "" "v1.9.5" "sdrangel_soft_fromsource_install" \
+		-Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/dsdcc -DUSE_MBELIB=ON -DLIBMBE_INCLUDE_DIR=/opt/install/mbelib/include \
+		-DLIBMBE_LIBRARY=/opt/install/mbelib/lib/libmbe.so -DLIBSERIALDV_INCLUDE_DIR=/opt/install/serialdv/include/serialdv \
+		-DLIBSERIALDV_LIBRARY=/opt/install/serialdv/lib/libserialdv.so
+
+	goodecho "[+] Codec2"
+	[ -d /root/thirdparty ] || mkdir /root/thirdparty
+	cd /root/thirdparty
+	install_dependencies "libspeexdsp-dev libsamplerate0-dev"
+	cmake_clone_and_build "https://github.com/drowe67/codec2-dev.git" "build" "" "v1.0.3" "sdrangel_soft_fromsource_install" \
+		-Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/codec2
+
+	goodecho "[+] SGP4"
+	[ -d /root/thirdparty ] || mkdir /root/thirdparty
+	cd /root/thirdparty
+	cmake_clone_and_build "https://github.com/dnwrnr/sgp4.git" "build" "" "" "sdrangel_soft_fromsource_install" \
+		-Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/sgp4
+
+	goodecho "[+] libsigmf"
+	[ -d /root/thirdparty ] || mkdir /root/thirdparty
+	cd /root/thirdparty
+	cmake_clone_and_build "https://github.com/f4exb/libsigmf.git" "build" "new-namespaces" "" "sdrangel_soft_fromsource_install" \
+		-Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/libsigmf
+
+	goodecho "[+] ggmorse"
+	[ -d /root/thirdparty ] || mkdir /root/thirdparty
+	cd /root/thirdparty
+	cmake_clone_and_build "https://github.com/ggerganov/ggmorse.git" "build" "" "" "sdrangel_soft_fromsource_install" \
+		-Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/ggmorse -DGGMORSE_BUILD_TESTS=OFF -DGGMORSE_BUILD_EXAMPLES=OFF
+
+	goodecho "[+] Installing SDR Angel"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
 	cmake_clone_and_build "https://github.com/PentHertz/sdrangel.git" "build" "" "" "sdrangel_soft_fromsource_install" -Wno-dev -DDEBUG_OUTPUT=ON -DRX_SAMPLE_24BIT=ON \
