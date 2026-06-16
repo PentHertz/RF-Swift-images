@@ -148,7 +148,7 @@ function sdrpp_soft_install () {
 	goodecho "[+] Installing SDR++"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	arch=`uname -i`
+	arch=`uname -m`  # uname -m is reliable in containers; uname -i can return "unknown"
 	prog=""
 	case "$arch" in
   		x86_64|amd64)

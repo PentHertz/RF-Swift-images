@@ -917,10 +917,29 @@ function artemis_soft_install () {
     cd /rftools/docs
     gitinstall "https://github.com/AresValley/Artemis.git" "artemis_soft_install"
     cd Artemis
-    pip3install -r requirements.txt
-    sed -i '1s|^|#!/bin/env python3\n|' app.py
-    chmod +x app.py
-    ln -s $(pwd)/app.py /usr/sbin/Artemis
+    # Artemis pins PySide6==6.8.0.1 (requires-python "<3.13"), which has no wheel
+    # for resolute's system Python 3.14.
+    if command -v uv >/dev/null 2>&1; then
+        # Preferred: install the pinned requirements under a uv-managed Python 3.12
+        # venv and run app.py from it via a wrapper.
+        goodecho "[+] Installing Artemis with uv on Python 3.12"
+        uv python install 3.12
+        uv venv --python 3.12 /rftools/docs/Artemis/.venv
+        uv pip install --python /rftools/docs/Artemis/.venv/bin/python -r requirements.txt
+        cat > /usr/sbin/Artemis <<'EOF'
+#!/bin/bash
+cd /rftools/docs/Artemis
+exec ./.venv/bin/python app.py "$@"
+EOF
+        chmod +x /usr/sbin/Artemis
+    else
+        # Fallback: system Python (works only where PySide6==6.8.0.1 has a wheel).
+        goodecho "[+] Installing Artemis with pip on the system Python"
+        pip3install -r requirements.txt
+        sed -i '1s|^|#!/bin/env python3\n|' app.py
+        chmod +x app.py
+        ln -s $(pwd)/app.py /usr/sbin/Artemis
+    fi
 }
 
 function airsnitch_soft_install() {

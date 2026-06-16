@@ -155,23 +155,25 @@ function signalhound_spike_sa_device() {
         cd ${filename}
         chmod +x setup.sh
         sh -c ./setup.sh
-        # Create the script content
+        # Create the script content. BASE_DIR is derived from $filename so it
+        # always matches the version that was actually downloaded/extracted (the
+        # runtime $ variables are escaped so they stay literal in the wrapper).
         local script_path="/usr/local/bin/Spike"
-        cat << 'EOF' | sudo tee "$script_path" > /dev/null
+        cat << EOF | sudo tee "$script_path" > /dev/null
 #!/bin/sh
 
 # Set the fixed path
-BASE_DIR="/rftools/analysers/Spike(Ubuntu22.04x64)_4_0_12"
+BASE_DIR="/rftools/analysers/$filename"
 APPNAME="Spike"
 
 # Set up the environment variables
-LD_LIBRARY_PATH="$BASE_DIR/lib"
-LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/MATLAB/MATLAB_Runtime/v911/runtime/glnxa64
+LD_LIBRARY_PATH="\$BASE_DIR/lib"
+LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/usr/local/MATLAB/MATLAB_Runtime/v911/runtime/glnxa64
 export LD_LIBRARY_PATH
-export QT_PLUGIN_PATH="$BASE_DIR/plugins"
+export QT_PLUGIN_PATH="\$BASE_DIR/plugins"
 
 # Execute the binary
-"$BASE_DIR/bin/$APPNAME" "$@"
+"\$BASE_DIR/bin/\$APPNAME" "\$@"
 EOF
 
     # Make the script executable
@@ -227,7 +229,7 @@ function harogic_sa_device() {
     goodecho "[+] Downloading SAStudio4"
     [ -d /rftools/analysers ] || mkdir -p /rftools/analysers
     cd /rftools/analysers
-    arch=`uname -i`
+    arch=`uname -m`  # uname -m is reliable in containers; uname -i can return "unknown"
     prog=""
     sdkarch=""
     case "$arch" in
@@ -319,7 +321,7 @@ function harogic_sa_device_new() {
     goodecho "[+] Downloading SAStudio4"
     [ -d /rftools/analysers ] || mkdir -p /rftools/analysers
     cd /rftools/analysers
-    arch=`uname -i`
+    arch=`uname -m`  # uname -m is reliable in containers; uname -i can return "unknown"
     prog=""
     sdkarch=""
     case "$arch" in

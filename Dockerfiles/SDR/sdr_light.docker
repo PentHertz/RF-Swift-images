@@ -77,9 +77,9 @@ RUN ./entrypoint.sh lotus_budc_tune_device
 # Installing FISSURE (RF framework) reusing the GNU Radio/SDR stack above
 RUN ./entrypoint.sh fissure_soft_install
 
-# GNU Radio 4.0 (GR4) built in parallel to the apt 3.10, with its own Python 3.12
-# venv for the embedded interpreter (RC/experimental; best-effort)
-RUN ./entrypoint.sh gnuradio4_soft_install
+# NOTE: GNU Radio 4.0 (GR4, experimental RC) is intentionally NOT built here to
+# keep sdr_light lean. It lives in the dedicated downstream image built from
+# SDR/sdr_gnuradio4.docker (make sdrgnuradio4) for those who want to try it.
 
 RUN mkdir -p /sdrtools/
 COPY run /sdrtools/run

@@ -665,7 +665,11 @@ function vortix_soft_install_fromsource() {
     export CARGO_HOME=/tmp/cargo
     export PATH="$CARGO_HOME/bin:$PATH"
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-    cargo install vortix
+    # --locked uses vortix's published Cargo.lock instead of resolving transitive
+    # deps to their newest versions. Without it cargo pulls time 0.3.48, whose
+    # added impl trips a coherence false-positive (E0119) in ratatui-widgets
+    # 0.3.1's blanket From impl. Pin the version too for reproducibility.
+    cargo install --locked --version 0.4.1 vortix
     cp "$CARGO_HOME/bin/vortix" /usr/local/bin/
     rm -rf /tmp/rustup /tmp/cargo
     sed -i '/\/tmp\/cargo\/env/d' /root/.zshenv

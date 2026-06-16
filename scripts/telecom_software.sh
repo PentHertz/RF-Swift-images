@@ -71,7 +71,14 @@ function openbts_uhd_soft_install() {
         criticalecho-noexit "[-] Unsupported architecture: $ARCH"
         exit 0
     fi
-    install_dependencies "libzmq3-dev libsqlite3-dev"
+    install_dependencies "libzmq3-dev libsqlite3-dev cppzmq-dev"
+	# OpenBTS' configure hardcodes a check for /usr/local/include/zmq.hpp. On
+	# resolute libzmq3-dev no longer bundles the C++ binding; it now comes from
+	# cppzmq-dev under /usr/include, so mirror the headers into /usr/local/include.
+	mkdir -p /usr/local/include
+	for h in zmq.hpp zmq_addon.hpp; do
+		[ -f "/usr/include/$h" ] && cp -f "/usr/include/$h" /usr/local/include/
+	done
 	goodecho "[+] Feching OpenBTS from penthertz"
 	[ -d /telecom/2G ] || mkdir -p /telecom/2G
 	cd /telecom/2G

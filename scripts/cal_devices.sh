@@ -95,13 +95,33 @@ function NanoVNASaver_cal_device() {
 
 function NanoVNASaver_cal_device_call() {
     install_dependencies "libxcb-cursor0"
-    goodecho "[+] Installing NanoVNASaver with pip3"
-    
-    pip3 install --break-system-packages PySide6
-    
-    pipx install 'git+https://github.com/NanoVNA-Saver/nanovna-saver.git@v0.7.3'
-    
-    ln -s /root/.local/bin/NanoVNASaver /usr/bin/NanoVNASaver
+
+    # resolute's system Python is 3.14, which the latest NanoVNA-Saver release
+    # (v0.7.3) does not support (requires-python "<3.13").
+    if command -v uv >/dev/null 2>&1; then
+        # Preferred: use uv to provision a compatible standalone Python and install
+        # the stable release into a dedicated venv, then wrap it.
+        goodecho "[+] Installing NanoVNASaver (stable v0.7.3) with uv on Python 3.12"
+        local nvs_dir="/rftools/calibration/nanovnasaver"
+        [ -d "$nvs_dir" ] || mkdir -p "$nvs_dir"
+        uv python install 3.12
+        uv venv --python 3.12 "$nvs_dir/.venv"
+        uv pip install --python "$nvs_dir/.venv/bin/python" \
+            PySide6 'git+https://github.com/NanoVNA-Saver/nanovna-saver.git@v0.7.3'
+        cat > /usr/bin/NanoVNASaver <<'EOF'
+#!/bin/bash
+exec /rftools/calibration/nanovnasaver/.venv/bin/NanoVNASaver "$@"
+EOF
+        chmod +x /usr/bin/NanoVNASaver
+    else
+        # Fallback: no uv. main has relaxed requires-python to ">=3.10", so install
+        # a 3.14-compatible commit with pipx under the system Python (pin until a
+        # release >0.7.3 ships).
+        goodecho "[+] Installing NanoVNASaver with pipx on the system Python"
+        pip3 install --break-system-packages PySide6
+        pipx install 'git+https://github.com/NanoVNA-Saver/nanovna-saver.git@3445a0ab86161f9c886c9d6f215eb57cab9b6f45'
+        ln -sf /root/.local/bin/NanoVNASaver /usr/bin/NanoVNASaver
+    fi
 }
 
 function NanoVNA_QT_cal_device() {

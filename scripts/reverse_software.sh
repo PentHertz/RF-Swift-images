@@ -217,10 +217,14 @@ function imhex_soft_install() {
     
     if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then
         goodecho "[+] Installing ImHex for x86_64"
-        install_dependencies "libmbedtls21 libmbedx509-7 libglfw3-dev"
-        # No Ubuntu 26.04 build published yet; the 25.04 deb links against the same library sonames
+        install_dependencies "libmbedtls21 libmbedx509-7 libmbedcrypto16 libglfw3-dev"
+        # No Ubuntu 26.04 build published yet, so we reuse the 25.04 deb. Its
+        # Depends lists libmbedtls14 (the 25.04 package name), which does not
+        # exist on resolute (mbedtls 3.6.5 is shipped as libmbedtls21 +
+        # libmbedcrypto16). ImHex only actually links libmbedcrypto.so.16, which
+        # libmbedcrypto16 provides, so override the stale declared dependency.
         installfromnet "wget https://github.com/WerWolv/ImHex/releases/download/v$IMH_VERSION/imhex-$IMH_VERSION-Ubuntu-25.04-x86_64.deb"
-        dpkg -i imhex-$IMH_VERSION-Ubuntu-25.04-x86_64.deb
+        dpkg -i --ignore-depends=libmbedtls14 imhex-$IMH_VERSION-Ubuntu-25.04-x86_64.deb
         
     elif [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
         goodecho "[+] Installing ImHex for arm64"

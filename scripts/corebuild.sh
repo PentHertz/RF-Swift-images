@@ -174,9 +174,12 @@ function install_GPU_latest_Radeon() { # tested with GPD Pocket 4
     esac
     
 
-    # Add AMD GPG key before installing dependencies
+    # Add AMD GPG key before installing dependencies. apt-key was removed in
+    # modern Ubuntu (26.04), so install the key as a dearmored keyring file in
+    # /etc/apt/trusted.gpg.d/ instead (globally trusted, like the old apt-key).
     goodecho "[+] Adding AMD GPG key"
-    apt-key adv --fetch-keys https://repo.radeon.com/rocm/rocm.gpg.key
+    install_dependencies "gnupg ca-certificates"
+    wget -qO- https://repo.radeon.com/rocm/rocm.gpg.key | gpg --dearmor -o /etc/apt/trusted.gpg.d/rocm.gpg
     
     install_dependencies "mesa-utils vulkan-tools mesa-vulkan-drivers"
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
@@ -184,7 +187,11 @@ function install_GPU_latest_Radeon() { # tested with GPD Pocket 4
     # Radeon Software for Linux 26.12 (Ubuntu 26.04 HWE)
     installfromnet "wget https://repo.radeon.com/amdgpu-install/31.30/ubuntu/resolute/amdgpu-install_31.30.313000-1_all.deb"
     dpkg -i amdgpu-install_31.30.313000-1_all.deb
-    amdgpu-install -y --accept-eula
+    # Install the open graphics + OpenCL userspace only. --accept-eula is rejected
+    # unless a usecase pulls EULA-bound proprietary packages (which we don't want),
+    # and --no-dkms skips the kernel module (useless in a container, and no kernel
+    # headers are present anyway).
+    amdgpu-install -y --no-dkms --usecase=graphics,opencl
 }
 
 install_go() {

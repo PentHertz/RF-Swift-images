@@ -2,14 +2,28 @@
 
 function common_sources_and_sinks() {
     # gr-osmosdr does find_package(Boost ... system). In Boost 1.90 (resolute)
-    # boost::system is header-only, so CMake 4.2's LEGACY FindBoost module reports
-    # "Could NOT find Boost (missing: system)" - there is no libboost_system.so to
-    # locate. The fix is to use Boost's modern CMake package (BoostConfig.cmake),
-    # which exposes Boost::system as a header-only target. Force policy CMP0167=NEW
-    # so find_package(Boost) uses config mode instead of the removed FindBoost.
-    install_dependencies "libboost-all-dev"
-    grclone_and_build "https://github.com/PentHertz/gr-osmosdr.git" "" "common_sources_and_sinks" "-DCMAKE_POLICY_DEFAULT_CMP0167=NEW"
-    cd /rftools/sdr/oot/gr-osmosdr
+    # boost::system is header-only AND Ubuntu no longer ships a boost_system CMake
+    # config, so the component cannot be resolved in either mode:
+    #   - LEGACY FindBoost  -> "Could NOT find Boost (missing: system)" (no .so)
+    #   - modern BoostConfig (CMP0167=NEW) -> "Could not find ... boost_system"
+    # Since boost::system is header-only it is pulled in transitively by
+    # chrono/thread, so we drop the obsolete "system" component from the fork's
+    # CMakeLists before building, and use config mode (CMP0167=NEW).
+    # python3-six is required by gr-osmosdr's doxygen docstring scraper
+    # (docs/doxygen/doxyxml/.../compoundsuper.py imports six); it is no longer a
+    # transitive dep on resolute's Python 3.14, so install it explicitly.
+    install_dependencies "libboost-all-dev python3-six"
+    [ -d /rftools/sdr/oot ] || mkdir -p /rftools/sdr/oot
+    cd /rftools/sdr/oot || exit
+    gitinstall "https://github.com/PentHertz/gr-osmosdr.git" "common_sources_and_sinks" ""
+    cd gr-osmosdr || exit
+    # Remove the unresolvable Boost "system" component from the find_package call.
+    sed -i '/find_package(Boost/s/ system//' CMakeLists.txt
+    mkdir -p build && cd build
+    cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_POLICY_DEFAULT_CMP0167=NEW ../
+    make -j$(nproc)
+    sudo make install
+    cd .. && rm -rf build/ # Cleaning build directory
     #cd thirdparty
     #chmod +x ./hydrasdr_pkg-confile.sh
     #./hydrasdr_pkg-confile.sh
