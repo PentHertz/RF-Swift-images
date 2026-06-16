@@ -601,9 +601,12 @@ function 5greplay_soft_install() {
         cd 5Greplay || criticalecho "[-] Failed to enter 5Greplay directory"
     fi
     
-    # Build 5Greplay
-    colorecho "[+] Building 5Greplay..."
-    make -j$(nproc) || {
+    # Build 5Greplay. GCC 15 (resolute) defaults to C23, where an empty parameter
+    # list (void conf_release();) means (void) and clashes with the real
+    # void conf_release(config_t *) declaration. Force gnu17 to restore the old
+    # "unspecified args" semantics. Override CC (not CFLAGS) so the Makefile's
+    # own CFLAGS += -fPIC -Wall ... are preserved.
+    make -j$(nproc) CC="gcc -std=gnu17" || {
         criticalecho-noexit "[-] Failed to build 5Greplay"
         cd "$install_dir"
         return 1

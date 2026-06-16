@@ -158,10 +158,13 @@ function grtempest_grmod_install() {
 function deeptempest_grmod_install() {
     grclone_and_build "https://github.com/PentHertz/deep-tempest.git" "gr-tempest" "deeptempest_grmod_install"
     cd examples
-    grcc FFT_autocorrelate.grc
-    grcc FFT_crosscorrelate.grc
-    grcc Keep_1_in_N_frames.grc
-    grcc binary_serializer.grc
+    # Pre-compile the example flowgraphs to .py (convenience only). Best-effort:
+    # some upstream examples (e.g. binary_serializer.grc) fail to evaluate under
+    # GRC 3.10.12 ("gr.GR_LSB_FIRST" -> name 'gr' is not defined) and must not
+    # abort the whole image build.
+    for f in FFT_autocorrelate.grc FFT_crosscorrelate.grc Keep_1_in_N_frames.grc binary_serializer.grc; do
+        grcc "$f" || record_build_failure "grcc" "deep-tempest/$f" "GRC example failed to compile (GNU Radio 3.10)"
+    done
     mkdir -p /root/.grc_gnuradio
     cp *.block.yml /root/.grc_gnuradio
     cd ../..

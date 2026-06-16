@@ -162,12 +162,18 @@ function dsl2sigrok_install() {
 }
 
 function hydranfc_trace_plugin_install() {
-    goodecho "[+] Installing dsl2sigrok"
+    goodecho "[+] Installing HydraNFC trace plugin"
     [ -d /hardware ] || mkdir /hardware
     cd /hardware
     git clone https://github.com/hydrabus/hydranfc_v2_sniffer_decoder.git
-    ln -s "$(pwd)/hydranfc_v2_sniffer_decoder" /usr/share/libsigrokdecode4DSL/decoders/ # installing for DSView
-    ln -s "$(pwd)/hydranfc_v2_sniffer_decoder" /usr/share/libsigrokdecode/decoders/
+    # Link the decoder into whichever sigrok decoder dirs exist (DSView's 4DSL
+    # path and/or the stock libsigrokdecode path); best-effort if neither present.
+    local src; src="$(pwd)/hydranfc_v2_sniffer_decoder"
+    local linked=0 d
+    for d in /usr/share/libsigrokdecode4DSL/decoders /usr/share/libsigrokdecode/decoders; do
+        [ -d "$d" ] && ln -sf "$src" "$d/" && linked=1
+    done
+    [ "$linked" -eq 1 ] || record_build_failure "build" "hydranfc-trace-plugin" "no sigrok decoder dir present to link into"
 }
 
 function arduino_ide_install() {
@@ -288,8 +294,22 @@ function mtkclient_install() {
     cd /hardware
     gitinstall "https://github.com/bkerler/mtkclient.git" "mtkclient_install"
     cd mtkclient
-    pip3install -r requirements.txt
-    pip3install .
+    if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
+        # keystone-engine ships no aarch64 wheel (only the 2020 x86_64/i686 wheels)
+        # and its bundled 2020-era LLVM fails to build from source on aarch64
+        # (matches the arm64 TODO in keystone_soft_install). Install everything
+        # else, attempt keystone-engine best-effort, and install mtkclient without
+        # re-resolving deps so the arm64 hardware image still builds. mtkclient runs
+        # without the assembler, just without keystone-dependent features.
+        grep -ivE '^[[:space:]]*keystone-engine[[:space:]]*$' requirements.txt > /tmp/mtkclient-reqs.txt
+        pip3install -r /tmp/mtkclient-reqs.txt
+        rm -f /tmp/mtkclient-reqs.txt
+        pip3install "keystone-engine" || record_build_failure "pip" "keystone-engine (mtkclient)" "no aarch64 wheel; bundled LLVM build fails on arm64"
+        pip3install --no-deps .
+    else
+        pip3install -r requirements.txt
+        pip3install .
+    fi
 }
 
 function esptool_install() {
