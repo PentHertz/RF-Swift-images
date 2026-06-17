@@ -917,28 +917,33 @@ function artemis_soft_install () {
     cd /rftools/docs
     gitinstall "https://github.com/AresValley/Artemis.git" "artemis_soft_install"
     cd Artemis
-    # Artemis pins PySide6==6.8.0.1 (requires-python "<3.13"), which has no wheel
-    # for resolute's system Python 3.14.
+    # Artemis >= 4.x is a uv project (pyproject.toml + uv.lock) that requires
+    # Python >= 3.14 and pins pyside6 6.11.x -- both compatible with resolute's
+    # system Python 3.14, so the old "uv-managed Python 3.12" workaround (for the
+    # previous PySide6==6.8.0.1 "<3.13" pin) is no longer needed. There is no
+    # requirements.txt or app.py anymore: deps live in pyproject.toml and the app
+    # runs from source as a package via `python -m artemis` (resources.py is
+    # committed, so no pyside6-rcc step is required).
     if command -v uv >/dev/null 2>&1; then
-        # Preferred: install the pinned requirements under a uv-managed Python 3.12
-        # venv and run app.py from it via a wrapper.
-        goodecho "[+] Installing Artemis with uv on Python 3.12"
-        uv python install 3.12
-        uv venv --python 3.12 /rftools/docs/Artemis/.venv
-        uv pip install --python /rftools/docs/Artemis/.venv/bin/python -r requirements.txt
+        goodecho "[+] Installing Artemis dependencies with uv (Python 3.14)"
+        uv venv --python 3.14 /rftools/docs/Artemis/.venv
+        uv pip install --python /rftools/docs/Artemis/.venv/bin/python -r pyproject.toml
         cat > /usr/sbin/Artemis <<'EOF'
 #!/bin/bash
 cd /rftools/docs/Artemis
-exec ./.venv/bin/python app.py "$@"
+exec ./.venv/bin/python -m artemis "$@"
 EOF
         chmod +x /usr/sbin/Artemis
     else
-        # Fallback: system Python (works only where PySide6==6.8.0.1 has a wheel).
+        # Fallback: install the declared deps on the system Python 3.14.
         goodecho "[+] Installing Artemis with pip on the system Python"
-        pip3install -r requirements.txt
-        sed -i '1s|^|#!/bin/env python3\n|' app.py
-        chmod +x app.py
-        ln -s $(pwd)/app.py /usr/sbin/Artemis
+        pip3install packaging pyside6 requests
+        cat > /usr/sbin/Artemis <<'EOF'
+#!/bin/bash
+cd /rftools/docs/Artemis
+exec python3 -m artemis "$@"
+EOF
+        chmod +x /usr/sbin/Artemis
     fi
 }
 

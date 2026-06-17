@@ -132,11 +132,18 @@ function openbts_umts_soft_install_call() {
 	cd OpenBTS-UMTS
 	git submodule init
 	git submodule update
-	./install_dependences.sh
-	./autogen.sh
-	./configure
-	make
-	sudo make install
+	# Best-effort on resolute, same as OpenBTS-UHD: this is legacy C++ that does
+	# not compile cleanly under GCC 15 / libstdc++ 15 (e.g. SIP/SIPInterface.cpp).
+	# The proper fix is an upstream source update in PentHertz/OpenBTS-UMTS; until
+	# then, don't abort the whole telecom_2Gto3G image build.
+	set +e
+	set +o pipefail
+	( ./install_dependences.sh && ./autogen.sh && ./configure && make && sudo make install )
+	if [ $? -ne 0 ]; then
+		record_build_failure "make" "OpenBTS-UMTS" "Legacy C++ fails to build under GCC 15; needs upstream source update"
+	fi
+	set -e
+	set -o pipefail
 }
 
 function srsran4G_5GNSA_soft_install() {
