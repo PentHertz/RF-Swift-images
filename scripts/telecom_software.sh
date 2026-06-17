@@ -85,11 +85,24 @@ function openbts_uhd_soft_install() {
 	goodecho "[+] Cloninig OpenBTS"
 	installfromnet "git clone https://github.com/PentHertz/OpenBTS.git"
 	cd OpenBTS
-	./preinstall.sh
-	./autogen.sh
-	./configure --with-uhd
-	make -j$(nproc)
-	make install
+	# Best-effort on resolute: the bundled Transceiver code predates libstdc++'s
+	# unconditional forward declaration of std::complex (GCC 15 / libstdc++ 15,
+	# in <bits/stl_pair.h>). Combined with the pervasive global `using namespace
+	# std;` in OpenBTS headers, the unqualified `complex` typedef now collides
+	# with std::complex ("reference to 'complex' is ambiguous"). The clean fix is
+	# a source-level rename/qualification that belongs upstream in PentHertz/OpenBTS
+	# (and must be compile-tested). Until then, don't abort the whole image build.
+	set +e
+	set +o pipefail
+	( ./preinstall.sh && ./autogen.sh && ./configure --with-uhd && make -j$(nproc) && make install )
+	if [ $? -ne 0 ]; then
+		record_build_failure "make" "OpenBTS-UHD" "GCC 15 std::complex ambiguity in Transceiver code; needs upstream source rename/update"
+		set -e
+		set -o pipefail
+		return 0
+	fi
+	set -e
+	set -o pipefail
 	ldconfig
 	ln -s Transceiver52M/transceiver .
 }

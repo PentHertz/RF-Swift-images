@@ -763,8 +763,17 @@ function titus_soft_install() {
         make build
         make install
         ln -sf /root/.titus/titus /usr/sbin/titus
-        install_dependencies "default-jre-headless"
-        make install-burp
+        # Gradle 8.5 (bundled in titus/burp) only supports Java <= 21, but
+        # resolute ships Java 25 as default-jre. Install JDK 21 and point the
+        # burp Gradle build at it; keep it best-effort since burp is optional.
+        install_dependencies "openjdk-21-jdk-headless"
+        JAVA21_HOME=$(ls -d /usr/lib/jvm/java-21-openjdk* 2>/dev/null | head -n1)
+        if [ -n "$JAVA21_HOME" ]; then
+            JAVA_HOME="$JAVA21_HOME" PATH="$JAVA21_HOME/bin:$PATH" make install-burp \
+                || record_build_failure "make" "titus/burp" "Gradle shadowJar failed (Java 25 / Gradle 8.5 mismatch)"
+        else
+            record_build_failure "make" "titus/burp" "JDK 21 not found; skipping burp Gradle build on Java 25"
+        fi
     fi
 }
 
