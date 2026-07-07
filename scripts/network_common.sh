@@ -262,8 +262,18 @@ function netexec_soft_install() {
     goodecho "[+] Installing NetExec"
     install_dependencies "pipx git"
     pipx ensurepath
-    pipx install git+https://github.com/Pennyw0rth/NetExec
-    ln -s /root/.local/bin/netexec /usr/sbin/netexec
+    # NetExec pulls in aardwolf, whose Rust extension (rlers) builds against
+    # pyo3-ffi 0.23.5, which supports Python <= 3.13. resolute's system Python is
+    # 3.14, so the build fails. When uv is available, provision a compatible
+    # Python 3.13 and install NetExec into a pipx venv that uses it.
+    if command -v uv >/dev/null 2>&1; then
+        goodecho "[+] Installing NetExec with pipx on uv-provisioned Python 3.13"
+        uv python install 3.13
+        pipx install --python "$(uv python find 3.13)" git+https://github.com/Pennyw0rth/NetExec
+    else
+        pipx install git+https://github.com/Pennyw0rth/NetExec
+    fi
+    ln -sf /root/.local/bin/netexec /usr/sbin/netexec
 }
 
 function donpapi_soft_install() {
@@ -436,7 +446,14 @@ function asleap_soft_install() {
     cd /opt/network
     gitinstall "https://github.com/FlUxIuS/asleap.git" "asleap_soft_install" "des_fix"
     cd asleap
-    make
+    # asleap's Makefile hardcodes `CFLAGS =`, shadowing the toolchain's relaxing
+    # CFLAGS from corebuild.docker, and its `asleap` target references $(CFLAGS)
+    # but not $(CPPFLAGS). So asleap.c is compiled without the -Wno-* flags (only
+    # the object files, built via make's implicit rule, pick up $(CPPFLAGS)), and
+    # GCC 14+ rejects the signal(SIGINT, cleanup) handler mismatch as a hard
+    # error. Inject the flags via CC (like 5Greplay) so the Makefile's own CFLAGS
+    # are preserved.
+    make CC="gcc -Wno-incompatible-pointer-types -Wno-int-conversion -Wno-implicit-function-declaration"
     ln -s $(pwd)/asleap /usr/local/bin/asleap
 }
 

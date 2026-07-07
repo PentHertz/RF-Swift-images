@@ -31,7 +31,33 @@ function common_sources_and_sinks() {
 
 function grgsm_grmod_install() {
     install_dependencies "build-essential libtool libtalloc-dev libsctp-dev shtool autoconf automake git-core pkg-config make gcc gnutls-dev libusb-1.0-0-dev libmnl-dev libosmocore libosmocore-dev"
-    grclone_and_build "https://github.com/FlUxIuS/gr-gsm.git" "" "grgsm_grmod_install"
+    # gr-gsm is unmaintained and still uses boost::asio::io_service and
+    # udp::resolver::query, both removed in Boost 1.87 (resolute ships Boost 1.90),
+    # so its udp_socket sources no longer compile. grclone_and_build clones and
+    # builds atomically with no patch hook, so drive clone -> patch -> build here
+    # (mirroring common_sources_and_sinks), migrating the sources to the modern
+    # io_context / host+service resolve() API before building.
+    [ -d /rftools/sdr/oot ] || mkdir -p /rftools/sdr/oot
+    cd /rftools/sdr/oot || exit
+    gitinstall "https://github.com/FlUxIuS/gr-gsm.git" "grgsm_grmod_install" ""
+    cd gr-gsm || exit
+    # Boost >= 1.87: io_service was removed in favour of io_context.
+    sed -i 's/boost::asio::io_service/boost::asio::io_context/' \
+        include/gsm/misc_utils/udp_socket.h
+    # Boost >= 1.87: resolver::query was removed; resolve the endpoints via the
+    # host/service overload and take the first entry of the returned range.
+    perl -0777 -pi -e 's{udp::resolver\s+resolver\(d_io_service\);.*?d_udp_endpoint_tx\s*=\s*\*resolver\.resolve\(tx_query\);}{udp::resolver resolver(d_io_service);\n\n      d_udp_endpoint_rx = *resolver.resolve(udp::v4(), bind_addr, src_port, boost::asio::ip::resolver_base::passive).begin();\n      d_udp_endpoint_tx = *resolver.resolve(udp::v4(), remote_addr, dst_port, boost::asio::ip::resolver_base::passive).begin();}s' \
+        lib/misc_utils/udp_socket.cc
+    # Fail loudly on upstream drift instead of building the old, broken sources.
+    if grep -q 'boost::asio::io_service\|resolver::query\|resolver_query_base' \
+        include/gsm/misc_utils/udp_socket.h lib/misc_utils/udp_socket.cc; then
+        criticalecho-noexit "[-] gr-gsm Boost.Asio patch did not apply (upstream changed); build will fail"
+    fi
+    mkdir -p build && cd build
+    cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../
+    make -j$(nproc)
+    sudo make install
+    cd .. && rm -rf build/
 }
 
 function grbladerf_grmod_install() {
