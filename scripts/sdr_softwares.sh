@@ -812,6 +812,10 @@ function tetra_suite_install () {
     cd /rftools/sdr
     gitinstall "https://github.com/sq5bpf/telive.git" "tetra_suite_install"
     cd telive
+    # telive_receiver.h uses time_t but never includes <time.h>; newer glibc no
+    # longer pulls it in transitively, so add the missing include before building.
+    grep -q '#include <time.h>' telive_receiver.h || \
+        sed -i 's|#include <stdint.h>|#include <stdint.h>\n#include <time.h>|' telive_receiver.h
     # telive is old sq5bpf C too; same GCC 14+ strictness (implicit-int /
     # implicit-function-declaration) would break it, so apply the same downgrade.
     make -j$(nproc) CC="gcc -Wno-implicit-function-declaration -Wno-implicit-int -Wno-int-conversion -Wno-incompatible-pointer-types"
