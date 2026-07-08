@@ -411,6 +411,71 @@ EOF
     goodecho "[+] Usage: caido (launches with --no-sandbox automatically)"
 }
 
+function hetty_soft_install() {
+    # Hetty (https://github.com/dstotijn/hetty) is an HTTP toolkit for security
+    # research: an MITM proxy with a web UI, in the same family as Caido/Burp. It
+    # ships as a self-contained static binary (CGO_ENABLED=0) with the admin UI
+    # embedded, so install the prebuilt release binary and verify its SHA-256 rather
+    # than building the Next.js frontend + Go binary from source.
+    goodecho "[+] Installing Hetty (HTTP toolkit for security research)"
+    install_dependencies "curl jq tar"
+    ARCH=$(uname -m)
+
+    # Map the architecture to Hetty's release naming convention.
+    case "$ARCH" in
+        x86_64|amd64)
+            HETTY_ARCH="x86_64"
+            ;;
+        aarch64|arm64)
+            HETTY_ARCH="arm64"
+            ;;
+        *)
+            criticalecho-noexit "[!] Unsupported architecture for Hetty: $ARCH (need x86_64 or arm64)"
+            exit 0
+            ;;
+    esac
+
+    # Resolve the latest release tag (e.g. v0.7.0); asset names drop the leading 'v'.
+    HETTY_TAG=$(curl -s https://api.github.com/repos/dstotijn/hetty/releases/latest | jq -r .tag_name)
+    if [ -z "$HETTY_TAG" ] || [ "$HETTY_TAG" = "null" ]; then
+        criticalecho-noexit "[!] Could not resolve the latest Hetty release"
+        exit 0
+    fi
+    HETTY_VER="${HETTY_TAG#v}"
+    HETTY_BASE="https://github.com/dstotijn/hetty/releases/download/${HETTY_TAG}"
+    HETTY_TARBALL="hetty_${HETTY_VER}_Linux_${HETTY_ARCH}.tar.gz"
+
+    [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
+    cd /root/thirdparty || exit
+    rm -rf hetty_install && mkdir hetty_install && cd hetty_install
+
+    goodecho "[+] Downloading Hetty ${HETTY_TAG} (${HETTY_ARCH})"
+    installfromnet "curl -fL -o ${HETTY_TARBALL} ${HETTY_BASE}/${HETTY_TARBALL}"
+    installfromnet "curl -fL -o checksums.txt ${HETTY_BASE}/checksums.txt"
+    if [ ! -s "${HETTY_TARBALL}" ]; then
+        criticalecho-noexit "[!] Hetty download failed or empty: ${HETTY_TARBALL}"
+        exit 0
+    fi
+
+    # Verify the published SHA-256 checksum; a mismatch is a tamper signal -> fatal.
+    goodecho "[+] Verifying Hetty SHA-256 checksum"
+    if ! grep "${HETTY_TARBALL}$" checksums.txt | sha256sum -c - ; then
+        criticalecho-noexit "[!] Hetty checksum verification FAILED for ${HETTY_TARBALL}"
+        cd /root/thirdparty && rm -rf hetty_install
+        exit 1
+    fi
+
+    tar -xf "${HETTY_TARBALL}"
+    HETTY_BIN=$(find . -name hetty -type f | head -1)
+    if [ -z "$HETTY_BIN" ]; then
+        criticalecho-noexit "[!] hetty binary not found in the release tarball"
+        exit 0
+    fi
+    install -m 0755 "$HETTY_BIN" /usr/local/bin/hetty
+    cd /root/thirdparty && rm -rf hetty_install
+    goodecho "[+] Hetty installed: $(command -v hetty) (proxy + web UI on :8080)"
+}
+
 function beef_soft_install() {
     colorecho "[+] Installing BeEF"
     export TERM=xterm

@@ -800,7 +800,11 @@ function tetra_suite_install () {
     cd /rftools/sdr
     gitinstall "https://github.com/sq5bpf/osmo-tetra-sq5bpf.git" "tetra_suite_install"
     cd osmo-tetra-sq5bpf/src
-    make -j$(nproc)
+    # osmo-tetra (sq5bpf) is old C: it has implicit function declarations (tun_alloc,
+    # decode_chan_alloc) and implicit-int returns (show_ascii_strings), which GCC 14+
+    # promotes to hard errors by default. Override CC to downgrade them (the Makefile
+    # keeps its own CFLAGS incl. -fcommon and pkg-config) so the fork still builds.
+    make -j$(nproc) CC="gcc -Wno-implicit-function-declaration -Wno-implicit-int -Wno-int-conversion -Wno-incompatible-pointer-types"
     cd ../..
     
     # Install telive
@@ -808,7 +812,9 @@ function tetra_suite_install () {
     cd /rftools/sdr
     gitinstall "https://github.com/sq5bpf/telive.git" "tetra_suite_install"
     cd telive
-    make -j$(nproc)
+    # telive is old sq5bpf C too; same GCC 14+ strictness (implicit-int /
+    # implicit-function-declaration) would break it, so apply the same downgrade.
+    make -j$(nproc) CC="gcc -Wno-implicit-function-declaration -Wno-implicit-int -Wno-int-conversion -Wno-incompatible-pointer-types"
     
     # Clone ACELP codec installer (not built - user runs it manually due to ETSI licensing)
     goodecho "[+] Cloning TETRA ACELP codec installer (run 'install-tetra-codec' to enable voice decoding)"
