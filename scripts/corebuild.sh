@@ -232,7 +232,7 @@ install_go() {
         sudo tar -C /usr --strip-components=1 -xzf /tmp/$GO_TAR go/bin go/pkg go/src
         rm /tmp/$GO_TAR
         echo "Go $GO_VERSION installed successfully in /usr/bin."
-        echo 'export GOPROXY=direct' >> /root/.bashrc
+        echo 'export GOPROXY=https://proxy.golang.org,direct' >> /root/.bashrc
     else
         echo "Download failed. Falling back to package manager."
         install_dependencies "golang-go"
@@ -272,7 +272,7 @@ function uvpython_install() { # Avoid terrible long builds
     install_dependencies "clang libclang-dev llvm-dev build-essential"
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
     cd /root/thirdparty
-    UV_VERSION="0.11.27"
+    UV_VERSION="0.11.20"
     installfromnet "wget https://github.com/astral-sh/uv/releases/download/$UV_VERSION/uv-installer.sh"
     chmod +x uv-installer.sh
     ./uv-installer.sh

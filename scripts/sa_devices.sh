@@ -42,7 +42,7 @@ function signalhound_sdk_install() {
     cd /root/thirdparty
 
     ARCH=$(uname -m)
-    SDK_URL="https://signalhound.com/sigdownloads/SDK/signal_hound_sdk_07_06_26.zip"
+    SDK_URL="https://signalhound.com/sigdownloads/SDK/signal_hound_sdk_05_13_26.zip"
     SDK_DIR="/opt/signalhound"
 
     installfromnet "wget -q ${SDK_URL} -O signal_hound_sdk.zip"
@@ -148,7 +148,7 @@ function signalhound_spike_sa_device() {
         colorecho "[+] Downloading Spike bin from SignalHound"
         [ -d /rftools/analysers ] || mkdir -p /rftools/analysers
         cd /rftools/analysers
-        filename="Spike(Ubuntu22.04x64)_4_0_15"
+        filename="Spike(Ubuntu22.04x64)_4_0_13"
         installfromnet "wget https://signalhound.com/sigdownloads/Spike/$filename.zip"
         unzip ${filename}.zip
         rm ${filename}.zip
@@ -190,21 +190,21 @@ function signalhound_vsg60_sa_device() {
         colorecho "[+] Downloading VSG60 bin from SignalHound"
         [ -d /rftools/generators ] || mkdir -p /rftools/generators
         cd /rftools/generators
-        filename="VSG(Ubuntu22.04x64)_2_0_2"
+        filename="VSG60(Ubuntu22.04x64)_1_0_19"
         installfromnet "wget https://signalhound.com/sigdownloads/VSG60/$filename.zip"
-        unzip "VSG(Ubuntu22.04x64)_2_0_2.zip"
-        rm "VSG(Ubuntu22.04x64)_2_0_2.zip"
-        cd "VSG(Ubuntu22.04x64)_2_0_2"
+        unzip "VSG60(Ubuntu22.04x64)_1_0_19.zip"
+        rm "VSG60(Ubuntu22.04x64)_1_0_19.zip"
+        cd "VSG60(Ubuntu22.04x64)_1_0_19"
         chmod +x setup.sh
         sh -c ./setup.sh
-        local script_path="/usr/sbin/vsg_signalhound"
+        local script_path="/usr/sbin/vsg60"
     
         # Create the script content
         cat << 'EOF' | sudo tee "$script_path" > /dev/null
 #!/bin/sh
 
 # Set the fixed path
-BASE_DIR="/rftools/generators/VSG(Ubuntu22.04x64)_2_0_2"
+BASE_DIR="/rftools/generators/VSG60(Ubuntu22.04x64)_1_0_19"
 APPNAME="vsg60"
 
 # Set up the environment variables

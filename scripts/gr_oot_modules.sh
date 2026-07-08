@@ -168,7 +168,33 @@ function grsandia_utils_grmod_install() {
 }
 
 function grdvbs2_grmod_install() {
-    grclone_and_build "https://github.com/bkerler/gr-dvbs2.git" "" "grdvbs2_grmod_install"
+    # gr-dvbs2's bbheader_source still uses boost::asio::io_service and
+    # udp::resolver::query, both removed in Boost 1.87 (resolute ships Boost 1.90),
+    # so bbheader_source_impl.{h,cc} no longer compile. grclone_and_build clones and
+    # builds atomically with no patch hook, so drive clone -> patch -> build here
+    # (mirroring grgsm_grmod_install), migrating the sources to the modern
+    # io_context / host+service resolve() API before building.
+    [ -d /rftools/sdr/oot ] || mkdir -p /rftools/sdr/oot
+    cd /rftools/sdr/oot || exit
+    gitinstall "https://github.com/bkerler/gr-dvbs2.git" "grdvbs2_grmod_install" ""
+    cd gr-dvbs2 || exit
+    # Boost >= 1.87: io_service was removed in favour of io_context.
+    sed -i 's/boost::asio::io_service/boost::asio::io_context/' \
+        lib/bbheader_source_impl.h
+    # Boost >= 1.87: resolver::query was removed; resolve the endpoint via the
+    # host/service overload and take the first entry of the returned range.
+    perl -0777 -pi -e 's{boost::asio::ip::udp::resolver::query\s+query\([^;]*?\);\s*d_endpoint\s*=\s*\*resolver\.resolve\(query\);}{d_endpoint = *resolver.resolve(host, s_port, boost::asio::ip::resolver_base::passive).begin();}s' \
+        lib/bbheader_source_impl.cc
+    # Fail loudly on upstream drift instead of building the old, broken sources.
+    if grep -q 'boost::asio::io_service\|resolver::query\|resolver_query_base' \
+        lib/bbheader_source_impl.h lib/bbheader_source_impl.cc; then
+        criticalecho-noexit "[-] gr-dvbs2 Boost.Asio patch did not apply (upstream changed); build will fail"
+    fi
+    mkdir -p build && cd build
+    cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../
+    make -j$(nproc)
+    sudo make install
+    cd .. && rm -rf build/
 }
 
 function grtempest_grmod_install() { 
@@ -205,7 +231,38 @@ function grfhss_utils_grmod_install() {
 }
 
 function grtiming_utils_grmod_install() {
-    grclone_and_build "https://github.com/sandialabs/gr-timing_utils.git" "" "grtiming_utils_grmod_install"
+    # gr-timing_utils still uses boost::asio::io_service, io_service::work and the
+    # io_context::dispatch() member, all removed in Boost 1.87 (resolute ships Boost
+    # 1.90). Clone -> patch -> build here (like grgsm_grmod_install) to migrate the
+    # sources to io_context / executor_work_guard / the free dispatch() function.
+    [ -d /rftools/sdr/oot ] || mkdir -p /rftools/sdr/oot
+    cd /rftools/sdr/oot || exit
+    gitinstall "https://github.com/sandialabs/gr-timing_utils.git" "grtiming_utils_grmod_install" ""
+    cd gr-timing_utils || exit
+    # io_service::work -> executor_work_guard (before the generic io_service rename,
+    # otherwise io_service::work would become the non-existent io_context::work).
+    perl -0777 -pi -e 's{boost::asio::io_service::work}{boost::asio::executor_work_guard<boost::asio::io_context::executor_type>}g' \
+        lib/reference_timer.h
+    perl -0777 -pi -e 's{new boost::asio::executor_work_guard<boost::asio::io_context::executor_type>\(io\)}{new boost::asio::executor_work_guard<boost::asio::io_context::executor_type>(boost::asio::make_work_guard(io))}g' \
+        lib/reference_timer.h
+    # io_service -> io_context (also fixes &boost::asio::io_service::run).
+    sed -i 's/boost::asio::io_service/boost::asio::io_context/g' \
+        lib/reference_timer.h lib/interrupt_emitter_impl.cc
+    # io_context::reset() was renamed to restart().
+    sed -i 's/\bio\.reset()/io.restart()/g' lib/reference_timer.h
+    # The io_context::dispatch() member was removed; use the free function.
+    perl -0777 -pi -e 's{\bio\.dispatch\(}{boost::asio::dispatch(io, }g' \
+        lib/interrupt_emitter_impl.cc
+    # Fail loudly on upstream drift instead of building the old, broken sources.
+    if grep -q 'boost::asio::io_service\|io\.dispatch(' \
+        lib/reference_timer.h lib/interrupt_emitter_impl.cc; then
+        criticalecho-noexit "[-] gr-timing_utils Boost.Asio patch did not apply (upstream changed); build will fail"
+    fi
+    mkdir -p build && cd build
+    cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../
+    make -j$(nproc)
+    sudo make install
+    cd .. && rm -rf build/
 }
 
 function grdab_grmod_install() {
@@ -314,7 +371,26 @@ function grradar_grmod_install() {
 }
 
 function grnordic_grmod_install() {
-    grclone_and_build "https://github.com/bkerler/gr-nordic.git" "" "grnordic_grmod_install"
+    # gr-nordic's nordic_rx uses boost::asio::io_service and udp::resolver::query,
+    # both removed in Boost 1.87 (resolute ships Boost 1.90). Clone -> patch -> build
+    # here (like grgsm_grmod_install) to migrate to io_context / resolve().
+    [ -d /rftools/sdr/oot ] || mkdir -p /rftools/sdr/oot
+    cd /rftools/sdr/oot || exit
+    gitinstall "https://github.com/bkerler/gr-nordic.git" "grnordic_grmod_install" ""
+    cd gr-nordic || exit
+    sed -i 's/boost::asio::io_service/boost::asio::io_context/g' lib/nordic_rx_impl.cc
+    # resolver::query removed; resolve via protocol/host/service and take the first entry.
+    perl -0777 -pi -e 's{boost::asio::ip::udp::resolver::query\s+query\((.*?)\);\s*boost::asio::ip::udp::endpoint\s+receiver_endpoint\s*=\s*\*resolver\.resolve\(query\);}{boost::asio::ip::udp::endpoint receiver_endpoint = *resolver.resolve($1).begin();}s' \
+        lib/nordic_rx_impl.cc
+    # Fail loudly on upstream drift instead of building the old, broken sources.
+    if grep -q 'boost::asio::io_service\|resolver::query\|resolver_query_base' lib/nordic_rx_impl.cc; then
+        criticalecho-noexit "[-] gr-nordic Boost.Asio patch did not apply (upstream changed); build will fail"
+    fi
+    mkdir -p build && cd build
+    cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../
+    make -j$(nproc)
+    sudo make install
+    cd .. && rm -rf build/
 }
 
 function grpaint_grmod_install() {
@@ -478,7 +554,32 @@ function grgrnet_grmod_install() {
     ARCH=$(uname -m)
     if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ] || [ "$ARCH" = "arm64" ] || [ "$ARCH" = "aarch64" ]; then
         install_dependencies "libpthread-stubs0-dev"
-        grclone_and_build "https://github.com/ghostop14/gr-grnet.git" "" "grgrnet_grmod_install"
+        # gr-grnet's TCP/UDP sink and source blocks use boost::asio::io_service,
+        # tcp/udp::resolver::query and io_context::reset(), all removed in Boost 1.87
+        # (resolute ships Boost 1.90). Clone -> patch -> build here (like
+        # grgsm_grmod_install) to migrate to io_context / resolve() / restart().
+        [ -d /rftools/sdr/oot ] || mkdir -p /rftools/sdr/oot
+        cd /rftools/sdr/oot || exit
+        gitinstall "https://github.com/ghostop14/gr-grnet.git" "grgrnet_grmod_install" ""
+        cd gr-grnet || exit
+        sed -i 's/boost::asio::io_service/boost::asio::io_context/g' lib/*.h lib/*.cc
+        # io_context::reset() was renamed to restart().
+        sed -i 's/d_io_service\.reset()/d_io_service.restart()/g' lib/*.cc
+        # resolver::query removed; resolve via host/service (+ error_code) and take
+        # the first entry of the returned range.
+        perl -0777 -pi -e 's{boost::asio::ip::tcp::resolver::query\s+query\(\s*d_host,\s*s_port,\s*boost::asio::ip::resolver_query_base::passive\);\s*d_endpoint\s*=\s*\*resolver\.resolve\(query,\s*err\);}{d_endpoint = *resolver.resolve(d_host, s_port, boost::asio::ip::resolver_base::passive, err).begin();}s' \
+            lib/tcp_sink_impl.cc
+        perl -0777 -pi -e 's{boost::asio::ip::udp::resolver::query\s+query\(\s*s_host,\s*s_port,\s*boost::asio::ip::resolver_query_base::passive\);\s*boost::system::error_code\s+err;\s*d_endpoint\s*=\s*\*resolver\.resolve\(query,\s*err\);}{boost::system::error_code err;\n  d_endpoint = *resolver.resolve(s_host, s_port, boost::asio::ip::resolver_base::passive, err).begin();}s' \
+            lib/udp_sink_impl.cc
+        # Fail loudly on upstream drift instead of building the old, broken sources.
+        if grep -q 'boost::asio::io_service\|resolver::query\|resolver_query_base' lib/*.h lib/*.cc; then
+            criticalecho-noexit "[-] gr-grnet Boost.Asio patch did not apply (upstream changed); build will fail"
+        fi
+        mkdir -p build && cd build
+        cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../
+        make -j$(nproc)
+        sudo make install
+        cd .. && rm -rf build/
     fi
 }
 

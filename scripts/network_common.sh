@@ -216,7 +216,7 @@ function crunch_soft_install() {
 function bettercap_soft_install() {
 	goodecho "[+] Installing bettercap"
 	rm -rf ~/.cache/go-build #TODO: trying to solve build exit for ARM on GitHub
-	export GOPROXY=direct
+	export GOPROXY=https://proxy.golang.org,direct
 	install_dependencies "libnetfilter-queue-dev"
 	[ -d /rftools/bluetooth ] || mkdir -p /rftools/bluetooth
 	cd /rftools/bluetooth
@@ -670,7 +670,7 @@ function sniffnet_soft_install_fromsource() {
 function curlie_soft_install_fromsource() {
     goodecho "[+] Installing curlie"
     export GOSUMDB=sum.golang.org
-    export GOPROXY=direct
+    export GOPROXY=https://proxy.golang.org,direct
     go install github.com/rs/curlie@latest
     ln -s /root/go/bin/curlie /usr/sbin/curlie
 }
@@ -730,7 +730,7 @@ EOF
 function snitch_soft_install() {
     goodecho "[+] Installing snitch"
     export GOSUMDB=sum.golang.org
-    export GOPROXY=direct
+    export GOPROXY=https://proxy.golang.org,direct
     go install github.com/karol-broda/snitch@latest
     ln -s /root/go/bin/snitch /usr/sbin/snitch
 }
@@ -761,7 +761,7 @@ function titus_soft_install() {
     [ -d /opt/network ] || mkdir -p /opt/network
     cd /opt/network
     export GOSUMDB=sum.golang.org
-    export GOPROXY=direct
+    export GOPROXY=https://proxy.golang.org,direct
     gitinstall "https://github.com/praetorian-inc/titus.git" "titus_soft_install"
     cd titus
 
@@ -797,7 +797,7 @@ function titus_soft_install() {
 function brutus_soft_install() {
     goodecho "[+] Installing brutus"
     export GOSUMDB=sum.golang.org
-    export GOPROXY=direct
+    export GOPROXY=https://proxy.golang.org,direct
     go install github.com/praetorian-inc/brutus/cmd/brutus@latest
     ln -s ~/go/bin/brutus /usr/sbin/brutus
     ln -s ~/go/bin/nabuu /usr/sbin/nabuu
@@ -806,7 +806,7 @@ function brutus_soft_install() {
 function whosthere_soft_install() {
     goodecho "[+] Installing whosthere"
     export GOSUMDB=sum.golang.org
-    export GOPROXY=direct
+    export GOPROXY=https://proxy.golang.org,direct
     go install github.com/ramonvermeulen/whosthere@latest
     ln -s /root/go/bin/whosthere /usr/local/bin/whosthere
 }
@@ -814,7 +814,7 @@ function whosthere_soft_install() {
 function nerva_soft_install() {
     goodecho "[+] Installing nerva"
     export GOSUMDB=sum.golang.org
-    export GOPROXY=direct
+    export GOPROXY=https://proxy.golang.org,direct
     go install github.com/praetorian-inc/nerva/cmd/nerva@latest
     ln -s ~/go/bin/nerva /usr/bin/nerva
 }
@@ -835,7 +835,7 @@ function mic_soft_install() {
     [ -d /opt/network ] || mkdir -p /opt/network
     cd /opt/network
     export GOSUMDB=sum.golang.org
-    export GOPROXY=direct
+    export GOPROXY=https://proxy.golang.org,direct
     gitinstall "https://github.com/djnnvx/mic.git" "mic_soft_install"
     cd mic
     go build -o mic .
@@ -847,7 +847,7 @@ function betterleaks_soft_install() {
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
     cd /root/thirdparty
     export GOSUMDB=sum.golang.org
-    export GOPROXY=direct
+    export GOPROXY=https://proxy.golang.org,direct
     gitinstall "https://github.com/betterleaks/betterleaks.git" "betterleaks_soft_install"
     cd betterleaks
     make build
@@ -871,7 +871,7 @@ function reconftw_soft_install() {
     [ -d /opt/network ] || mkdir -p /opt/network
     cd /opt/network
     export GOSUMDB=sum.golang.org
-    export GOPROXY=direct
+    export GOPROXY=https://proxy.golang.org,direct
     gitinstall "https://github.com/six2dez/reconftw.git" "reconftw_soft_install"
     cd reconftw
     ./install.sh --verbose
