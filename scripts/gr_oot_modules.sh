@@ -133,11 +133,11 @@ function grreveng_grmod_install() {
 }
 
 function grpdu_utils_grmod_install() {
-    grclone_and_build "https://github.com/FlUxIuS/gr-pdu_utils.git" "" "grpdu_utils_grmod_install"
+    grclone_and_build "https://github.com/PentHertz/gr-pdu_utils_resolute.git" "" "grpdu_utils_grmod_install"
 }
 
 function grsandia_utils_grmod_install() {
-    grclone_and_build "https://github.com/bkerler/gr-sandia_utils.git" "" "grsandia_utils_grmod_install"
+    grclone_and_build "https://github.com/PentHertz/gr-sandia_utils_resolute.git" "" "grsandia_utils_grmod_install"
 }
 
 function grdvbs2_grmod_install() {
@@ -176,7 +176,7 @@ function deeptempest_grmod_install() {
 }
 
 function grfhss_utils_grmod_install() {
-    grclone_and_build "https://github.com/FlUxIuS/gr-fhss_utils.git" "" "grfhss_utils_grmod_install"
+    grclone_and_build "https://github.com/PentHertz/gr-fhss_utils_resolute.git" "" "grfhss_utils_grmod_install"
 }
 
 function grtiming_utils_grmod_install() {
