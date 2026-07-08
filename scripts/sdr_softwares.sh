@@ -230,6 +230,13 @@ function cyberther_soft_install() {
 	esac
 	goodecho "[CyberEther][+] Upgrading meson (Noble ships 1.3.2, CyberEther >= 1.4.1 requires >= 1.11.0)"
 	pip3 install --break-system-packages --upgrade meson
+	# CyberEther bundles airspyone_host (libairspy) as a meson subproject; its
+	# airspy.c does "typedef int bool;", which is illegal now that bool is a C23
+	# keyword (GCC 15 defaults to gnu23). Force gnu17 for C sources so the bundled
+	# C subprojects (libairspy, libusb, glfw, zlib) keep compiling; CyberEther's
+	# own C++ uses cpp_std and is unaffected. meson applies env CFLAGS to
+	# subprojects too, which -Dc_std would not reliably do.
+	export CFLAGS="${CFLAGS:-} -std=gnu17"
 	meson setup -Dbuildtype=${BUILDTYPE} build && cd build
 	ninja -j${NINJA_JOBS} install
 }

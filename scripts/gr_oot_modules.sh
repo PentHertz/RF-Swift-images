@@ -525,7 +525,20 @@ function grhydrasdr_grmod_install() {
     # GNU Radio OOT source block for HydraSDR (PentHertz/gr-hydrasdr). Requires
     # libhydrasdr, installed by hydrasdr_rfone_install (from hydrasdr/rfone_host) in
     # the base image; the module ships its own FindLibHYDRASDR.cmake to locate it.
-    grclone_and_build "https://github.com/PentHertz/gr-hydrasdr.git" "" "grhydrasdr_grmod_install"
+    # The published repo currently carries a stale build/ dir (CMakeCache.txt pinned
+    # to another absolute path), which makes cmake refuse to configure. Wipe build/
+    # and configure out-of-tree. Once the fork drops the committed build/ dir this
+    # can go back to a plain grclone_and_build.
+    [ -d /rftools/sdr/oot ] || mkdir -p /rftools/sdr/oot
+    cd /rftools/sdr/oot || exit
+    gitinstall "https://github.com/PentHertz/gr-hydrasdr.git" "grhydrasdr_grmod_install" ""
+    cd gr-hydrasdr || exit
+    rm -rf build
+    mkdir -p build && cd build
+    cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../
+    make -j$(nproc)
+    sudo make install
+    cd .. && rm -rf build/
 }
 
 function grmer_grmod_install() {
