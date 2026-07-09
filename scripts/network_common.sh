@@ -84,6 +84,17 @@ function metasploit_soft_install() {
         curl https://raw.githubusercontent.com/rapid7/metasploit-omnibus/master/config/templates/metasploit-framework-wrappers/msfupdate.erb > msfinstall
         chmod 755 msfinstall
         sudo ./msfinstall
+        # Neutralize Rapid7's apt repo once metasploit is installed. Its CDN
+        # intermittently serves a mismatched InRelease/Packages.gz pair
+        # ("File has unexpected size (430 != 429). Mirror sync in progress?")
+        # during metasploit-framework rebuilds, which hard-fails `apt-fast update`
+        # in EVERY image built FROM this one (network, ad, ...). The framework is
+        # already installed under /opt; the repo is only needed for apt-path
+        # `msfupdate`. Re-enable by restoring the .list (rebuild the image to
+        # pick up a fresh metasploit).
+        for _msf_list in /etc/apt/sources.list.d/*metasploit*.list; do
+            [ -e "$_msf_list" ] && sudo mv "$_msf_list" "${_msf_list}.disabled"
+        done
     else
         criticalecho-noexit "[-] Unsupported architecture: $ARCH"
         criticalecho-noexit "[-] Metasploit installation is only supported on amd64/x86_64 and arm64/aarch64"

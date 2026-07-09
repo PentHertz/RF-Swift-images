@@ -829,7 +829,10 @@ function tetra_suite_install () {
         sed -i 's|#include <stdint.h>|#include <stdint.h>\n#include <time.h>|' telive_receiver.h
     # telive is old sq5bpf C too; same GCC 14+ strictness (implicit-int /
     # implicit-function-declaration) would break it, so apply the same downgrade.
-    make -j$(nproc) CC="gcc -Wno-implicit-function-declaration -Wno-implicit-int -Wno-int-conversion -Wno-incompatible-pointer-types"
+    # Also force -std=gnu17: GCC 15 defaults to gnu23, where an empty parameter
+    # list means (void), so telive's `void timeout_receivers()` called as
+    # timeout_receivers(grxml_url) becomes a hard "too many arguments" error.
+    make -j$(nproc) CC="gcc -std=gnu17 -Wno-implicit-function-declaration -Wno-implicit-int -Wno-int-conversion -Wno-incompatible-pointer-types"
     
     # Clone ACELP codec installer (not built - user runs it manually due to ETSI licensing)
     goodecho "[+] Cloning TETRA ACELP codec installer (run 'install-tetra-codec' to enable voice decoding)"
