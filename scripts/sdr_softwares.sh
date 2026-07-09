@@ -208,8 +208,8 @@ function cyberther_soft_install() {
 	goodecho "[CyberEther][+] Cloning GitHub repository"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	git clone --depth=1 --branch v1.4.1 https://github.com/luigifcruz/CyberEther.git CyberEther-1.4.1
-	cd CyberEther-1.4.1
+	git clone --depth=1 --branch v1.6.1 https://github.com/luigifcruz/CyberEther.git CyberEther-1.6.1
+	cd CyberEther-1.6.1
 	goodecho "[CyberEther][+] Configuring build options for architecture"
 	BUILDTYPE="debugoptimized"
 	NINJA_JOBS=$(nproc)
@@ -237,6 +237,17 @@ function cyberther_soft_install() {
 	# own C++ uses cpp_std and is unaffected. meson applies env CFLAGS to
 	# subprojects too, which -Dc_std would not reliably do.
 	export CFLAGS="${CFLAGS:-} -std=gnu17"
+	# CyberEther generates resources/geodata/geodata.hh by having parser.py download
+	# ~20 Natural Earth GeoJSON files from raw.githubusercontent.com at build time.
+	# parser.py makes a single attempt and aborts on GitHub HTTP 429 rate-limiting,
+	# so pre-fetch them here (installfromnet retries) into the dir parser.py scans;
+	# it then finds them present and skips the flaky download. The list is read from
+	# the module's own meson.build so it tracks the upstream version.
+	goodecho "[CyberEther][+] Pre-fetching Natural Earth geodata (avoids build-time 429s)"
+	_ne_url="https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson"
+	for _ne_f in $(grep -oE "ne_10m_[A-Za-z0-9_]+\.geojson" resources/geodata/meson.build | sort -u); do
+	    [ -s "resources/geodata/$_ne_f" ] || installfromnet "wget -q -O resources/geodata/$_ne_f $_ne_url/$_ne_f"
+	done
 	meson setup -Dbuildtype=${BUILDTYPE} build && cd build
 	ninja -j${NINJA_JOBS} install
 }
