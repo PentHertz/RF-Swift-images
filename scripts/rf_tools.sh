@@ -768,7 +768,12 @@ function sparrowwifi_sdr_soft_install() {
     [ -d /rftools/wifi ] || mkdir -p /rftools/wifi
     cd /rftools/wifi
 
-    # System Qt5 packages
+    # System Qt5 packages.
+    # (Dropped python3-sip-dev: it no longer exists on resolute -- "Unable to locate
+    # package" -- and sparrow-wifi doesn't need it. It's a run-in-place app that only
+    # imports PyQt5 at runtime; PyQt5 comes prebuilt from python3-pyqt5/.qtchart/.qsci
+    # and the SIP runtime lib is pulled in as their dependency. The -dev SIP package
+    # only matters for *building* bindings, which this app never does.)
     install_dependencies "python3-pyqt5 \
         python3-pyqt5.qtchart \
         python3-pyqt5.qtsvg \
@@ -778,7 +783,6 @@ function sparrowwifi_sdr_soft_install() {
         qtbase5-dev \
         pyqt5-dev \
         pyqt5-dev-tools \
-        python3-sip-dev \
         python3-pip \
         python3-tk \
         python3-setuptools \
