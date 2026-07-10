@@ -171,8 +171,20 @@ function deeptempest_grmod_install() {
     cd ../..
     goodecho "[+] Installing requirements for deep-tempest"
     cd end-to-end/
-    pip3install -r requirement.txt
-    pip3install "numpy<2.0" # force Numpy < 2
+    # deep-tempest's ML pipeline is PyTorch (torch/torchvision/timm/einops), NOT
+    # TensorFlow. On Python 3.14 the whole stack installs: torch 2.13 & torchvision
+    # 0.28 ship cp314 wheels, opencv-python 5.x is a forward-compatible cp37-abi3
+    # wheel, scikit-image/lmdb have cp314, the rest are pure-python. Best-effort in
+    # case a transient/dep hiccup occurs (pip3install already records a build-report
+    # entry on failure) so gr-tempest (built above) and the image survive.
+    pip3install -r requirement.txt || \
+        criticalecho-noexit "[-] deep-tempest ML deps incomplete on this Python (see build report); gr-tempest SDR module is still installed"
+    # Dropped the old `numpy<2.0` force: it was the actual blocker on py3.14 -- numpy
+    # 1.26 has no cp314 wheel (slow, fragile source build) and would break torch /
+    # scikit-image / scipy, which require numpy 2.x here. The only numpy-2.0-removed
+    # API the code used is np.alltrue (an alias of np.all, deleted in numpy 2.0);
+    # patch it in the persisted clone so the deblur runtime path works on numpy 2.x.
+    [ -f utils/utils_deblur.py ] && sed -i 's/np\.alltrue(/np.all(/g' utils/utils_deblur.py
 }
 
 function grfhss_utils_grmod_install() {
@@ -234,7 +246,12 @@ function grfosphor_grmod_install() {
         cd /root/thirdparty
         cmake_clone_and_build "https://github.com/glfw/glfw" "build" "" "" "grfosphor_grmod_install" -DBUILD_SHARED_LIBS=true
         cd /root/thirdparty
-        grclone_and_build "https://github.com/osmocom/gr-fosphor.git" "" "grfosphor_grmod_install"
+        # PentHertz/gr-fosphor_resolute drops the header-only Boost "system" component
+        # from find_package(Boost): on Boost 1.90 boost::system ships no
+        # boost_systemConfig.cmake, so osmocom's find_package(Boost ... system) fails
+        # in config mode ("Boost required to compile gr-fosphor"). system is pulled in
+        # transitively via chrono/thread, so dropping it is safe.
+        grclone_and_build "https://github.com/PentHertz/gr-fosphor_resolute.git" "" "grfosphor_grmod_install"
     fi
 }
 

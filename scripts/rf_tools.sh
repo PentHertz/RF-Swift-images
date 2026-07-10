@@ -112,9 +112,10 @@ function sniffle_soft_install() {
         installfromnet "git clone https://github.com/bkerler/Sniffle.git"
         cd Sniffle/python_cli
         pip3install -r requirements.txt
-        
-        pip3 uninstall numpy -y --break-system-packages
-        pip3install "numpy<2.0"
+        # numpy<2.0 override removed: Sniffle's python_cli only uses stable numpy
+        # APIs that are unchanged in numpy 2.x, and its own requirements pull scipy,
+        # which on Python 3.14 is a cp314 wheel built against numpy 2.x -- pinning
+        # numpy<2 (no cp314 wheel; slow 1.26 source build) would break that scipy.
         [ -d /rftools/bluetooth/firmwares/Sniffle ] || mkdir -p /rftools/bluetooth/firmwares/Sniffle
         cd /rftools/bluetooth/firmwares/Sniffle
         goodecho "[+] Downloading firmwares for Sniffle"

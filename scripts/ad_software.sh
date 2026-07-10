@@ -19,7 +19,12 @@ function _ad_pipx() {
     local name="$1" spec="$2" bin="$3"
     pipx install "$spec" \
         || record_build_failure "pip" "$name" "pipx install failed"
-    [ -n "$bin" ] && [ -e "/root/.local/bin/$bin" ] && ln -sf "/root/.local/bin/$bin" "/usr/sbin/$bin"
+    if [ -n "$bin" ] && [ -e "/root/.local/bin/$bin" ]; then
+        ln -sf "/root/.local/bin/$bin" "/usr/sbin/$bin"
+    fi
+    # Best-effort helper: a missing binary (e.g. pipx install failed above and was
+    # recorded) must not become this function's exit status and abort the build.
+    return 0
 }
 
 function ldapdomaindump_soft_install() {
@@ -90,8 +95,15 @@ function sharplaps_soft_install() {
     gitinstall "https://github.com/swisskyrepo/SharpLAPS.git" "sharplaps_soft_install"
     if [ -d SharpLAPS ]; then
         local exe; exe=$(find "$AD_DIR/SharpLAPS" -iname 'SharpLAPS.exe' 2>/dev/null | head -1)
-        [ -n "$exe" ] && ln -sf "$exe" /usr/local/bin/SharpLAPS.exe
+        if [ -n "$exe" ]; then
+            ln -sf "$exe" /usr/local/bin/SharpLAPS.exe
+        else
+            goodecho "[+] SharpLAPS staged as source (no prebuilt .exe in repo; build it on/against a Windows target)"
+        fi
     else
         record_build_failure "git" "SharpLAPS" "clone failed"
     fi
+    # Staging the source is the goal; a missing prebuilt .exe (the normal case for
+    # this C#/source-only repo) must not fail the build via the trailing test above.
+    return 0
 }
