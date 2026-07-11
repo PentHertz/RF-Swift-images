@@ -300,8 +300,8 @@ function urh_soft_install() {
     cd /root/thirdparty
     install_dependencies "qt6-base-dev libgl1-mesa-dev libxkbcommon-x11-0 libegl1 libxcb-cursor0 python3-pyqt6 python3-pyqt6.sip python3-pyqt6.qtsvg pyqt6-dev-tools"
     ARCH=$(uname -m)
-    VERSION_URH="0.0.1"
-    GITBUILD="git20260327.0c9ab4c"
+    VERSION_URH="0.0.2"
+    GITBUILD="git20260710.0a6fe54"
     case "$ARCH" in
         x86_64|amd64)
             ARCH="amd64"
@@ -309,7 +309,7 @@ function urh_soft_install() {
         aarch64|arm64)
             ARCH="arm64"
             ;;
-        riscv64) 
+        riscv64)
             ARCH="riscv64"
             ;;
         *)
@@ -317,10 +317,38 @@ function urh_soft_install() {
             return 0
             ;;
     esac
+    # v0.0.2 ships a per-Ubuntu-base .deb: its bundled /opt/urh-venv is built
+    # against that base's Python (noble -> 3.12, resolute -> 3.14). The .deb must
+    # match the image, otherwise the venv's site-packages sit under the wrong
+    # lib/pythonX.Y and `urh` dies with "PackageNotFoundError: ... urh-ng". Pick
+    # the variant for the image being built; default to resolute.
+    BASE_CODENAME=$(. /etc/os-release 2>/dev/null; echo "${VERSION_CODENAME:-resolute}")
     # Use curly braces to properly delimit variable names
-    FILENAME="urh-penthertz_${ARCH}_${VERSION_URH}+${GITBUILD}.deb"
-    installfromnet "wget https://github.com/PentHertz/urh-ng/releases/download/v$VERSION_URH/$FILENAME"
-    dpkg -i $FILENAME
+    FILENAME="urh-penthertz_${ARCH}_${VERSION_URH}+${GITBUILD}.${BASE_CODENAME}.deb"
+    BASEURL="https://github.com/PentHertz/urh-ng/releases/download/v${VERSION_URH}"
+    installfromnet "wget ${BASEURL}/${FILENAME}"
+    installfromnet "wget ${BASEURL}/SHA256SUMS"
+    if [ -f "$FILENAME" ]; then
+        # Verify by SHA-256. The SHA256SUMS entries use '~' where GitHub serves
+        # '.', so match on the digest rather than the file name.
+        if [ -s SHA256SUMS ]; then
+            URH_HASH=$(sha256sum "$FILENAME" | cut -d' ' -f1)
+            if grep -qi "^${URH_HASH}[[:space:]]" SHA256SUMS; then
+                goodecho "[+] URH .deb SHA-256 verified"
+            else
+                criticalecho-noexit "[!] URH .deb SHA-256 mismatch -- refusing to install"
+                record_build_failure "download" "urh (${FILENAME})" "SHA-256 mismatch"
+                rm -f "$FILENAME"
+                return 1
+            fi
+        else
+            criticalecho-noexit "[!] SHA256SUMS unavailable -- installing URH unverified"
+        fi
+        dpkg -i "$FILENAME"
+    else
+        record_build_failure "download" "urh (${FILENAME})" "download failed"
+        return 1
+    fi
 }
 
 function urh_soft_install_2_9_8() {
