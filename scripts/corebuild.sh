@@ -199,7 +199,7 @@ install_go() {
     ARCH=$(uname -m)
     
     # Define URL and version
-    GO_VERSION="1.26.4" # Replace with the latest version if needed
+    GO_VERSION="1.26.5" # Replace with the latest version if needed
     BASE_URL="https://golang.org/dl/"
 
     case "$ARCH" in
@@ -272,7 +272,7 @@ function uvpython_install() { # Avoid terrible long builds
     install_dependencies "clang libclang-dev llvm-dev build-essential"
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
     cd /root/thirdparty
-    UV_VERSION="0.11.20"
+    UV_VERSION="0.11.28"
     installfromnet "wget https://github.com/astral-sh/uv/releases/download/$UV_VERSION/uv-installer.sh"
     chmod +x uv-installer.sh
     ./uv-installer.sh
