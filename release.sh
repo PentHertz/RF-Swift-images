@@ -39,9 +39,9 @@ DRYRUN="false"
 DEV_REGISTRY="${DEV_REGISTRY:-penthertz/rfswiftdev_resolute}"
 RELEASE_REGISTRY="${RELEASE_REGISTRY:-penthertz/rfswift_resolute}"
 
-VALID_IMAGES="corebuild sdrsa_devices sdr_light sdr_full automotive android osint reversing rfid network ad wifi bluetooth hardware telecom_utils telecom_2Gto3G telecom_4G_5GNSA telecom_5G deeptempest"
+VALID_IMAGES="corebuild sdrsa_devices sdr_light sdr_gnuradio4 sdr_full automotive android osint reversing rfid network ad wifi bluetooth hardware telecom_utils telecom_2Gto3G telecom_4G_5GNSA telecom_5G deeptempest"
 # Topological order (each image builds FROM an earlier one). Used for `all`.
-ALL_IMAGES="corebuild sdrsa_devices sdr_light sdr_full reversing rfid automotive android osint network ad wifi bluetooth hardware deeptempest telecom_utils telecom_2Gto3G telecom_4G_5GNSA telecom_5G"
+ALL_IMAGES="corebuild sdrsa_devices sdr_light sdr_gnuradio4 sdr_full reversing rfid automotive android osint network ad wifi bluetooth hardware deeptempest telecom_utils telecom_2Gto3G telecom_4G_5GNSA telecom_5G"
 
 # ---- helpers ---------------------------------------------------------------
 die()  { printf '\033[1;31m[!] %s\033[0m\n' "$*" >&2; exit 1; }
@@ -56,6 +56,7 @@ make_target() {
         corebuild)     echo common ;;
         sdrsa_devices) echo sdrsadevices ;;
         sdr_light)     echo sdrlight ;;
+        sdr_gnuradio4) echo sdrgnuradio4 ;;
         sdr_full)      echo sdrfull ;;
         *)             echo "$1" ;;
     esac

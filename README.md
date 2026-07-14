@@ -5,3 +5,5 @@ ___
 # RF Swift images
 
 This repository hosts all Dockerfiles to build different types of images as long as needed installation scripts.
+
+See [docs/RELEASING.md](docs/RELEASING.md) for how images are built, updated and released (CI workflows and `release.sh`).

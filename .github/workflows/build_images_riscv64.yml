@@ -79,7 +79,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make common
 
   sdrsa_devices:
-    runs-on: ubuntu-26.04
+    runs-on: Linux
     timeout-minutes: 340
     needs: corebuild
     strategy:
@@ -142,7 +142,7 @@ jobs:
 
 
   sdrsa_devices_antsdr:
-    runs-on: ubuntu-26.04
+    runs-on: Linux
     timeout-minutes: 340
     needs: corebuild
     strategy:
@@ -476,7 +476,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrfull
 
   telecom_utils:
-    runs-on: ubuntu-26.04
+    runs-on: Linux
     timeout-minutes: 340
     needs: sdrsa_devices
     strategy:
@@ -972,7 +972,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make bluetooth
 
   rfid:
-    runs-on: ubuntu-26.04
+    runs-on: Linux
     timeout-minutes: 340
     needs: corebuild
     strategy:
@@ -1094,7 +1094,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make network
 
   automotive:
-    runs-on: ubuntu-26.04
+    runs-on: Linux
     timeout-minutes: 340
     needs: corebuild
     strategy:
@@ -1155,7 +1155,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make automotive
 
   android:
-    runs-on: ubuntu-26.04
+    runs-on: Linux
     timeout-minutes: 340
     needs: corebuild
     strategy:
@@ -1216,7 +1216,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make android
 
   osint:
-    runs-on: ubuntu-26.04
+    runs-on: Linux
     timeout-minutes: 340
     needs: corebuild
     strategy:
@@ -1276,7 +1276,7 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make osint
 
   ad:
-    runs-on: ubuntu-26.04
+    runs-on: Linux
     timeout-minutes: 340
     needs: network
     strategy:

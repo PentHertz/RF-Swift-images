@@ -28,6 +28,7 @@ on:
           - corebuild
           - sdrsa_devices
           - sdr_light
+          - sdr_gnuradio4
           - sdr_full
           - automotive
           - android

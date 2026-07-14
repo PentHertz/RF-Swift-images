@@ -254,6 +254,73 @@ jobs:
           cd Dockerfiles
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrlight
 
+  sdr_gnuradio4:
+    runs-on: ubuntu-26.04-arm
+    timeout-minutes: 340
+    needs: sdr_light
+    strategy:
+      matrix:
+        platform: [arm64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - name: Check for modified files
+        id: file_check
+        run: |
+          git fetch origin
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.event.inputs.force_all }}" = "true" ]; then
+            MODIFIED_FILES="config/"
+          else
+            MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          fi
+          echo "Modified files: $MODIFIED_FILES"
+          if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
+            echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_corebuild=false" >> $GITHUB_OUTPUT
+          fi
+
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdrsa_devices.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "run_job_sdrsa_devices=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_light.docker"* || "$MODIFIED_FILES" == *"scripts/sa_devices.sh"* || "$MODIFIED_FILES" == *"scripts/sdr_peripherals.sh"* ]]; then
+            echo "run_job_sdr_light=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_sdr_light=false" >> $GITHUB_OUTPUT
+          fi
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/sdr_gnuradio4.docker"* || "$MODIFIED_FILES" == *"scripts/sdr_softwares.sh"* ]]; then
+            echo "run_job_sdr_gnuradio4=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_job_sdr_gnuradio4=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Clear stale Docker credentials
+        run: |
+          rm -f ~/.docker/config.json
+          mkdir -p ~/.docker
+
+      - name: Set up Docker Buildx
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true' || steps.file_check.outputs.run_job_sdr_gnuradio4 == 'true'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true' || steps.file_check.outputs.run_job_sdr_gnuradio4 == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push sdr_gnuradio4 image with caching
+        if: steps.file_check.outputs.run_job_corebuild == 'true' || steps.file_check.outputs.run_job_sdrsa_devices == 'true' || steps.file_check.outputs.run_job_sdr_light == 'true' || steps.file_check.outputs.run_job_sdr_gnuradio4 == 'true'
+        run: |
+          cd Dockerfiles
+          STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrgnuradio4
+
   hardware:
     runs-on: ubuntu-26.04-arm
     timeout-minutes: 340
