@@ -283,7 +283,7 @@ function uvpython_install() { # Avoid terrible long builds
 
 function littlesnitch_soft_install() {
     local arch
-    local version="1.0.9"
+    local version="1.1.0"
     arch="$(uname -m)"
     case "$arch" in
         x86_64|amd64)
