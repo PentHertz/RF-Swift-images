@@ -30,7 +30,6 @@ define build_and_push_registry
         ..;
 endef
 
-
 define build_and_push_registry_torestore
     @docker buildx build --platform $(PLATFORM) \
         --cache-from=type=registry,ref=$(CACHE_REPO):cache_$(1)_$(ARCH) \
