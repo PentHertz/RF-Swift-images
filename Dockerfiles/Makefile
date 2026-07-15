@@ -30,6 +30,7 @@ define build_and_push_registry
         ..;
 endef
 
+
 define build_and_push_registry_torestore
     @docker buildx build --platform $(PLATFORM) \
         --cache-from=type=registry,ref=$(CACHE_REPO):cache_$(1)_$(ARCH) \
@@ -281,6 +282,7 @@ clean_cache:
 	@docker buildx prune -af
 	@docker volume prune -f
 	@docker system prune -af --volumes
+
 # Print the build report (tools/packages that failed to install) baked into an
 # already-built image. Pulls the image if needed.
 #   make report IMG=corebuild ARCH=amd64

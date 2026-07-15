@@ -1052,9 +1052,20 @@ function gnuradio4_soft_install() {
     # the embedded-Python support and points it at GR4's own 3.12 venv. Tests off.
     local PYARGS=""
     [ -x "$GR4_VENV/bin/python" ] && PYARGS="-DPYTHON_FORCE_INCLUDE=ON -DPython3_EXECUTABLE=$GR4_VENV/bin/python"
+    # GR4's template-heavy TUs (the block plugins especially) peak at ~4-6 GB RSS
+    # each, so -j$(nproc) OOMs small runners (GitHub arm64 = 4 cores / 16 GB) and
+    # the runner then SIGTERMs the whole build. Cap parallelism at ~5 GB per job.
+    # -Wno-psabi: drop the (harmless) arm64 std::simd ABI-change note flood.
+    local MEMKB GR4JOBS
+    MEMKB=$(awk '/MemAvailable/{print $2}' /proc/meminfo 2>/dev/null || echo 0)
+    GR4JOBS=$(( MEMKB / (5 * 1024 * 1024) ))
+    [ "$GR4JOBS" -lt 1 ] && GR4JOBS=1
+    [ "$GR4JOBS" -gt "$(nproc)" ] && GR4JOBS="$(nproc)"
+    goodecho "[+] Building GR4 with -j${GR4JOBS} ($(nproc) cores, ~$((MEMKB / 1024 / 1024)) GB RAM available)"
     if cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_CXX_FLAGS="-Wno-psabi" \
             -DGR4_DEPENDENCY_MODE=system-or-fetch -DENABLE_TESTING=OFF $PYARGS \
-       && cmake --build build -j"$(nproc)"; then
+       && cmake --build build -j"$GR4JOBS"; then
         cmake --install build --prefix "$GNURADIO4_HOME/install" 2>/dev/null || true
         cat > /etc/profile.d/gnuradio4.sh <<EOF
 # GNU Radio 4.0 (GR4) - parallel to the apt GNU Radio 3.10
