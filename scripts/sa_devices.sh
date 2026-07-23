@@ -42,7 +42,7 @@ function signalhound_sdk_install() {
     cd /root/thirdparty
 
     ARCH=$(uname -m)
-    SDK_URL="https://signalhound.com/sigdownloads/SDK/signal_hound_sdk_05_13_26.zip"
+    SDK_URL="https://signalhound.com/sigdownloads/SDK/signal_hound_sdk_07_06_26.zip"
     SDK_DIR="/opt/signalhound"
 
     installfromnet "wget -q ${SDK_URL} -O signal_hound_sdk.zip"
@@ -148,7 +148,7 @@ function signalhound_spike_sa_device() {
         colorecho "[+] Downloading Spike bin from SignalHound"
         [ -d /rftools/analysers ] || mkdir -p /rftools/analysers
         cd /rftools/analysers
-        filename="Spike(Ubuntu22.04x64)_4_0_13"
+        filename="Spike(Ubuntu22.04x64)_4_0_15"
         installfromnet "wget https://signalhound.com/sigdownloads/Spike/$filename.zip"
         unzip ${filename}.zip
         rm ${filename}.zip
@@ -187,25 +187,25 @@ function signalhound_vsg60_sa_device() {
     ARCH=$(uname -m)
     if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then
         colorecho "[+] Architecture is $ARCH, proceeding with installation"
-        colorecho "[+] Downloading VSG60 bin from SignalHound"
+        colorecho "[+] Downloading VSG software bin from SignalHound"
         [ -d /rftools/generators ] || mkdir -p /rftools/generators
         cd /rftools/generators
-        filename="VSG60(Ubuntu22.04x64)_1_0_19"
+        filename="VSG(Ubuntu22.04x64)_2_0_2"
         installfromnet "wget https://signalhound.com/sigdownloads/VSG60/$filename.zip"
-        unzip "VSG60(Ubuntu22.04x64)_1_0_19.zip"
-        rm "VSG60(Ubuntu22.04x64)_1_0_19.zip"
-        cd "VSG60(Ubuntu22.04x64)_1_0_19"
+        unzip "$filename.zip"
+        rm "$filename.zip"
+        cd "$filename"
         chmod +x setup.sh
         sh -c ./setup.sh
-        local script_path="/usr/sbin/vsg60"
+        local script_path="/usr/sbin/vsg_signalhound"
     
         # Create the script content
         cat << 'EOF' | sudo tee "$script_path" > /dev/null
 #!/bin/sh
 
 # Set the fixed path
-BASE_DIR="/rftools/generators/VSG60(Ubuntu22.04x64)_1_0_19"
-APPNAME="vsg60"
+BASE_DIR="/rftools/generators/VSG(Ubuntu22.04x64)_2_0_2"
+APPNAME="vsg_signalhound"
 
 # Set up the environment variables
 LD_LIBRARY_PATH="$BASE_DIR/lib"
@@ -407,4 +407,94 @@ function harogic_sa_device_new() {
     mkdir -p /rftools/analysers/${prog}/bin/CalFile
     ln -s /rftools/analysers/${prog}/bin/CalFile /usr/bin/CalFile
 
+}
+
+function harogic_sa_device_latest() {
+    goodecho "[+] Downloading SAStudio4"
+    [ -d /rftools/analysers ] || mkdir -p /rftools/analysers
+    cd /rftools/analysers
+    arch=`uname -m`  # uname -m is reliable in containers; uname -i can return "unknown"
+    tag="v0.55.88"
+    prog=""
+    sdkarch=""
+    case "$arch" in
+        x86_64|amd64)
+            prog="SAStudio4_4.4.55.48_amd64"
+            sdkarch="x86_64";;
+        aarch64|unknown|arm64)
+            prog="SAStudio4_4.4.55.48_arm64"
+            sdkarch="aarch64";;
+        *)
+            printf 'Unsupported architecture: "%s"!\n' "$arch" >&2; exit 0;;
+    esac
+    installfromnet "wget https://github.com/PentHertz/rfswift_harogic_install/releases/download/${tag}/$prog.zip"
+    case "$arch" in
+        x86_64|amd64)
+            # SAStudio4 >= 4.4 ships as a flat portable bundle: the zip has no
+            # root directory and no install.sh; bin/SAStudio4 runs directly with
+            # the bundled SDK libs (lib/) on LD_LIBRARY_PATH.
+            unzip -q "$prog.zip" -d "$prog"
+            rm "$prog.zip"
+            chmod +x /rftools/analysers/${prog}/bin/SAStudio4
+            install_dependencies "qtbase5-dev libxcb-cursor-dev"
+            cat > /usr/sbin/sastudio <<EOF
+#!/bin/bash
+export LD_LIBRARY_PATH="/rftools/analysers/${prog}/lib:\$LD_LIBRARY_PATH"
+cd /rftools/analysers/${prog}/bin
+exec ./SAStudio4 "\$@"
+EOF
+            chmod +x /usr/sbin/sastudio
+            ;;
+        aarch64|unknown|arm64)
+            # arm64 still ships the 4.3-style bundle with its install.sh
+            unzip -q "$prog.zip"
+            rm "$prog.zip"
+            cd "$prog"
+            mkdir -p /root/Desktop
+            mkdir -p /home/root/Desktop/
+            sed -i 's/actual_user=$(logname)/actual_user="root"/g' install.sh
+            sed -i 's/$SUDO_USER/root/g' install.sh
+            ./install.sh
+            ln -s /usr/lib/aarch64-linux-gnu/libffi.so.8 /usr/lib/libffi.so.6
+            ln -s /usr/local/bin/sastudio/.sastudio.sh /usr/sbin/sastudio
+            cd /rftools/analysers
+            ;;
+    esac
+    goodecho "[+] Installing htraapi"
+    installfromnet "wget https://github.com/PentHertz/rfswift_harogic_install/releases/download/${tag}/Install_HTRA_SDK.zip"
+    # Since v0.55.88 the SDK zip has no root directory either
+    unzip -q Install_HTRA_SDK.zip -d Install_HTRA_SDK
+    rm Install_HTRA_SDK.zip
+    cd Install_HTRA_SDK/
+    cp htraapi/configs/htrausb.conf /etc/
+    cp htraapi/configs/htra-cyusb.rules /etc/udev/rules.d/
+    rm -rf /opt/htraapi/
+    cp -r htraapi/ /opt/
+
+    # Extract library version from the actual architecture path
+    file=$( ls htraapi/lib/${sdkarch}/libhtraapi.so.* | head -1 )
+    [ -z "$file" ] && { echo "Error: libhtraapi.so not found for $sdkarch"; exit 1; }
+    file=$( basename $file )
+    version=${file#*so.}
+    majornum=${version%%.*}
+
+    # Create version symlinks in SDK directory
+    ln -sf /opt/htraapi/lib/${sdkarch}/libhtraapi.so.${version} /opt/htraapi/lib/${sdkarch}/libhtraapi.so.${majornum}
+    ln -sf /opt/htraapi/lib/${sdkarch}/libhtraapi.so.${majornum} /opt/htraapi/lib/${sdkarch}/libhtraapi.so
+    ln -sf /opt/htraapi/lib/${sdkarch}/libusb-1.0.so.0.2.0 /opt/htraapi/lib/${sdkarch}/libusb-1.0.so.0
+    ln -sf /opt/htraapi/lib/${sdkarch}/libusb-1.0.so.0 /opt/htraapi/lib/${sdkarch}/libusb-1.0.so
+
+    # Copy libraries to system paths
+    cd "/opt/htraapi/lib/${sdkarch}"
+    [ -f libhtraapi.so ] || { echo "Error: symlink setup failed"; exit 1; }
+    cp libh* /usr/lib/
+    ln -sf $(pwd)/libliquid.so /usr/lib/libliquid.so
+    cp /opt/htraapi/inc/htra_api.h /usr/include
+
+    # Update linker cache
+    ldconfig
+
+    colorecho "[+] Note: you'll have to put your calibration data after!"
+    mkdir -p /rftools/analysers/${prog}/bin/CalFile
+    ln -sf /rftools/analysers/${prog}/bin/CalFile /usr/bin/CalFile
 }

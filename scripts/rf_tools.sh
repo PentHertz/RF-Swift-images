@@ -922,34 +922,21 @@ function artemis_soft_install () {
     cd /rftools/docs
     gitinstall "https://github.com/AresValley/Artemis.git" "artemis_soft_install"
     cd Artemis
-    # Artemis >= 4.x is a uv project (pyproject.toml + uv.lock) that requires
-    # Python >= 3.14 and pins pyside6 6.11.x -- both compatible with resolute's
-    # system Python 3.14, so the old "uv-managed Python 3.12" workaround (for the
-    # previous PySide6==6.8.0.1 "<3.13" pin) is no longer needed. There is no
-    # requirements.txt or app.py anymore: deps live in pyproject.toml and the app
-    # runs from source as a package via `python -m artemis` (resources.py is
-    # committed, so no pyside6-rcc step is required).
-    if command -v uv >/dev/null 2>&1; then
-        goodecho "[+] Installing Artemis dependencies with uv (Python 3.14)"
-        uv venv --python 3.14 /rftools/docs/Artemis/.venv
-        uv pip install --python /rftools/docs/Artemis/.venv/bin/python -r pyproject.toml
-        cat > /usr/sbin/Artemis <<'EOF'
+    # Official install flow (https://aresvalley.github.io/Artemis/run_from_source/):
+    # Artemis is a uv project (pyproject.toml + uv.lock); `uv sync` sets up the
+    # venv with pinned deps and `uv run python -m artemis` launches the app.
+    which uv || curl -LsSf https://astral.sh/uv/install.sh | sh
+    export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
+    goodecho "[+] Installing Artemis dependencies with uv sync"
+    uv sync
+    cat > /usr/sbin/Artemis <<'EOF'
 #!/bin/bash
+export PATH="/root/.local/bin:/root/.cargo/bin:$PATH"
 cd /rftools/docs/Artemis
-exec ./.venv/bin/python -m artemis "$@"
+exec uv run python -m artemis "$@"
 EOF
-        chmod +x /usr/sbin/Artemis
-    else
-        # Fallback: install the declared deps on the system Python 3.14.
-        goodecho "[+] Installing Artemis with pip on the system Python"
-        pip3install packaging pyside6 requests
-        cat > /usr/sbin/Artemis <<'EOF'
-#!/bin/bash
-cd /rftools/docs/Artemis
-exec python3 -m artemis "$@"
-EOF
-        chmod +x /usr/sbin/Artemis
-    fi
+    chmod +x /usr/sbin/Artemis
+    goodecho "[+] Artemis installed. Use 'Artemis' wrapper to run."
 }
 
 function airsnitch_soft_install() {

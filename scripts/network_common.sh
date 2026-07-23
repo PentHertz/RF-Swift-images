@@ -553,7 +553,7 @@ function trufflehog_script_install() {
 }
 
 function burpsuite_community_install() { # TODO: only working well on x86_64 with the GUI :/
-    local version="${1:-2026.4.3}"
+    local version="${1:-2026.6}"
     local install_dir="/opt/burpsuite"
     local arch=$(uname -m)
     
