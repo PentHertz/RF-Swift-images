@@ -83,12 +83,33 @@ function mobsf_soft_install() {
         return 1
     fi
     cd Mobile-Security-Framework-MobSF
-    # MobSF pins a large dependency set; keep it in its own venv (with access to
-    # system site-packages) and let its setup script resolve everything.
-    python3 -m venv --system-site-packages ./venv
-    ./venv/bin/python -m pip install --upgrade pip > /dev/null 2>&1 || true
+    # MobSF only supports Python 3.12-3.13 (setup.sh hard-fails on anything
+    # else) and drives install + runtime through `python3 -m poetry`, so expose
+    # a uv-provisioned 3.12 as `python3` for both.
+    if ! command -v uv >/dev/null 2>&1; then
+        record_build_failure "build" "MobSF" "uv not available to provision Python 3.12"
+        return 1
+    fi
+    uv python install 3.12
+    local mobsf_py
+    mobsf_py="$(uv python find 3.12)"
+    if [ -z "$mobsf_py" ]; then
+        record_build_failure "build" "MobSF" "uv could not provision Python 3.12"
+        return 1
+    fi
+    mkdir -p "$MOBILE_DIR/.mobsf-python"
+    ln -sf "$mobsf_py" "$MOBILE_DIR/.mobsf-python/python3"
+    ln -sf "$mobsf_py" "$MOBILE_DIR/.mobsf-python/python"
     if [ -f ./setup.sh ]; then
-        bash ./setup.sh || record_build_failure "build" "MobSF" "setup.sh reported errors"
+        PATH="$MOBILE_DIR/.mobsf-python:$PATH" bash ./setup.sh \
+            || record_build_failure "build" "MobSF" "setup.sh reported errors"
+        cat > /usr/bin/mobsf <<EOF
+#!/bin/bash
+export PATH="$MOBILE_DIR/.mobsf-python:\$PATH"
+cd "$MOBILE_DIR/Mobile-Security-Framework-MobSF"
+exec bash ./run.sh "\$@"
+EOF
+        chmod +x /usr/bin/mobsf
     else
         record_build_failure "build" "MobSF" "setup.sh not found"
     fi
