@@ -27,6 +27,20 @@ function arsenal_soft_install() {
 	echo "alias a='/opt/arsenal/run'" >> ~/.bashrc
 }
 
+function grimoire_soft_install() {
+	goodecho "[+] Installing grimoire"
+	cd /opt
+	gitinstall "https://github.com/PentHertz/grimoire.git" "grimoire_soft_install"
+	cd grimoire
+	pip3install -r requirements.txt
+	chmod +x grimoire.py
+	# Docs are fetched at runtime ('grimoire all'), not baked in: the sources are
+	# 20+ repos and this is the base image every other one builds on.
+	ln -sf /opt/grimoire/grimoire.py /usr/local/bin/grimoire
+	echo "alias grim='/usr/local/bin/grimoire'" >> ~/.zshrc
+	echo "alias grim='/usr/local/bin/grimoire'" >> ~/.bashrc
+}
+
 function atuin_soft_fromsource_install() {
         goodecho "[+] Proceeding with atuin installation from source instead"
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
