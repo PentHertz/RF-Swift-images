@@ -90,3 +90,61 @@ function joernsast_install() {
     done
     ln -sf $(pwd)/c2cpg.sh /usr/local/bin/c2cpg
 }
+
+function trivy_install() {
+    # Trivy: vulnerability / misconfig / secret / SBOM scanner for container
+    # images, filesystems and repos -- used here to triage extracted firmware
+    # and dependency trees during reversing.
+    goodecho "[+] Installing Trivy"
+
+    local arch asset
+    arch=$(uname -m)
+    case "$arch" in
+        x86_64|amd64)  asset="Linux-64bit" ;;
+        aarch64|arm64) asset="Linux-ARM64" ;;
+        *)             asset="" ;;
+    esac
+
+    # Prefer the upstream install script (fetches the prebuilt release binary for
+    # the detected arch into /usr/local/bin, tracking the latest release).
+    if [ -n "$asset" ]; then
+        installfromnet "curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh -o /tmp/trivy-install.sh"
+        if [ -s /tmp/trivy-install.sh ]; then
+            sh /tmp/trivy-install.sh -b /usr/local/bin
+            rm -f /tmp/trivy-install.sh
+        fi
+        if command -v trivy >/dev/null 2>&1; then
+            goodecho "[+] Trivy installed: $(command -v trivy)"
+            return 0
+        fi
+        record_build_failure "download" "trivy" "install script failed; falling back to go install"
+    fi
+
+    # No prebuilt binary for this arch (e.g. riscv64) or the download failed:
+    # build from source with the Go toolchain from corebuild's install_go.
+    if command -v go >/dev/null 2>&1; then
+        GOBIN=/usr/local/bin go install github.com/aquasecurity/trivy/cmd/trivy@latest \
+            || record_build_failure "build" "trivy" "go install failed"
+    else
+        record_build_failure "build" "trivy" "no prebuilt binary for $arch and go unavailable"
+    fi
+}
+
+function sighthound_install() {
+    # Sighthound: tree-sitter based static vulnerability scanner (pattern +
+    # source->sink taint flow) over Python/JS/TS/Java/PHP/C#/Go/Ruby, with
+    # text/JSON/CSV/SARIF output. Complements semgrep in the reversing SAST set.
+    # Not published on crates.io and ships no release binaries -> build from git
+    # with the rustup toolchain from corebuild's rust_tools (needs Rust 1.85+).
+    goodecho "[+] Installing Sighthound"
+    if ! command -v cargo >/dev/null 2>&1; then
+        record_build_failure "build" "sighthound" "cargo toolchain unavailable"
+        return 0
+    fi
+    local repo="https://github.com/Corgea/Sighthound.git"
+    # Prefer the pinned Cargo.lock for a reproducible build; retry unlocked if the
+    # lockfile can't resolve against the installed toolchain.
+    cargo install --git "$repo" --bin sighthound --root /usr/local --locked \
+        || cargo install --git "$repo" --bin sighthound --root /usr/local \
+        || record_build_failure "build" "sighthound" "cargo install --git failed"
+}

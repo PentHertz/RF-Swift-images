@@ -35,7 +35,8 @@ RUN ./entrypoint.sh esp32_bluetooth_classic_sniffer_soft_install
 # Tools for Bluetooth LE
 RUN ./entrypoint.sh mirage_soft_install && \
 	./entrypoint.sh sniffle_soft_install && \
-	./entrypoint.sh whad_soft_install
+	./entrypoint.sh whad_soft_install && \
+	./entrypoint.sh caeruleus_soft_install
 
 # BLE exploits
 RUN ./entrypoint.sh CVE_2025_36911_whisperpair_install && \

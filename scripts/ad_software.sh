@@ -107,3 +107,40 @@ function sharplaps_soft_install() {
     # this C#/source-only repo) must not fail the build via the trailing test above.
     return 0
 }
+
+function skewrun_soft_install() {
+    # skewrun resolves a Domain Controller's time over AD protocols and wraps a
+    # target process with libfaketime (LD_PRELOAD) so tools like Impacket/NetExec
+    # survive Kerberos KRB_AP_ERR_SKEW without root or touching the system clock.
+    goodecho "[+] Installing skewrun (AD clock-skew wrapper)"
+    install_dependencies "libfaketime"
+
+    local arch asset
+    arch=$(uname -m)
+    case "$arch" in
+        x86_64|amd64)  asset="skewrun-x86_64-linux-musl" ;;
+        aarch64|arm64) asset="skewrun-aarch64-linux-musl" ;;
+        *)             asset="" ;;
+    esac
+
+    # Prefer the upstream static musl release (no toolchain, tracks latest).
+    if [ -n "$asset" ]; then
+        installfromnet "wget -O /usr/local/bin/skewrun https://github.com/JVBotelho/skewrun/releases/latest/download/$asset"
+        if [ -s /usr/local/bin/skewrun ] && head -c4 /usr/local/bin/skewrun | grep -q $'\x7fELF'; then
+            chmod +x /usr/local/bin/skewrun
+            goodecho "[+] skewrun installed: /usr/local/bin/skewrun"
+            return 0
+        fi
+        rm -f /usr/local/bin/skewrun
+        record_build_failure "download" "skewrun" "release binary download failed; falling back to cargo"
+    fi
+
+    # No prebuilt binary for this arch (e.g. riscv64) or the download failed:
+    # build from crates.io using the cargo toolchain from corebuild's rust_tools.
+    if command -v cargo >/dev/null 2>&1; then
+        cargo install skewrun --root /usr/local \
+            || record_build_failure "build" "skewrun" "cargo install failed"
+    else
+        record_build_failure "build" "skewrun" "no prebuilt binary for $arch and cargo unavailable"
+    fi
+}

@@ -43,7 +43,8 @@ RUN ./entrypoint.sh ldapdomaindump_soft_install && \
 	./entrypoint.sh sprayhound_soft_install && \
 	./entrypoint.sh kerbrute_soft_install && \
 	./entrypoint.sh sharplaps_soft_install && \
-	./entrypoint.sh install_pyGoldenGMSA
+	./entrypoint.sh install_pyGoldenGMSA && \
+	./entrypoint.sh skewrun_soft_install
 
 # Build report (tools that failed to install)
 RUN ./entrypoint.sh print_build_report

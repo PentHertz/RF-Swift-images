@@ -294,6 +294,22 @@ function breaktooth_soft_install() {
     gitinstall "https://github.com/FlUxIuS/breaktooth-unofficial.git" "breaktooth_soft_install"
 }
 
+function caeruleus_soft_install() {
+    # Caeruleus: single Go binary for the whole BLE assessment workflow on
+    # Linux/BlueZ (scan, GATT enumerate, read/write/notify, fuzz, structured
+    # assess) with JSON/JSONL output. BlueZ runtime deps already come with the
+    # bluetooth image; it's pure Go so `go install` covers every arch (upstream
+    # prebuilt binaries are amd64/arm64 only).
+    goodecho "[+] Installing Caeruleus (BLE toolkit)"
+    if command -v go >/dev/null 2>&1; then
+        GOBIN=/usr/local/bin go install github.com/praetorian-inc/caeruleus/cmd/caeruleus@latest \
+            && goodecho "[+] Caeruleus installed: /usr/local/bin/caeruleus" \
+            || record_build_failure "build" "caeruleus" "go install failed"
+    else
+        record_build_failure "build" "caeruleus" "go toolchain unavailable"
+    fi
+}
+
 
 function blerp_soft_install() {
     goodecho "[+] Installing BLERP - BLE Re-Pairing Attacks PoC (NDSS 26')"

@@ -48,7 +48,9 @@ RUN ./entrypoint.sh LLVM_install && \
 	./entrypoint.sh clang_static_analyzer_install && \
 	./entrypoint.sh joernsast_install && \
 	./entrypoint.sh angr_soft_install && \
-	./entrypoint.sh angrop_soft_install
+	./entrypoint.sh angrop_soft_install && \
+	./entrypoint.sh trivy_install && \
+	./entrypoint.sh sighthound_install
 
 #RUN ./entrypoint.sh appledb_rs_soft_install
 
