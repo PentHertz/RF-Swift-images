@@ -67,6 +67,7 @@ RUN ./entrypoint.sh install_desktop_packages
 # Installing VPN tools (WireGuard, OpenVPN, Tailscale, Netbird)
 RUN ./entrypoint.sh vpn_tools_install
 
+RUN mkdir -p /root/.local/bin
 COPY config/.zshrc /root/.zshrc
 
 # RF Swift shell integration (must be last to append at end of rc files)

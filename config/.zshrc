@@ -15,3 +15,4 @@ alias grim='/usr/local/bin/grimoire'
 source $HOME/.atuin/bin/env
 eval "$(atuin init zsh)"
 export GOPROXY=direct
+export PATH="$PATH:/root/.local/bin"
