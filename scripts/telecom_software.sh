@@ -8,7 +8,7 @@ function yatebts_blade2_soft_install() { # TODO: make few tests with new Nuand l
 	[ -d /telecom/2G ] || mkdir -p /telecom/2G
 	cd /telecom/2G
 	goodecho "[+] Fetching Yate"
-	installfromnet "git clone https://github.com/svedm/yate.git" # TODO: maybe needs to be updated to rc3? 
+	installfromnet "git clone https://github.com/PentHertz/yate_resolute.git" # TODO: maybe needs to be updated to rc3? 
 	cd yate
 	./autogen.sh
 	./configure --prefix=/usr/local
@@ -83,7 +83,7 @@ function openbts_uhd_soft_install() {
 	[ -d /telecom/2G ] || mkdir -p /telecom/2G
 	cd /telecom/2G
 	goodecho "[+] Cloninig OpenBTS"
-	installfromnet "git clone https://github.com/PentHertz/OpenBTS.git"
+	installfromnet "git clone -b resolute https://github.com/PentHertz/OpenBTS.git"
 	cd OpenBTS
 	# Best-effort on resolute: the bundled Transceiver code predates libstdc++'s
 	# unconditional forward declaration of std::complex (GCC 15 / libstdc++ 15,
@@ -128,7 +128,7 @@ function openbts_umts_soft_install_call() {
 	[ -d /telecom/3G ] || mkdir -p /telecom/3G
 	cd /telecom/3G
 	goodecho "[+] Cloninig OpenBTS UMTS"
-	installfromnet "git clone https://github.com/PentHertz/OpenBTS-UMTS.git"
+	installfromnet "git clone -b resolute https://github.com/PentHertz/OpenBTS-UMTS.git"
 	cd OpenBTS-UMTS
 	git submodule init
 	git submodule update
@@ -167,25 +167,31 @@ function srsran4G_5GNSA_soft_install() {
     set -o pipefail
 }
 
-function srsran5GSA_soft_install() {
+function ocudu_soft_install() {
 	set +e # TODO: debug that function
     set +o pipefail
-	goodecho "[+] Installing srsran_project dependencies"
-	install_dependencies "cmake make gcc g++ pkg-config libfftw3-dev libmbedtls-dev libsctp-dev libyaml-cpp-dev libgtest-dev"
-	goodecho "[+] Feching srsran_project"
+	goodecho "[+] Installing OCUDU dependencies"
+	install_dependencies "cmake make gcc g++ pkg-config libmbedtls-dev libsctp-dev libyaml-cpp-dev libgtest-dev libfftw3-dev"
+	goodecho "[+] Fetching OCUDU"
 	[ -d /telecom/5G ] || mkdir -p /telecom/5G
 	cd /telecom/5G
-	goodecho "[+] Cloninig and installing srsran_project"
-	installfromnet "git clone https://github.com/srsRAN/srsRAN_Project.git"
-	cd srsRAN_Project
-	mkdir build
+	goodecho "[+] Cloning and installing OCUDU"
+	installfromnet "git clone https://gitlab.com/ocudu/ocudu.git"
+	cd ocudu
+	mkdir -p build
 	cd build
 	cmake ../
 	make -j $(nproc)
 	make install
+	ldconfig
 	#make test -j $(nproc)
 	set -e
     set -o pipefail
+}
+
+# OCUDU replaced srsRAN Project as the 5G SA stack installed here
+function srsran5GSA_soft_install() {
+	ocudu_soft_install
 }
 
 function srsran5GSA_bladerf_soft_install() {
