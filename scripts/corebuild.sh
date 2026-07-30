@@ -73,6 +73,19 @@ function flameshot_install() {
     install_dependencies "flameshot"
 }
 
+function enable_apt_components() {
+    local components="main restricted universe multiverse"
+    if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then
+        sed -i -E "s/^Components:.*/Components: ${components}/" \
+            /etc/apt/sources.list.d/ubuntu.sources
+    fi
+    if [ -s /etc/apt/sources.list ]; then
+        sed -i -E "s/^deb(-src)?[[:space:]]+([^[:space:]]+)[[:space:]]+([^[:space:]]+)[[:space:]]+.*/deb\1 \2 \3 ${components}/" \
+            /etc/apt/sources.list
+    fi
+    grep -hE '^(Components:|deb )' /etc/apt/sources.list.d/*.sources /etc/apt/sources.list 2>/dev/null
+}
+
 function rust_tools() {
     goodecho "[+] Installing RUST tools"
     # Install system cargo as fallback/build deps only

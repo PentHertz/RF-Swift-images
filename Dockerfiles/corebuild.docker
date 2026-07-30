@@ -42,7 +42,8 @@ RUN apt update -y && \
 	apt upgrade -y
 
 # Pre-installation tools
-RUN ./entrypoint.sh docker_preinstall
+RUN ./entrypoint.sh docker_preinstall && \
+	./entrypoint.sh enable_apt_components
 
 # Install a newer version of Go than from PKG manager
 RUN ./entrypoint.sh install_go
