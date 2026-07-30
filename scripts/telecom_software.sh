@@ -155,7 +155,7 @@ function srsran4G_5GNSA_soft_install() {
 	[ -d /telecom/4G ] || mkdir -p /telecom/4G
 	cd /telecom/4G
 	goodecho "[+] Cloninig and installing srsRAN 4G"
-	installfromnet "git clone https://github.com/srsran/srsRAN_4G.git"
+	installfromnet "git clone https://github.com/PentHertz/srsRAN_4G_resolute.git"
 	cd srsRAN_4G
 	mkdir build
 	cd build
