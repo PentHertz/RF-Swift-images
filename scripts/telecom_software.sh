@@ -393,6 +393,8 @@ function pycrate_soft_install() {
 
 function cryptomobile_soft_install() {
     goodecho "[+] Installing CryptoMobile"
+    [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
+	cd /root/thirdparty
     pip3install pycryptodome
     gitinstall "https://github.com/mitshell/CryptoMobile.git" "cryptomobile_soft_install"
     cd CryptoMobile
