@@ -9,7 +9,7 @@ function yatebts_blade2_soft_install() { # TODO: make few tests with new Nuand l
 	cd /telecom/2G
 	goodecho "[+] Fetching Yate"
 	installfromnet "git clone https://github.com/PentHertz/yate_resolute.git" # TODO: maybe needs to be updated to rc3? 
-	cd yate
+	cd yate_resolute
 	./autogen.sh
 	./configure --prefix=/usr/local
 	make -j$(nproc)
@@ -156,7 +156,7 @@ function srsran4G_5GNSA_soft_install() {
 	cd /telecom/4G
 	goodecho "[+] Cloninig and installing srsRAN 4G"
 	installfromnet "git clone https://github.com/PentHertz/srsRAN_4G_resolute.git"
-	cd srsRAN_4G
+	cd srsRAN_4G_resolute
 	mkdir build
 	cd build
 	cmake -DCMAKE_CXX_FLAGS="-Wno-error=array-bounds" ..
