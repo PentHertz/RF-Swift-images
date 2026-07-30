@@ -12,7 +12,7 @@ function dsview_install() {
             return 0
             ;;
     esac
-    DSVIEW_VERSION="1.3.2"
+    DSVIEW_VERSION="1.3.4"
     DEB_NAME="dsview_${DSVIEW_VERSION}-1_${DEB_ARCH}.deb"
     DEB_URL="https://github.com/PentHertz/DSView/releases/download/v${DSVIEW_VERSION}/${DEB_NAME}"
     [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
@@ -89,7 +89,7 @@ function pulseview_install() {
             return 0
             ;;
     esac
-    PULSEVIEW_VERSION="0.4.2"
+    PULSEVIEW_VERSION="0.4.4"
     DEB_NAME="sigrok-pulseview_${PULSEVIEW_VERSION}-1_${DEB_ARCH}.deb"
     DEB_URL="https://github.com/PentHertz/pulseview/releases/download/v${PULSEVIEW_VERSION}/${DEB_NAME}"
     [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
