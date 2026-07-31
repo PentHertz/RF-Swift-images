@@ -95,33 +95,41 @@ function NanoVNASaver_cal_device() {
 
 function NanoVNASaver_cal_device_call() {
     install_dependencies "libxcb-cursor0"
+    
+    local nvs_rev="3445a0ab86161f9c886c9d6f215eb57cab9b6f45"  # main, 18 commits past v0.7.3
+    local nvs_url="git+https://github.com/NanoVNA-Saver/nanovna-saver.git@${nvs_rev}"
 
-    # resolute's system Python is 3.14, which the latest NanoVNA-Saver release
-    # (v0.7.3) does not support (requires-python "<3.13").
+    # main also relaxed requires-python from "<3.13" to ">=3.10", and PySide6 ships
+    # abi3 wheels declaring "<3.15", so resolute's system Python 3.14 is supported
+    # either way. uv is still preferred to keep these deps out of the system Python.
     if command -v uv >/dev/null 2>&1; then
-        # Preferred: use uv to provision a compatible standalone Python and install
-        # the stable release into a dedicated venv, then wrap it.
-        goodecho "[+] Installing NanoVNASaver (stable v0.7.3) with uv on Python 3.12"
+        goodecho "[+] Installing NanoVNASaver (main @ ${nvs_rev:0:7}) with uv on Python 3.12"
         local nvs_dir="/rftools/calibration/nanovnasaver"
         [ -d "$nvs_dir" ] || mkdir -p "$nvs_dir"
         uv python install 3.12
-        uv venv --python 3.12 "$nvs_dir/.venv"
-        uv pip install --python "$nvs_dir/.venv/bin/python" \
-            PySide6 'git+https://github.com/NanoVNA-Saver/nanovna-saver.git@v0.7.3'
+        # --clear: without it uv prompts when .venv already exists, which stalls or
+        # fails a non-interactive rebuild.
+        uv venv --clear --python 3.12 "$nvs_dir/.venv"
+        uv pip install --python "$nvs_dir/.venv/bin/python" PySide6 "$nvs_url"
         cat > /usr/bin/NanoVNASaver <<'EOF'
 #!/bin/bash
 exec /rftools/calibration/nanovnasaver/.venv/bin/NanoVNASaver "$@"
 EOF
         chmod +x /usr/bin/NanoVNASaver
     else
-        # Fallback: no uv. main has relaxed requires-python to ">=3.10", so install
-        # a 3.14-compatible commit with pipx under the system Python (pin until a
-        # release >0.7.3 ships).
-        goodecho "[+] Installing NanoVNASaver with pipx on the system Python"
+        # Fallback: no uv. Install under the system Python with pipx.
+        goodecho "[+] Installing NanoVNASaver (main @ ${nvs_rev:0:7}) with pipx on the system Python"
         pip3 install --break-system-packages PySide6
-        pipx install 'git+https://github.com/NanoVNA-Saver/nanovna-saver.git@3445a0ab86161f9c886c9d6f215eb57cab9b6f45'
+        pipx install --force "$nvs_url"  # --force so a rebuild is not a hard error
         ln -sf /root/.local/bin/NanoVNASaver /usr/bin/NanoVNASaver
     fi
+
+    # An incomplete wheel is invisible until the user's first launch, so fail the
+    # build here instead. offscreen keeps this valid in a headless build.
+    QT_QPA_PLATFORM=offscreen NanoVNASaver --version >/dev/null 2>&1 || {
+        criticalecho-noexit "[-] NanoVNASaver installed but will not start (missing Qt UI modules?)."
+        return 1
+    }
 }
 
 function NanoVNA_QT_cal_device() {

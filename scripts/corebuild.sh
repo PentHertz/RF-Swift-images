@@ -285,7 +285,7 @@ function uvpython_install() { # Avoid terrible long builds
     install_dependencies "clang libclang-dev llvm-dev build-essential"
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
     cd /root/thirdparty
-    UV_VERSION="0.12.0"
+    UV_VERSION="0.12.1"
     installfromnet "wget https://github.com/astral-sh/uv/releases/download/$UV_VERSION/uv-installer.sh"
     chmod +x uv-installer.sh
     ./uv-installer.sh
