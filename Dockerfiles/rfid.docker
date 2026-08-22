@@ -34,7 +34,8 @@ RUN ./entrypoint.sh proxmark3_soft_install && \
 	./entrypoint.sh mfread_soft_install && \
 	./entrypoint.sh rfidler_soft_install && \
 	./entrypoint.sh miLazyCracker_soft_install && \
-	./entrypoint.sh chameleon_ultra_soft_install
+	./entrypoint.sh chameleon_ultra_soft_install && \
+	./entrypoint.sh proxmark5_soft_install
 
 RUN mkdir -p /sdrtools/
 COPY run /sdrtools/run
