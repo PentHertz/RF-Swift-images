@@ -213,7 +213,7 @@ function logic2_saleae_install() {
         criticalecho-noexit "[!] Current architecture: $ARCH"
         exit 0
     fi
-    LOGIC_VERSION="2.4.44"
+    LOGIC_VERSION="2.4.46"
     install_dependencies "libfftw3-dev"
     [ -d /hardware ] || mkdir /hardware
     cd /hardware

@@ -350,18 +350,142 @@ EOF
 
 # RFID package
 function proxmark3_soft_install() {
-	set +e # TODO: debug that function
+    set +e # TODO: debug that function
     set +o pipefail
-	goodecho "[+] Installing proxmark3 dependencies"
-	install_dependencies "git ca-certificates build-essential pkg-config libreadline-dev"
-	install_dependencies "gcc-arm-none-eabi libnewlib-dev qtbase5-dev libbz2-dev liblz4-dev libbluetooth-dev libpython3-dev libssl-dev libgd-dev"
-	goodecho "[+] Installing proxmark3"
-	[ -d /rftools/rfid ] || mkdir -p /rftools/rfid
-	cd /rftools/rfid
-	installfromnet "git clone https://github.com/RfidResearchGroup/proxmark3.git"
-	cd proxmark3/
-	make clean && make -j$(nproc)
-	set -e
+
+    goodecho "[+] Installing proxmark3 dependencies"
+    install_dependencies "git ca-certificates build-essential pkg-config libreadline-dev"
+    install_dependencies "gcc-arm-none-eabi libnewlib-dev qtbase5-dev libbz2-dev liblz4-dev libbluetooth-dev libpython3-dev libssl-dev libgd-dev"
+
+    goodecho "[+] Installing proxmark3"
+    [ -d /rftools/rfid ] || mkdir -p /rftools/rfid
+    cd /rftools/rfid || return 1
+
+    if [ -d proxmark3/.git ]; then
+        goodecho "[+] proxmark3 already cloned, updating"
+        cd proxmark3/ || return 1
+        installfromnet "git pull --ff-only"
+    else
+        installfromnet "git clone https://github.com/RfidResearchGroup/proxmark3.git"
+        cd proxmark3/ || return 1
+    fi
+
+    local pm3dir
+    pm3dir="$(pwd)"
+
+    # A stale wrapper written through a symlink can clobber the repo's own pm3.
+    # Restore it before building so we never compile against a poisoned tree.
+    if [ -f pm3 ] && head -n 5 pm3 | grep -q "exec .*${pm3dir}/pm3"; then
+        goodecho "[+] Repairing pm3 clobbered by a previous wrapper"
+        git checkout -- pm3 || installfromnet "git checkout -- pm3"
+    fi
+
+    goodecho "[+] Building proxmark3"
+    make clean && make -j"$(nproc)"
+
+    if [ ! -x "${pm3dir}/client/proxmark3" ]; then
+        badecho "[-] proxmark3 build failed, no client binary, skipping wrappers"
+        set -e
+        set -o pipefail
+        return 1
+    fi
+
+    goodecho "[+] Creating pm3 wrappers"
+    local variant target
+    for variant in "" "-flash" "-flash-all" "-flash-bootrom" "-flash-fullimage"; do
+        target="${pm3dir}/pm3${variant}"
+        [ -x "${target}" ] || continue
+
+        # rm first: redirection follows symlinks and would write through to the target
+        rm -f "/usr/local/bin/pm3${variant}"
+        cat > "/usr/local/bin/pm3${variant}" <<EOF
+#!/usr/bin/env bash
+# Wrapper: pm3 resolves its install dir from \$0, so exec the real script
+# rather than symlinking it from /usr/local/bin.
+target="${target}"
+if [ "\$(readlink -f "\${target}")" = "\$(readlink -f "\${BASH_SOURCE[0]}")" ]; then
+    echo "[!!] pm3${variant} wrapper points at itself, refusing to exec" >&2
+    exit 1
+fi
+exec "\${target}" "\$@"
+EOF
+        chmod +x "/usr/local/bin/pm3${variant}"
+    done
+
+    goodecho "[+] Verifying pm3"
+    pm3 --version || badecho "[-] pm3 built but did not run cleanly"
+
+    set -e
+    set -o pipefail
+}
+
+function proxmark5_soft_install() {
+    set +e # TODO: debug that function
+    set +o pipefail
+
+    goodecho "[+] Installing proxmark5 dependencies"
+    install_dependencies "git ca-certificates build-essential pkg-config libreadline-dev"
+    install_dependencies "gcc-arm-none-eabi libnewlib-dev qtbase5-dev libbz2-dev liblz4-dev libbluetooth-dev libpython3-dev libssl-dev libgd-dev"
+
+    goodecho "[+] Installing proxmark5"
+    [ -d /rftools/rfid ] || mkdir -p /rftools/rfid
+    cd /rftools/rfid || return 1
+
+    if [ -d proxmark5/.git ]; then
+        goodecho "[+] proxmark5 already cloned, updating"
+        cd proxmark5/ || return 1
+        installfromnet "git pull --ff-only"
+    else
+        installfromnet "git clone https://github.com/RfidResearchGroup/proxmark3.git proxmark5"
+        cd proxmark5/ || return 1
+    fi
+
+    local pm3dir
+    pm3dir="$(pwd)"
+
+    # A stale wrapper written through a symlink can clobber the repo's own pm3.
+    # Restore it before building so we never compile against a poisoned tree.
+    if [ -f pm3 ] && head -n 5 pm3 | grep -q "exec .*${pm3dir}/pm3"; then
+        goodecho "[+] Repairing pm3 clobbered by a previous wrapper"
+        git checkout -- pm3 || installfromnet "git checkout -- pm3"
+    fi
+
+    goodecho "[+] Building proxmark5 (PLATFORM=PM5)"
+    make clean && make -j"$(nproc)" PLATFORM=PM5
+
+    if [ ! -x "${pm3dir}/client/proxmark3" ]; then
+        badecho "[-] proxmark5 build failed, no client binary, skipping wrappers"
+        set -e
+        set -o pipefail
+        return 1
+    fi
+
+    goodecho "[+] Creating pm5 wrappers"
+    local variant target
+    for variant in "" "-flash" "-flash-all" "-flash-bootrom" "-flash-fullimage"; do
+        target="${pm3dir}/pm3${variant}"
+        [ -x "${target}" ] || continue
+
+        # rm first: redirection follows symlinks and would write through to the target
+        rm -f "/usr/local/bin/pm5${variant}"
+        cat > "/usr/local/bin/pm5${variant}" <<EOF
+#!/usr/bin/env bash
+# Wrapper: pm3 aborts on an unknown \$0 and resolves its install dir from it,
+# so exec the real script rather than symlinking it under another name.
+target="${target}"
+if [ "\$(readlink -f "\${target}")" = "\$(readlink -f "\${BASH_SOURCE[0]}")" ]; then
+    echo "[!!] pm5${variant} wrapper points at itself, refusing to exec" >&2
+    exit 1
+fi
+exec "\${target}" "\$@"
+EOF
+        chmod +x "/usr/local/bin/pm5${variant}"
+    done
+
+    goodecho "[+] Verifying pm5"
+    pm5 --version || badecho "[-] pm5 built but did not run cleanly"
+
+    set -e
     set -o pipefail
 }
 

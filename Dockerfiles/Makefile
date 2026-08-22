@@ -286,6 +286,7 @@ clean_cache:
 # already-built image. Pulls the image if needed.
 #   make report IMG=corebuild ARCH=amd64
 #   make report IMG=automotive ARCH=arm64
+
 IMG ?= corebuild
 report:
 	@docker run --rm --entrypoint sh $(REGISTRY_IMAGE):$(IMG)_$(ARCH) -c \
