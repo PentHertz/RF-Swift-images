@@ -42,7 +42,7 @@ function signalhound_sdk_install() {
     cd /root/thirdparty
 
     ARCH=$(uname -m)
-    SDK_URL="https://signalhound.com/sigdownloads/SDK/signal_hound_sdk_07_06_26.zip"
+    SDK_URL="https://signalhound.com/sigdownloads/SDK/signal_hound_sdk_08_26_26.zip"
     SDK_DIR="/opt/signalhound"
 
     installfromnet "wget -q ${SDK_URL} -O signal_hound_sdk.zip"
