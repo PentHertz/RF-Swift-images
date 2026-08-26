@@ -1014,30 +1014,72 @@ EOF
 GNURADIO4_HOME="/opt/gnuradio4"
 
 function gnuradio4_soft_install() {
-    # GNU Radio 4.0 (GR4, github.com/fair-acc/gnuradio4) built from source
+    # GNU Radio 4.0 (GR4, github.com/gnuradio/gnuradio4) built from source
     # ALONGSIDE the apt GNU Radio 3.10. GR4 is a separate C++23 codebase with its
-    # own headers/namespace/prefix, so it does not conflict with 3.10. It is a
-    # release candidate (experimental) and its install tooling is still immature
-    # upstream, so we keep it in a dedicated tree under /opt/gnuradio4 and expose
-    # it via /etc/profile.d. Heavy, template-heavy build; best-effort so it never
-    # aborts the image. Resolute provides the needed GCC 15 + CMake 4.2 (C++23).
+    # own headers/namespace/prefix, so it does not conflict with 3.10. Upstream's
+    # own binary packages use CPACK_PACKAGING_INSTALL_PREFIX=/opt/gnuradio4 for
+    # exactly the same coexistence reason, so we keep that prefix and expose it
+    # via /etc/profile.d. Upstream calls GR4 a maturing beta; heavy, template-
+    # heavy build, best-effort so it never aborts the image.
+    #
+    # 2026-08 restructure: gnuradio/gnuradio4 is now a *super-repo* driven by
+    # CMake presets (dev / full) that clones its components (gnuradio4-core,
+    # -blocks, -library) into src/ at configure time. fair-acc/gnuradio4 is
+    # superseded. Tags up to 4.0.0-RC2 still carry the pre-restructure monorepo
+    # layout, and the repo README still documents it, so we detect the layout at
+    # runtime rather than trusting the ref. Set GR4_REF to override the tag.
     goodecho "[+] Installing GNU Radio 4.0 (GR4) in parallel to 3.10 -- heavy build"
-    # python3.12 (from the deadsnakes PPA already enabled in corebuild) gives GR4
-    # its OWN interpreter: GR4 wants Python >= 3.12 for its embedded PythonBlock,
-    # and resolute's default python3 is 3.14. Keeping GR4 on its own 3.12 venv
-    # isolates it from system Python and from GNU Radio 3.10's bindings.
+    # python3.12 (deadsnakes PPA, already enabled in corebuild) gives GR4 its OWN
+    # interpreter: GR4 wants Python >= 3.12 for its embedded PythonBlock, and
+    # resolute's default python3 is 3.14. Its own venv isolates it from system
+    # Python and from GNU Radio 3.10's bindings.
     install_dependencies "build-essential g++ cmake ninja-build git pkg-config libfftw3-dev python3.12 python3.12-dev python3.12-venv"
+
+    # Upstream requires CMake >= 3.25 and GCC >= 14 (>= 15 recommended) for C++23.
+    # Check up front: a toolchain miss otherwise shows up as a wall of template
+    # errors 40 minutes in.
+    local CMAKE_VER GCC_VER
+    CMAKE_VER=$(cmake --version 2>/dev/null | awk 'NR==1{print $3}')
+    GCC_VER=$(g++ -dumpfullversion -dumpversion 2>/dev/null | cut -d. -f1)
+    if [ -z "$CMAKE_VER" ] || [ "$(printf '%s\n3.25\n' "$CMAKE_VER" | sort -V | head -1)" != "3.25" ]; then
+        record_build_failure "toolchain" "gnuradio4" "cmake >= 3.25 required (found: ${CMAKE_VER:-none})"
+        return 1
+    fi
+    if [ -z "$GCC_VER" ] || [ "$GCC_VER" -lt 14 ]; then
+        record_build_failure "toolchain" "gnuradio4" "g++ >= 14 required (found: ${GCC_VER:-none})"
+        return 1
+    fi
+
     [ -d /opt ] || mkdir -p /opt
     cd /opt
-    # Pin to the latest release candidate tag.
-    gitinstall "https://github.com/fair-acc/gnuradio4.git" "gnuradio4_soft_install" "4.0.0-RC2"
+
+    # Track the newest upstream tag rather than a hard pin. versionsort.suffix=-
+    # makes any dashed suffix a *pre*-release, so 4.0.0 will correctly outrank
+    # 4.0.0-RC2 once it ships (git's default sort does the opposite).
+    local GR4_URL="https://github.com/gnuradio/gnuradio4.git"
+    local GR4_TAG="${GR4_REF:-}"
+    if [ -z "$GR4_TAG" ]; then
+        GR4_TAG=$(git -c 'versionsort.suffix=-' ls-remote --tags --refs \
+                      --sort=-v:refname "$GR4_URL" 2>/dev/null \
+                  | awk -F/ 'NR==1 {print $NF}')
+    fi
+    if [ -z "$GR4_TAG" ]; then
+        GR4_TAG="main"
+        goodecho "[+] Could not resolve the latest GR4 tag -- falling back to main"
+    else
+        goodecho "[+] Latest GR4 tag resolved: $GR4_TAG"
+    fi
+
+    gitinstall "$GR4_URL" "gnuradio4_soft_install" "$GR4_TAG"
     if [ ! -d gnuradio4 ]; then
-        record_build_failure "git" "gnuradio4" "clone failed"
+        record_build_failure "git" "gnuradio4" "clone failed (ref: $GR4_TAG)"
         return 1
     fi
     cd "$GNURADIO4_HOME"
 
-    # GR4's own isolated Python env (3.12) for the embedded PythonBlock interpreter.
+    # GR4's isolated Python env (3.12) for the embedded PythonBlock interpreter.
+    # Upstream is still re-wiring the GR4 python bindings after the split, so this
+    # may end up unused on the preset path -- cheap and harmless either way.
     local GR4_VENV="$GNURADIO4_HOME/venv"
     if command -v python3.12 > /dev/null 2>&1; then
         python3.12 -m venv "$GR4_VENV"
@@ -1046,36 +1088,78 @@ function gnuradio4_soft_install() {
     else
         record_build_failure "apt" "python3.12 (GR4)" "python3.12 unavailable; GR4 will build without Python"
     fi
-
-    # Deps (vir-simd, magic_enum, ExprTk, ...) auto-resolve via system-or-fetch.
-    # SoapySDR from sdr_light is reused (system). PYTHON_FORCE_INCLUDE=ON requires
-    # the embedded-Python support and points it at GR4's own 3.12 venv. Tests off.
     local PYARGS=""
     [ -x "$GR4_VENV/bin/python" ] && PYARGS="-DPYTHON_FORCE_INCLUDE=ON -DPython3_EXECUTABLE=$GR4_VENV/bin/python"
-    # GR4's template-heavy TUs (the block plugins especially) peak at ~4-6 GB RSS
-    # each, so -j$(nproc) OOMs small runners (GitHub arm64 = 4 cores / 16 GB) and
-    # the runner then SIGTERMs the whole build. Cap parallelism at ~5 GB per job.
+
+    # GR4's template-heavy TUs peak at several GB RSS each, so -j$(nproc) OOMs
+    # small runners (GitHub arm64 = 4 cores / 16 GB) and the runner then SIGTERMs
+    # the whole build. Upstream cut default type instantiations down to roughly
+    # the GR3 set, so 3 GB/job is now enough headroom (was 5 GB). Upstream's own
+    # remedy, ./enableZRAM.sh, needs host kernel access and is unusable here, so
+    # this cap is the only OOM defence.
     # -Wno-psabi: drop the (harmless) arm64 std::simd ABI-change note flood.
+    # WARNINGS_AS_ERRORS defaults to ON upstream -- turn it off, or any new
+    # upstream warning fails a build we only ever wanted best-effort.
+    local COMMON_ARGS="-DCMAKE_CXX_FLAGS=-Wno-psabi -DWARNINGS_AS_ERRORS=OFF"
     local MEMKB GR4JOBS
     MEMKB=$(awk '/MemAvailable/{print $2}' /proc/meminfo 2>/dev/null || echo 0)
-    GR4JOBS=$(( MEMKB / (5 * 1024 * 1024) ))
+    GR4JOBS=$(( MEMKB / (3 * 1024 * 1024) ))
     [ "$GR4JOBS" -lt 1 ] && GR4JOBS=1
     [ "$GR4JOBS" -gt "$(nproc)" ] && GR4JOBS="$(nproc)"
-    goodecho "[+] Building GR4 with -j${GR4JOBS} ($(nproc) cores, ~$((MEMKB / 1024 / 1024)) GB RAM available)"
-    if cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_CXX_FLAGS="-Wno-psabi" \
-            -DGR4_DEPENDENCY_MODE=system-or-fetch -DENABLE_TESTING=OFF $PYARGS \
-       && cmake --build build -j"$GR4JOBS"; then
-        cmake --install build --prefix "$GNURADIO4_HOME/install" 2>/dev/null || true
-        cat > /etc/profile.d/gnuradio4.sh <<EOF
-# GNU Radio 4.0 (GR4) - parallel to the apt GNU Radio 3.10
-export GNURADIO4_HOME="$GNURADIO4_HOME"
-export GNURADIO4_VENV="$GR4_VENV"
-export PATH="$GNURADIO4_HOME/install/bin:$GNURADIO4_HOME/build/bin:\$PATH"
-EOF
-        goodecho "[+] GNU Radio 4.0 built at $GNURADIO4_HOME (own Python venv: $GR4_VENV; env: /etc/profile.d/gnuradio4.sh). apt GNU Radio 3.10 remains the default."
+
+    # Layout detection. src/ is populated *by* configure, so it cannot be used as
+    # a probe -- CMakePresets.json plus a 'dev' preset is the only reliable tell.
+    local GR4_BUILD_DIR GR4_CONFIGURED=0
+    if [ -f CMakePresets.json ] && cmake --list-presets 2>/dev/null | grep -q '"dev"'; then
+        # Super-repo: the preset owns generator, build type and binary dir
+        # (build/dev), so -G / -B / -DCMAKE_BUILD_TYPE must NOT be passed.
+        # 'dev' is the headless workspace; 'full' would drag in the incubator,
+        # control plane and the Qt/GUI Studio app, which we don't want here.
+        # Configure clones the component repos: this step needs git egress.
+        goodecho "[+] GR4 super-repo layout -- preset 'dev', -j${GR4JOBS} ($(nproc) cores, ~$((MEMKB / 1024 / 1024)) GB RAM available)"
+        GR4_BUILD_DIR="$GNURADIO4_HOME/build/dev"
+        if cmake --preset dev $COMMON_ARGS \
+                -DCMAKE_INSTALL_PREFIX="$GNURADIO4_HOME/install" $PYARGS \
+           && cmake --build --preset dev -j"$GR4JOBS"; then
+            GR4_CONFIGURED=1
+        fi
     else
-        record_build_failure "build" "gnuradio4" "GR4 source build failed (RC/experimental)"
+        # Pre-restructure monorepo (tags <= 4.0.0-RC2). Deps (vir-simd,
+        # magic_enum, ExprTk, ...) auto-resolve via system-or-fetch; SoapySDR
+        # from sdr_light is reused (system). Neither flag exists post-split.
+        goodecho "[+] GR4 pre-restructure layout ($GR4_TAG) -- classic configure, -j${GR4JOBS} ($(nproc) cores, ~$((MEMKB / 1024 / 1024)) GB RAM available)"
+        GR4_BUILD_DIR="$GNURADIO4_HOME/build"
+        if cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release $COMMON_ARGS \
+                -DGR_ENABLE_BLOCK_REGISTRY=ON \
+                -DGR4_DEPENDENCY_MODE=system-or-fetch -DENABLE_TESTING=OFF $PYARGS \
+           && cmake --build build -j"$GR4JOBS"; then
+            GR4_CONFIGURED=1
+        fi
+    fi
+
+    if [ "$GR4_CONFIGURED" -eq 1 ]; then
+        # The post documents no install step for the workspace -- activate.sh is
+        # the sanctioned entry point. Try installing anyway (harmless if the
+        # workspace exposes no install rules) so downstream find_package works.
+        cmake --install "$GR4_BUILD_DIR" --prefix "$GNURADIO4_HOME/install" 2>/dev/null || true
+        {
+            echo "# GNU Radio 4.0 (GR4) - parallel to the apt GNU Radio 3.10 (ref: $GR4_TAG)"
+            echo "export GNURADIO4_HOME=\"$GNURADIO4_HOME\""
+            echo "export GNURADIO4_VENV=\"$GR4_VENV\""
+            echo "export GNURADIO4_BUILD=\"$GR4_BUILD_DIR\""
+            if [ -f "$GR4_BUILD_DIR/activate.sh" ]; then
+                # Workspace activation wins; it sets PATH and the CMake package
+                # paths for every component in dependency order.
+                echo "[ -f \"$GR4_BUILD_DIR/activate.sh\" ] && . \"$GR4_BUILD_DIR/activate.sh\""
+            else
+                echo "export PATH=\"$GR4_BUILD_DIR/bin:\$PATH\""
+            fi
+            echo "export PATH=\"$GNURADIO4_HOME/install/bin:\$PATH\""
+            echo "export CMAKE_PREFIX_PATH=\"$GNURADIO4_HOME/install:\$CMAKE_PREFIX_PATH\""
+        } > /etc/profile.d/gnuradio4.sh
+        goodecho "[+] GNU Radio 4.0 built at $GNURADIO4_HOME (ref: $GR4_TAG; build: $GR4_BUILD_DIR; own Python venv: $GR4_VENV; env: /etc/profile.d/gnuradio4.sh). apt GNU Radio 3.10 remains the default."
+    else
+        record_build_failure "build" "gnuradio4" "GR4 source build failed (ref: $GR4_TAG, beta)"
     fi
     cd /opt
 }
