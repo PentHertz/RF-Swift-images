@@ -827,6 +827,23 @@ function netcatopenbsd_soft_install() {
     install_dependencies "netcat-openbsd" 
 }
 
+function tailcat_soft_install() {
+    goodecho "[+] Installing Tailcat (encrypted netcat over Tailscale's data plane)"
+    export GOPROXY=https://proxy.golang.org,direct
+    export GOSUMDB=sum.golang.org
+
+    # Keep the container reproducible and aligned with RF-Swift-nix. Avoid
+    # @latest: Tailcat is moving quickly and may raise its minimum Go version.
+    local tailcat_rev="c04c5afee401df40e620db8ae108e957ae07bcd9"
+    installfromnet "env GOBIN=/usr/local/bin go install github.com/tailscale/tailcat/cmd/tailcat@${tailcat_rev}"
+
+    if ! command -v tailcat >/dev/null 2>&1; then
+        record_build_failure "go" "tailcat" "build failed at ${tailcat_rev}"
+        return 1
+    fi
+    tailcat --help >/dev/null
+}
+
 function telnet_soft_install() {
     goodecho "[+] Installing Telnet"
     install_dependencies "telnet" 
@@ -1089,4 +1106,3 @@ function graphqlmap_soft_install() {
         || record_build_failure "pip" "GraphQLmap" "pipx install failed"
     [ -e /root/.local/bin/graphqlmap ] && ln -sf /root/.local/bin/graphqlmap /usr/sbin/graphqlmap
 }
-

@@ -42,6 +42,7 @@ RUN ./entrypoint.sh nmap_soft_install && \
 	./entrypoint.sh snitch_soft_install && \
 	./entrypoint.sh sslyze_soft_install && \
 	./entrypoint.sh netcatopenbsd_soft_install && \
+	./entrypoint.sh tailcat_soft_install && \
 	./entrypoint.sh telnet_soft_install && \
 	./entrypoint.sh nmapautomator_soft_install && \
 	./entrypoint.sh trippy_soft_install && \
