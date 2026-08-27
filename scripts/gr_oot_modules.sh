@@ -376,8 +376,8 @@ function grsignalhound_Receiver_grmod_install() {
     fi
 
     # Download and install the Signal Hound SDK
-    installfromnet "wget https://signalhound.com/sigdownloads/SDK/signal_hound_sdk_05_13_26.zip"
-    unzip -q signal_hound_sdk_05_13_26.zip
+    installfromnet "wget https://signalhound.com/sigdownloads/SDK/signal_hound_sdk_08_26_26.zip"
+    unzip -q signal_hound_sdk_08_26_26.zip
     INIT_PATH=$(pwd)
 
     # Install bb_series library
