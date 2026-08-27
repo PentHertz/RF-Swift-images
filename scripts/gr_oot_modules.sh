@@ -405,9 +405,10 @@ function grsignalhound_Receiver_grmod_install() {
         ln -sf /usr/local/lib/libbb_api.so.5 /usr/lib/libbb_api.so.5
     fi
 
-    # Install vsg60_series library (x86_64 only - no aarch64 version available)
+    # Install vsg60_series library. Signal Hound renamed the x86_64 directory
+    # from lib/linux to lib/linux_x64 in the 08_26_26 SDK.
     if [[ "$ARCH" == "x86_64" ]]; then
-        cd "$INIT_PATH/signal_hound_sdk/device_apis/vsg60_vsg200_series/lib/linux/Ubuntu 18.04"
+        cd "$INIT_PATH/signal_hound_sdk/device_apis/vsg60_vsg200_series/lib/linux_x64/Ubuntu 18.04"
         cp libvsg_api.so.1.2.1 /usr/local/lib/
         chmod 0755 /usr/local/lib/libvsg_api.so.1.2.1
         ln -sf /usr/local/lib/libvsg_api.so.1.2.1 /usr/local/lib/libvsg_api.so
