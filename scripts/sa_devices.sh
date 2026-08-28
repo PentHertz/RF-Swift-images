@@ -54,7 +54,7 @@ function signalhound_sdk_install() {
 
     # Helper: resolve arch-specific lib subdir pattern
     case "$ARCH" in
-        x86_64|amd64)  LIB_PATTERN="linux_x64" ;;
+        x86_64|amd64)  LIB_PATTERN="linux_x64/Ubuntu 18.04" ;;
         aarch64|arm64) LIB_PATTERN="aarch64"    ;;
         *)
             criticalecho-noexit "[-] Unsupported architecture: $ARCH"

@@ -326,9 +326,9 @@ function gr_DCF77_Receiver_grmod_install() {
 
 function grsignalhound_Receiver_grmod_install() {
     # Check if the system architecture is supported
-    ARCH=$(uname -m) # TODO: continue with aarch64 suppport
-    if [[ "$ARCH" != "x86_64" && "$ARCH" != "amd64" ]]; then # && "$ARCH" != "aarch64" && "$ARCH" != "arm64" ]]; then
-        criticalecho-noexit "[!] This installation script is only compatible with x86_64/amd64 architectures."
+    ARCH=$(uname -m)
+    if [[ "$ARCH" != "x86_64" && "$ARCH" != "amd64" && "$ARCH" != "aarch64" && "$ARCH" != "arm64" ]]; then
+        criticalecho-noexit "[!] Signal Hound is unsupported on architecture $ARCH."
         return 0
     fi
 
@@ -380,75 +380,45 @@ function grsignalhound_Receiver_grmod_install() {
     unzip -q signal_hound_sdk_08_26_26.zip
     INIT_PATH=$(pwd)
 
-    # Install bb_series library
+    # Select libraries by architecture and discover their versions from the
+    # SDK. Signal Hound changes both version numbers and directory names.
     if [[ "$ARCH" == "x86_64" ]]; then
-        cd "$INIT_PATH/signal_hound_sdk/device_apis/bb_series/lib/linux_x64/Ubuntu 18.04"
-        cp libbb_api.so.5.0.9 /usr/local/lib/
-        ldconfig -v -n /usr/local/lib
-        ln -sf /usr/local/lib/libbb_api.so.5.0.9 /usr/local/lib/libbb_api.so.5
-        ln -sf /usr/local/lib/libbb_api.so.5 /usr/local/lib/libbb_api.so
-        ln -sf /usr/local/lib/libbb_api.so.5 /usr/lib/libbb_api.so
-        ln -sf /usr/local/lib/libbb_api.so.5 /usr/lib/libbb_api.so.5
-        # Copy FTDI library from SDK if not already installed
-        if [[ ! -f /usr/local/lib/libftd2xx.so ]]; then
-            cp libftd2xx.so /usr/local/lib/
-            chmod 0755 /usr/local/lib/libftd2xx.so
-            ldconfig -v
+        SH_LIB_PATTERN="linux_x64/Ubuntu 18.04"
+    else
+        SH_LIB_PATTERN="aarch64"
+    fi
+
+    install_signalhound_api() {
+        local series="$1" prefix="$2" library base version major
+        library=$(find "$INIT_PATH/signal_hound_sdk/device_apis/$series/lib" \
+            -path "*/$SH_LIB_PATTERN/*" -type f -name "$prefix.so.*" \
+            2>/dev/null | sort -V | tail -1)
+        if [[ -z "$library" ]]; then
+            criticalecho-noexit "[!] No $prefix library for $ARCH; skipping $series"
+            return 0
         fi
-    elif [[ "$ARCH" == "aarch64" ]]; then
-        cd "$INIT_PATH/signal_hound_sdk/device_apis/bb_series/lib/aarch64"
-        cp libbb_api.so.5.0.10 /usr/local/lib/
-        ldconfig -v -n /usr/local/lib
-        ln -sf /usr/local/lib/libbb_api.so.5.0.10 /usr/local/lib/libbb_api.so.5
-        ln -sf /usr/local/lib/libbb_api.so.5 /usr/local/lib/libbb_api.so
-        ln -sf /usr/local/lib/libbb_api.so.5 /usr/lib/libbb_api.so
-        ln -sf /usr/local/lib/libbb_api.so.5 /usr/lib/libbb_api.so.5
-    fi
+        base=$(basename "$library")
+        version=${base#*.so.}
+        major=${version%%.*}
+        cp "$library" /usr/local/lib/
+        chmod 0755 "/usr/local/lib/$base"
+        ln -sf "$base" "/usr/local/lib/$prefix.so.$major"
+        ln -sf "$prefix.so.$major" "/usr/local/lib/$prefix.so"
+    }
 
-    # Install vsg60_series library. Signal Hound renamed the x86_64 directory
-    # from lib/linux to lib/linux_x64 in the 08_26_26 SDK.
-    if [[ "$ARCH" == "x86_64" ]]; then
-        cd "$INIT_PATH/signal_hound_sdk/device_apis/vsg60_vsg200_series/lib/linux_x64/Ubuntu 18.04"
-        cp libvsg_api.so.1.2.1 /usr/local/lib/
-        chmod 0755 /usr/local/lib/libvsg_api.so.1.2.1
-        ln -sf /usr/local/lib/libvsg_api.so.1.2.1 /usr/local/lib/libvsg_api.so
-        ln -sf /usr/local/lib/libvsg_api.so.1.2.1 /usr/lib/libvsg_api.so
-        ldconfig -v
-    fi
-
-    # Install sm_series library
-    if [[ "$ARCH" == "x86_64" ]]; then
-        cd "$INIT_PATH/signal_hound_sdk/device_apis/sm_series/lib/linux_x64/Ubuntu 18.04"
-        cp libsm_api.so.2.3.10 /usr/local/lib/
-        chmod 0755 /usr/local/lib/libsm_api.so.2.3.10
-        ln -sf /usr/local/lib/libsm_api.so.2.3.10 /usr/local/lib/libsm_api.so
-        ln -sf /usr/local/lib/libsm_api.so.2.3.10 /usr/lib/libsm_api.so
-        ldconfig -v
-    elif [[ "$ARCH" == "aarch64" ]]; then
-        cd "$INIT_PATH/signal_hound_sdk/device_apis/sm_series/lib/aarch64"
-        cp libsm_api.so.2.3.9 /usr/local/lib/
-        chmod 0755 /usr/local/lib/libsm_api.so.2.3.9
-        ln -sf /usr/local/lib/libsm_api.so.2.3.9 /usr/local/lib/libsm_api.so
-        ln -sf /usr/local/lib/libsm_api.so.2.3.9 /usr/lib/libsm_api.so
-        ldconfig -v
-    fi
-
-    # Install sp_series library (both architectures available)
-    if [[ "$ARCH" == "x86_64" ]]; then
-        cd "$INIT_PATH/signal_hound_sdk/device_apis/sp_series/lib/linux_x64/Ubuntu 18.04"
-        cp libsp_api.so.1.0.9 /usr/local/lib/
-        chmod 0755 /usr/local/lib/libsp_api.so.1.0.9
-        ln -sf /usr/local/lib/libsp_api.so.1.0.9 /usr/local/lib/libsp_api.so
-        ln -sf /usr/local/lib/libsp_api.so.1.0.9 /usr/lib/libsp_api.so
-        ldconfig -v
-    elif [[ "$ARCH" == "aarch64" ]]; then
-        cd "$INIT_PATH/signal_hound_sdk/device_apis/sp_series/lib/aarch64"
-        cp libsp_api.so.1.0.4 /usr/local/lib/
-        chmod 0755 /usr/local/lib/libsp_api.so.1.0.4
-        ln -sf /usr/local/lib/libsp_api.so.1.0.4 /usr/local/lib/libsp_api.so
-        ln -sf /usr/local/lib/libsp_api.so.1.0.4 /usr/lib/libsp_api.so
-        ldconfig -v
-    fi
+    install_signalhound_api bb_series libbb_api
+    install_signalhound_api vsg60_vsg200_series libvsg_api
+    install_signalhound_api sm_series libsm_api
+    install_signalhound_api sp_series libsp_api
+    for series in bb_series vsg60_vsg200_series sm_series sp_series; do
+        include_dir="$INIT_PATH/signal_hound_sdk/device_apis/$series/include"
+        [[ -d "$include_dir" ]] && cp "$include_dir"/*.h /usr/local/include/ 2>/dev/null || true
+    done
+    # SP keeps its public header alongside each architecture's library.
+    sp_include=$(find "$INIT_PATH/signal_hound_sdk/device_apis/sp_series/lib" \
+        -path "*/$SH_LIB_PATTERN/include" -type d 2>/dev/null | head -1)
+    [[ -n "$sp_include" ]] && cp "$sp_include"/*.h /usr/local/include/ 2>/dev/null || true
+    ldconfig -v
 
     # Install tg_series library (x86_64 only based on tree output)
     if [[ "$ARCH" == "x86_64" ]]; then
@@ -466,7 +436,7 @@ function grsignalhound_Receiver_grmod_install() {
     fi
 
     # Return to init path
-    cd $INIT_PATH
+    cd "$INIT_PATH"
 
     # Clone and build the gr-signal-hound repository
     grclone_and_build "https://github.com/PentHertz/gr-signal-hound.git" "" "grsignalhound_Receiver_grmod_install"
