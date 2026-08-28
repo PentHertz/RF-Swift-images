@@ -97,6 +97,7 @@ function signalhound_sdk_install() {
     install_sh_lib bb_series libbb_api BB60
     install_sh_lib sm_series libsm_api SM200
     install_sh_lib sp_series libsp_api SP145
+    install_sh_lib vsg60_vsg200_series libvsg_api VSG60
 
     # FTDI driver (BB60 only, x86_64) - may ship without version suffix
     if [[ "$ARCH" == "x86_64" || "$ARCH" == "amd64" ]]; then
@@ -118,7 +119,7 @@ function signalhound_sdk_install() {
 
     # Install headers
     goodecho "[+] Installing SDK headers"
-    for series in bb_series sm_series sp_series; do
+    for series in bb_series sm_series sp_series vsg60_vsg200_series; do
         HEADER_DIR="${SDK_DIR}/device_apis/${series}/include"
         [ -d "$HEADER_DIR" ] && sudo cp "$HEADER_DIR"/*.h /usr/include/ 2>/dev/null
     done
@@ -134,8 +135,8 @@ function signalhound_sdk_install() {
     sudo ldconfig
 
     goodecho "[+] Signal Hound SDK installed:"
-    ldconfig -p | grep -E "(bb_api|sm_api|sp_api)" || echo "  (no libraries detected in ldconfig)"
-    ls -l /usr/include/bb_api.h /usr/include/sm_api.h /usr/include/sp_api.h 2>/dev/null || echo "  (some headers missing)"
+    ldconfig -p | grep -E "(bb_api|sm_api|sp_api|vsg_api)" || echo "  (no libraries detected in ldconfig)"
+    ls -l /usr/include/bb_api.h /usr/include/sm_api.h /usr/include/sp_api.h /usr/include/vsg_api.h 2>/dev/null || echo "  (some headers missing)"
 
     rm -rf /root/thirdparty/signal_hound_sdk
 }
