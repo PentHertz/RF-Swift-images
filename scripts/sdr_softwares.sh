@@ -1100,7 +1100,10 @@ function gnuradio4_soft_install() {
     # -Wno-psabi: drop the (harmless) arm64 std::simd ABI-change note flood.
     # WARNINGS_AS_ERRORS defaults to ON upstream -- turn it off, or any new
     # upstream warning fails a build we only ever wanted best-effort.
-    local COMMON_ARGS="-DCMAKE_CXX_FLAGS=-Wno-psabi -DWARNINGS_AS_ERRORS=OFF"
+    # Ship the runtime and development libraries, not upstream examples or
+    # benchmarks. Those contain several of GR4's slowest template-heavy units
+    # and made native ARM64 builds vulnerable to runner cancellation.
+    local COMMON_ARGS="-DCMAKE_CXX_FLAGS=-Wno-psabi -DWARNINGS_AS_ERRORS=OFF -DENABLE_EXAMPLES=OFF -DENABLE_BENCHMARKS=OFF"
     local MEMKB GR4JOBS
     MEMKB=$(awk '/MemAvailable/{print $2}' /proc/meminfo 2>/dev/null || echo 0)
     GR4JOBS=$(( MEMKB / (3 * 1024 * 1024) ))
