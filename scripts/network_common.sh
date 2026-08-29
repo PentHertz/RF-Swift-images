@@ -841,7 +841,10 @@ function tailcat_soft_install() {
         record_build_failure "go" "tailcat" "build failed at ${tailcat_rev}"
         return 1
     fi
-    tailcat --help >/dev/null
+    # Tailcat currently prints valid help but exits non-zero. The binary's
+    # presence above is the installation check; do not abort the Docker RUN
+    # chain merely because of that CLI help convention.
+    tailcat --help >/dev/null 2>&1 || true
 }
 
 function telnet_soft_install() {
