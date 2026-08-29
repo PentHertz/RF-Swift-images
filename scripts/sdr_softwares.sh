@@ -1029,11 +1029,11 @@ function gnuradio4_soft_install() {
     # layout, and the repo README still documents it, so we detect the layout at
     # runtime rather than trusting the ref. Set GR4_REF to override the tag.
     goodecho "[+] Installing GNU Radio 4.0 (GR4) in parallel to 3.10 -- heavy build"
-    # python3.12 (deadsnakes PPA, already enabled in corebuild) gives GR4 its OWN
-    # interpreter: GR4 wants Python >= 3.12 for its embedded PythonBlock, and
-    # resolute's default python3 is 3.14. Its own venv isolates it from system
-    # Python and from GNU Radio 3.10's bindings.
-    install_dependencies "build-essential g++ cmake ninja-build git pkg-config libfftw3-dev python3.12 python3.12-dev python3.12-venv"
+    # GR4 wants Python >= 3.12 for its embedded PythonBlock. Use the distro's
+    # default Python packages (3.14 on Resolute); versioned 3.12 packages
+    # are no longer published for Resolute ARM64. A private venv still isolates
+    # GR4 from GNU Radio 3.10's Python packages.
+    install_dependencies "build-essential g++ cmake ninja-build git pkg-config libfftw3-dev python3 python3-dev python3-venv"
 
     # Upstream requires CMake >= 3.25 and GCC >= 14 (>= 15 recommended) for C++23.
     # Check up front: a toolchain miss otherwise shows up as a wall of template
@@ -1085,16 +1085,19 @@ function gnuradio4_soft_install() {
         sed -i 's/^add_subdirectory(bench).*/add_subdirectory(bench EXCLUDE_FROM_ALL) # RF-Swift: optional microbenchmarks/' CMakeLists.txt
     fi
 
-    # GR4's isolated Python env (3.12) for the embedded PythonBlock interpreter.
+    # GR4's isolated Python env for the embedded PythonBlock interpreter.
     # Upstream is still re-wiring the GR4 python bindings after the split, so this
     # may end up unused on the preset path -- cheap and harmless either way.
     local GR4_VENV="$GNURADIO4_HOME/venv"
-    if command -v python3.12 > /dev/null 2>&1; then
-        python3.12 -m venv "$GR4_VENV"
+    local GR4_PYTHON=""
+    if command -v python3 > /dev/null 2>&1 \
+       && python3 -c 'import sys; raise SystemExit(sys.version_info < (3, 12))'; then
+        GR4_PYTHON="$(command -v python3)"
+        "$GR4_PYTHON" -m venv "$GR4_VENV"
         "$GR4_VENV/bin/python" -m pip install --upgrade pip numpy > /dev/null 2>&1 \
             || record_build_failure "pip" "gnuradio4 venv numpy" "GR4 python env setup failed"
     else
-        record_build_failure "apt" "python3.12 (GR4)" "python3.12 unavailable; GR4 will build without Python"
+        record_build_failure "toolchain" "Python (GR4)" "Python >= 3.12 unavailable; GR4 will build without Python"
     fi
     local PYARGS=""
     [ -x "$GR4_VENV/bin/python" ] && PYARGS="-DPYTHON_FORCE_INCLUDE=ON -DPython3_EXECUTABLE=$GR4_VENV/bin/python"
