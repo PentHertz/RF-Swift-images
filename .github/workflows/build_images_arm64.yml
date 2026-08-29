@@ -255,7 +255,11 @@ jobs:
           STORAGE_TYPE=registry ARCH=${{ matrix.platform }} CACHE_REPO=${{ env.CACHE_REPO }} REGISTRY_IMAGE=${{ env.REGISTRY_IMAGE }} make sdrlight
 
   sdr_gnuradio4:
-    runs-on: ubuntu-26.04-arm
+    # GR4's long C++23 template build was repeatedly SIGTERM'd after ~6 minutes
+    # on the Ubuntu 26.04 ARM public-preview image. The build itself runs inside
+    # the Ubuntu Resolute container (and still uses GCC 15), so use the stable
+    # ARM runner host until the 26.04 runner leaves preview.
+    runs-on: ubuntu-24.04-arm
     timeout-minutes: 340
     needs: sdr_light
     strategy:

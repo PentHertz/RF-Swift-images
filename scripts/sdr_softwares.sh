@@ -1077,6 +1077,14 @@ function gnuradio4_soft_install() {
     fi
     cd "$GNURADIO4_HOME"
 
+    # RC2 adds its standalone microbenchmark helper to ALL unconditionally;
+    # ENABLE_EXAMPLES does not cover it and the tag has no ENABLE_BENCHMARKS
+    # option. Keep the target available to developers, but do not build it as
+    # part of the image's default runtime/development installation.
+    if grep -q '^add_subdirectory(bench)' CMakeLists.txt; then
+        sed -i 's/^add_subdirectory(bench).*/add_subdirectory(bench EXCLUDE_FROM_ALL) # RF-Swift: optional microbenchmarks/' CMakeLists.txt
+    fi
+
     # GR4's isolated Python env (3.12) for the embedded PythonBlock interpreter.
     # Upstream is still re-wiring the GR4 python bindings after the split, so this
     # may end up unused on the preset path -- cheap and harmless either way.
@@ -1100,10 +1108,10 @@ function gnuradio4_soft_install() {
     # -Wno-psabi: drop the (harmless) arm64 std::simd ABI-change note flood.
     # WARNINGS_AS_ERRORS defaults to ON upstream -- turn it off, or any new
     # upstream warning fails a build we only ever wanted best-effort.
-    # Ship the runtime and development libraries, not upstream examples or
-    # benchmarks. Those contain several of GR4's slowest template-heavy units
-    # and made native ARM64 builds vulnerable to runner cancellation.
-    local COMMON_ARGS="-DCMAKE_CXX_FLAGS=-Wno-psabi -DWARNINGS_AS_ERRORS=OFF -DENABLE_EXAMPLES=OFF -DENABLE_BENCHMARKS=OFF"
+    # Ship the runtime and development libraries, not upstream examples. Those
+    # contain several of GR4's slowest template-heavy units and made native
+    # ARM64 builds vulnerable to runner cancellation.
+    local COMMON_ARGS="-DCMAKE_CXX_FLAGS=-Wno-psabi -DWARNINGS_AS_ERRORS=OFF -DENABLE_EXAMPLES=OFF"
     local MEMKB GR4JOBS
     MEMKB=$(awk '/MemAvailable/{print $2}' /proc/meminfo 2>/dev/null || echo 0)
     GR4JOBS=$(( MEMKB / (3 * 1024 * 1024) ))
@@ -1133,8 +1141,7 @@ function gnuradio4_soft_install() {
         goodecho "[+] GR4 pre-restructure layout ($GR4_TAG) -- classic configure, -j${GR4JOBS} ($(nproc) cores, ~$((MEMKB / 1024 / 1024)) GB RAM available)"
         GR4_BUILD_DIR="$GNURADIO4_HOME/build"
         if cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release $COMMON_ARGS \
-                -DGR_ENABLE_BLOCK_REGISTRY=ON \
-                -DGR4_DEPENDENCY_MODE=system-or-fetch -DENABLE_TESTING=OFF $PYARGS \
+                -DGR_ENABLE_BLOCK_REGISTRY=ON -DENABLE_TESTING=OFF $PYARGS \
            && cmake --build build -j"$GR4JOBS"; then
             GR4_CONFIGURED=1
         fi
