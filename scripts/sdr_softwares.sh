@@ -1099,12 +1099,12 @@ function gnuradio4_soft_install() {
     local PYARGS=""
     [ -x "$GR4_VENV/bin/python" ] && PYARGS="-DPYTHON_FORCE_INCLUDE=ON -DPython3_EXECUTABLE=$GR4_VENV/bin/python"
 
-    # GR4's template-heavy TUs peak at several GB RSS each, so -j$(nproc) OOMs
-    # small runners (GitHub arm64 = 4 cores / 16 GB) and the runner then SIGTERMs
-    # the whole build. Upstream cut default type instantiations down to roughly
-    # the GR3 set, so 3 GB/job is now enough headroom (was 5 GB). Upstream's own
-    # remedy, ./enableZRAM.sh, needs host kernel access and is unusable here, so
-    # this cap is the only OOM defence.
+    # GR4's generated block TUs peak at several GB RSS each. Four concurrent
+    # GCC processes fit the old 3 GB estimate on a 16 GB ARM runner, but the
+    # generated Converter/DataSink units exceed it and BuildKit is terminated
+    # with SIGTERM (143). Reserve 6 GB per ARM64 compiler job, leaving room for
+    # Docker, Ninja and the linker; retain 3 GB/job on other architectures.
+    # Upstream's enableZRAM.sh needs host kernel access and is unusable here.
     # -Wno-psabi: drop the (harmless) arm64 std::simd ABI-change note flood.
     # WARNINGS_AS_ERRORS defaults to ON upstream -- turn it off, or any new
     # upstream warning fails a build we only ever wanted best-effort.
@@ -1112,9 +1112,13 @@ function gnuradio4_soft_install() {
     # contain several of GR4's slowest template-heavy units and made native
     # ARM64 builds vulnerable to runner cancellation.
     local COMMON_ARGS="-DCMAKE_CXX_FLAGS=-Wno-psabi -DWARNINGS_AS_ERRORS=OFF -DENABLE_EXAMPLES=OFF"
-    local MEMKB GR4JOBS
+    local MEMKB MEM_PER_JOB_KB GR4JOBS
     MEMKB=$(awk '/MemAvailable/{print $2}' /proc/meminfo 2>/dev/null || echo 0)
-    GR4JOBS=$(( MEMKB / (3 * 1024 * 1024) ))
+    MEM_PER_JOB_KB=$((3 * 1024 * 1024))
+    if [ "$(uname -m)" = "aarch64" ]; then
+        MEM_PER_JOB_KB=$((6 * 1024 * 1024))
+    fi
+    GR4JOBS=$(( MEMKB / MEM_PER_JOB_KB ))
     [ "$GR4JOBS" -lt 1 ] && GR4JOBS=1
     [ "$GR4JOBS" -gt "$(nproc)" ] && GR4JOBS="$(nproc)"
 
