@@ -337,8 +337,79 @@ EOF
     goodecho "[!] Note: container must be run with --cap-add SYS_ADMIN --cap-add DAC_READ_SEARCH"
 }
 
+function x11_egl_shim_install() {
+    # Mesa's GLX client cannot create a context on XQuartz (macOS hosts, Docker
+    # Desktop / Podman / Lima alike): the server exposes no fbconfig that the
+    # software rasterizer accepts ("No matching fbConfigs or visuals found",
+    # "glx: failed to create drisw screen"), so every GLX-based tool dies at
+    # window creation (SDR++: "OpenGL 3.0 was not supported", then an assert
+    # in glfwSetWindowIcon). EGL on the very same X11 display works and gives
+    # OpenGL 4.5 through llvmpipe. Qt (QT_XCB_GL_INTEGRATION) and SDL
+    # (SDL_VIDEO_X11_FORCE_EGL) switch to EGL from the environment; GLFW
+    # (SDR++, SatDump, CyberEther, ...) has no such switch, so this shim,
+    # preloaded only when RF Swift asks for EGL (see rfswift_shell_setup),
+    # sets GLFW_CONTEXT_CREATION_API=GLFW_EGL_CONTEXT_API before every
+    # glfwCreateWindow. It resolves the GLFW symbols at call time and
+    # references none directly, so preloading it into a program that never
+    # uses GLFW is a no-op (no undefined-symbol errors under BIND_NOW).
+    goodecho "[+] Building the GLFW EGL shim (OpenGL over XQuartz and other X servers without usable GLX)"
+    install_dependencies "gcc libc6-dev"
+    mkdir -p /usr/lib/rfswift
+    cat > /tmp/rfswift-glfw-egl.c <<'EOF'
+/* RF Swift: make GLFW create its OpenGL context through EGL instead of GLX.
+ * Preloaded (LD_PRELOAD) only when RFSWIFT_GL_PLATFORM=egl; see
+ * /root/.zshrc and RF-Swift-images/scripts/corebuild.sh. */
+#define _GNU_SOURCE
+#include <dlfcn.h>
+#include <stddef.h>
+
+#define RF_GLFW_CONTEXT_CREATION_API 0x0002200B /* GLFW_CONTEXT_CREATION_API */
+#define RF_GLFW_EGL_CONTEXT_API      0x00036002 /* GLFW_EGL_CONTEXT_API */
+
+typedef void *(*rf_create_fn)(int, int, const char *, void *, void *);
+typedef void (*rf_hint_fn)(int, int);
+
+void *glfwCreateWindow(int width, int height, const char *title, void *monitor, void *share)
+{
+    rf_create_fn real = (rf_create_fn)dlsym(RTLD_NEXT, "glfwCreateWindow");
+    rf_hint_fn hint = (rf_hint_fn)dlsym(RTLD_DEFAULT, "glfwWindowHint");
+    if (!real)
+        return NULL;
+    if (hint)
+        hint(RF_GLFW_CONTEXT_CREATION_API, RF_GLFW_EGL_CONTEXT_API);
+    return real(width, height, title, monitor, share);
+}
+EOF
+    if gcc -shared -fPIC -O2 -Wall -o /usr/lib/rfswift/libglfw-egl.so /tmp/rfswift-glfw-egl.c; then
+        goodecho "[+] GLFW EGL shim installed at /usr/lib/rfswift/libglfw-egl.so"
+    else
+        criticalecho-noexit "[-] GLFW EGL shim build failed; GLFW tools will not render over XQuartz"
+    fi
+    rm -f /tmp/rfswift-glfw-egl.c
+}
+
 function rfswift_shell_setup() {
     goodecho "[+] Setting up RF Swift shell integration"
+    # EGL switch for hosts whose X server has no usable GLX (see
+    # x11_egl_shim_install). Same POSIX block for both shells.
+    for rc in ~/.zshrc ~/.bashrc; do
+        cat >> "$rc" << 'RFEOF'
+
+# RF Swift: OpenGL through EGL when the host X server has no usable GLX
+# (XQuartz on macOS). rfswift sets RFSWIFT_GL_PLATFORM=egl on such hosts.
+if [ "$RFSWIFT_GL_PLATFORM" = "egl" ]; then
+    export QT_XCB_GL_INTEGRATION=xcb_egl
+    export SDL_VIDEO_X11_FORCE_EGL=1
+    export SDL_VIDEO_FORCE_EGL=1
+    if [ -r /usr/lib/rfswift/libglfw-egl.so ]; then
+        case ":${LD_PRELOAD:-}:" in
+            *:/usr/lib/rfswift/libglfw-egl.so:*) ;;
+            *) export LD_PRELOAD="/usr/lib/rfswift/libglfw-egl.so${LD_PRELOAD:+:$LD_PRELOAD}" ;;
+        esac
+    fi
+fi
+RFEOF
+    done
     # Recording indicator - must be at the very end of zshrc/bashrc
     # so it runs after the prompt theme is fully loaded
     cat >> ~/.zshrc << 'RFEOF'

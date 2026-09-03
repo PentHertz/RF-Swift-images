@@ -65,6 +65,9 @@ RUN ./entrypoint.sh uvpython_install && \
 # Installing Desktop/VNC packages for remote GUI access
 RUN ./entrypoint.sh install_desktop_packages
 
+# GLFW->EGL shim so OpenGL tools render over XQuartz (macOS hosts), see corebuild.sh
+RUN ./entrypoint.sh x11_egl_shim_install
+
 # Installing VPN tools (WireGuard, OpenVPN, Tailscale, Netbird)
 RUN ./entrypoint.sh vpn_tools_install
 
