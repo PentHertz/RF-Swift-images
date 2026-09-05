@@ -17,7 +17,7 @@ function dsview_install() {
     DEB_URL="https://github.com/PentHertz/DSView/releases/download/v${DSVIEW_VERSION}/${DEB_NAME}"
     [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
     cd /root/thirdparty
-    installfromnet "wget ${DEB_URL}"
+    installfromnet "wget" "${DEB_URL}"
     dpkg -i "${DEB_NAME}" || apt-get install -f -y
     rm -f "${DEB_NAME}"
 }
@@ -28,7 +28,7 @@ function dsview_install_fromsources() {
     ldconfig
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
     cd /root/thirdparty
-    installfromnet "git clone https://github.com/DreamSourceLab/DSView.git"
+    installfromnet "git" "clone" "https://github.com/DreamSourceLab/DSView.git"
     cd DSView
     mkdir build
     cd build
@@ -52,7 +52,7 @@ function flashrom_install() {
     install_dependencies "meson pciutils usbutils libpci-dev libusb-dev libftdi1 libftdi-dev zlib1g-dev subversion libusb-1.0-0-dev"
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
     cd /root/thirdparty
-    installfromnet "git clone https://github.com/flashrom/flashrom.git"
+    installfromnet "git" "clone" "https://github.com/flashrom/flashrom.git"
     cd flashrom
     meson setup builddir
     meson compile -C builddir
@@ -94,7 +94,7 @@ function pulseview_install() {
     DEB_URL="https://github.com/PentHertz/pulseview/releases/download/v${PULSEVIEW_VERSION}/${DEB_NAME}"
     [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
     cd /root/thirdparty
-    installfromnet "wget ${DEB_URL}"
+    installfromnet "wget" "${DEB_URL}"
     dpkg -i "${DEB_NAME}" || apt-get install -f -y
     udevadm control --reload-rules && udevadm trigger
     rm -f "${DEB_NAME}"
@@ -329,7 +329,7 @@ function ngscopeclient_install() {
     install_dependencies "libvulkan-dev glslang-dev glslang-tools spirv-tools glslc"
     install_dependencies "liblxi-dev libtirpc-dev"
     install_dependencies "texlive texlive-fonts-extra texlive-extra-utils"
-    installfromnet "git clone --recursive https://github.com/ngscopeclient/scopehal-apps.git"
+    installfromnet "git" "clone" "--recursive" "https://github.com/ngscopeclient/scopehal-apps.git"
     cd scopehal-apps
     mkdir -p build
     cd build
@@ -393,7 +393,7 @@ function slogic_pulseview_install_fromsources() {
 
     # Build Sipeed's forked libsigrok (slogic-dev branch)
     goodecho "[+] Building Sipeed libsigrok (slogic-dev)"
-    installfromnet "git clone --depth=1 -b slogic-dev https://github.com/sipeed/libsigrok.git"
+    installfromnet "git" "clone" "--depth=1" "-b" "slogic-dev" "https://github.com/sipeed/libsigrok.git"
     cd libsigrok
     ./autogen.sh
     mkdir -p build && cd build
@@ -404,7 +404,7 @@ function slogic_pulseview_install_fromsources() {
 
     # Build libsigrokdecode
     goodecho "[+] Building libsigrokdecode for SLogic"
-    installfromnet "git clone --depth=1 https://github.com/sigrokproject/libsigrokdecode.git"
+    installfromnet "git" "clone" "--depth=1" "https://github.com/sigrokproject/libsigrokdecode.git"
     cd libsigrokdecode
     ./autogen.sh
     mkdir -p build && cd build
@@ -415,7 +415,7 @@ function slogic_pulseview_install_fromsources() {
 
     # Build PulseView linked against Sipeed's libsigrok
     goodecho "[+] Building PulseView for SLogic"
-    installfromnet "git clone --depth=1 https://github.com/sigrokproject/pulseview.git"
+    installfromnet "git" "clone" "--depth=1" "https://github.com/sigrokproject/pulseview.git"
     cd pulseview
     mkdir -p build && cd build
     PKG_CONFIG_PATH="$SLOGIC_PKG" cmake \

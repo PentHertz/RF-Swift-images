@@ -15,7 +15,7 @@ function LLVM_install() { # expects llvm version TODO: not available on RISCV64 
         [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
         cd /root/thirdparty
 
-        installfromnet "wget -c https://apt.llvm.org/llvm.sh"
+        installfromnet "wget" "-c" "https://apt.llvm.org/llvm.sh"
 
         chmod +x llvm.sh
         ./llvm.sh ${LLVM_VERSION}
@@ -108,7 +108,7 @@ function trivy_install() {
     # Prefer the upstream install script (fetches the prebuilt release binary for
     # the detected arch into /usr/local/bin, tracking the latest release).
     if [ -n "$asset" ]; then
-        installfromnet "curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh -o /tmp/trivy-install.sh"
+        installfromnet "curl" "-sfL" "https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh" "-o" "/tmp/trivy-install.sh"
         if [ -s /tmp/trivy-install.sh ]; then
             sh /tmp/trivy-install.sh -b /usr/local/bin
             rm -f /tmp/trivy-install.sh

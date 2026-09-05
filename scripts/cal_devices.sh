@@ -56,7 +56,7 @@ function KCSDI_cal_device() {
     esac
    install_dependencies "libnss3-dev libfuse-dev"
    goodecho "[+] Downloading KCSDI from penthertz repo"
-   installfromnet "wget https://github.com/PentHertz/rfswift_deepace_install/releases/download/nightly/${image_name}"
+   installfromnet "wget" "https://github.com/PentHertz/rfswift_deepace_install/releases/download/nightly/${image_name}"
    chmod +x ${image_name}
    goodecho "[+] Creating wrapper script (extraction deferred to runtime)"
    rm -f /usr/bin/KCSDI
@@ -154,7 +154,7 @@ function pocketvna_sa_device() {
 		cd /rftools/calibration
         mkdir pocketVNA
         cd pocketVNA
-        installfromnet "wget https://github.com/PentHertz/rfswift_unofficial_pocketvna/releases/download/latest/pocketVna1.m96-New_x86_64.run.2.tar.gz"
+        installfromnet "wget" "https://github.com/PentHertz/rfswift_unofficial_pocketvna/releases/download/latest/pocketVna1.m96-New_x86_64.run.2.tar.gz"
         tar xvzf pocketVna1.m96-New_x86_64.run.2.tar.gz
         rm pocketVna1.m96-New_x86_64.run.2.tar.gz
         chmod +x pocketVna1.m96-New_x86_64.run

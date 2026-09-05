@@ -1,6 +1,8 @@
 name: Full build - Multi-Platform Docker Build with Caching
 
 env:
+  RFSWIFT_BEFORE: ${{ github.event.before }}
+  RFSWIFT_FORCE_ALL: ${{ github.event.inputs.force_all || 'false' }}
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   REGISTRY_IMAGE: penthertz/rfswift
   CACHE_REPO: penthertz/rfswift
@@ -24,13 +26,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
 
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -69,12 +70,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -136,13 +136,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
 
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -185,12 +184,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -259,13 +257,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
 
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -313,12 +310,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -392,13 +388,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
 
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -446,12 +441,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -525,13 +519,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
 
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -579,12 +572,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -658,12 +650,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -706,12 +697,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -780,13 +770,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
 
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -842,12 +831,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -903,13 +891,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
 
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -962,12 +949,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -1046,13 +1032,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
 
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -1113,13 +1098,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
 
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -1180,13 +1164,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
 
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -1234,12 +1217,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -1313,13 +1295,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
 
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -1372,12 +1353,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -1453,13 +1433,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
 
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -1512,12 +1491,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -1592,13 +1570,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
 
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -1651,12 +1628,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -1731,13 +1707,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
 
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -1785,12 +1760,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -1864,13 +1838,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
 
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -1918,12 +1891,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -1997,13 +1969,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
 
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -2045,12 +2016,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -2118,13 +2088,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
 
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -2166,12 +2135,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -2239,13 +2207,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
 
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -2287,12 +2254,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -2358,13 +2324,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2
+          fetch-depth: 0
 
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT
@@ -2406,12 +2371,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 
+          fetch-depth: 0
       - name: Check for modified files
         id: file_check
         run: |
-          git fetch origin
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD)
+          MODIFIED_FILES=$(bash .github/scripts/changed-files.sh)
           echo "Modified files: $MODIFIED_FILES"
           if [[ "$MODIFIED_FILES" == *"config/"* || "$MODIFIED_FILES" == *"Dockerfiles/Makefile"* || "$MODIFIED_FILES" == *"scripts/terminal_harness.sh"* || "$MODIFIED_FILES" == *"run/"* || "$MODIFIED_FILES" == *"Dockerfiles/corebuild.docker"* || "$MODIFIED_FILES" == *"scripts/common.sh"* || "$MODIFIED_FILES" == *"scripts/entrypoint.sh"* || "$MODIFIED_FILES" == *"scripts/corebuild.sh"* || "$MODIFIED_FILES" == *"docs/guide.md"* ]]; then
             echo "run_job_corebuild=true" >> $GITHUB_OUTPUT

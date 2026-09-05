@@ -7,7 +7,7 @@ function kc908_sa_device() {
         colorecho "[+] Downloading bin from DEEPACE"
         [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
         cd /root/thirdparty
-        installfromnet "wget https://github.com/PentHertz/rfswift_deepace_install/releases/download/nightly/KC908-GNURadio24.4.06.zip"
+        installfromnet "wget" "https://github.com/PentHertz/rfswift_deepace_install/releases/download/nightly/KC908-GNURadio24.4.06.zip"
         unzip KC908-GNURadio24.4.06.zip
         rm KC908-GNURadio24.4.06.zip
         cd KC908-GNURadio/lib
@@ -45,7 +45,7 @@ function signalhound_sdk_install() {
     SDK_URL="https://signalhound.com/sigdownloads/SDK/signal_hound_sdk_08_26_26.zip"
     SDK_DIR="/opt/signalhound"
 
-    installfromnet "wget -q ${SDK_URL} -O signal_hound_sdk.zip"
+    installfromnet "wget" "-q" "${SDK_URL}" "-O" "signal_hound_sdk.zip"
     unzip -q signal_hound_sdk.zip
     rm signal_hound_sdk.zip
 
@@ -150,7 +150,7 @@ function signalhound_spike_sa_device() {
         [ -d /rftools/analysers ] || mkdir -p /rftools/analysers
         cd /rftools/analysers
         filename="Spike(Ubuntu22.04x64)_4_0_16"
-        installfromnet "wget https://signalhound.com/sigdownloads/Spike/$filename.zip"
+        installfromnet "wget" "https://signalhound.com/sigdownloads/Spike/$filename.zip"
         unzip ${filename}.zip
         rm ${filename}.zip
         cd ${filename}
@@ -192,7 +192,7 @@ function signalhound_vsg60_sa_device() {
         [ -d /rftools/generators ] || mkdir -p /rftools/generators
         cd /rftools/generators
         filename="VSG(Ubuntu22.04x64)_2_0_3"
-        installfromnet "wget https://signalhound.com/sigdownloads/VSG60/$filename.zip"
+        installfromnet "wget" "https://signalhound.com/sigdownloads/VSG60/$filename.zip"
         unzip "$filename.zip"
         rm "$filename.zip"
         cd "$filename"
@@ -241,7 +241,7 @@ function harogic_sa_device() {
         *)
             printf 'Unsupported architecture: "%s"!\n' "$arch" >&2; exit 0;;
     esac
-    installfromnet "wget https://github.com/PentHertz/rfswift_harogic_install/releases/download/v0.55.63/$prog.zip"
+    installfromnet "wget" "https://github.com/PentHertz/rfswift_harogic_install/releases/download/v0.55.63/$prog.zip"
     unzip "$prog.zip"
     rm "$prog.zip"
     cd "$prog"
@@ -257,7 +257,7 @@ function harogic_sa_device() {
     esac
     ln -s /usr/local/bin/sastudio/.sastudio.sh /usr/sbin/sastudio
     goodecho "[+] Installing htraapi"
-    installfromnet "wget https://github.com/PentHertz/rfswift_harogic_install/releases/download/v0.55.63/Install_HTRA_SDK.zip"
+    installfromnet "wget" "https://github.com/PentHertz/rfswift_harogic_install/releases/download/v0.55.63/Install_HTRA_SDK.zip"
     unzip Install_HTRA_SDK.zip
     rm Install_HTRA_SDK.zip
     cd Install_HTRA_SDK/
@@ -333,7 +333,7 @@ function harogic_sa_device_new() {
         *)
             printf 'Unsupported architecture: "%s"!\n' "$arch" >&2; exit 0;;
     esac
-    installfromnet "wget https://github.com/PentHertz/rfswift_harogic_install/releases/download/v0.55.64/$prog.zip"
+    installfromnet "wget" "https://github.com/PentHertz/rfswift_harogic_install/releases/download/v0.55.64/$prog.zip"
     unzip "$prog.zip"
     rm "$prog.zip"
     cd "$prog"
@@ -349,7 +349,7 @@ function harogic_sa_device_new() {
     esac
     ln -s /usr/local/bin/sastudio/.sastudio.sh /usr/sbin/sastudio
     goodecho "[+] Installing htraapi"
-    installfromnet "wget https://github.com/PentHertz/rfswift_harogic_install/releases/download/v0.55.64/Install_HTRA_SDK.zip"
+    installfromnet "wget" "https://github.com/PentHertz/rfswift_harogic_install/releases/download/v0.55.64/Install_HTRA_SDK.zip"
     unzip Install_HTRA_SDK.zip
     rm Install_HTRA_SDK.zip
     cd Install_HTRA_SDK/
@@ -428,7 +428,7 @@ function harogic_sa_device_latest() {
         *)
             printf 'Unsupported architecture: "%s"!\n' "$arch" >&2; exit 0;;
     esac
-    installfromnet "wget https://github.com/PentHertz/rfswift_harogic_install/releases/download/${tag}/$prog.zip"
+    installfromnet "wget" "https://github.com/PentHertz/rfswift_harogic_install/releases/download/${tag}/$prog.zip"
     case "$arch" in
         x86_64|amd64)
             # SAStudio4 >= 4.4 ships as a flat portable bundle: the zip has no
@@ -462,7 +462,7 @@ EOF
             ;;
     esac
     goodecho "[+] Installing htraapi"
-    installfromnet "wget https://github.com/PentHertz/rfswift_harogic_install/releases/download/${tag}/Install_HTRA_SDK.zip"
+    installfromnet "wget" "https://github.com/PentHertz/rfswift_harogic_install/releases/download/${tag}/Install_HTRA_SDK.zip"
     # Since v0.55.88 the SDK zip has no root directory either
     unzip -q Install_HTRA_SDK.zip -d Install_HTRA_SDK
     rm Install_HTRA_SDK.zip

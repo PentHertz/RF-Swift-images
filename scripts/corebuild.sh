@@ -48,9 +48,9 @@ function docker_preinstall() {
     ln -s /usr/bin/python3 /usr/bin/python
 
     # Install apt-fast and all other packages with apt-fast
-    installfromnet "apt-get -y install apt-fast"
-    installfromnet "apt-fast update"
-    installfromnet "apt-fast install -y ${packages[@]} --no-install-recommends"
+    installfromnet "apt-get" "-y" "install" "apt-fast"
+    installfromnet "apt-fast" "update"
+    installfromnet "apt-fast" "install" "-y" "${packages[@]}" "--no-install-recommends"
 
     # Configure keyboard and locale settings
     echo apt-fast keyboard-configuration/layout string "English (US)" | debconf-set-selections
@@ -59,13 +59,13 @@ function docker_preinstall() {
     update-locale
 
     # Installing Cython
-    installfromnet "apt-fast install -y python3-pip" # forcing for RISC-V
+    installfromnet "apt-fast" "install" "-y" "python3-pip" # forcing for RISC-V
     pip3install "cython"
 }
 
 function audio_tools () {
     goodecho "[+] Installing audio tools from package manager"
-    installfromnet "apt-fast install -y audacity sox"
+    installfromnet "apt-fast" "install" "-y" "audacity" "sox"
 }
 
 function flameshot_install() {
@@ -89,7 +89,7 @@ function enable_apt_components() {
 function rust_tools() {
     goodecho "[+] Installing RUST tools"
     # Install system cargo as fallback/build deps only
-    installfromnet "apt-fast install -y cargo"
+    installfromnet "apt-fast" "install" "-y" "cargo"
     # Install rustup with latest stable (>= 1.85 required for edition2024)
     curl --proto '=https' --tlsv1.3 https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable --profile minimal
     source $HOME/.cargo/env
@@ -198,7 +198,7 @@ function install_GPU_latest_Radeon() { # tested with GPD Pocket 4
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
     cd /root/thirdparty
     # Radeon Software for Linux 26.12 (Ubuntu 26.04 HWE)
-    installfromnet "wget https://repo.radeon.com/amdgpu-install/31.30/ubuntu/resolute/amdgpu-install_31.30.313000-1_all.deb"
+    installfromnet "wget" "https://repo.radeon.com/amdgpu-install/31.30/ubuntu/resolute/amdgpu-install_31.30.313000-1_all.deb"
     dpkg -i amdgpu-install_31.30.313000-1_all.deb
     # Install the open graphics + OpenCL userspace only. --accept-eula is rejected
     # unless a usecase pulls EULA-bound proprietary packages (which we don't want),
@@ -286,7 +286,7 @@ function uvpython_install() { # Avoid terrible long builds
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
     cd /root/thirdparty
     UV_VERSION="0.12.9"
-    installfromnet "wget https://github.com/astral-sh/uv/releases/download/$UV_VERSION/uv-installer.sh"
+    installfromnet "wget" "https://github.com/astral-sh/uv/releases/download/$UV_VERSION/uv-installer.sh"
     chmod +x uv-installer.sh
     ./uv-installer.sh
     ln -s /root/.local/bin/uv /usr/local/bin/uv
@@ -317,7 +317,7 @@ function littlesnitch_soft_install() {
     goodecho "[+] Installing Little Snitch for Linux ${version} ($arch)"
     [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
     cd /root/thirdparty
-    installfromnet "wget -q https://obdev.at/downloads/littlesnitch-linux/${pkg}"
+    installfromnet "wget" "-q" "https://obdev.at/downloads/littlesnitch-linux/${pkg}"
     dpkg-deb -x "${pkg}" /tmp/littlesnitch_extracted
     cp -r /tmp/littlesnitch_extracted/* /
     rm -rf /tmp/littlesnitch_extracted "${pkg}"

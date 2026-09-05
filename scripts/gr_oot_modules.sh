@@ -263,7 +263,7 @@ function grdroineid_grmod_install() { # TODO: for turbofec RISCV64:  gcc: error:
     echo "[+] Cloning turbofec"
     [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
     cd /root/thirdparty
-    installfromnet "git clone https://github.com/zlinwei/turbofec.git"
+    installfromnet "git" "clone" "https://github.com/zlinwei/turbofec.git"
     cd turbofec
 
     autoreconf -i
@@ -279,7 +279,7 @@ function grdroineid_grmod_install() { # TODO: for turbofec RISCV64:  gcc: error:
 
     cd /root/thirdparty
     echo "[+] Cloning CRCpp"
-    installfromnet "git clone https://github.com/d-bahr/CRCpp.git"
+    installfromnet "git" "clone" "https://github.com/d-bahr/CRCpp.git"
     install -d /usr/local/include
     install -m 644 CRCpp/inc/CRC.h /usr/local/include/ \
         || { criticalecho-noexit "[!] Failed to install CRCpp header"; return 0; }
@@ -348,7 +348,7 @@ function grsignalhound_Receiver_grmod_install() {
 
     # Download and install the FTDI library based on architecture
     if [[ "$ARCH" == "x86_64" ]]; then
-        installfromnet "wget https://github.com/PentHertz/rfswift_ftdi/releases/download/v1.4.34/libftd2xx-linux-x86_64-1.4.34.tgz"
+        installfromnet "wget" "https://github.com/PentHertz/rfswift_ftdi/releases/download/v1.4.34/libftd2xx-linux-x86_64-1.4.34.tgz"
         tar xvfz libftd2xx-linux-x86_64-1.4.34.tgz
         cd linux-x86_64
         cp libftd2xx.* /usr/local/lib
@@ -361,7 +361,7 @@ function grsignalhound_Receiver_grmod_install() {
         ldconfig -v
         cd /root/thirdparty
     elif [[ "$ARCH" == "aarch64" ]]; then
-        installfromnet "wget https://github.com/PentHertz/rfswift_ftdi/releases/download/v1.4.34/libftd2xx-linux-arm-v8-1.4.34.tgz"
+        installfromnet "wget" "https://github.com/PentHertz/rfswift_ftdi/releases/download/v1.4.34/libftd2xx-linux-arm-v8-1.4.34.tgz"
         tar xvfz libftd2xx-linux-arm-v8-1.4.34.tgz
         cd linux-arm-v8
         cp libftd2xx.* /usr/local/lib
@@ -376,7 +376,7 @@ function grsignalhound_Receiver_grmod_install() {
     fi
 
     # Download and install the Signal Hound SDK
-    installfromnet "wget https://signalhound.com/sigdownloads/SDK/signal_hound_sdk_08_26_26.zip"
+    installfromnet "wget" "https://signalhound.com/sigdownloads/SDK/signal_hound_sdk_08_26_26.zip"
     unzip -q signal_hound_sdk_08_26_26.zip
     INIT_PATH=$(pwd)
 

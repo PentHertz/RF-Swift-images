@@ -7,7 +7,7 @@ function gnuradio_soft_install() {
 
 function sdrangel_soft_install() {
 	goodecho "[+] Installing dependencies"
-	installfromnet "apt-fast update"
+	installfromnet "apt-fast" "update"
 	install_dependencies "git cmake g++ pkg-config autoconf automake libtool libfftw3-dev libusb-1.0-0-dev libusb-dev libhidapi-dev libopengl-dev"
 	install_dependencies "qtbase5-dev qtchooser libqt5multimedia5-plugins qtmultimedia5-dev libqt5websockets5-dev"
 	install_dependencies "qttools5-dev qttools5-dev-tools libqt5opengl5-dev libqt5quick5 libqt5charts5-dev"
@@ -22,7 +22,7 @@ function sdrangel_soft_install() {
 	goodecho "[+] Downloading and unpacking SDR Angel"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	installfromnet "wget https://github.com/f4exb/sdrangel/releases/download/v7.21.3/sdrangel-2700-master.tar.gz"
+	installfromnet "wget" "https://github.com/f4exb/sdrangel/releases/download/v7.21.3/sdrangel-2700-master.tar.gz"
 	tar xvzf sdrangel-2700-master.tar.gz
 	cd sdrangel-2700-master
 	dpkg -i sdrangel_7.21.3-1_amd64.deb
@@ -38,7 +38,7 @@ function sdrangel_soft_fromsource_install() {
     fi
     
 	goodecho "[+] Installing dependencies"
-	installfromnet "apt-fast update"
+	installfromnet "apt-fast" "update"
 	install_dependencies "libsndfile-dev git cmake g++ pkg-config autoconf automake libtool libfftw3-dev libusb-1.0-0-dev libusb-dev libhidapi-dev libopengl-dev qtbase5-dev qtchooser libqt5multimedia5-plugins qtmultimedia5-dev libqt5websockets5-dev qttools5-dev qttools5-dev-tools libqt5opengl5-dev libqt5quick5 libqt5charts5-dev qml-module-qtlocation qml-module-qtpositioning qml-module-qtquick-window2 qml-module-qtquick-dialogs qml-module-qtquick-controls qml-module-qtquick-controls2 qml-module-qtquick-layouts libqt5serialport5-dev qtdeclarative5-dev qtpositioning5-dev qtlocation5-dev libqt5texttospeech5-dev qtwebengine5-dev qtbase5-private-dev libqt5gamepad5-dev libqt5svg5-dev libfaad-dev zlib1g-dev libboost-all-dev libasound2-dev pulseaudio libopencv-dev libxml2-dev bison flex ffmpeg libavcodec-dev libavformat-dev libopus-dev doxygen graphviz"
 	goodecho "[+] APT"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
@@ -160,7 +160,7 @@ function sdrpp_soft_install () {
   		*)
     		printf 'Unsupported architecture: "%s" -> use sdrpp_soft_fromsource_install instead\n' "$arch" >&2; exit 2;;
 	esac
-	installfromnet "wget https://github.com/AlexandreRouma/SDRPlusPlus/releases/download/nightly/$prog"
+	installfromnet "wget" "https://github.com/AlexandreRouma/SDRPlusPlus/releases/download/nightly/$prog"
 	dpkg -i $prog
 	cd /root
 }
@@ -177,7 +177,7 @@ function sigdigger_soft_install() {
     goodecho "[+] Downloading and launching auto-script"
     [ -d /rftools/sdr ] || mkdir -p /rftools/sdr
     cd /rftools/sdr
-    installfromnet "wget --no-check-certificate https://actinid.org/blsd"
+    installfromnet "wget" "--no-check-certificate" "https://actinid.org/blsd"
     chmod +x blsd
     ./blsd
     cd /root
@@ -246,7 +246,7 @@ function cyberther_soft_install() {
 	goodecho "[CyberEther][+] Pre-fetching Natural Earth geodata (avoids build-time 429s)"
 	_ne_url="https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson"
 	for _ne_f in $(grep -oE "ne_10m_[A-Za-z0-9_]+\.geojson" resources/geodata/meson.build | sort -u); do
-	    [ -s "resources/geodata/$_ne_f" ] || installfromnet "wget -q -O resources/geodata/$_ne_f $_ne_url/$_ne_f"
+	    [ -s "resources/geodata/$_ne_f" ] || installfromnet "wget" "-q" "-O" "resources/geodata/$_ne_f" "$_ne_url/$_ne_f"
 	done
 	meson setup -Dbuildtype=${BUILDTYPE} build && cd build
 	ninja -j${NINJA_JOBS} install
@@ -326,8 +326,8 @@ function urh_soft_install() {
     # Use curly braces to properly delimit variable names
     FILENAME="urh-penthertz_${ARCH}_${VERSION_URH}+${GITBUILD}.${BASE_CODENAME}.deb"
     BASEURL="https://github.com/PentHertz/urh-ng/releases/download/v${VERSION_URH}"
-    installfromnet "wget ${BASEURL}/${FILENAME}"
-    installfromnet "wget ${BASEURL}/SHA256SUMS"
+    installfromnet "wget" "${BASEURL}/${FILENAME}"
+    installfromnet "wget" "${BASEURL}/SHA256SUMS"
     if [ -f "$FILENAME" ]; then
         # Verify by SHA-256. The SHA256SUMS entries use '~' where GitHub serves
         # '.', so match on the digest rather than the file name.
@@ -375,7 +375,7 @@ function urh_soft_install_2_9_8() {
     esac
     # Use curly braces to properly delimit variable names
     FILENAME="urh-penthertz_${ARCH}_${VERSION_URH}+${GITBUILD}.deb"
-    installfromnet "wget https://github.com/PentHertz/urh/releases/download/v$VERSION_URH/$FILENAME"
+    installfromnet "wget" "https://github.com/PentHertz/urh/releases/download/v$VERSION_URH/$FILENAME"
     dpkg -i $FILENAME
 }
 
@@ -823,7 +823,7 @@ function tetra_suite_install () {
     goodecho "[+] Installing libosmo-dsp"
     cd /tmp
     if [ ! -f "/usr/local/lib/libosmosdr.so" ]; then
-        installfromnet "git clone --depth 1 https://github.com/osmocom/libosmo-dsp.git"
+        installfromnet "git" "clone" "--depth" "1" "https://github.com/osmocom/libosmo-dsp.git"
         cd libosmo-dsp
         autoreconf -fi
         ./configure --prefix=/usr/local

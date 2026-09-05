@@ -1,0 +1,16 @@
+name: Build and release helper regression tests
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: |
+          bash tests/retry.sh
+          bash tests/changed-files.sh
+          bash tests/promotion.sh
+          shellcheck --severity=error .github/scripts/*.sh tests/*.sh scripts/*.sh run/*.sh

@@ -2,21 +2,21 @@
 
 function canutils_soft_install() {
 	goodecho "[+] Installing can-utils"
-	installfromnet "apt-fast -y install can-utils"
+	installfromnet "apt-fast" "-y" "install" "can-utils"
 }
 
 function cantact_soft_install() {
 	goodecho "[+] Installing cantact dependencies"
-	installfromnet "apt-fast -y install cargo"
+	installfromnet "apt-fast" "-y" "install" "cargo"
 	goodecho "[+] Installing cantact"
-	installfromnet "cargo install cantact"
+	installfromnet "cargo" "install" "cantact"
 }
 
 function caringcaribou_soft_install() {
 	goodecho "[+] Cloning and installing caringcaribou"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	installfromnet "git clone https://github.com/CaringCaribou/caringcaribou.git"
+	installfromnet "git" "clone" "https://github.com/CaringCaribou/caringcaribou.git"
 	cd caringcaribou
 	python3 setup.py install
 }
@@ -27,7 +27,7 @@ function savvycan_soft_install() {
 	install_dependencies "qmake6 qt6-base-dev qt6-declarative-dev qt6-serialport-dev qt6-serialbus-dev qt6-tools-dev libqt6serialbus6-plugins"
 	[ -d /automotive ] || mkdir /automotive
 	cd /automotive
-	installfromnet "git clone https://github.com/collin80/SavvyCAN.git"
+	installfromnet "git" "clone" "https://github.com/collin80/SavvyCAN.git"
 	cd SavvyCAN
 	# Qt 6.10 removed QSerialPort::{Parity,Framing,BreakCondition}Error and QChar(uchar);
 	# upstream master still uses them (PR removing the enums was closed unmerged)
@@ -55,7 +55,7 @@ function v2ginjector_soft_install() {
 	goodecho "[+] Installing V2G Injector"
 	[ -d /automotive ] || mkdir /automotive
 	cd /automotive
-	installfromnet "git clone https://github.com/FlUxIuS/V2GInjector.git"
+	installfromnet "git" "clone" "https://github.com/FlUxIuS/V2GInjector.git"
 	cd V2GInjector
 	chmod +x install.sh
 	./install.sh

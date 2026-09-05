@@ -31,7 +31,7 @@ function mirage_soft_install() {
     cd /root/thirdparty
     python3.10 -m venv /opt/mirage-env
     source /opt/mirage-env/bin/activate
-    installfromnet "git clone https://github.com/RCayre/mirage"
+    installfromnet "git" "clone" "https://github.com/RCayre/mirage"
     cd mirage/
     pip install .
     pip install scapy==2.5.0
@@ -87,16 +87,16 @@ EOF
     goodecho "[+] Downloading firmwares for Mirage"
     mkdir Btlejack_microbit_ble400
     cd Btlejack_microbit_ble400
-    installfromnet "wget https://github.com/virtualabs/btlejack/archive/refs/tags/v2.1.1.zip"
+    installfromnet "wget" "https://github.com/virtualabs/btlejack/archive/refs/tags/v2.1.1.zip"
     cd ..
     mkdir Injectable_NRF52840
     cd Injectable_NRF52840
-    installfromnet "wget https://github.com/RCayre/injectable-firmware/releases/download/v1.0/pca10059.hex"
-    installfromnet "wget https://github.com/RCayre/injectable-firmware/releases/download/v1.0/mdk-dongle.hex"
+    installfromnet "wget" "https://github.com/RCayre/injectable-firmware/releases/download/v1.0/pca10059.hex"
+    installfromnet "wget" "https://github.com/RCayre/injectable-firmware/releases/download/v1.0/mdk-dongle.hex"
     cd ..
     mkdir NRFSniffer
     cd NRFSniffer
-    installfromnet "wget https://nsscprodmedia.blob.core.windows.net/prod/software-and-other-downloads/desktop-software/nrf-sniffer/sw/nrf_sniffer_for_bluetooth_le_4.1.1.zip"
+    installfromnet "wget" "https://nsscprodmedia.blob.core.windows.net/prod/software-and-other-downloads/desktop-software/nrf-sniffer/sw/nrf_sniffer_for_bluetooth_le_4.1.1.zip"
 }
 
 function sniffle_soft_install() {
@@ -109,7 +109,7 @@ function sniffle_soft_install() {
         [ -d /rftools/bluetooth ] || mkdir -p /rftools/bluetooth
         cd /rftools/bluetooth
         install_dependencies "gfortran"
-        installfromnet "git clone https://github.com/bkerler/Sniffle.git"
+        installfromnet "git" "clone" "https://github.com/bkerler/Sniffle.git"
         cd Sniffle/python_cli
         pip3install -r requirements.txt
         # numpy<2.0 override removed: Sniffle's python_cli only uses stable numpy
@@ -119,17 +119,17 @@ function sniffle_soft_install() {
         [ -d /rftools/bluetooth/firmwares/Sniffle ] || mkdir -p /rftools/bluetooth/firmwares/Sniffle
         cd /rftools/bluetooth/firmwares/Sniffle
         goodecho "[+] Downloading firmwares for Sniffle"
-        installfromnet "wget https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc1352p1_cc2652p1.hex"
-        installfromnet "wget https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc1352p1_cc2652p1_1M.hex"
-        installfromnet "wget https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc1352p7.hex"
-        installfromnet "wget https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc1352p7_1M.hex"
-        installfromnet "wget https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc1352r1.hex"
-        installfromnet "wget https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc1354p10.hex"
-        installfromnet "wget https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc2651p3.hex"
-        installfromnet "wget https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc2652r1.hex"
-        installfromnet "wget https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc2652r7.hex"
-        installfromnet "wget https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc2652rb.hex"
-        installfromnet "wget https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc2652rb_1M.hex"
+        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc1352p1_cc2652p1.hex"
+        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc1352p1_cc2652p1_1M.hex"
+        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc1352p7.hex"
+        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc1352p7_1M.hex"
+        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc1352r1.hex"
+        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc1354p10.hex"
+        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc2651p3.hex"
+        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc2652r1.hex"
+        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc2652r7.hex"
+        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc2652rb.hex"
+        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc2652rb_1M.hex"
     else
         goodecho "[!] Skipping Sniffle installation: unsupported architecture ($arch)"
     fi
@@ -219,7 +219,7 @@ function bdaddr_soft_install() {
 	goodecho "[+] Installing bdaddr"
 	[ -d /rftools/bluetooth ] || mkdir /rftools/bluetooth
 	cd /rftools/bluetooth
-	installfromnet "git clone https://github.com/thxomas/bdaddr"
+	installfromnet "git" "clone" "https://github.com/thxomas/bdaddr"
 	cd bdaddr
 	make
 	ln -s $(pwd)/bdaddr /usr/bin/bdaddr
@@ -229,7 +229,7 @@ function bluekit_soft_install() {
 	goodecho "[+] Installing BlueKit"
 	[ -d /rftools/bluetooth ] || mkdir /rftools/bluetooth
 	cd /rftools/bluetooth
-	installfromnet "git clone https://github.com/sgxgsx/BlueToolkit.git"
+	installfromnet "git" "clone" "https://github.com/sgxgsx/BlueToolkit.git"
 	cd BlueToolkit
 	chmod +x ./install.sh
 	./install.sh
@@ -325,7 +325,7 @@ function blerp_soft_install() {
     goodecho "[+] Downloading pre-built firmware ${BLERP_VER}"
     for f in bleshell-${BLERP_VER}.elf bleshell-${BLERP_VER}.hex bleshell-${BLERP_VER}.img \
              blehci-${BLERP_VER}.elf blehci-${BLERP_VER}.hex blehci-${BLERP_VER}.img; do
-        installfromnet "wget -q -O firmware/$f ${RELEASE_URL}/$f"
+        installfromnet "wget" "-q" "-O" "firmware/$f" "${RELEASE_URL}/$f"
     done
     goodecho "[+] Firmware downloaded to $(pwd)/firmware/"
     # Python venv to avoid conflicts with system Scapy (BLERP uses a custom Scapy fork)
@@ -364,9 +364,9 @@ function proxmark3_soft_install() {
     if [ -d proxmark3/.git ]; then
         goodecho "[+] proxmark3 already cloned, updating"
         cd proxmark3/ || return 1
-        installfromnet "git pull --ff-only"
+        installfromnet "git" "pull" "--ff-only"
     else
-        installfromnet "git clone https://github.com/RfidResearchGroup/proxmark3.git"
+        installfromnet "git" "clone" "https://github.com/RfidResearchGroup/proxmark3.git"
         cd proxmark3/ || return 1
     fi
 
@@ -377,7 +377,7 @@ function proxmark3_soft_install() {
     # Restore it before building so we never compile against a poisoned tree.
     if [ -f pm3 ] && head -n 5 pm3 | grep -q "exec .*${pm3dir}/pm3"; then
         goodecho "[+] Repairing pm3 clobbered by a previous wrapper"
-        git checkout -- pm3 || installfromnet "git checkout -- pm3"
+        git checkout -- pm3 || installfromnet "git" "checkout" "--" "pm3"
     fi
 
     goodecho "[+] Building proxmark3"
@@ -434,9 +434,9 @@ function proxmark5_soft_install() {
     if [ -d proxmark5/.git ]; then
         goodecho "[+] proxmark5 already cloned, updating"
         cd proxmark5/ || return 1
-        installfromnet "git pull --ff-only"
+        installfromnet "git" "pull" "--ff-only"
     else
-        installfromnet "git clone https://github.com/RfidResearchGroup/proxmark3.git proxmark5"
+        installfromnet "git" "clone" "https://github.com/RfidResearchGroup/proxmark3.git" "proxmark5"
         cd proxmark5/ || return 1
     fi
 
@@ -447,7 +447,7 @@ function proxmark5_soft_install() {
     # Restore it before building so we never compile against a poisoned tree.
     if [ -f pm3 ] && head -n 5 pm3 | grep -q "exec .*${pm3dir}/pm3"; then
         goodecho "[+] Repairing pm3 clobbered by a previous wrapper"
-        git checkout -- pm3 || installfromnet "git checkout -- pm3"
+        git checkout -- pm3 || installfromnet "git" "checkout" "--" "pm3"
     fi
 
     goodecho "[+] Building proxmark5 (PLATFORM=PM5)"
@@ -518,7 +518,7 @@ function mfread_soft_install() {
 	goodecho "[+] Installing mfdread"
 	[ -d /rftools/rfid ] || mkdir -p /rftools/rfid
 	cd /rftools/rfid
-	installfromnet "git clone https://github.com/zhovner/mfdread.git"
+	installfromnet "git" "clone" "https://github.com/zhovner/mfdread.git"
 }
 
 function rfidler_soft_install() {
@@ -548,10 +548,10 @@ function miLazyCracker_soft_install() {
 	goodecho "[+] Cloning miLazyCracker repo"
 	gitinstall "https://github.com/nfc-tools/miLazyCracker.git" "miLazyCracker"
 	cd miLazyCracker
-	#[ -f craptev1-v1.1.tar.xz ] || installfromnet "wget https://web.archive.org/web/20190221140220if_/https://www2.vaneay.fr/mifare/craptev1-v1.1.tar.xz"
-	#[ -f crapto1-v3.3.tar.xz ] || installfromnet "wget https://web.archive.org/web/20190221140255if_/https://www2.vaneay.fr/mifare/crapto1-v3.3.tar.xz"
-	[ -f crapto1-v3.3.tar.xz ] || installfromnet "wget https://github.com/PentHertz/rfid-proj/releases/download/v0/crapto1-v3.3.tar.xz"
-	[ -f craptev1-v1.1.tar.xz ] || installfromnet "wget https://github.com/PentHertz/rfid-proj/releases/download/v0/craptev1-v1.1.tar.xz"
+	#[ -f craptev1-v1.1.tar.xz ] || installfromnet "wget" "https://web.archive.org/web/20190221140220if_/https://www2.vaneay.fr/mifare/craptev1-v1.1.tar.xz"
+	#[ -f crapto1-v3.3.tar.xz ] || installfromnet "wget" "https://web.archive.org/web/20190221140255if_/https://www2.vaneay.fr/mifare/crapto1-v3.3.tar.xz"
+	[ -f crapto1-v3.3.tar.xz ] || installfromnet "wget" "https://github.com/PentHertz/rfid-proj/releases/download/v0/crapto1-v3.3.tar.xz"
+	[ -f craptev1-v1.1.tar.xz ] || installfromnet "wget" "https://github.com/PentHertz/rfid-proj/releases/download/v0/craptev1-v1.1.tar.xz"
 	goodecho "[+] Installing crypto1_bs for miLazyCracker"
 	gitinstall "https://github.com/aczid/crypto1_bs" "crypto1_bs"
 	cd crypto1_bs
@@ -616,9 +616,9 @@ function chameleon_ultra_soft_install() {
 function common_nettools() {
 	install_dependencies "iproute2 hostapd dnsmasq"
 	echo apt-fast macchanger/automatically_run  boolean false | debconf-set-selections
-	installfromnet "apt-fast install -y -q macchanger"
+	installfromnet "apt-fast" "install" "-y" "-q" "macchanger"
 	echo apt-fast wireshark-common/install-setuid boolean true | debconf-set-selections
-	installfromnet "apt-fast install -y -q tshark"
+	installfromnet "apt-fast" "install" "-y" "-q" "tshark"
 }
 
 function reaver_soft_install() {
@@ -847,7 +847,7 @@ function wifite2_soft_install () {
 	goodecho "[+] Installing wifite2"
 	[ -d /rftools/wifi ] || mkdir -p /rftools/wifi
 	cd /rftools/wifi
-	installfromnet "git clone https://github.com/derv82/wifite2.git"
+	installfromnet "git" "clone" "https://github.com/derv82/wifite2.git"
 	cd wifite2/
 	pipx install .
 	pipx ensurepath

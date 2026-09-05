@@ -18,7 +18,7 @@ function dex2jar_soft_install() {
     goodecho "[+] Installing dex2jar"
     [ -d "$MOBILE_DIR" ] || mkdir -p "$MOBILE_DIR"
     cd "$MOBILE_DIR"
-    installfromnet "wget -O dex-tools.zip https://github.com/pxb1988/dex2jar/releases/download/v2.4/dex-tools-v2.4.zip"
+    installfromnet "wget" "-O" "dex-tools.zip" "https://github.com/pxb1988/dex2jar/releases/download/v2.4/dex-tools-v2.4.zip"
     if [ -f dex-tools.zip ]; then
         unzip -o dex-tools.zip && rm -f dex-tools.zip
         chmod +x "$MOBILE_DIR"/dex-tools-v2.4/*.sh 2>/dev/null
@@ -64,7 +64,7 @@ function mobsf_soft_install() {
         *)     _wk_arch="" ;;
     esac
     if [ -n "$_wk_arch" ]; then
-        installfromnet "wget -O /tmp/wkhtmltox.deb https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox_0.12.6.1-3.jammy_${_wk_arch}.deb"
+        installfromnet "wget" "-O" "/tmp/wkhtmltox.deb" "https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox_0.12.6.1-3.jammy_${_wk_arch}.deb"
         if [ -f /tmp/wkhtmltox.deb ]; then
             apt-get install -y /tmp/wkhtmltox.deb \
                 || record_build_failure "apt" "wkhtmltox" "upstream deb install failed (PDF export unavailable)"

@@ -8,7 +8,7 @@ function yatebts_blade2_soft_install() { # TODO: make few tests with new Nuand l
 	[ -d /telecom/2G ] || mkdir -p /telecom/2G
 	cd /telecom/2G
 	goodecho "[+] Fetching Yate"
-	installfromnet "git clone https://github.com/PentHertz/yate_resolute.git" # TODO: maybe needs to be updated to rc3? 
+	installfromnet "git" "clone" "https://github.com/PentHertz/yate_resolute.git" # TODO: maybe needs to be updated to rc3?
 	cd yate_resolute
 	./autogen.sh
 	./configure --prefix=/usr/local
@@ -17,7 +17,7 @@ function yatebts_blade2_soft_install() { # TODO: make few tests with new Nuand l
 	ldconfig
 	cd ..
 	#goodecho "[+] Feching YateBTS"
-	#installfromnet "git clone https://github.com/yatevoip/yatebts.git"
+	#installfromnet "git" "clone" "https://github.com/yatevoip/yatebts.git"
 	gitinstall "https://github.com/PentHertz/yatebts-rc3-nonoff.git" "yatebts_blade2_soft_install"
 	cd yatebts-rc3-nonoff
 	rm -R yate
@@ -41,7 +41,7 @@ function yatebts_blade2_soft_install_toreview() { # TODO: make few tests with ne
 	goodecho "[+] Feching YateBTS from Nuand"
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
 	cd /root/thirdparty
-	installfromnet "wget https://nuand.com/downloads/yate-rc-3.tar.gz"
+	installfromnet "wget" "https://nuand.com/downloads/yate-rc-3.tar.gz"
 	goodecho "[+] Installing Yate"
 	cd yate
 	./autogen.sh
@@ -83,7 +83,7 @@ function openbts_uhd_soft_install() {
 	[ -d /telecom/2G ] || mkdir -p /telecom/2G
 	cd /telecom/2G
 	goodecho "[+] Cloninig OpenBTS"
-	installfromnet "git clone -b resolute https://github.com/PentHertz/OpenBTS.git"
+	installfromnet "git" "clone" "-b" "resolute" "https://github.com/PentHertz/OpenBTS.git"
 	cd OpenBTS
 	# Best-effort on resolute: the bundled Transceiver code predates libstdc++'s
 	# unconditional forward declaration of std::complex (GCC 15 / libstdc++ 15,
@@ -128,7 +128,7 @@ function openbts_umts_soft_install_call() {
 	[ -d /telecom/3G ] || mkdir -p /telecom/3G
 	cd /telecom/3G
 	goodecho "[+] Cloninig OpenBTS UMTS"
-	installfromnet "git clone -b resolute https://github.com/PentHertz/OpenBTS-UMTS.git"
+	installfromnet "git" "clone" "-b" "resolute" "https://github.com/PentHertz/OpenBTS-UMTS.git"
 	cd OpenBTS-UMTS
 	git submodule init
 	git submodule update
@@ -155,7 +155,7 @@ function srsran4G_5GNSA_soft_install() {
 	[ -d /telecom/4G ] || mkdir -p /telecom/4G
 	cd /telecom/4G
 	goodecho "[+] Cloninig and installing srsRAN 4G"
-	installfromnet "git clone https://github.com/PentHertz/srsRAN_4G_resolute.git"
+	installfromnet "git" "clone" "https://github.com/PentHertz/srsRAN_4G_resolute.git"
 	cd srsRAN_4G_resolute
 	mkdir build
 	cd build
@@ -176,7 +176,7 @@ function ocudu_soft_install() {
 	[ -d /telecom/5G ] || mkdir -p /telecom/5G
 	cd /telecom/5G
 	goodecho "[+] Cloning and installing OCUDU"
-	installfromnet "git clone https://gitlab.com/ocudu/ocudu.git"
+	installfromnet "git" "clone" "https://gitlab.com/ocudu/ocudu.git"
 	cd ocudu
 	mkdir -p build
 	cd build
@@ -203,7 +203,7 @@ function srsran5GSA_bladerf_soft_install() {
 	[ -d /telecom/5G ] || mkdir -p /telecom/5G
 	cd /telecom/5G
 	goodecho "[+] Cloninig and installing srsran_project"
-	installfromnet "git clone https://github.com/FlUxIuS/srsRAN_Project_bladerf.git"
+	installfromnet "git" "clone" "https://github.com/FlUxIuS/srsRAN_Project_bladerf.git"
 	cd srsRAN_Project_bladerf
 	mkdir build
 	cd build
@@ -237,7 +237,11 @@ install_npm_for_arch() {
             else
                 # Download and install npm manually
                 cd /tmp
-                installfromnet "curl -L https://www.npmjs.com/install.sh | sh"
+                local npm_installer
+                npm_installer=$(mktemp)
+                installfromnet curl -fL https://www.npmjs.com/install.sh -o "$npm_installer"
+                sh "$npm_installer"
+                rm -f "$npm_installer"
             fi
         else
             criticalecho-noexit "WARNING: Cannot install npm on RISC-V64, skipping npm-dependent installations"
@@ -257,20 +261,20 @@ function Open5GS_soft_install() {
 	ldconfig
 	curl -fsSL https://pgp.mongodb.com/server-6.0.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-6.0.gpg --dearmor
 	echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-6.0.gpg] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
-	installfromnet "apt-fast -y update"
+	installfromnet "apt-fast" "-y" "update"
 	install_dependencies "mongodb-org python3-pip python3-setuptools python3-wheel ninja-build build-essential flex bison git cmake libsctp-dev libgnutls28-dev libgcrypt-dev libssl-dev libidn11-dev libmongoc-dev libbson-dev libyaml-dev libnghttp2-dev libmicrohttpd-dev libcurl4-gnutls-dev libnghttp2-dev libtins-dev libtalloc-dev meson"
 	goodecho "[+] Feching Open5GS"
 	[ -d /telecom/5G ] || mkdir -p /telecom/5G
 	cd /telecom/5G
 	goodecho "[+] Cloninig and installing Open5GS"
-	installfromnet "git clone https://github.com/open5gs/open5gs"
+	installfromnet "git" "clone" "https://github.com/open5gs/open5gs"
 	# Open5GS requires the mongo-c-driver 1.x pkg-config (libmongoc-1.0), but
 	# resolute only ships mongo-c-driver 2.x (libmongoc2-2; pkg-config "mongoc2")
 	# and no 1.x apt package, so build the last 1.x release into /usr/local.
 	if ! pkg-config --exists libmongoc-1.0; then
 		goodecho "[+] Building mongo-c-driver 1.x for Open5GS (resolute ships 2.x only)"
 		cd /telecom/5G
-		installfromnet "git clone -b 1.28.1 --depth 1 https://github.com/mongodb/mongo-c-driver.git"
+		installfromnet "git" "clone" "-b" "1.28.1" "--depth" "1" "https://github.com/mongodb/mongo-c-driver.git"
 		cd mongo-c-driver
 		cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DENABLE_TESTS=OFF -DENABLE_EXAMPLES=OFF \
 			-DENABLE_STATIC=OFF -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
@@ -289,7 +293,7 @@ function Open5GS_soft_install() {
 	curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
 	NODE_MAJOR=20
 	echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
-	installfromnet "apt-fast update"
+	installfromnet "apt-fast" "update"
 	install_dependencies "nodejs"
 	cd webui
 
@@ -323,14 +327,14 @@ function Open5GS_nohttp2_soft_install() {
 	curl -fsSL https://pgp.mongodb.com/server-6.0.asc | gpg --batch --dearmor -o /usr/share/keyrings/mongodb-server-6.0.gpg
 	echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-6.0.gpg] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-6.0.list
 	
-	installfromnet "apt-fast -y update"
+	installfromnet "apt-fast" "-y" "update"
 	install_dependencies "mongodb-org"
 	
 	goodecho "[+] Fetching Open5GS"
 	[ -d /telecom/5G ] || mkdir -p /telecom/5G
 	cd /telecom/5G
 	goodecho "[+] Cloning and installing Open5GS"
-	installfromnet "git clone -b nohttp2 https://github.com/FlUxIuS/open5gs.git"
+	installfromnet "git" "clone" "-b" "nohttp2" "https://github.com/FlUxIuS/open5gs.git"
 	cd open5gs
 	meson build --prefix=$(pwd)/install
 	ninja -C build
@@ -344,7 +348,7 @@ function Open5GS_nohttp2_soft_install() {
 	NODE_MAJOR=20
 	echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
 	
-	installfromnet "apt-fast update"
+	installfromnet "apt-fast" "update"
 	install_dependencies "nodejs"
 	cd webui
 	npm ci
@@ -363,13 +367,13 @@ function Open5GS_0caps_soft_install() {
 	ldconfig
 	#curl -fsSL https://pgp.mongodb.com/server-6.0.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-6.0.gpg --dearmor
 	#echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-6.0.gpg] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
-	#installfromnet "apt-fast -y update"
+	#installfromnet "apt-fast" "-y" "update"
 	#install_dependencies "mongodb-org python3-pip python3-setuptools python3-wheel ninja-build build-essential flex bison git cmake libsctp-dev libgnutls28-dev libgcrypt-dev libssl-dev libidn11-dev libmongoc-dev libbson-dev libyaml-dev libnghttp2-dev libmicrohttpd-dev libcurl4-gnutls-dev libnghttp2-dev libtins-dev libtalloc-dev meson"
 	goodecho "[+] Feching Open5GS"
 	[ -d /telecom/5G ] || mkdir -p /telecom/5G
 	cd /telecom/5G
 	goodecho "[+] Cloninig and installing Open5GS"
-	installfromnet "git clone -b 0caps https://github.com/FlUxIuS/open5gs.git open5gs_0caps"
+	installfromnet "git" "clone" "-b" "0caps" "https://github.com/FlUxIuS/open5gs.git" "open5gs_0caps"
 	cd open5gs_0caps
 	meson build --prefix=`pwd`/install
 	ninja -C build
@@ -380,7 +384,7 @@ function Open5GS_0caps_soft_install() {
 	#curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
 	NODE_MAJOR=20
 	#echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
-	#installfromnet "apt-fast update"
+	#installfromnet "apt-fast" "update"
 	#install_dependencies "nodejs"
 	cd webui
 	npm ci
@@ -406,7 +410,7 @@ function pysctp_soft_install() {
 	cd /telecom
 	export DISTUTILS_USE_SDK=0
 	goodecho "[+] Cloninig and installing pysctp"
-	installfromnet "git clone https://github.com/FlUxIuS/pysctp.git"
+	installfromnet "git" "clone" "https://github.com/FlUxIuS/pysctp.git"
 	cd pysctp
 	install_dependencies "libsctp-dev"
 	pip3install .
@@ -424,7 +428,7 @@ function osmobts_suite_soft_install() {
 
         goodecho "[+] Cloning and installing $repo_dir"
         cd $osmo_src
-        installfromnet "git clone $repo_url" || { echo "Failed to clone $repo_dir"; exit 1; }
+        installfromnet "git" "clone" "$repo_url" || { echo "Failed to clone $repo_dir"; exit 1; }
         cd $repo_dir
         autoreconf -fi || { echo "autoreconf failed for $repo_dir"; exit 1; }
         ./configure $configure_opts || { echo "configure failed for $repo_dir"; exit 1; }
@@ -583,7 +587,7 @@ function 5greplay_soft_install() {
     fi
     
     # Clone mmt-dpi with depth 1
-    installfromnet "git clone --depth 1 ${dpi_repo_url}"
+    installfromnet "git" "clone" "--depth" "1" "${dpi_repo_url}"
     
     if [ ! -d "mmt-dpi" ]; then
         criticalecho "[-] Failed to clone mmt-dpi repository"
@@ -619,7 +623,7 @@ function 5greplay_soft_install() {
     if [ -d "5Greplay" ]; then
         colorecho "[!] 5Greplay directory already exists. Pulling latest changes..."
         cd 5Greplay || exit
-        installfromnet "git pull"
+        installfromnet "git" "pull"
         if [ $? -ne 0 ]; then
             criticalecho-noexit "[-] Failed to update 5Greplay repository"
         fi

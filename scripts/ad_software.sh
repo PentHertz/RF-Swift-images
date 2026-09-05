@@ -125,7 +125,7 @@ function skewrun_soft_install() {
 
     # Prefer the upstream static musl release (no toolchain, tracks latest).
     if [ -n "$asset" ]; then
-        installfromnet "wget -O /usr/local/bin/skewrun https://github.com/JVBotelho/skewrun/releases/latest/download/$asset"
+        installfromnet "wget" "-O" "/usr/local/bin/skewrun" "https://github.com/JVBotelho/skewrun/releases/latest/download/$asset"
         if [ -s /usr/local/bin/skewrun ] && head -c4 /usr/local/bin/skewrun | grep -q $'\x7fELF'; then
             chmod +x /usr/local/bin/skewrun
             goodecho "[+] skewrun installed: /usr/local/bin/skewrun"

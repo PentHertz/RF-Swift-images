@@ -18,7 +18,7 @@ function tailscale_install() {
     goodecho "[+] Installing Tailscale"
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
     cd /root/thirdparty
-    installfromnet "curl -fsSL https://tailscale.com/install.sh -o /root/thirdparty/tailscale_install.sh"
+    installfromnet "curl" "-fsSL" "https://tailscale.com/install.sh" "-o" "/root/thirdparty/tailscale_install.sh"
     chmod +x /root/thirdparty/tailscale_install.sh
     APT_SYSTEMCTL_START=false /root/thirdparty/tailscale_install.sh
 }
@@ -34,7 +34,7 @@ function netbird_install() {
     
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
     cd /root/thirdparty
-    installfromnet "curl -fsSL https://pkgs.netbird.io/install.sh -o /root/thirdparty/netbird_install.sh"
+    installfromnet "curl" "-fsSL" "https://pkgs.netbird.io/install.sh" "-o" "/root/thirdparty/netbird_install.sh"
     chmod +x /root/thirdparty/netbird_install.sh
     /root/thirdparty/netbird_install.sh
 }
@@ -147,7 +147,7 @@ function kismet_soft_install_fromsource() {
 	check_and_install_lib "librtlsdr-dev librtlsdr0" "librtlsdr"
 	install_dependencies "libsqlite3-dev ubertooth build-essential git libwebsockets-dev pkg-config zlib1g-dev libnl-3-dev libnl-genl-3-dev libcap-dev libpcap-dev libnm-dev libdw-dev libsqlite3-dev libprotobuf-dev libprotobuf-c-dev protobuf-compiler protobuf-c-compiler libsensors-dev libusb-1.0-0-dev python3 python3-setuptools python3-protobuf python3-requests python3-serial python3-usb python3-dev python3-websockets libubertooth-dev libbtbb-dev libmosquitto-dev"
 	goodecho "[+] Installing Kismet"
-	installfromnet "git clone https://www.kismetwireless.net/git/kismet.git"
+	installfromnet "git" "clone" "https://www.kismetwireless.net/git/kismet.git"
 	cd kismet
 	./configure --enable-bladerf --enable-wifi-coconut --enable-btgeiger --enable-python-tools
 	make
@@ -461,8 +461,8 @@ function hetty_soft_install() {
     rm -rf hetty_install && mkdir hetty_install && cd hetty_install
 
     goodecho "[+] Downloading Hetty ${HETTY_TAG} (${HETTY_ARCH})"
-    installfromnet "curl -fL -o ${HETTY_TARBALL} ${HETTY_BASE}/${HETTY_TARBALL}"
-    installfromnet "curl -fL -o checksums.txt ${HETTY_BASE}/checksums.txt"
+    installfromnet "curl" "-fL" "-o" "${HETTY_TARBALL}" "${HETTY_BASE}/${HETTY_TARBALL}"
+    installfromnet "curl" "-fL" "-o" "checksums.txt" "${HETTY_BASE}/checksums.txt"
     if [ ! -s "${HETTY_TARBALL}" ]; then
         criticalecho-noexit "[!] Hetty download failed or empty: ${HETTY_TARBALL}"
         exit 0
@@ -583,7 +583,7 @@ function burpsuite_community_install() { # TODO: only working well on x86_64 wit
             local installer_file="/tmp/burpsuite_community_linux_v${version}.sh"
             
             colorecho "[+] Downloading Burp Suite Community Edition installer..."
-            installfromnet "curl -L -o ${installer_file} ${download_url}"
+            installfromnet "curl" "-L" "-o" "${installer_file}" "${download_url}"
             
             if [ ! -f "$installer_file" ]; then
                 criticalecho "[-] Failed to download Burp Suite installer"
@@ -682,7 +682,7 @@ function install_burpsuite_jar() {
     
     # Download JAR file
     colorecho "[+] Downloading Burp Suite JAR..."
-    installfromnet "curl -L -o ${jar_file} ${jar_url}"
+    installfromnet "curl" "-L" "-o" "${jar_file}" "${jar_url}"
     
     if [ ! -f "$jar_file" ]; then
         criticalecho "[-] Failed to download Burp Suite JAR"
@@ -835,7 +835,7 @@ function tailcat_soft_install() {
     # Keep the container reproducible and aligned with RF-Swift-nix. Avoid
     # @latest: Tailcat is moving quickly and may raise its minimum Go version.
     local tailcat_rev="c04c5afee401df40e620db8ae108e957ae07bcd9"
-    installfromnet "env GOBIN=/usr/local/bin go install github.com/tailscale/tailcat/cmd/tailcat@${tailcat_rev}"
+    installfromnet "env" "GOBIN=/usr/local/bin" "go" "install" "github.com/tailscale/tailcat/cmd/tailcat@${tailcat_rev}"
 
     if ! command -v tailcat >/dev/null 2>&1; then
         record_build_failure "go" "tailcat" "build failed at ${tailcat_rev}"

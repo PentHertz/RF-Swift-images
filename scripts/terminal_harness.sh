@@ -2,12 +2,12 @@
 
 function fzf_soft_install() {
 	goodecho "[+] Installing fzf"
-	installfromnet "apt-fast -y install fzf"
+	installfromnet "apt-fast" "-y" "install" "fzf"
 }
 
 function zsh_tools_install() {
 	goodecho "[+] Installing zsh"
-	installfromnet "apt-fast -y install zsh"
+	installfromnet "apt-fast" "-y" "install" "zsh"
 	chsh -s /bin/zsh 
 	goodecho "[+] Installing oh-my-zsh"
 	sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"

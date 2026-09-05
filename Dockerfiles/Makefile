@@ -1,5 +1,8 @@
 # Set default architecture to all if ARCH is not provided
 ARCH ?= amd64
+SOURCE_REVISION ?= $(shell git rev-parse HEAD 2>/dev/null || echo unknown)
+SOURCE_DIRTY := $(shell git status --porcelain --untracked-files=no 2>/dev/null)
+REVISION_LABEL = $(SOURCE_REVISION)$(if $(SOURCE_DIRTY),-dirty,)
 CACHE_REPO ?= penthertz/rfswiftdev_resolute
 REGISTRY_IMAGE ?= penthertz/rfswiftdev_resolute
 STORAGE_TYPE ?= local  # Set to "registry" to use registry-based caching
@@ -21,7 +24,7 @@ endif
 
 # Function to build and push using registry cache
 define build_and_push_registry
-    @docker buildx build --platform $(PLATFORM) \
+    @docker buildx build --label org.opencontainers.image.revision=$(REVISION_LABEL) --platform $(PLATFORM) \
         --cache-from=type=registry,ref=$(CACHE_REPO):cache_$(1)_$(ARCH) \
         $(2) \
         --push \
@@ -32,7 +35,7 @@ endef
 
 
 define build_and_push_registry_torestore
-    @docker buildx build --platform $(PLATFORM) \
+    @docker buildx build --label org.opencontainers.image.revision=$(REVISION_LABEL) --platform $(PLATFORM) \
         --cache-from=type=registry,ref=$(CACHE_REPO):cache_$(1)_$(ARCH) \
         --cache-to=type=registry,ref=$(CACHE_REPO):cache_$(1)_$(ARCH),mode=min \
         $(2) \
@@ -44,7 +47,7 @@ endef
 
 # Function to build and push using local cache
 define build_and_push_local
-    @docker buildx build --platform $(PLATFORM) \
+    @docker buildx build --label org.opencontainers.image.revision=$(REVISION_LABEL) --platform $(PLATFORM) \
         $(2) \
         --load \
         -t $(REGISTRY_IMAGE):$(1)_$(ARCH) \
@@ -55,7 +58,7 @@ endef
 # Function to build multi-stage with registry cache (for sdr_full stages)
 define build_stage_registry_torestore
     @echo "Building stage: $(1) for $(ARCH)"
-    @docker buildx build --platform $(PLATFORM) \
+    @docker buildx build --label org.opencontainers.image.revision=$(REVISION_LABEL) --platform $(PLATFORM) \
         --target $(1) \
         --cache-from=type=registry,ref=$(CACHE_REPO):cache_sdrfull_$(1)_$(ARCH) \
         --cache-to=type=registry,ref=$(CACHE_REPO):cache_sdrfull_$(1)_$(ARCH),mode=min \
@@ -68,7 +71,7 @@ endef
 
 define build_stage_registry
     @echo "Building stage: $(1) for $(ARCH)"
-    @docker buildx build --platform $(PLATFORM) \
+    @docker buildx build --label org.opencontainers.image.revision=$(REVISION_LABEL) --platform $(PLATFORM) \
         --target $(1) \
         --cache-from=type=registry,ref=$(CACHE_REPO):cache_sdrfull_$(1)_$(ARCH) \
         $(2) \
@@ -81,7 +84,7 @@ endef
 # Function to build multi-stage with local cache (for sdr_full stages)
 define build_stage_local
     @echo "Building stage: $(1) for $(ARCH)"
-    @docker buildx build --platform $(PLATFORM) \
+    @docker buildx build --label org.opencontainers.image.revision=$(REVISION_LABEL) --platform $(PLATFORM) \
         --target $(1) \
         $(2) \
         --load \
@@ -165,7 +168,7 @@ sdrfull_final:
 sdrfull_torestore:
 ifeq ($(STORAGE_TYPE),registry)
 	@echo "Building sdr_full with registry caching - using all available cached stages"
-	@docker buildx build --platform $(PLATFORM) \
+	@docker buildx build --label org.opencontainers.image.revision=$(REVISION_LABEL) --platform $(PLATFORM) \
 		--cache-from=type=registry,ref=$(CACHE_REPO):cache_sdrfull_stage-begin_$(ARCH) \
 		--cache-from=type=registry,ref=$(CACHE_REPO):cache_sdrfull_stage-extraoot1_$(ARCH) \
 		--cache-from=type=registry,ref=$(CACHE_REPO):cache_sdrfull_stage-extraoot2_$(ARCH) \
@@ -185,7 +188,7 @@ endif
 sdrfull:
 ifeq ($(STORAGE_TYPE),registry)
 	@echo "Building sdr_full with registry caching - using all available cached stages"
-	@docker buildx build --platform $(PLATFORM) \
+	@docker buildx build --label org.opencontainers.image.revision=$(REVISION_LABEL) --platform $(PLATFORM) \
 		--cache-from=type=registry,ref=$(CACHE_REPO):cache_sdrfull_stage-begin_$(ARCH) \
 		--cache-from=type=registry,ref=$(CACHE_REPO):cache_sdrfull_stage-extraoot1_$(ARCH) \
 		--cache-from=type=registry,ref=$(CACHE_REPO):cache_sdrfull_stage-extraoot2_$(ARCH) \
@@ -335,4 +338,3 @@ help:
 	rfid network wifi bluetooth reversing automotive hardware \
 	telecom_utils telecom_2Gto3G telecom_4Gto5G telecom_4G_5GNSA telecom_5G telecom_5G_bladerf \
 	deeptempest build help
-

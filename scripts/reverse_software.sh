@@ -4,8 +4,8 @@ function kataistruct_soft_install() {
 	goodecho "[+] Installing Katai Struct"
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
 	cd /root/thirdparty
-	installfromnet "curl -LO https://github.com/kaitai-io/kaitai_struct_compiler/releases/download/0.10/kaitai-struct-compiler_0.10_all.deb"
-	installfromnet "apt-fast install -y ./kaitai-struct-compiler_0.10_all.deb"
+	installfromnet "curl" "-LO" "https://github.com/kaitai-io/kaitai_struct_compiler/releases/download/0.10/kaitai-struct-compiler_0.10_all.deb"
+	installfromnet "apt-fast" "install" "-y" "./kaitai-struct-compiler_0.10_all.deb"
 }
 
 function unicorn_soft_install() {
@@ -14,7 +14,7 @@ function unicorn_soft_install() {
 	cd /root/thirdparty
 	ARCH=$(uname -m)
     if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then # TODO: fix arm64 install
-		installfromnet "git clone https://github.com/unicorn-engine/unicorn.git"
+		installfromnet "git" "clone" "https://github.com/unicorn-engine/unicorn.git"
 		cd unicorn
 		mkdir build; cd build
 		cmake .. -DCMAKE_BUILD_TYPE=Release
@@ -33,7 +33,7 @@ function keystone_soft_install() {
 	cd /root/thirdparty
 	ARCH=$(uname -m)
     if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then # TODO: fix arm64 install
-		installfromnet "git clone https://github.com/keystone-engine/keystone.git"
+		installfromnet "git" "clone" "https://github.com/keystone-engine/keystone.git"
 		cd keystone
 		mkdir build; cd build
 		# Keystone's CMakeLists declares cmake_minimum_required < 3.5, which CMake 4.x
@@ -63,7 +63,7 @@ function radare2_soft_install() {
 	goodecho "[+] Installing Radare"
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
 	cd /root/thirdparty
-	installfromnet "git clone https://github.com/radareorg/radare2"
+	installfromnet "git" "clone" "https://github.com/radareorg/radare2"
 	cd radare2 ; sys/install.sh
 }
 
@@ -144,7 +144,7 @@ function cutter_soft_install() { # TODO: fix installation
 	goodecho "[+] Cloning Cutter"
 	[ -d /reverse ] || mkdir -p /reverse
 	cd /reverse
-	installfromnet "git clone --recurse-submodules https://github.com/rizinorg/cutter"
+	installfromnet "git" "clone" "--recurse-submodules" "https://github.com/rizinorg/cutter"
 	cd cutter
 	mkdir build && cd build
 	cmake ..
@@ -163,7 +163,7 @@ function ghidra_soft_install() {
     ghidra_date="20260817"
 	prog="ghidra_${ghidra_version}_PUBLIC_${ghidra_date}"
 
-	installfromnet "wget https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_${ghidra_version}_build/${prog}.zip"
+	installfromnet "wget" "https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_${ghidra_version}_build/${prog}.zip"
 	unzip "$prog"
 	cd "ghidra_${ghidra_version}_PUBLIC"
 	ln -s $(pwd)/ghidraRun /usr/sbin/ghidraRun
@@ -223,7 +223,7 @@ function imhex_soft_install() {
         # exist on resolute (mbedtls 3.6.5 is shipped as libmbedtls21 +
         # libmbedcrypto16). ImHex only actually links libmbedcrypto.so.16, which
         # libmbedcrypto16 provides, so override the stale declared dependency.
-        installfromnet "wget https://github.com/WerWolv/ImHex/releases/download/v$IMH_VERSION/imhex-$IMH_VERSION-Ubuntu-25.04-x86_64.deb"
+        installfromnet "wget" "https://github.com/WerWolv/ImHex/releases/download/v$IMH_VERSION/imhex-$IMH_VERSION-Ubuntu-25.04-x86_64.deb"
         dpkg -i --ignore-depends=libmbedtls14 imhex-$IMH_VERSION-Ubuntu-25.04-x86_64.deb
         
     elif [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
@@ -231,7 +231,7 @@ function imhex_soft_install() {
         install_dependencies "libmbedtls21 libmbedx509-7 libglfw3-dev libfuse2"
         
         # Download the AppImage
-        installfromnet "wget https://github.com/WerWolv/ImHex/releases/download/v$IMH_VERSION/imhex-$IMH_VERSION-arm64.AppImage"
+        installfromnet "wget" "https://github.com/WerWolv/ImHex/releases/download/v$IMH_VERSION/imhex-$IMH_VERSION-arm64.AppImage"
         chmod +x imhex-$IMH_VERSION-arm64.AppImage
         
         # Try extraction with better error handling
@@ -278,7 +278,7 @@ function imhex_soft_install_fromsource() {
 	chmod +x dist/get_deps_debian.sh
 	#sed -i -e 's/g++-14/g++-12/g' -e 's/gcc-14/gcc-12/g' dist/get_deps_debian.sh
 	goodecho "[+] Installing ImHex dependencies"
-	installfromnet "sh -c ./dist/get_deps_debian.sh"
+	installfromnet "sh" "-c" "./dist/get_deps_debian.sh"
 	mkdir -p build
 	cd build
 	CC=gcc-14 CXX=g++-14                          \

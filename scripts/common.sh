@@ -86,14 +86,18 @@ function print_build_report() {
 }
 
 function installfromnet() {
-    n=0
-    until [ "$n" -ge 5 ]
-    do
-        colorecho "[Internet][Download] Try number: $n"
-        $* && break
-        n=$((n+1))
-        sleep 15
+    local attempt status=1
+    if [ "$#" -eq 0 ]; then return 2; fi
+    for attempt in 1 2 3 4 5; do
+        colorecho "[Internet][Download] Try number: $attempt"
+        if "$@"; then
+            return 0
+        else
+            status=$?
+        fi
+        if [ "$attempt" -lt 5 ]; then sleep 15; fi
     done
+    return "$status"
 }
 
 # Best-effort apt install: try the whole list, and if that fails fall back to
@@ -173,7 +177,7 @@ function gitinstall() {
     if [ -d "$repo_name" ]; then
         colorecho "Repository '$repo_name' already exists. Pulling latest changes..."
         cd "$repo_name" || exit
-        installfromnet "git pull"
+        installfromnet "git" "pull"
         if [ $? -eq 0 ]; then
             goodecho "Repository '$repo_name' updated successfully."
         else
@@ -183,13 +187,12 @@ function gitinstall() {
     else
         # Clone the repository with the specified branch if provided
         if [ -n "$branch" ]; then
-            installfromnet "git clone -b $branch $repo_url"
+            installfromnet "git" "clone" "-b" "$branch" "$repo_url"
         else
-            installfromnet "git clone $repo_url"
+            installfromnet "git" "clone" "$repo_url"
         fi
 
-        # installfromnet swallows the exit code, so judge success by whether the
-        # checkout actually exists rather than by $?.
+        # Also verify that the checkout exists after the retry helper succeeds.
         if [ -d "$repo_name" ]; then
             # Ensure the directory /var/lib/db/ exists, create if not
             if [ ! -d "/var/lib/db/" ]; then
@@ -240,11 +243,11 @@ function cmake_clone_and_build() {
     else
         echo "Repository exists. Ensuring it's up to date..."
         cd "$repo_name" || exit
-        installfromnet "git fetch"
+        installfromnet "git" "fetch"
         local LOCAL=$(git rev-parse @)
         local REMOTE=$(git rev-parse @{u})
         if [ "$LOCAL" != "$REMOTE" ]; then
-            installfromnet "git pull"
+            installfromnet "git" "pull"
             should_build=true
         else
             echo "No updates needed."
@@ -283,8 +286,8 @@ function check_and_install_lib() {
         colorecho "[!] $lib_name is not installed. Attempting to install..."
         
         # Attempt to install the library using apt-get
-        installfromnet "apt-fast update"
-        installfromnet "apt-fast -y install $lib_name"
+        installfromnet "apt-fast" "update"
+        installfromnet "apt-fast" "-y" "install" "$lib_name"
 
         # Verify the installation
         if pkg-config --exists "$pkg_config_name"; then
@@ -419,8 +422,8 @@ function rfswift_update() {
 
     if [ "$do_apt" = true ]; then
         goodecho "[+] Refreshing apt packages (upgrade only, no removals)"
-        installfromnet "apt-fast update"
-        DEBIAN_FRONTEND=noninteractive installfromnet "apt-fast upgrade -y" \
+        installfromnet "apt-fast" "update"
+        DEBIAN_FRONTEND=noninteractive installfromnet "apt-fast" "upgrade" "-y" \
             || criticalecho-noexit "[!] apt upgrade reported errors; continuing"
     fi
 
@@ -481,7 +484,7 @@ function rfswift_update() {
             reason="install recipe changed"
         elif [ "$latest" = true ] && [ -n "${fnpath[$fn]:-}" ]; then
             local p="${fnpath[$fn]}"
-            ( cd "$p" && installfromnet "git fetch --quiet" ) \
+            ( cd "$p" && installfromnet "git" "fetch" "--quiet" ) \
                 || criticalecho-noexit "[!] $fn: git fetch failed"
             local localrev remoterev
             localrev=$(git -C "$p" rev-parse @ 2>/dev/null || true)

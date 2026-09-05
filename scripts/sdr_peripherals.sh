@@ -33,7 +33,7 @@ python3-ruamel.yaml"
 	goodecho "[+] Cloning and compiling UHD"
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
 	cd /root/thirdparty
-	installfromnet "git clone https://github.com/EttusResearch/uhd.git"
+	installfromnet "git" "clone" "https://github.com/EttusResearch/uhd.git"
 	cd uhd/host
 	mkdir build
 	cd build
@@ -69,7 +69,7 @@ function antsdr_uhd_devices_install_fromsources() { # Is replacing original one 
 	install_dependencies "python3-ruamel.yaml"
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
 	cd /root/thirdparty
-	installfromnet "git clone https://github.com/MicroPhase/antsdr_uhd.git"
+	installfromnet "git" "clone" "https://github.com/MicroPhase/antsdr_uhd.git"
 	cd antsdr_uhd
 	cd host/
 	mkdir build
@@ -97,15 +97,15 @@ function antsdr_uhd_devices_install() {
     DEB_URL="https://github.com/PentHertz/antsdr_uhd/releases/download/v${ANTSDR_VERSION}/${DEB_NAME}"
     [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
     cd /root/thirdparty
-    installfromnet "wget ${DEB_URL}"
+    installfromnet "wget" "${DEB_URL}"
     dpkg -i "${DEB_NAME}" || apt-get install -f -y
     rm -f "${DEB_NAME}"
 }
 
 function nuand_devices_install() {
 	goodecho "[+] Installing Nuand's libs and tools from package manager"
-	installfromnet "add-apt-repository ppa:nuandllc/bladerf"
-	installfromnet "apt-fast update"
+	installfromnet "add-apt-repository" "ppa:nuandllc/bladerf"
+	installfromnet "apt-fast" "update"
 	install_dependencies "bladerf libbladerf-dev"
 	goodecho "[+] Copying rules sets"
 	cp /root/rules/88-nuand-bladerf1.rules.in /etc/udev/rules.d/
@@ -126,7 +126,7 @@ function nuand_devices_fromsource_install() {
     goodecho "[+] Cloning, building and installing Nuand's repository"
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
     cd /root/thirdparty
-	installfromnet "git clone https://github.com/Nuand/bladeRF.git ./bladeRF"
+	installfromnet "git" "clone" "https://github.com/Nuand/bladeRF.git" "./bladeRF"
 	cd ./bladeRF/host
 	mkdir build
 	cd build
@@ -164,7 +164,7 @@ function install_soapyPlutoSDR_modules() {
 	install_dependencies "libad9361-dev libiio-utils libiio-dev"
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
 	cd /root/thirdparty
-	installfromnet "git clone https://github.com/pothosware/SoapyPlutoSDR"
+	installfromnet "git" "clone" "https://github.com/pothosware/SoapyPlutoSDR"
 	cd SoapyPlutoSDR
 	mkdir build
 	cd build
@@ -190,7 +190,7 @@ function rtlsdrv4_devices_install() {
 	install_dependencies "libusb-1.0-0-dev git cmake pkg-config libpthread-stubs0-dev"
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
 	cd /root/thirdparty
-	installfromnet "git clone https://github.com/rtlsdrblog/rtl-sdr-blog"
+	installfromnet "git" "clone" "https://github.com/rtlsdrblog/rtl-sdr-blog"
 	cd rtl-sdr-blog
 	mkdir build
 	cd build
@@ -212,7 +212,7 @@ function osmofl2k_devices_install() {
 	install_dependencies "libusb-1.0-0-dev git cmake pkg-config"
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
 	cd /root/thirdparty
-	installfromnet "git clone https://gitea.osmocom.org/sdr/osmo-fl2k"
+	installfromnet "git" "clone" "https://gitea.osmocom.org/sdr/osmo-fl2k"
 	mkdir osmo-fl2k/build
 	cd osmo-fl2k/build
 	cmake ../ -DINSTALL_UDEV_RULES=ON
@@ -224,7 +224,7 @@ function osmofl2k_devices_install() {
 	[ -d /rftools/sdr ] || mkdir -p /rftools/sdr
 	cd /rftools/sdr
 	goodecho "[+] Cloning a few examples"
-	installfromnet "git clone https://github.com/steve-m/fl2k-examples.git"
+	installfromnet "git" "clone" "https://github.com/steve-m/fl2k-examples.git"
 }
 
 function xtrx_devices_install() {
@@ -253,8 +253,8 @@ function libresdr_b2x0_devices_install() {
     mkdir -p libresdr
     cd libresdr
 	goodecho "[+] Downloading LibreSDR B2x0 FPGA firmwares"
-	installfromnet "wget https://github.com/FlUxIuS/libresdr-b2xx/releases/download/2024.1/libresdr_b210.bin"
-	installfromnet "wget https://github.com/FlUxIuS/libresdr-b2xx/releases/download/2024.1/libresdr_b220.bin"
+	installfromnet "wget" "https://github.com/FlUxIuS/libresdr-b2xx/releases/download/2024.1/libresdr_b210.bin"
+	installfromnet "wget" "https://github.com/FlUxIuS/libresdr-b2xx/releases/download/2024.1/libresdr_b220.bin"
 }
 
 function litexm2sdr_devices_install() {
