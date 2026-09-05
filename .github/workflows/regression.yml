@@ -12,5 +12,4 @@ jobs:
       - run: |
           bash tests/retry.sh
           bash tests/changed-files.sh
-          bash tests/promotion.sh
           shellcheck --severity=error .github/scripts/*.sh tests/*.sh scripts/*.sh run/*.sh

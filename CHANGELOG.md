@@ -10,16 +10,13 @@
   a curl argument.
 - Image change detection covers every commit in a push, with a full-build
   fallback for unavailable base commits and workflow changes.
-- Release promotion resolves immutable digests, checks each image's source
-  revision and architecture against the checked-out release commit, and validates
-  every image before publishing any tags for that architecture. Full builds now
-  carry source-revision labels. Older/unlabelled or stale builds are rejected;
-  run a forced full build of the tagged commit before rerunning promotion.
-- Added regression tests for retries, multi-commit selection and release guards;
+- Full builds now carry source-revision labels.
+- Added regression tests for retries and multi-commit selection;
   added the missing keep-running script interpreter declaration.
 
 ### Notes
 
-- Release preflight is per architecture; publishing across registries/architectures
-  is not atomic. Base-image and upstream tool version pinning remain separate
-  reproducibility work. No container images were published by this patch.
+- Release workflows retain the existing per-image retagging behavior, using the
+  available development tags even if some images were not rebuilt for the release.
+  Base-image and upstream tool version pinning remain separate reproducibility
+  work. No container images were published by this patch.
