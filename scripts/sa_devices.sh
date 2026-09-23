@@ -149,7 +149,7 @@ function signalhound_spike_sa_device() {
         colorecho "[+] Downloading Spike bin from SignalHound"
         [ -d /rftools/analysers ] || mkdir -p /rftools/analysers
         cd /rftools/analysers
-        filename="Spike(Ubuntu22.04x64)_4_0_16"
+        filename="Spike(Ubuntu_x64)_4_0_17"
         installfromnet "wget" "https://signalhound.com/sigdownloads/Spike/$filename.zip"
         unzip ${filename}.zip
         rm ${filename}.zip
@@ -191,7 +191,7 @@ function signalhound_vsg60_sa_device() {
         colorecho "[+] Downloading VSG software bin from SignalHound"
         [ -d /rftools/generators ] || mkdir -p /rftools/generators
         cd /rftools/generators
-        filename="VSG(Ubuntu22.04x64)_2_0_3"
+        filename="VSG(Ubuntu_x64)_2_0_4"
         installfromnet "wget" "https://signalhound.com/sigdownloads/VSG60/$filename.zip"
         unzip "$filename.zip"
         rm "$filename.zip"
