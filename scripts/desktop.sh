@@ -4,10 +4,16 @@ function install_desktop_packages() {
     goodecho "[+] Installing desktop/VNC packages for remote GUI access"
     install_dependencies "tigervnc-standalone-server tigervnc-tools novnc websockify socat dbus-x11 lxqt-core openbox breeze-icon-theme fonts-powerline terminator"
 
-    # VNC config
-    mkdir -p /root/.vnc
-    cp /root/config/xstartup.conf /root/.vnc/xstartup
-    chmod u+x /root/.vnc/xstartup
+    # VNC config. TigerVNC >= 1.14 keeps its files in ~/.config/tigervnc and
+    # moves a real ~/.vnc directory there on first start; that move fails on a
+    # directory from an image layer (overlayfs) and vncserver exits. Ship the
+    # layout the migration would produce: the directory plus a ~/.vnc symlink,
+    # which older TigerVNC versions also read through.
+    mkdir -p /root/.config/tigervnc
+    cp /root/config/xstartup.conf /root/.config/tigervnc/xstartup
+    chmod u+x /root/.config/tigervnc/xstartup
+    rm -rf /root/.vnc
+    ln -s .config/tigervnc /root/.vnc
 
     # Install wallpaper (replace /usr/share/rfswift/wallpaper.png with your own)
     mkdir -p /usr/share/rfswift

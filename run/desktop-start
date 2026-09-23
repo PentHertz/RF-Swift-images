@@ -33,6 +33,31 @@ find_available_display() {
     done
 }
 
+# TigerVNC >= 1.14 moves a real ~/.vnc directory to ~/.config/tigervnc on start,
+# which fails on a directory from an image layer (overlayfs) and stops vncserver.
+# Do the move with a copy for containers made from older images, and leave the
+# ~/.vnc symlink that TigerVNC expects afterwards.
+ensure_vnc_dir() {
+    local legacy=/root/.vnc
+    local config=/root/.config/tigervnc
+
+    [ -L "$legacy" ] && return
+    mkdir -p "$config"
+    if [ -d "$legacy" ]; then
+        cp -a "$legacy/." "$config/" && rm -rf "$legacy" || return
+    fi
+    ln -s .config/tigervnc "$legacy"
+}
+
+# Start vncserver, stopping here when it fails: websockify or socat would
+# otherwise forward to a port nobody listens on.
+start_vncserver() {
+    if ! vncserver "$@"; then
+        echo "[rfswift-desktop] ERROR: vncserver failed to start" >&2
+        exit 1
+    fi
+}
+
 mode=${RFSWIFT_DESKTOP_PROTO:-"http"}
 host=${RFSWIFT_DESKTOP_HOST:-"127.0.0.1"}
 port=${RFSWIFT_DESKTOP_PORT:-"6080"}
@@ -45,9 +70,10 @@ unset XDG_SESSION_TYPE
 unset WAYLAND_DISPLAY
 # Keep DISPLAY if set by host X11 forwarding; VNC will use a different display ID
 
+ensure_vnc_dir
+
 # Configure VNC security based on password
 if [ -n "$password" ]; then
-    mkdir -p /root/.vnc
     echo "$password" | vncpasswd -f > /root/.vnc/passwd
     chmod 600 /root/.vnc/passwd
     security_type="VncAuth"
@@ -92,18 +118,18 @@ echo "[rfswift-desktop] Starting desktop ($mode) on display :$display_id"
 case "$mode" in
     vnc)
         if [[ "$host" == "127.0.0.1" || "$host" == "localhost" ]]; then
-            vncserver -localhost yes -rfbport "$port" -geometry 1920x1080 -SecurityTypes "$vnc_security" $vnc_ssl_args ":$display_id"
+            start_vncserver -localhost yes -rfbport "$port" -geometry 1920x1080 -SecurityTypes "$vnc_security" $vnc_ssl_args ":$display_id"
         elif [[ "$host" == "0.0.0.0" ]]; then
-            vncserver -localhost no -rfbport "$port" -geometry 1920x1080 -SecurityTypes "$vnc_security" $vnc_ssl_args ":$display_id"
+            start_vncserver -localhost no -rfbport "$port" -geometry 1920x1080 -SecurityTypes "$vnc_security" $vnc_ssl_args ":$display_id"
         else
             vnc_port=$(comm -23 <(seq 49152 65535 | sort) <(ss -Htan | awk '{print $4}' | cut -d':' -f2 | sort -u) | shuf | head -n 1)
-            vncserver -localhost yes -rfbport "$vnc_port" -geometry 1920x1080 -SecurityTypes "$vnc_security" $vnc_ssl_args ":$display_id"
+            start_vncserver -localhost yes -rfbport "$vnc_port" -geometry 1920x1080 -SecurityTypes "$vnc_security" $vnc_ssl_args ":$display_id"
             socat TCP4-LISTEN:"$port",fork,bind="$host" TCP4:127.0.0.1:"$vnc_port" &
         fi
         ;;
     http)
         random_port=$(python3 -c 'import socket; s=socket.socket(); s.bind(("", 0)); print(s.getsockname()[1]); s.close()')
-        vncserver -localhost yes -rfbport "$random_port" -geometry 1920x1080 -SecurityTypes "$security_type" ":$display_id"
+        start_vncserver -localhost yes -rfbport "$random_port" -geometry 1920x1080 -SecurityTypes "$security_type" ":$display_id"
         if [ -n "$ssl" ]; then
             websockify -D --cert "$ssl_cert" --key "$ssl_key" --web /usr/share/novnc/ "$host:$port" "127.0.0.1:$random_port"
             echo "[rfswift-desktop] Desktop accessible at https://$host:$port"
