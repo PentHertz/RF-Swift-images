@@ -42,7 +42,10 @@ function objection_soft_install() {
 
 function androguard_soft_install() {
     goodecho "[+] Installing androguard"
-    pip3install "git+https://github.com/androguard/androguard"
+    # androguard 5.x pulls dexparser-ag from git, whose Rust bindings pin
+    # PyO3 0.23 (max Python 3.13). Resolute ships 3.14, so build them against
+    # the stable ABI instead of failing PyO3's interpreter version check.
+    PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1 pip3install "git+https://github.com/androguard/androguard"
 }
 
 function drozer_soft_install() {

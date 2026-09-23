@@ -390,7 +390,12 @@ function unblob_soft_install() {
     cd /reverse
     gitinstall "https://github.com/onekey-sec/unblob.git" "unblob_soft_install"
     cd unblob
-    pipx install .
+    # unblob's rust-toolchain.toml pins an exact Rust release, which makes the
+    # rustup proxy auto-install a second toolchain in the middle of the pip
+    # build: image bloat, and flaky (a partial install fails the next attempt
+    # with "detected conflict: bin/cargo-clippy"). Its MSRV is well below
+    # stable, so build with the stable toolchain from corebuild's rust_tools.
+    RUSTUP_TOOLCHAIN=stable pipx install .
 }
 
 function angr_soft_install() {
