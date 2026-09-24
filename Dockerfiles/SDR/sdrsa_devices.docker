@@ -6,8 +6,13 @@
 ARG BASE_IMAGE=corebuild
 FROM ${BASE_IMAGE}
 
-ARG UHD_BASE=uhd # Use antsdr_uhd with ANTSDR
+ARG UHD_BASE=uhd_latest # latest Ettus release from source; uhd for Ubuntu's package, antsdr_uhd with ANTSDR
 ARG RTLSDR_BASE=rtlsdr # rtlsdrv4 for v4 version driver
+
+# Every libuhd in the image (the UHD_BASE one, and Ubuntu's that gnuradio/gqrx/
+# SoapyUHD pull in later) loads FPGA/firmware images from here; libuhd skips
+# this path when it doesn't exist.
+ENV UHD_IMAGES_DIR=/usr/local/share/uhd/images
 
 LABEL "org.container.project"="rfswift"
 LABEL "org.container.author"="Sébastien Dudek"

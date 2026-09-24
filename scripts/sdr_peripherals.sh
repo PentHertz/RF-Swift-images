@@ -16,14 +16,69 @@ function uhd_devices_install() {
 	uhd_images_install
 }
 
+function uhd_latest_devices_install() {
+	# Latest Ettus UHD release, built from source into /usr/local (Ubuntu's
+	# libuhd lags upstream). apt consumers such as gnuradio, gqrx and SoapyUHD
+	# still pull Ubuntu's libuhd in later and stay linked against it; the
+	# Dockerfile's UHD_IMAGES_DIR makes every libuhd share this build's images.
+	# Falls back to the packaged UHD if the release can't be resolved or built.
+	goodecho "[+] Installing the latest UHD release from source"
+	local tag
+	tag=$(curl -fsSL https://api.github.com/repos/EttusResearch/uhd/releases/latest 2>/dev/null \
+		| sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p' | head -n1)
+	# The API is rate-limited for anonymous callers: fall back to the highest release tag
+	[ -n "$tag" ] || tag=$(git ls-remote --tags --refs https://github.com/EttusResearch/uhd.git 'v*' 2>/dev/null \
+		| awk -F/ '{print $3}' | grep -E '^v[0-9]+(\.[0-9]+)+$' | sort -V | tail -n1)
+	if [ -z "$tag" ]; then
+		record_build_failure "download" "UHD (latest)" "could not resolve the latest release; installed the packaged UHD instead"
+		uhd_devices_install
+		return
+	fi
+	goodecho "[+] Latest UHD release: ${tag}"
+	install_dependencies "build-essential cmake git pkg-config libusb-1.0-0-dev libncurses-dev xz-utils"
+	# Only the Boost libraries UHD links (libboost-all-dev drags in OpenMPI & co)
+	install_dependencies "libboost-dev libboost-filesystem-dev libboost-program-options-dev libboost-serialization-dev \
+		libboost-thread-dev libboost-chrono-dev libboost-date-time-dev"
+	# UHD >= 4.11 talks to MPM devices (N3xx/E3xx/X4xx) over gRPC
+	install_dependencies "libprotobuf-dev protobuf-compiler libgrpc++-dev protobuf-compiler-grpc"
+	install_dependencies "python3-dev python3-mako python3-numpy python3-requests python3-ruamel.yaml python3-setuptools"
+	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty
+	cd /root/thirdparty
+	rm -rf uhd
+	# - UHD takes its version from the branch name, and a detached tag checkout
+	#   reports "4.11.0.HEAD": name the branch like Ettus' release branches (UHD-*).
+	# - UHD installs its Python API with the upstream site-packages layout, which
+	#   Ubuntu's python3 doesn't search: use the /usr/local dist-packages dir.
+	# - B310 (B300 component) stays off: it needs NI's nib310rio-dev header.
+	local pydir
+	pydir=$(python3 -c 'import sys; print("lib/python3.%d/dist-packages" % sys.version_info[1])')
+	if ! { installfromnet git clone --depth 1 --branch "$tag" https://github.com/EttusResearch/uhd.git \
+		&& git -C uhd checkout -q -b "UHD-${tag#v}" \
+		&& cmake -S uhd/host -B uhd/host/build -DCMAKE_BUILD_TYPE=Release \
+			-DENABLE_TESTS=OFF -DENABLE_MANUAL=OFF -DENABLE_DOXYGEN=OFF -DENABLE_DPDK=OFF \
+			-DUHD_PYTHON_DIR="$pydir" \
+		&& cmake --build uhd/host/build -j"$(nproc)" \
+		&& cmake --install uhd/host/build; }; then
+		record_build_failure "build" "UHD ${tag}" "source build failed; installed the packaged UHD instead"
+		uhd_devices_install
+		return
+	fi
+	ldconfig
+	goodecho "[+] Copying rules sets"
+	cp /root/rules/uhd-usrp.rules /etc/udev/rules.d/
+	goodecho "[+] Downloading Hardware Driver firmware/FPGA"
+	uhd_images_install "${tag#v}"
+}
+
 function uhd_images_install() {
+	# Usage: uhd_images_install [uhd_version]   (default: the packaged libuhd-dev)
 	# uhd_images_downloader fetches from files.ettus.com, which sits behind a
 	# Cloudflare bot challenge that CI runners cannot pass. Ettus attaches the
 	# same image set to each GitHub release (identical targets and build hashes
 	# as the downloader's default manifest, inventory.json included), so install
 	# that and keep the downloader only as a fallback.
-	local uhd_ver images_dir tmp name base
-	uhd_ver=$(dpkg-query -W -f='${Version}' libuhd-dev 2>/dev/null | sed -E 's/^[0-9]+://; s/[-+~].*$//')
+	local uhd_ver="$1" images_dir tmp name base
+	[ -n "$uhd_ver" ] || uhd_ver=$(dpkg-query -W -f='${Version}' libuhd-dev 2>/dev/null | sed -E 's/^[0-9]+://; s/[-+~].*$//')
 	# The downloader's own install location, i.e. where libuhd looks (no network)
 	images_dir=$(uhd_images_downloader --dry-run 2>&1 | sed -n 's/^\[INFO\] Images destination: //p')
 	if [ -n "$uhd_ver" ] && [ -n "$images_dir" ]; then

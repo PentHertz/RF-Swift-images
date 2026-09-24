@@ -8,8 +8,12 @@ CYAN='\033[0;36m'
 RESET='\033[0m'
 
 # File paths
-ORIGINAL_BIN="/usr/share/uhd/images/usrp_b210_fpga.bin"
-BACKUP_BIN="/usr/share/uhd/images/usrp_b210_fpga_backup.bin"
+# UHD images directory, resolved the way libuhd does: UHD_IMAGES_DIR (set
+# image-wide, shared by every libuhd in the container) when it exists, else ask libuhd
+IMAGES_DIR="$UHD_IMAGES_DIR"
+[ -d "$IMAGES_DIR" ] || IMAGES_DIR=$(uhd_config_info --images-dir 2>/dev/null | sed -n 's/^Images directory: *//p')
+ORIGINAL_BIN="$IMAGES_DIR/usrp_b210_fpga.bin"
+BACKUP_BIN="$IMAGES_DIR/usrp_b210_fpga_backup.bin"
 LIBRESDR_B210="/rftools/sdr/libresdr/libresdr_b210.bin"
 LIBRESDR_B220="/rftools/sdr/libresdr/libresdr_b220.bin"
 
@@ -21,6 +25,11 @@ print_step() {
 # Check if the user has root privileges
 if [ "$(id -u)" -ne 0 ]; then
   echo -e "${RED}This script must be run as root.${RESET}"
+  exit 1
+fi
+
+if [ ! -f "$ORIGINAL_BIN" ]; then
+  echo -e "${RED}B210 FPGA image not found in '${IMAGES_DIR}' (run uhd_images_downloader first).${RESET}"
   exit 1
 fi
 

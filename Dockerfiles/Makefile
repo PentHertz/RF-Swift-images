@@ -8,7 +8,7 @@ REGISTRY_IMAGE ?= penthertz/rfswiftdev_resolute
 STORAGE_TYPE ?= local  # Set to "registry" to use registry-based caching
 
 # Drivers
-UHD_BASE ?= uhd
+UHD_BASE ?= uhd_latest
 RTLSDR_BASE ?= rtlsdr
 
 # Determine the platform based on the ARCH value
