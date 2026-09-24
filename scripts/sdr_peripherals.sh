@@ -9,11 +9,41 @@ function ad_devices_install() {
 
 function uhd_devices_install() {
 	goodecho "[+] Installing UHD's libs and tools from package manager"
-	install_dependencies "libuhd4.9.0 libuhd-dev uhd-host"
+	install_dependencies "libuhd4.9.0 libuhd-dev uhd-host xz-utils"
 	goodecho "[+] Copying rules sets"
 	cp /root/rules/uhd-usrp.rules  /etc/udev/rules.d/
 	goodecho "[+] Downloading Hardware Driver firmware/FPGA"
-    installfromnet "/usr/bin/uhd_images_downloader"
+	uhd_images_install
+}
+
+function uhd_images_install() {
+	# uhd_images_downloader fetches from files.ettus.com, which sits behind a
+	# Cloudflare bot challenge that CI runners cannot pass. Ettus attaches the
+	# same image set to each GitHub release (identical targets and build hashes
+	# as the downloader's default manifest, inventory.json included), so install
+	# that and keep the downloader only as a fallback.
+	local uhd_ver images_dir tmp name base
+	uhd_ver=$(dpkg-query -W -f='${Version}' libuhd-dev 2>/dev/null | sed -E 's/^[0-9]+://; s/[-+~].*$//')
+	# The downloader's own install location, i.e. where libuhd looks (no network)
+	images_dir=$(uhd_images_downloader --dry-run 2>&1 | sed -n 's/^\[INFO\] Images destination: //p')
+	if [ -n "$uhd_ver" ] && [ -n "$images_dir" ]; then
+		name="uhd-images_${uhd_ver}"
+		base="https://github.com/EttusResearch/uhd/releases/download/v${uhd_ver}"
+		tmp=$(mktemp -d)
+		if installfromnet wget -q -O "$tmp/$name.tar.xz" "$base/$name.tar.xz" \
+			&& installfromnet wget -q -O "$tmp/$name.sha256" "$base/$name.sha256" \
+			&& (cd "$tmp" && awk -v f="$name.tar.xz" '$2 == f' "$name.sha256" | sha256sum -c -) \
+			&& mkdir -p "$images_dir" \
+			&& tar -xJf "$tmp/$name.tar.xz" -C "$images_dir" --strip-components=1; then
+			rm -rf "$tmp"
+			goodecho "[+] Installed UHD ${uhd_ver} images from GitHub into ${images_dir}"
+			return 0
+		fi
+		rm -rf "$tmp"
+	fi
+	criticalecho-noexit "[!] UHD images not available from GitHub, falling back to uhd_images_downloader"
+	installfromnet uhd_images_downloader \
+		|| record_build_failure "download" "uhd-images" "GitHub release and files.ettus.com both failed; run uhd_images_downloader in the container"
 }
 
 function check_neon() {
@@ -58,7 +88,11 @@ python3-ruamel.yaml"
 	sudo make install
 	#sudo ldconfig
 	goodecho "[+] Downloading Hardware Driver firmware/FPGA"
-    	installfromnet "uhd_images_downloader"
+	# files.ettus.com sits behind a Cloudflare bot challenge that CI runners
+	# cannot pass. The images are only needed at runtime, so don't fail the
+	# build: users can fetch them later with uhd_images_downloader.
+	installfromnet "uhd_images_downloader" \
+		|| record_build_failure "download" "uhd-images" "files.ettus.com unreachable (Cloudflare challenge?); run uhd_images_downloader in the container"
 }
 
 function antsdr_uhd_devices_install_fromsources() { # Is replacing original one for now
