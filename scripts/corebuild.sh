@@ -388,6 +388,67 @@ EOF
     rm -f /tmp/rfswift-glfw-egl.c
 }
 
+function x11_nomitshm_shim_install() {
+    # MIT-SHM does not work across the container boundary: an X client creates
+    # a SysV shared memory segment in the container's IPC namespace and asks
+    # the host X server to attach it by id, but the server resolves the id in
+    # the host's namespace. When the host has a segment with the same id
+    # (small ids are common after a reboot), the toolkit's probe succeeds on
+    # the wrong segment and the next MIT-SHM request kills the program (GRC:
+    # "BadAccess (attempt to access private resource denied)", request_code
+    # 130). This shim reports MIT-SHM as absent to Xlib clients (GTK, cairo,
+    # Mesa), which then draw with plain X requests. Qt goes through xcb and
+    # skips MIT-SHM with QT_X11_NO_MITSHM=1, set in the image and by rfswift.
+    # It is loaded from /etc/ld.so.preload so shells, console commands and
+    # launchers all get it, and it references no symbol, so programs that do
+    # not use X11 are unaffected.
+    goodecho "[+] Building the MIT-SHM shim (X11 GUIs on the host display)"
+    install_dependencies "gcc libc6-dev"
+    cat > /tmp/rfswift-nomitshm.c <<'EOF'
+/* RF Swift: report MIT-SHM as unavailable to Xlib clients.
+ * Loaded from /etc/ld.so.preload; see RF-Swift-images/scripts/corebuild.sh. */
+typedef int Bool;
+typedef struct _XDisplay Display;
+
+Bool XShmQueryExtension(Display *dpy)
+{
+    (void)dpy;
+    return 0;
+}
+
+Bool XShmQueryVersion(Display *dpy, int *major, int *minor, Bool *pixmaps)
+{
+    (void)dpy;
+    (void)major;
+    (void)minor;
+    (void)pixmaps;
+    return 0;
+}
+EOF
+    local multiarch
+    multiarch=$(gcc -print-multiarch)
+    mkdir -p "/usr/lib/${multiarch}/rfswift"
+    if ! gcc -shared -fPIC -O2 -Wall -o "/usr/lib/${multiarch}/rfswift/libnomitshm.so" /tmp/rfswift-nomitshm.c; then
+        criticalecho-noexit "[-] MIT-SHM shim build failed; GTK tools may crash on the host display"
+        rm -f /tmp/rfswift-nomitshm.c
+        return
+    fi
+    # 32-bit programs resolve $LIB to their own directory (lib32 with
+    # gcc-multilib, lib/i386-linux-gnu with multiarch i386 libraries): build
+    # that variant when a 32-bit toolchain is present.
+    if [ "$multiarch" = "x86_64-linux-gnu" ] && echo 'int main(void){return 0;}' | gcc -m32 -x c -o /dev/null - 2>/dev/null; then
+        mkdir -p /usr/lib32/rfswift /usr/lib/i386-linux-gnu/rfswift
+        if gcc -m32 -shared -fPIC -O2 -Wall -o /usr/lib32/rfswift/libnomitshm.so /tmp/rfswift-nomitshm.c; then
+            cp /usr/lib32/rfswift/libnomitshm.so /usr/lib/i386-linux-gnu/rfswift/
+        fi
+    fi
+    rm -f /tmp/rfswift-nomitshm.c
+    if ! grep -qs 'rfswift/libnomitshm.so' /etc/ld.so.preload; then
+        echo '/usr/$LIB/rfswift/libnomitshm.so' >> /etc/ld.so.preload
+    fi
+    goodecho "[+] MIT-SHM shim installed at /usr/lib/${multiarch}/rfswift/libnomitshm.so"
+}
+
 function rfswift_shell_setup() {
     goodecho "[+] Setting up RF Swift shell integration"
     # EGL switch for hosts whose X server has no usable GLX (see

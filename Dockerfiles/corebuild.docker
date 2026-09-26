@@ -68,6 +68,10 @@ RUN ./entrypoint.sh install_desktop_packages
 # GLFW->EGL shim so OpenGL tools render over XQuartz (macOS hosts), see corebuild.sh
 RUN ./entrypoint.sh x11_egl_shim_install
 
+# No MIT-SHM on the host display: it fails across the IPC namespace, see corebuild.sh
+RUN ./entrypoint.sh x11_nomitshm_shim_install
+ENV QT_X11_NO_MITSHM=1
+
 # Installing VPN tools (WireGuard, OpenVPN, Tailscale, Netbird)
 RUN ./entrypoint.sh vpn_tools_install
 
