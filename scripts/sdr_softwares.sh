@@ -82,17 +82,18 @@ function sdrangel_soft_fromsource_install() {
 	goodecho "[+] SGP4"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	cmake_clone_and_build "https://github.com/dnwrnr/sgp4.git" "build" "" ""  "sdrangel_soft_fromsource_install"-Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/sgp4
+	# v3.0 renamed the public API (e.g. CoordTopocentric::range_rate -> rangeRate) and breaks SDRangel
+	cmake_clone_and_build "https://github.com/dnwrnr/sgp4.git" "build" "" "v2.0" "sdrangel_soft_fromsource_install" -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/sgp4
 
 	goodecho "[+] libsigmf"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	cmake_clone_and_build "https://github.com/f4exb/libsigmf.git" "build" "new-namespaces" ""  "sdrangel_soft_fromsource_install"-Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/libsigmf
+	cmake_clone_and_build "https://github.com/f4exb/libsigmf.git" "build" "new-namespaces" "" "sdrangel_soft_fromsource_install" -Wno-dev -DCMAKE_INSTALL_PREFIX=/opt/install/libsigmf
 
 	goodecho "[+] ggmorse"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	cmake_clone_and_build "https://github.com/ggerganov/ggmorse.git" "build" "" ""  "sdrangel_soft_fromsource_install"-Wno-dev \
+	cmake_clone_and_build "https://github.com/ggerganov/ggmorse.git" "build" "" "" "sdrangel_soft_fromsource_install" -Wno-dev \
 		-DCMAKE_INSTALL_PREFIX=/opt/install/ggmorse -DGGMORSE_BUILD_TESTS=OFF -DGGMORSE_BUILD_EXAMPLES=OFF
 
 	goodecho "[+] Installing SDR Angel"
