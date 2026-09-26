@@ -8,7 +8,8 @@ REGISTRY_IMAGE ?= penthertz/rfswiftdev_resolute
 STORAGE_TYPE ?= local  # Set to "registry" to use registry-based caching
 
 # Drivers
-UHD_BASE ?= uhd_latest
+# uhd = Ubuntu's libuhd, shared with apt GNU Radio (latest UHD: manual uhd_latest_devices_install)
+UHD_BASE ?= uhd
 RTLSDR_BASE ?= rtlsdr
 
 # Determine the platform based on the ARCH value

@@ -18,9 +18,15 @@ function uhd_devices_install() {
 
 function uhd_latest_devices_install() {
 	# Latest Ettus UHD release, built from source into /usr/local (Ubuntu's
-	# libuhd lags upstream). apt consumers such as gnuradio, gqrx and SoapyUHD
-	# still pull Ubuntu's libuhd in later and stay linked against it; the
-	# Dockerfile's UHD_IMAGES_DIR makes every libuhd share this build's images.
+	# libuhd lags upstream). Manual install inside a container only
+	# (./entrypoint.sh uhd_latest_devices_install), not a UHD_BASE for image
+	# builds: apt GNU Radio stays linked against Ubuntu's libuhd, and source
+	# builds that link libgnuradio-uhd too (gr-osmosdr, gnss-sdr) would then load
+	# both libuhd versions into one process and abort at exit ("double free or
+	# corruption"), e.g. grcc when gr-gsm imports osmosdr.
+	# Once built, it replaces Ubuntu's UHD tools, headers and Python API. Only
+	# Ubuntu's libuhd runtime stays, as apt gnuradio, gqrx and SoapyUHD depend on
+	# it; the Dockerfile's UHD_IMAGES_DIR makes both share this build's images.
 	# Falls back to the packaged UHD if the release can't be resolved or built.
 	goodecho "[+] Installing the latest UHD release from source"
 	local tag
@@ -63,6 +69,15 @@ function uhd_latest_devices_install() {
 		uhd_devices_install
 		return
 	fi
+	local ubuntu_uhd
+	ubuntu_uhd=$(dpkg-query -W -f='${Package} ${db:Status-Status}\n' libuhd-dev uhd-host python3-uhd 2>/dev/null \
+		| awk '$2 == "installed" {print $1}' | xargs)
+	if [ -n "$ubuntu_uhd" ]; then
+		goodecho "[+] Removing Ubuntu's UHD packages superseded by UHD ${tag}: ${ubuntu_uhd}"
+		apt-get remove -y ${ubuntu_uhd} \
+			|| criticalecho-noexit "[!] Could not remove ${ubuntu_uhd}; Ubuntu's UHD tools stay installed next to UHD ${tag}"
+	fi
+	criticalecho-noexit "[!] Ubuntu's libuhd runtime stays for apt GNU Radio: don't rebuild gr-osmosdr, gnss-sdr or other libgnuradio-uhd users from source now, they would link both libuhd versions"
 	ldconfig
 	goodecho "[+] Copying rules sets"
 	cp /root/rules/uhd-usrp.rules /etc/udev/rules.d/
