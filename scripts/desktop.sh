@@ -2,7 +2,10 @@
 
 function install_desktop_packages() {
     goodecho "[+] Installing desktop/VNC packages for remote GUI access"
-    install_dependencies "tigervnc-standalone-server tigervnc-tools novnc websockify socat dbus-x11 lxqt-core openbox breeze-icon-theme fonts-powerline terminator"
+    # lxqt-menu-data ships /etc/xdg/menus/lxqt-applications.menu. Nothing in
+    # lxqt-core depends on it since Ubuntu 26.04, and without it the LXQt menu
+    # has no categories, so the installed tools do not show up.
+    install_dependencies "tigervnc-standalone-server tigervnc-tools novnc websockify socat dbus-x11 lxqt-core lxqt-menu-data openbox breeze-icon-theme fonts-powerline terminator"
 
     # VNC config. TigerVNC >= 1.14 keeps its files in ~/.config/tigervnc and
     # moves a real ~/.vnc directory there on first start; that move fails on a
