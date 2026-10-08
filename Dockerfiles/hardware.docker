@@ -59,6 +59,12 @@ RUN ./entrypoint.sh install_GPU_nvidia  && \
 RUN	./entrypoint.sh hydranfc_trace_plugin_install
 # TODO: more plugins form OpenOCD and so on...
 
+# Serial, FTDI, side-channel and Glasgow tooling
+RUN ./entrypoint.sh serial_tools_install && \
+	./entrypoint.sh pyftdi_install && \
+	./entrypoint.sh chipwhisperer_install && \
+	./entrypoint.sh glasgow_install
+
 # Cleaning and quitting
 WORKDIR /root/
 #RUN rm -rf /root/scripts/

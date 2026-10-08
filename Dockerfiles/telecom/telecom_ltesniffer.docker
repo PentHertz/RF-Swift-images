@@ -1,9 +1,10 @@
+
 # This DockerFile is part of the RFSwift project
-# Install type: OSINT (open-source intelligence) tooling
+# Install type: Telecom LTE sniffing (LTESniffer)
 # Author(s): Sébastien Dudek (@FlUxIuS) @Penthertz
 # website: penthertz.com
 
-ARG BASE_IMAGE=corebuild
+ARG BASE_IMAGE=telecom_utils
 FROM ${BASE_IMAGE}
 
 LABEL "org.container.project"="rfswift"
@@ -20,29 +21,23 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 
 COPY scripts /root/scripts/
 COPY rules /root/rules/
+COPY config /root/config
 
 WORKDIR /root/scripts/
 RUN chmod +x entrypoint.sh
 
-# OSINT tooling: apt utilities, pipx tools, Go tools, and git/venv frameworks
-RUN ./entrypoint.sh osint_apt_tools_install && \
-	./entrypoint.sh osint_pipx_tools_install && \
-	./entrypoint.sh osint_go_tools_install
-
-RUN ./entrypoint.sh spiderfoot_soft_install && \
-	./entrypoint.sh reconng_soft_install && \
-	./entrypoint.sh finalrecon_soft_install
-
-RUN ./entrypoint.sh amass_soft_install && \
-	./entrypoint.sh phoneinfoga_soft_install && \
-	./entrypoint.sh blackbird_soft_install
-
-# Build report (tools that failed to install)
+# LTESniffer (passive LTE sniffer, USRP). Kept out of telecom_4G_5GNSA so it
+# does not share that image's srsRAN build.
+RUN ./entrypoint.sh LTESniffer_soft_install
 RUN ./entrypoint.sh print_build_report
+
+RUN mkdir -p /sdrtools/
+COPY run /sdrtools/run
 
 # Cleaning and quitting
 WORKDIR /root/
-RUN rm -rf /root/thirdparty && \
-	rm -rf /root/rules/ && \
-	apt-fast clean
+#RUN rm -rf /root/scripts/
+RUN rm -rf /root/rules/
+RUN rm -rf /root/thirdparty
+RUN apt-fast clean
 RUN DEBIAN_FRONTEND=noninteractive rm -rf /var/lib/apt/lists/*

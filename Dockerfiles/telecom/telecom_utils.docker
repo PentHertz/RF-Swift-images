@@ -39,6 +39,8 @@ RUN ./entrypoint.sh pycrate_soft_install && \
 	./entrypoint.sh Modmobmap_soft_install
 
 RUN ./entrypoint.sh jss7_soft_install
+
+RUN ./entrypoint.sh QCSuper_soft_install
 # More to come!
 
 RUN mkdir -p /sdrtools/

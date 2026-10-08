@@ -1181,3 +1181,17 @@ function gnuradio4_soft_install() {
     fi
     cd /opt
 }
+
+function rfcat_soft_install() {
+    goodecho "[+] Installing rfcat (YARD Stick One and other CC1111 dongles)"
+    install_dependencies "libusb-1.0-0 python3-usb python3-dev"
+    pip3install rfcat || true
+    return 0
+}
+
+function killerbee_soft_install() {
+    goodecho "[+] Installing KillerBee (IEEE 802.15.4 / Zigbee)"
+    install_dependencies "libgcrypt20-dev libusb-1.0-0-dev python3-dev build-essential python3-usb python3-serial"
+    pip3install "git+https://github.com/riverloopsec/killerbee" || true
+    return 0
+}

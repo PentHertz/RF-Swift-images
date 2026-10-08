@@ -529,3 +529,40 @@ function rfswift_update() {
     [ "${#failed[@]}" -gt 0 ] && return 1
     return 0
 }
+
+# ---------------------------------------------------------------------------
+# Small installers for CLI tools distributed through pipx or `go install`.
+# Both are best-effort: a failure is recorded in the build report and the
+# function still returns 0 so one missing tool never aborts an image build.
+# ---------------------------------------------------------------------------
+
+# pipx_install_tool <name> <pipx spec> [binary to link into /usr/local/bin]
+function pipx_install_tool() {
+    local name="$1" spec="$2" bin="$3"
+    install_dependencies "pipx git"
+    pipx ensurepath > /dev/null 2>&1 || true
+    if ! pipx install "$spec"; then
+        record_build_failure "pip" "$name" "pipx install failed"
+        return 0
+    fi
+    if [ -n "$bin" ] && [ -e "/root/.local/bin/$bin" ]; then
+        ln -sf "/root/.local/bin/$bin" "/usr/local/bin/$bin"
+    fi
+    return 0
+}
+
+# go_install_tool <name> <module@version> [name to install the binary as]
+function go_install_tool() {
+    local name="$1" module="$2" bin="$3"
+    install_dependencies "golang-go git"
+    local tmp built
+    tmp=$(mktemp -d)
+    if GOBIN="$tmp" go install "$module"; then
+        built=$(find "$tmp" -maxdepth 1 -type f | head -n1)
+        install -m 0755 "$built" "/usr/local/bin/${bin:-$(basename "$built")}"
+    else
+        record_build_failure "build" "$name" "go install failed: $module"
+    fi
+    rm -rf "$tmp"
+    return 0
+}

@@ -275,6 +275,12 @@ telecom_5G_train:
 telecom_5G:
 	$(call build_and_push,telecom_5G,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):telecom_utils_$(ARCH),$(CURDIR)/telecom/telecom_5G.docker)
 
+telecom_5G_oai:
+	$(call build_and_push,telecom_5G_oai,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):telecom_utils_$(ARCH),$(CURDIR)/telecom/telecom_5G_oai.docker)
+
+telecom_ltesniffer:
+	$(call build_and_push,telecom_ltesniffer,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):telecom_utils_$(ARCH),$(CURDIR)/telecom/telecom_ltesniffer.docker)
+
 deeptempest:
 	$(call build_and_push,deeptempest,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices_$(ARCH),$(CURDIR)/SDR/sdr_deeptemptest_beta.docker)
 
@@ -324,7 +330,7 @@ help:
 	@echo ""
 	@echo "Other image targets:"
 	@echo "  rfid, network, wifi, bluetooth, reversing, automotive, hardware"
-	@echo "  telecom_utils, telecom_2Gto3G, telecom_4G_5GNSA, telecom_5G, deeptempest"
+	@echo "  telecom_utils, telecom_2Gto3G, telecom_4G_5GNSA, telecom_5G, telecom_5G_oai, telecom_ltesniffer, deeptempest"
 	@echo ""
 	@echo "Examples:"
 	@echo "  make sdrfull ARCH=arm64 STORAGE_TYPE=registry"
@@ -336,5 +342,5 @@ help:
 	sdrfull_stage_extrasofts sdrfull_stage_mldlsofts sdrfull_final \
 	sdrfull1 sdrfull2 sdrfull3 sdrfull4 sdrfull_intelgpu sdrfull_nvidiagpu \
 	rfid network wifi bluetooth reversing automotive hardware \
-	telecom_utils telecom_2Gto3G telecom_4Gto5G telecom_4G_5GNSA telecom_5G telecom_5G_bladerf \
+	telecom_utils telecom_2Gto3G telecom_4Gto5G telecom_4G_5GNSA telecom_5G telecom_5G_oai telecom_ltesniffer telecom_5G_bladerf \
 	deeptempest build help

@@ -100,6 +100,16 @@ RUN ./entrypoint.sh caido_soft_install && \
 # OSINT
 RUN ./entrypoint.sh wiretapper_soft_install_fromsource
 
+# Pivoting, scanning, interception and the tools AutoRecon's plugins call
+RUN ./entrypoint.sh ligolo_ng_soft_install && \
+	./entrypoint.sh chisel_soft_install && \
+	./entrypoint.sh proxychains_soft_install && \
+	./entrypoint.sh hydra_soft_install && \
+	./entrypoint.sh masscan_soft_install && \
+	./entrypoint.sh rustscan_soft_install && \
+	./entrypoint.sh autorecon_tools_soft_install && \
+	./entrypoint.sh mitmproxy_soft_install
+
 RUN mkdir -p /sdrtools/
 COPY run /sdrtools/run
 

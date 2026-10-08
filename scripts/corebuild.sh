@@ -73,6 +73,20 @@ function flameshot_install() {
     install_dependencies "flameshot"
 }
 
+function common_utils_install() {
+    goodecho "[+] Installing common CLI/GUI utilities"
+    # diff/compare, hex & binary viewers, text/data processing
+    install_dependencies "colordiff meld git-delta xxd hexyl bsdextrautils file jq yq ripgrep fd-find bat dos2unix moreutils less nano"
+    # terminal & system monitoring, archives, process debugging
+    install_dependencies "tmux mc tree ncdu htop btop pv bc tealdeer 7zip zip xz-utils zstd lsof strace ltrace"
+    # basic networking clients and X11 clipboard helpers
+    install_dependencies "openssh-client net-tools iputils-ping bind9-dnsutils traceroute xclip xsel"
+    # Debian/Ubuntu ship fd and bat as fdfind/batcat: expose the upstream names
+    [ -x /usr/bin/fdfind ] && ln -sf /usr/bin/fdfind /usr/local/bin/fd
+    [ -x /usr/bin/batcat ] && ln -sf /usr/bin/batcat /usr/local/bin/bat
+    return 0
+}
+
 function enable_apt_components() {
     local components="main restricted universe multiverse"
     if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then
@@ -212,7 +226,7 @@ install_go() {
     ARCH=$(uname -m)
     
     # Define URL and version
-    GO_VERSION="1.27.1" # Replace with the latest version if needed
+    GO_VERSION="1.27.2" # Replace with the latest version if needed
     BASE_URL="https://golang.org/dl/"
 
     case "$ARCH" in
@@ -285,7 +299,7 @@ function uvpython_install() { # Avoid terrible long builds
     install_dependencies "clang libclang-dev llvm-dev build-essential"
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
     cd /root/thirdparty
-    UV_VERSION="0.12.19"
+    UV_VERSION="0.12.23"
     installfromnet "wget" "https://github.com/astral-sh/uv/releases/download/$UV_VERSION/uv-installer.sh"
     chmod +x uv-installer.sh
     ./uv-installer.sh

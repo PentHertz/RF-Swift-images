@@ -215,6 +215,10 @@ function logic2_saleae_install() {
     fi
     LOGIC_VERSION="2.4.46"
     install_dependencies "libfftw3-dev"
+    # Electron runtime libraries Logic.bin links against (not bundled in the AppImage)
+    install_dependencies "libnspr4 libnss3 libglib2.0-0t64 libatk1.0-0t64 libatk-bridge2.0-0t64 libatspi2.0-0t64 \
+        libcups2t64 libdbus-1-3 libcairo2 libpango-1.0-0 libgtk-3-0t64 libx11-6 libxcomposite1 libxdamage1 \
+        libxext6 libxfixes3 libxrandr2 libxcb1 libxkbcommon0 libgbm1 libexpat1 libudev1 libasound2t64"
     [ -d /hardware ] || mkdir /hardware
     cd /hardware
     mkdir -p Saleae
@@ -227,17 +231,22 @@ function logic2_saleae_install() {
     # Extract the AppImage to avoid needing FUSE in containers
     goodecho "[+] Extracting AppImage (avoiding FUSE requirement)..."
     ./Logic-${LOGIC_VERSION}-linux-x64.AppImage --appimage-extract
-    
-    # Create symlink to the extracted Logic binary with --no-sandbox
-    # This creates an alias that always runs with --no-sandbox
+    if [ ! -x squashfs-root/AppRun ]; then
+        record_build_failure "build" "Logic 2 (Saleae)" "AppImage extraction failed: squashfs-root/AppRun missing"
+        return
+    fi
+
+    # Launch through the AppImage's AppRun, which resolves the binary from the
+    # bundled .desktop entry (the layout moved from squashfs-root/Logic to
+    # usr/lib/logic/ in 2.4.x), always with --no-sandbox
     cat > /usr/local/bin/Logic << 'EOF'
 #!/bin/bash
-exec /hardware/Saleae/squashfs-root/Logic --no-sandbox "$@"
+exec /hardware/Saleae/squashfs-root/AppRun --no-sandbox "$@"
 EOF
     chmod +x /usr/local/bin/Logic
-    
-    # Also create the original symlink for compatibility
-    ln -sf /hardware/Saleae/squashfs-root/Logic /usr/local/bin/Logic-2-Saleae
+
+    # Also keep the original command name for compatibility
+    ln -sf /usr/local/bin/Logic /usr/local/bin/Logic-2-Saleae
     
     # Optional: Create additional convenience aliases
     ln -sf /usr/local/bin/Logic /usr/local/bin/logic
@@ -470,4 +479,67 @@ function pythonfindus_install() {
 function pythonrd6006_install() {
     goodecho "[+] Installing Python3 module for rd6006"
     pip3install rd6006
+}
+
+function serial_tools_install() {
+    goodecho "[+] Installing serial terminals (picocom, minicom, tio) and a baud-rate finder"
+    install_dependencies "picocom minicom tio python3-serial"
+    cat > /usr/local/bin/baudrate <<'WRAP'
+#!/usr/bin/env python3
+"""Cycle through common baud rates on a serial port and show what comes in.
+Usage: baudrate /dev/ttyUSB0 [-t SECONDS]   (Ctrl-C to stop; 'ok' = mostly printable)"""
+import argparse, sys, time
+import serial
+
+RATES = [115200, 57600, 38400, 19200, 9600, 4800, 2400, 1200, 230400, 460800, 921600]
+ap = argparse.ArgumentParser()
+ap.add_argument("port")
+ap.add_argument("-t", type=float, default=2.0, help="seconds to listen per rate (default 2)")
+a = ap.parse_args()
+try:
+    for rate in RATES:
+        with serial.Serial(a.port, rate, timeout=0.2) as s:
+            print(f"\n=== {rate} baud ===", flush=True)
+            end = time.time() + a.t
+            while time.time() < end:
+                data = s.read(256)
+                if data:
+                    printable = sum(32 <= b < 127 or b in (9, 10, 13) for b in data) / len(data)
+                    sys.stdout.write(("ok " if printable > 0.9 else "?? ") + data.decode("ascii", "replace"))
+                    sys.stdout.flush()
+except KeyboardInterrupt:
+    pass
+WRAP
+    chmod +x /usr/local/bin/baudrate
+}
+
+function pyftdi_install() {
+    goodecho "[+] Installing pyftdi (SPI/I2C/JTAG/UART over FT232H, FT2232H boards such as the Tigard)"
+    install_dependencies "libusb-1.0-0 python3-dev"
+    pip3install pyftdi || true
+    return 0
+}
+
+function chipwhisperer_install() {
+    goodecho "[+] Installing the ChipWhisperer Python package"
+    install_dependencies "libusb-1.0-0-dev python3-dev build-essential"
+    pip3install chipwhisperer || true
+    return 0
+}
+
+function glasgow_install() {
+    goodecho "[+] Installing the Glasgow Interface Explorer CLI"
+    install_dependencies "pipx git libusb-1.0-0"
+    [ -d /hardware ] || mkdir /hardware
+    cd /hardware
+    gitinstall "https://github.com/GlasgowEmbedded/glasgow.git" "glasgow_install" || true
+    if [ -d glasgow/software ]; then
+        pipx ensurepath > /dev/null 2>&1 || true
+        pipx install "/hardware/glasgow/software[builtin-toolchain]" \
+            || record_build_failure "pip" "glasgow" "pipx install failed"
+        [ -e /root/.local/bin/glasgow ] && ln -sf /root/.local/bin/glasgow /usr/local/bin/glasgow
+    else
+        record_build_failure "git" "glasgow" "clone failed"
+    fi
+    return 0
 }

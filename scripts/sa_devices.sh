@@ -191,7 +191,7 @@ function signalhound_vsg60_sa_device() {
         colorecho "[+] Downloading VSG software bin from SignalHound"
         [ -d /rftools/generators ] || mkdir -p /rftools/generators
         cd /rftools/generators
-        filename="VSG(Ubuntu_x64)_2_0_4"
+        filename="VSG(Ubuntu_x64)_2_0_5"
         installfromnet "wget" "https://signalhound.com/sigdownloads/VSG60/$filename.zip"
         unzip "$filename.zip"
         rm "$filename.zip"
@@ -200,21 +200,23 @@ function signalhound_vsg60_sa_device() {
         sh -c ./setup.sh
         local script_path="/usr/sbin/vsg_signalhound"
     
-        # Create the script content
-        cat << 'EOF' | sudo tee "$script_path" > /dev/null
+        # Create the script content. As for Spike, BASE_DIR is derived from
+        # $filename so it matches the version that was downloaded/extracted
+        # (the runtime $ variables are escaped so they stay literal).
+        cat << EOF | sudo tee "$script_path" > /dev/null
 #!/bin/sh
 
 # Set the fixed path
-BASE_DIR="/rftools/generators/VSG(Ubuntu22.04x64)_2_0_2"
+BASE_DIR="/rftools/generators/$filename"
 APPNAME="vsg_signalhound"
 
 # Set up the environment variables
-LD_LIBRARY_PATH="$BASE_DIR/lib"
+LD_LIBRARY_PATH="\$BASE_DIR/lib"
 export LD_LIBRARY_PATH
-export QT_PLUGIN_PATH="$BASE_DIR/plugins"
+export QT_PLUGIN_PATH="\$BASE_DIR/plugins"
 
 # Execute the binary
-"$BASE_DIR/bin/$APPNAME" "$@"
+"\$BASE_DIR/bin/\$APPNAME" "\$@"
 EOF
 
     # Make the script executable

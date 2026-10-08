@@ -673,3 +673,77 @@ function 5greplay_soft_install() {
     fi
 }
 ### TODO: more More!
+
+function LTESniffer_soft_install() {
+	set +e # best-effort, like the other RAN stacks in this file
+	set +o pipefail
+	goodecho "[+] Installing LTESniffer (passive LTE sniffer)"
+	install_dependencies "build-essential cmake libfftw3-dev libmbedtls-dev libboost-program-options-dev libconfig++-dev libsctp-dev libuhd-dev libboost-system-dev libboost-test-dev libboost-thread-dev libqwt-qt5-dev qtbase5-dev libglib2.0-dev libssl-dev"
+	[ -d /telecom/4G ] || mkdir -p /telecom/4G
+	cd /telecom/4G
+	installfromnet "git" "clone" "https://github.com/SysSec-KAIST/LTESniffer.git"
+	if [ -d LTESniffer ] && ( cd LTESniffer && mkdir -p build && cd build && cmake ../ && make -j"$(nproc)" ); then
+		ln -sf /telecom/4G/LTESniffer/build/src/LTESniffer /usr/local/bin/LTESniffer
+		goodecho "[+] LTESniffer built: /telecom/4G/LTESniffer/build/src/LTESniffer"
+	else
+		record_build_failure "build" "LTESniffer" "cmake/make failed"
+	fi
+	set -e
+	set -o pipefail
+}
+
+function QCSuper_soft_install() {
+	goodecho "[+] Installing QCSuper (Qualcomm diag capture to pcap)"
+	install_dependencies "android-tools-adb libusb-1.0-0"
+	pipx_install_tool "qcsuper" "qcsuper" "qcsuper"
+}
+
+function openairinterface5g_soft_install() {
+	# OpenAirInterface 5G RAN (gNB + nrUE, USRP). OAI's own "build_oai -I" refuses
+	# Ubuntu 26.04 (its supported-distribution list stops at 24.04), so its
+	# dependency step is replicated here: the apt packages, asn1c at the fork
+	# commit OAI pins, and the SIMDE headers at OAI's pinned commit. build_oai
+	# then runs without -I. UHD comes from the base image.
+	set +e
+	set +o pipefail
+	local OAI_TAG="v2.4.0"
+	goodecho "[+] Installing OpenAirInterface 5G (${OAI_TAG})"
+	install_dependencies "automake build-essential cmake ninja-build pkg-config git libblas-dev liblapack-dev liblapacke-dev libreadline-dev libconfig-dev libsctp-dev libssl-dev libtool patch openssl zlib1g-dev xxd libyaml-cpp-dev bison flex"
+	install_dependencies "libuhd-dev uhd-host libboost-all-dev libusb-1.0-0-dev"
+	[ -d /telecom/5G ] || mkdir -p /telecom/5G
+	if [ ! -x /opt/asn1c/bin/asn1c ]; then
+		rm -rf /tmp/asn1c
+		if installfromnet git clone https://github.com/mouse07410/asn1c /tmp/asn1c \
+			&& ( cd /tmp/asn1c && git checkout 940dd5fa9f3917913fd487b13dfddfacd0ded06e && autoreconf -iv \
+				&& CFLAGS="-O2 -fno-strict-aliasing" ./configure --prefix /opt/asn1c/ && make -j"$(nproc)" && make install ); then
+			goodecho "[+] asn1c installed in /opt/asn1c"
+		else
+			record_build_failure "build" "asn1c (OAI)" "build failed; OAI cannot build without it"
+		fi
+		rm -rf /tmp/asn1c
+	fi
+	if [ ! -d /usr/include/simde ]; then
+		rm -rf /tmp/simde
+		if installfromnet git clone https://github.com/simd-everywhere/simde-no-tests.git /tmp/simde \
+			&& ( cd /tmp/simde && git checkout -f c7f26b73ba8e874b95c2cec2b497826ad2188f68 ); then
+			rm -rf /tmp/simde/.git
+			cp -r /tmp/simde /usr/include/simde
+		else
+			record_build_failure "git" "simde (OAI)" "clone failed"
+		fi
+		rm -rf /tmp/simde
+	fi
+	cd /telecom/5G
+	installfromnet git clone --depth 1 --branch "$OAI_TAG" https://gitlab.eurecom.fr/oai/openairinterface5g.git
+	if [ -d openairinterface5g ] && ( cd openairinterface5g/cmake_targets && ./build_oai --gNB --nrUE -w USRP --ninja -c ); then
+		local b
+		for b in nr-softmodem nr-uesoftmodem; do
+			ln -sf "/telecom/5G/openairinterface5g/cmake_targets/ran_build/build/$b" "/usr/local/bin/$b"
+		done
+		goodecho "[+] OAI ${OAI_TAG} built: nr-softmodem, nr-uesoftmodem (sample configs: /telecom/5G/openairinterface5g/targets/PROJECTS/GENERIC-NR-5GC/CONF)"
+	else
+		record_build_failure "build" "openairinterface5g ${OAI_TAG}" "build_oai failed"
+	fi
+	set -e
+	set -o pipefail
+}

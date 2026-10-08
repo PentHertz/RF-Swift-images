@@ -112,3 +112,52 @@ EOF
         record_build_failure "git" "finalrecon" "clone failed"
     fi
 }
+
+function amass_soft_install() {
+    goodecho "[+] Installing OWASP Amass"
+    install_dependencies "golang-go git"
+    GOBIN=/usr/local/bin go install -v github.com/owasp-amass/amass/v4/...@master \
+        || record_build_failure "build" "amass" "go install failed"
+    return 0
+}
+
+function phoneinfoga_soft_install() {
+    goodecho "[+] Installing PhoneInfoga"
+    local asset tmp
+    case "$(uname -m)" in
+        x86_64|amd64)  asset="phoneinfoga_Linux_x86_64.tar.gz" ;;
+        aarch64|arm64) asset="phoneinfoga_Linux_arm64.tar.gz" ;;
+        *) record_build_failure "download" "phoneinfoga" "no upstream build for $(uname -m)"; return 0 ;;
+    esac
+    tmp=$(mktemp -d)
+    if installfromnet wget -q -O "$tmp/p.tgz" "https://github.com/sundowndev/phoneinfoga/releases/latest/download/$asset" \
+        && tar -xzf "$tmp/p.tgz" -C "$tmp" phoneinfoga; then
+        install -m 0755 "$tmp/phoneinfoga" /usr/local/bin/phoneinfoga
+    else
+        record_build_failure "download" "phoneinfoga" "release download failed"
+    fi
+    rm -rf "$tmp"
+    return 0
+}
+
+function blackbird_soft_install() {
+    goodecho "[+] Installing Blackbird"
+    install_dependencies "python3-venv git"
+    [ -d "$OSINT_DIR" ] || mkdir -p "$OSINT_DIR"
+    cd "$OSINT_DIR"
+    gitinstall "https://github.com/p1ngul1n0/blackbird.git" "blackbird_soft_install" || true
+    if [ -d blackbird ]; then
+        cd blackbird
+        python3 -m venv venv
+        ./venv/bin/pip install -r requirements.txt \
+            || record_build_failure "pip" "blackbird" "requirements install failed"
+        cat > /usr/local/bin/blackbird <<WRAP
+#!/bin/bash
+cd "$OSINT_DIR/blackbird" && exec ./venv/bin/python blackbird.py "\$@"
+WRAP
+        chmod +x /usr/local/bin/blackbird
+    else
+        record_build_failure "git" "blackbird" "clone failed"
+    fi
+    return 0
+}

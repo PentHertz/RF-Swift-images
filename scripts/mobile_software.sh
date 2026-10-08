@@ -117,3 +117,49 @@ EOF
         record_build_failure "build" "MobSF" "setup.sh not found"
     fi
 }
+
+function jadx_soft_install() {
+    goodecho "[+] Installing jadx"
+    local JADX_VERSION="1.5.6"
+    install_dependencies "default-jre unzip"
+    [ -d "$MOBILE_DIR" ] || mkdir -p "$MOBILE_DIR"
+    cd "$MOBILE_DIR"
+    if installfromnet wget -q -O jadx.zip "https://github.com/skylot/jadx/releases/download/v${JADX_VERSION}/jadx-${JADX_VERSION}.zip"; then
+        rm -rf jadx && mkdir -p jadx && unzip -o -q jadx.zip -d jadx && rm -f jadx.zip
+        ln -sf "$MOBILE_DIR/jadx/bin/jadx" /usr/local/bin/jadx
+        ln -sf "$MOBILE_DIR/jadx/bin/jadx-gui" /usr/local/bin/jadx-gui
+    else
+        record_build_failure "download" "jadx" "release zip download failed"
+    fi
+    return 0
+}
+
+function apkleaks_soft_install() {
+    goodecho "[+] Installing apkleaks"
+    pipx_install_tool "apkleaks" "apkleaks" "apkleaks"
+}
+
+function reflutter_soft_install() {
+    goodecho "[+] Installing reFlutter"
+    pipx_install_tool "reflutter" "reflutter" "reflutter"
+}
+
+function ios_tools_soft_install() {
+    goodecho "[+] Installing iOS tooling (libimobiledevice utilities, ipsw)"
+    install_dependencies "libimobiledevice-utils ideviceinstaller libusbmuxd-tools usbmuxd ifuse"
+    local IPSW_VERSION="3.1.732" arch tmp
+    case "$(uname -m)" in
+        x86_64|amd64)  arch="x86_64" ;;
+        aarch64|arm64) arch="arm64" ;;
+        *) goodecho "[!] ipsw: no upstream build for $(uname -m)"; return 0 ;;
+    esac
+    tmp=$(mktemp -d)
+    if installfromnet wget -q -O "$tmp/ipsw.deb" "https://github.com/blacktop/ipsw/releases/download/v${IPSW_VERSION}/ipsw_${IPSW_VERSION}_linux_${arch}.deb" \
+        && apt-fast install -y "$tmp/ipsw.deb"; then
+        goodecho "[+] ipsw ${IPSW_VERSION} installed"
+    else
+        record_build_failure "download" "ipsw" "deb download/install failed"
+    fi
+    rm -rf "$tmp"
+    return 0
+}

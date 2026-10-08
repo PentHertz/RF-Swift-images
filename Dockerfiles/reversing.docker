@@ -59,6 +59,13 @@ RUN ./entrypoint.sh cutter_soft_install &&\
 #RUN ./entrypoint.sh qiling_soft_install # TODO: resolve some debconf
 #RUN ./entrypoint.sh emba_soft_install # TODO: takes lot of time
 
+# Exploit development and binary triage
+RUN ./entrypoint.sh bytecaster_install && \
+	./entrypoint.sh pwndbg_soft_install && \
+	./entrypoint.sh gef_soft_install && \
+	./entrypoint.sh exploitdev_tools_soft_install && \
+	./entrypoint.sh binary_triage_tools_soft_install
+
 # Cleaning and quitting
 WORKDIR /root/
 #RUN rm -rf /root/scripts/

@@ -310,13 +310,14 @@ function bytecaster_install() {
     cd ByteCaster
     
     # Compile for current architecture (Go auto-detects in Docker)
-    CGO_ENABLED=0 go build -ldflags="-w -s" -tags netgo -o ByteCaster
-    chmod +x ByteCaster
-    
-    # Create symlink
-    ln -sf /reverse/ByteCaster/ByteCaster /usr/bin/ByteCaster
-    
-    goodecho "[+] ByteCaster installed at /usr/bin/ByteCaster"
+    if CGO_ENABLED=0 go build -ldflags="-w -s" -tags netgo -o ByteCaster; then
+        chmod +x ByteCaster
+        ln -sf /reverse/ByteCaster/ByteCaster /usr/bin/ByteCaster
+        goodecho "[+] ByteCaster installed at /usr/bin/ByteCaster"
+    else
+        record_build_failure "build" "ByteCaster" "go build failed"
+    fi
+    return 0
 }
 
 function sasquatch_soft_install() {
@@ -412,3 +413,73 @@ function angrop_soft_install() {
 
 
 ### TODO: more More!
+
+# ---------------------------------------------------------------------------
+# Exploit development
+# ---------------------------------------------------------------------------
+function pwndbg_soft_install() {
+    goodecho "[+] Installing pwndbg (loaded by gdb through ~/.gdbinit)"
+    install_dependencies "gdb gdbserver python3-dev python3-venv git curl"
+    [ -d /reverse ] || mkdir /reverse
+    cd /reverse
+    gitinstall "https://github.com/pwndbg/pwndbg.git" "pwndbg_soft_install" || true
+    if [ -d pwndbg ] && ( cd pwndbg && ./setup.sh ); then
+        goodecho "[+] pwndbg installed"
+    else
+        record_build_failure "build" "pwndbg" "setup.sh failed"
+    fi
+    return 0
+}
+
+function gef_soft_install() {
+    goodecho "[+] Installing GEF (run 'gef' instead of 'gdb' to use it instead of pwndbg)"
+    install_dependencies "gdb"
+    [ -d /reverse/gef ] || mkdir -p /reverse/gef
+    if installfromnet wget -q -O /reverse/gef/gef.py "https://raw.githubusercontent.com/hugsy/gef/main/gef.py"; then
+        cat > /usr/local/bin/gef <<'WRAP'
+#!/bin/bash
+exec gdb -nx -ex "source /reverse/gef/gef.py" "$@"
+WRAP
+        chmod +x /usr/local/bin/gef
+    else
+        record_build_failure "download" "gef" "gef.py download failed"
+    fi
+    return 0
+}
+
+function exploitdev_tools_soft_install() {
+    goodecho "[+] Installing pwntools, ROPgadget, one_gadget and checksec"
+    install_dependencies "checksec ruby ruby-dev build-essential python3-dev libffi-dev libssl-dev"
+    pipx_install_tool "pwntools" "pwntools" "pwn"
+    local b
+    for b in cyclic shellcraft asm disasm phd constgrep elfdiff elfpatch hex unhex pwnstrip; do
+        [ -e "/root/.local/bin/$b" ] && ln -sf "/root/.local/bin/$b" "/usr/local/bin/$b"
+    done
+    pipx_install_tool "ROPgadget" "ropgadget" "ROPgadget"
+    gem install one_gadget || record_build_failure "build" "one_gadget" "gem install failed"
+    return 0
+}
+
+# ---------------------------------------------------------------------------
+# Binary triage
+# ---------------------------------------------------------------------------
+function binary_triage_tools_soft_install() {
+    goodecho "[+] Installing capa, FLOSS, YARA and Detect-It-Easy"
+    install_dependencies "yara python3-yara"
+    pipx_install_tool "capa" "flare-capa" "capa"
+    pipx_install_tool "floss" "flare-floss" "floss"
+    local DIE_VERSION="3.21" tmp
+    if [ "$(uname -m)" != "x86_64" ]; then
+        goodecho "[!] Detect-It-Easy only publishes amd64 .deb packages; skipping it on $(uname -m)"
+        return 0
+    fi
+    tmp=$(mktemp -d)
+    if installfromnet wget -q -O "$tmp/die.deb" "https://github.com/horsicq/DIE-engine/releases/download/${DIE_VERSION}/die_${DIE_VERSION}_Ubuntu_26.04_amd64.deb" \
+        && apt-fast install -y "$tmp/die.deb"; then
+        goodecho "[+] Detect-It-Easy ${DIE_VERSION} installed (die, diec, diel)"
+    else
+        record_build_failure "download" "Detect-It-Easy" "deb download/install failed"
+    fi
+    rm -rf "$tmp"
+    return 0
+}

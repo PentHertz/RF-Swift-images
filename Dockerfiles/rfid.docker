@@ -37,6 +37,10 @@ RUN ./entrypoint.sh proxmark3_soft_install && \
 	./entrypoint.sh chameleon_ultra_soft_install && \
 	./entrypoint.sh proxmark5_soft_install
 
+RUN ./entrypoint.sh mfoc_hardnested_soft_install && \
+	./entrypoint.sh smartcard_tools_soft_install && \
+	./entrypoint.sh flipper_zero_soft_install
+
 RUN mkdir -p /sdrtools/
 COPY run /sdrtools/run
 

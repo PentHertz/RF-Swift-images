@@ -553,7 +553,7 @@ function trufflehog_script_install() {
 }
 
 function burpsuite_community_install() { # TODO: only working well on x86_64 with the GUI :/
-    local version="${1:-2026.8}"
+    local version="${1:-2026.9.1}"
     local install_dir="/opt/burpsuite"
     local arch=$(uname -m)
     
@@ -1108,4 +1108,91 @@ function graphqlmap_soft_install() {
     pipx install git+https://github.com/swisskyrepo/GraphQLmap \
         || record_build_failure "pip" "GraphQLmap" "pipx install failed"
     [ -e /root/.local/bin/graphqlmap ] && ln -sf /root/.local/bin/graphqlmap /usr/sbin/graphqlmap
+}
+
+# ---------------------------------------------------------------------------
+# Pivoting / tunnelling
+# ---------------------------------------------------------------------------
+function ligolo_ng_soft_install() {
+    goodecho "[+] Installing ligolo-ng (ligolo-proxy + ligolo-agent)"
+    go_install_tool "ligolo-ng proxy" "github.com/nicocha30/ligolo-ng/cmd/proxy@latest" "ligolo-proxy"
+    go_install_tool "ligolo-ng agent" "github.com/nicocha30/ligolo-ng/cmd/agent@latest" "ligolo-agent"
+}
+
+function chisel_soft_install() {
+    goodecho "[+] Installing chisel"
+    go_install_tool "chisel" "github.com/jpillora/chisel@latest" "chisel"
+}
+
+function proxychains_soft_install() {
+    goodecho "[+] Installing proxychains-ng"
+    install_dependencies "proxychains4"
+}
+
+# ---------------------------------------------------------------------------
+# Scanning / brute force
+# ---------------------------------------------------------------------------
+function hydra_soft_install() {
+    goodecho "[+] Installing THC-Hydra"
+    install_dependencies "hydra"
+}
+
+function masscan_soft_install() {
+    goodecho "[+] Installing masscan"
+    install_dependencies "masscan"
+}
+
+function rustscan_soft_install() {
+    goodecho "[+] Installing RustScan (cargo)"
+    export PATH="/root/.cargo/bin:${PATH}"
+    if command -v cargo > /dev/null 2>&1 && cargo install --locked rustscan; then
+        ln -sf /root/.cargo/bin/rustscan /usr/local/bin/rustscan
+    else
+        record_build_failure "build" "rustscan" "cargo install failed"
+    fi
+    return 0
+}
+
+function feroxbuster_soft_install() {
+    goodecho "[+] Installing feroxbuster (upstream release binary)"
+    install_dependencies "unzip"
+    local asset tmp
+    case "$(uname -m)" in
+        x86_64|amd64)  asset="x86_64-linux-feroxbuster.zip" ;;
+        aarch64|arm64) asset="aarch64-linux-feroxbuster.zip" ;;
+        *) record_build_failure "download" "feroxbuster" "no upstream build for $(uname -m)"; return 0 ;;
+    esac
+    tmp=$(mktemp -d)
+    if installfromnet wget -q -O "$tmp/ferox.zip" "https://github.com/epi052/feroxbuster/releases/latest/download/$asset" \
+        && unzip -o -q "$tmp/ferox.zip" -d "$tmp" && [ -f "$tmp/feroxbuster" ]; then
+        install -m 0755 "$tmp/feroxbuster" /usr/local/bin/feroxbuster
+    else
+        record_build_failure "download" "feroxbuster" "release download failed"
+    fi
+    rm -rf "$tmp"
+    return 0
+}
+
+function enum4linux_ng_soft_install() {
+    goodecho "[+] Installing enum4linux-ng"
+    install_dependencies "smbclient ldap-utils"
+    pipx_install_tool "enum4linux-ng" "git+https://github.com/cddmp/enum4linux-ng" "enum4linux-ng"
+}
+
+# The tools AutoRecon's default plugins shell out to (it is installed on its own with pipx)
+function autorecon_tools_soft_install() {
+    goodecho "[+] Installing AutoRecon helper tools"
+    install_dependencies "gobuster nikto whatweb sslscan dnsrecon smbmap onesixtyone snmp smbclient"
+    feroxbuster_soft_install
+    enum4linux_ng_soft_install
+}
+
+function mitmproxy_soft_install() {
+    goodecho "[+] Installing mitmproxy"
+    pipx_install_tool "mitmproxy" "mitmproxy" "mitmproxy"
+    local b
+    for b in mitmdump mitmweb; do
+        [ -e "/root/.local/bin/$b" ] && ln -sf "/root/.local/bin/$b" "/usr/local/bin/$b"
+    done
+    return 0
 }

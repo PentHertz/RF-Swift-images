@@ -232,7 +232,8 @@ function bluekit_soft_install() {
 	installfromnet "git" "clone" "https://github.com/sgxgsx/BlueToolkit.git"
 	cd BlueToolkit
 	chmod +x ./install.sh
-	./install.sh
+	./install.sh || record_build_failure "build" "BlueToolkit" "install.sh failed"
+	return 0
 }
 
 ### Bluetooth Exploits
@@ -898,9 +899,13 @@ function hostapdwpe_soft_install () {
     patch -p1 -f --forward < ../hostapd-2.11-wpe.patch || true
 
     cd hostapd
-    make
-    ln -sf $(pwd)/hostapd-wpe /usr/local/bin/hostapd-wpe
-    ln -sf $(pwd)/hostapd-wpe.conf /etc/hostapd-wpe.conf
+    if make -j"$(nproc)"; then
+        ln -sf $(pwd)/hostapd-wpe /usr/local/bin/hostapd-wpe
+        ln -sf $(pwd)/hostapd-wpe.conf /etc/hostapd-wpe.conf
+    else
+        record_build_failure "build" "hostapd-wpe" "patched hostapd build failed"
+    fi
+    return 0
 }
 
 function sparrowwifi_sdr_soft_install() {
@@ -1041,10 +1046,11 @@ function rfquak_soft_install () {
 	goodecho "[+] Installing RFQuack from PIP"
 	[ -d /rftools ] || mkdir -p /rftools
 	cd /rftools
-	git clone --recursive https://github.com/rfquack/RFQuack
+	installfromnet git clone --recursive https://github.com/rfquack/RFQuack
 	cd RFQuack
-	pip3install -r requirements.pip
-	make clean build
+	pip3install -r requirements.pip || true
+	make clean build || record_build_failure "build" "RFQuack" "firmware build failed"
+	return 0
 }
 
 function artemis_soft_install () {
@@ -1092,4 +1098,139 @@ function airsnitch_soft_install() {
     bash build.sh
     bash pysetup.sh
     goodecho "[+] AirSnitch installed. Use 'airsnitch' wrapper to run."
+}
+
+# ---------------------------------------------------------------------------
+# Wi-Fi: WPA-Enterprise tooling
+# ---------------------------------------------------------------------------
+function wpa_sycophant_soft_install() {
+    goodecho "[+] Installing wpa_sycophant (EAP relay client, pairs with hostapd-mana's enable_sycophant)"
+    install_dependencies "build-essential pkg-config libnl-3-dev libnl-genl-3-dev libnl-route-3-dev libssl-dev libdbus-1-dev libreadline-dev"
+    [ -d /rftools/wifi ] || mkdir -p /rftools/wifi
+    cd /rftools/wifi
+    gitinstall "https://github.com/sensepost/wpa_sycophant.git" "wpa_sycophant_soft_install" || true
+    if [ -d wpa_sycophant ] && make -C wpa_sycophant/wpa_supplicant -j"$(nproc)"; then
+        cat > /usr/local/bin/wpa_sycophant <<'WRAP'
+#!/bin/bash
+cd /rftools/wifi/wpa_sycophant && exec ./wpa_sycophant.sh "$@"
+WRAP
+        chmod +x /usr/local/bin/wpa_sycophant
+    else
+        record_build_failure "build" "wpa_sycophant" "modified wpa_supplicant build failed"
+    fi
+    return 0
+}
+
+function eap_buster_soft_install() {
+    goodecho "[+] Installing EAP_buster (lists the EAP methods a WPA-Enterprise network accepts)"
+    install_dependencies "wpasupplicant"
+    [ -d /rftools/wifi ] || mkdir -p /rftools/wifi
+    cd /rftools/wifi
+    gitinstall "https://github.com/blackarrowsec/EAP_buster.git" "eap_buster_soft_install" || true
+    if [ -f EAP_buster/EAP_buster.sh ]; then
+        chmod +x EAP_buster/EAP_buster.sh
+        cat > /usr/local/bin/EAP_buster <<'WRAP'
+#!/bin/bash
+cd /rftools/wifi/EAP_buster && exec ./EAP_buster.sh "$@"
+WRAP
+        chmod +x /usr/local/bin/EAP_buster
+    else
+        record_build_failure "git" "EAP_buster" "clone failed"
+    fi
+    return 0
+}
+
+# ---------------------------------------------------------------------------
+# Bluetooth
+# ---------------------------------------------------------------------------
+function crackle_soft_install() {
+    goodecho "[+] Installing crackle (BLE legacy pairing key recovery)"
+    install_dependencies "build-essential git libpcap-dev"
+    [ -d /rftools/bluetooth ] || mkdir -p /rftools/bluetooth
+    cd /rftools/bluetooth
+    gitinstall "https://github.com/mikeryan/crackle.git" "crackle_soft_install" || true
+    if [ -d crackle ] && make -C crackle && make -C crackle install; then
+        goodecho "[+] crackle installed"
+    else
+        record_build_failure "build" "crackle" "make failed"
+    fi
+    return 0
+}
+
+function sweyntooth_soft_install() {
+    goodecho "[+] Staging SweynTooth BLE test suite (needs an nRF52840 dongle flashed with the bundled firmware)"
+    install_dependencies "python3-venv build-essential"
+    [ -d /rftools/bluetooth/exploits ] || mkdir -p /rftools/bluetooth/exploits
+    cd /rftools/bluetooth/exploits
+    gitinstall "https://github.com/Matheus-Garbelini/sweyntooth_bluetooth_low_energy_attacks.git" "sweyntooth_soft_install" || true
+    if [ -d sweyntooth_bluetooth_low_energy_attacks ]; then
+        cd sweyntooth_bluetooth_low_energy_attacks
+        python3 -m venv .venv
+        ./.venv/bin/pip install -r requirements.txt \
+            || record_build_failure "pip" "sweyntooth" "requirements install failed"
+        ( cd libs/smp_server && make build && make install ) \
+            || record_build_failure "build" "sweyntooth smp_server" "make failed"
+        goodecho "[+] SweynTooth staged in $(pwd): ./.venv/bin/python <test>.py <serial port> <target address>"
+    else
+        record_build_failure "git" "sweyntooth" "clone failed"
+    fi
+    return 0
+}
+
+# ---------------------------------------------------------------------------
+# RFID / NFC / smartcards
+# ---------------------------------------------------------------------------
+function mfoc_hardnested_soft_install() {
+    goodecho "[+] Installing mfoc-hardnested"
+    install_dependencies "build-essential autoconf autoconf-archive automake libtool pkg-config libnfc-dev liblzma-dev git"
+    [ -d /rftools/rfid ] || mkdir -p /rftools/rfid
+    cd /rftools/rfid
+    gitinstall "https://github.com/nfc-tools/mfoc-hardnested.git" "mfoc_hardnested_soft_install" || true
+    if [ -d mfoc-hardnested ] && ( cd mfoc-hardnested && autoreconf -vis && ./configure && make -j"$(nproc)" && make install ); then
+        goodecho "[+] mfoc-hardnested installed"
+    else
+        record_build_failure "build" "mfoc-hardnested" "autotools build failed"
+    fi
+    return 0
+}
+
+function smartcard_tools_soft_install() {
+    goodecho "[+] Installing PC/SC tools and GlobalPlatformPro (gp)"
+    install_dependencies "pcscd pcsc-tools libpcsclite-dev libccid default-jre-headless"
+    [ -d /rftools/rfid/gp ] || mkdir -p /rftools/rfid/gp
+    if installfromnet wget -q -O /rftools/rfid/gp/gp.jar "https://github.com/martinpaljak/GlobalPlatformPro/releases/latest/download/gp.jar"; then
+        cat > /usr/local/bin/gp <<'WRAP'
+#!/bin/bash
+exec java -jar /rftools/rfid/gp/gp.jar "$@"
+WRAP
+        chmod +x /usr/local/bin/gp
+    else
+        record_build_failure "download" "GlobalPlatformPro" "gp.jar download failed"
+    fi
+    return 0
+}
+
+function flipper_zero_soft_install() {
+    goodecho "[+] Installing ufbt and qFlipper (Flipper Zero)"
+    pipx_install_tool "ufbt" "ufbt" "ufbt"
+    local QFLIPPER_VERSION="1.3.3"
+    if [ "$(uname -m)" != "x86_64" ]; then
+        goodecho "[!] qFlipper's AppImage is only published for x86_64; skipping it on $(uname -m)"
+        return 0
+    fi
+    [ -d /rftools/rfid/qFlipper ] || mkdir -p /rftools/rfid/qFlipper
+    cd /rftools/rfid/qFlipper
+    # Extracted rather than run as an AppImage: no FUSE in containers
+    if installfromnet wget -q -O qFlipper.AppImage "https://update.flipperzero.one/builds/qFlipper/${QFLIPPER_VERSION}/qFlipper-x86_64-${QFLIPPER_VERSION}.AppImage" \
+        && chmod +x qFlipper.AppImage && ./qFlipper.AppImage --appimage-extract > /dev/null && [ -x squashfs-root/AppRun ]; then
+        rm -f qFlipper.AppImage
+        cat > /usr/local/bin/qFlipper <<'WRAP'
+#!/bin/bash
+exec /rftools/rfid/qFlipper/squashfs-root/AppRun "$@"
+WRAP
+        chmod +x /usr/local/bin/qFlipper
+    else
+        record_build_failure "download" "qFlipper" "AppImage download/extract failed"
+    fi
+    return 0
 }

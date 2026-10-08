@@ -11,7 +11,8 @@ AD_DIR="/opt/ad"
 
 function ad_apt_tools_install() {
     goodecho "[+] Installing AD apt tooling"
-    install_dependencies "smbclient ldap-utils krb5-user samdump2 onesixtyone nbtscan crackmapexec dnsutils gcc-mingw-w64-x86-64 libpcap-dev"
+    # crackmapexec is the unmaintained predecessor of NetExec (installed below), so it is no longer pulled in
+    install_dependencies "smbclient ldap-utils krb5-user samdump2 onesixtyone nbtscan smbmap dnsutils gcc-mingw-w64-x86-64 libpcap-dev"
 }
 
 # Small helper: pipx install with best-effort reporting + optional symlink.
@@ -143,4 +144,38 @@ function skewrun_soft_install() {
     else
         record_build_failure "build" "skewrun" "no prebuilt binary for $arch and cargo unavailable"
     fi
+}
+
+function evil_winrm_soft_install() {
+    goodecho "[+] Installing evil-winrm (Ruby gem)"
+    install_dependencies "ruby ruby-dev build-essential libssl-dev"
+    gem install evil-winrm || record_build_failure "build" "evil-winrm" "gem install failed"
+    return 0
+}
+
+function coercer_soft_install() {
+    goodecho "[+] Installing Coercer"
+    pipx_install_tool "coercer" "coercer" "coercer"
+}
+
+function targetedkerberoast_soft_install() {
+    goodecho "[+] Installing targetedKerberoast"
+    install_dependencies "python3-venv git"
+    [ -d "$AD_DIR" ] || mkdir -p "$AD_DIR"
+    cd "$AD_DIR"
+    gitinstall "https://github.com/ShutdownRepo/targetedKerberoast.git" "targetedkerberoast_soft_install" || true
+    if [ -d targetedKerberoast ]; then
+        cd targetedKerberoast
+        python3 -m venv venv
+        ./venv/bin/pip install -r requirements.txt \
+            || record_build_failure "pip" "targetedKerberoast" "requirements install failed"
+        cat > /usr/local/bin/targetedKerberoast <<WRAP
+#!/bin/bash
+exec "$AD_DIR/targetedKerberoast/venv/bin/python" "$AD_DIR/targetedKerberoast/targetedKerberoast.py" "\$@"
+WRAP
+        chmod +x /usr/local/bin/targetedKerberoast
+    else
+        record_build_failure "git" "targetedKerberoast" "clone failed"
+    fi
+    return 0
 }

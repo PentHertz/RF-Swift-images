@@ -62,3 +62,36 @@ function v2ginjector_soft_install() {
 }
 
 ### TODO: more More!
+
+function can_python_tools_soft_install() {
+    goodecho "[+] Installing cantools, udsoncan and doipclient"
+    install_dependencies "python3-can can-utils"
+    pipx_install_tool "cantools" "cantools" "cantools"
+    pip3install udsoncan doipclient || true
+    return 0
+}
+
+function icsim_soft_install() {
+    goodecho "[+] Installing ICSim (instrument cluster simulator on a virtual CAN bus)"
+    install_dependencies "build-essential libsdl2-dev libsdl2-image-dev can-utils git"
+    [ -d /automotive ] || mkdir -p /automotive
+    cd /automotive
+    gitinstall "https://github.com/zombieCraig/ICSim.git" "icsim_soft_install" || true
+    if [ -d ICSim ] && make -C ICSim; then
+        # icsim/controls load their artwork relative to the repo directory
+        cat > /usr/local/bin/icsim <<'WRAP'
+#!/bin/bash
+cd /automotive/ICSim && exec ./icsim "$@"
+WRAP
+        cat > /usr/local/bin/icsim-controls <<'WRAP'
+#!/bin/bash
+cd /automotive/ICSim && exec ./controls "$@"
+WRAP
+        chmod +x /usr/local/bin/icsim /usr/local/bin/icsim-controls
+        ln -sf /automotive/ICSim/setup_vcan.sh /usr/local/bin/icsim-setup-vcan
+        goodecho "[+] ICSim: icsim-setup-vcan, then 'icsim vcan0' and 'icsim-controls vcan0'"
+    else
+        record_build_failure "build" "ICSim" "make failed"
+    fi
+    return 0
+}

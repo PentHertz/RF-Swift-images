@@ -60,6 +60,11 @@ RUN ./entrypoint.sh wpa3_dragonslayer_soft_install && \
 
 # To fix for full Python3 support ./entrypoint.sh Pyrit_soft_install && \
 
+# WPA-Enterprise tooling
+RUN ./entrypoint.sh hostapdwpe_soft_install && \
+	./entrypoint.sh wpa_sycophant_soft_install && \
+	./entrypoint.sh eap_buster_soft_install
+
 RUN mkdir -p /sdrtools/
 COPY run /sdrtools/run
 

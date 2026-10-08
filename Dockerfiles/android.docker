@@ -38,6 +38,12 @@ RUN ./entrypoint.sh frida_soft_install && \
 # Mobile Security Framework (heavier; own venv)
 RUN ./entrypoint.sh mobsf_soft_install
 
+RUN ./entrypoint.sh jadx_soft_install && \
+	./entrypoint.sh mitmproxy_soft_install && \
+	./entrypoint.sh apkleaks_soft_install && \
+	./entrypoint.sh reflutter_soft_install && \
+	./entrypoint.sh ios_tools_soft_install
+
 # Build report (tools that failed to install)
 RUN ./entrypoint.sh print_build_report
 

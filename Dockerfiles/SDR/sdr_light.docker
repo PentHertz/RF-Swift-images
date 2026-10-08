@@ -78,6 +78,10 @@ RUN ./entrypoint.sh lotus_budc_tune_device
 # Installing FISSURE (RF framework) reusing the GNU Radio/SDR stack above
 RUN ./entrypoint.sh fissure_soft_install
 
+# Sub-GHz and 802.15.4 attack dongles
+RUN ./entrypoint.sh rfcat_soft_install && \
+	./entrypoint.sh killerbee_soft_install
+
 # NOTE: GNU Radio 4.0 (GR4, experimental RC) is intentionally NOT built here to
 # keep sdr_light lean. It lives in the dedicated downstream image built from
 # SDR/sdr_gnuradio4.docker (make sdrgnuradio4) for those who want to try it.

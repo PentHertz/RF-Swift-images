@@ -135,6 +135,8 @@ RUN	./entrypoint.sh sigdigger_soft_install && \
 RUN ./entrypoint.sh satdump_sdr_soft_install
 RUN ./entrypoint.sh sdrangel_soft_fromsource_install
 
+RUN ./entrypoint.sh rfquak_soft_install
+
 # ============================================
 # STAGE 4: ML/DL and GPU Support
 # ============================================

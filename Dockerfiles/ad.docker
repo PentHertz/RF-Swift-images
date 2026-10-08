@@ -46,6 +46,11 @@ RUN ./entrypoint.sh ldapdomaindump_soft_install && \
 	./entrypoint.sh install_pyGoldenGMSA && \
 	./entrypoint.sh skewrun_soft_install
 
+RUN ./entrypoint.sh evil_winrm_soft_install && \
+	./entrypoint.sh coercer_soft_install && \
+	./entrypoint.sh enum4linux_ng_soft_install && \
+	./entrypoint.sh targetedkerberoast_soft_install
+
 # Build report (tools that failed to install)
 RUN ./entrypoint.sh print_build_report
 

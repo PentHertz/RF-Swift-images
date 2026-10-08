@@ -46,6 +46,10 @@ RUN ./entrypoint.sh CVE_2025_36911_whisperpair_install && \
 	./entrypoint.sh blerp_soft_install && \
 	./entrypoint.sh bluesploit_soft_install
 
+RUN ./entrypoint.sh bluekit_soft_install && \
+	./entrypoint.sh crackle_soft_install && \
+	./entrypoint.sh sweyntooth_soft_install
+
 # Cleaning and quitting
 WORKDIR /root/
 #RUN rm -rf /root/scripts/
