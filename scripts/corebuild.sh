@@ -81,6 +81,8 @@ function common_utils_install() {
     install_dependencies "tmux mc tree ncdu htop btop pv bc tealdeer 7zip zip xz-utils zstd lsof strace ltrace"
     # basic networking clients and X11 clipboard helpers
     install_dependencies "openssh-client net-tools iputils-ping bind9-dnsutils traceroute xclip xsel"
+    # Recoll full-text desktop search (GUI + recollindex/recollq) with filters for PDF, Office and RTF documents
+    install_dependencies "recoll poppler-utils antiword unrtf python3-chardet python3-lxml"
     # Debian/Ubuntu ship fd and bat as fdfind/batcat: expose the upstream names
     [ -x /usr/bin/fdfind ] && ln -sf /usr/bin/fdfind /usr/local/bin/fd
     [ -x /usr/bin/batcat ] && ln -sf /usr/bin/batcat /usr/local/bin/bat
