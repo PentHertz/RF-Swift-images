@@ -177,8 +177,9 @@ function gitinstall() {
     if [ -d "$repo_name" ]; then
         colorecho "Repository '$repo_name' already exists. Pulling latest changes..."
         cd "$repo_name" || exit
-        installfromnet "git" "pull"
-        if [ $? -eq 0 ]; then
+        # Inside `if` so a failed pull keeps the existing checkout instead of
+        # tripping errexit and aborting the build.
+        if installfromnet "git" "pull"; then
             goodecho "Repository '$repo_name' updated successfully."
         else
             criticalecho-noexit "Failed to update the repository."

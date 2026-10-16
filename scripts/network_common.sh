@@ -500,6 +500,9 @@ cd /opt/network/beef
 exec ./beef "$@"
 EOF
     chmod +x /usr/local/bin/beef
+    # ./install rewrites the tracked Gemfile.lock, which blocks the `git pull` when
+    # an image built on top of one that already has BeEF installs it again
+    if [ -d beef ]; then git -C beef checkout -- Gemfile.lock || true; fi
     gitinstall "https://github.com/beefproject/beef" "beef_soft_install"
     cd beef
     yes | ./install || true  # Ignore SIGPIPE exit code

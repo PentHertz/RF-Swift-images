@@ -249,7 +249,11 @@ function cyberther_soft_install() {
 	for _ne_f in $(grep -oE "ne_10m_[A-Za-z0-9_]+\.geojson" resources/geodata/meson.build | sort -u); do
 	    [ -s "resources/geodata/$_ne_f" ] || installfromnet "wget" "-q" "-O" "resources/geodata/$_ne_f" "$_ne_url/$_ne_f"
 	done
-	meson setup -Dbuildtype=${BUILDTYPE} build && cd build
+	# v1.14.0's Soapy module keeps a std::atomic<std::optional<Range>> (~32 bytes,
+	# not lock-free), so GCC emits __atomic_load/__atomic_store calls into
+	# libatomic, which upstream never links. With meson's --no-undefined the
+	# libjetstream.so link then fails.
+	meson setup -Dbuildtype=${BUILDTYPE} -Dcpp_link_args=-latomic build && cd build
 	ninja -j${NINJA_JOBS} install
 }
 
