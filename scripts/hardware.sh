@@ -213,7 +213,7 @@ function logic2_saleae_install() {
         criticalecho-noexit "[!] Current architecture: $ARCH"
         exit 0
     fi
-    LOGIC_VERSION="2.4.46"
+    LOGIC_VERSION="2.4.48"
     install_dependencies "libfftw3-dev"
     # Electron runtime libraries Logic.bin links against (not bundled in the AppImage)
     install_dependencies "libnspr4 libnss3 libglib2.0-0t64 libatk1.0-0t64 libatk-bridge2.0-0t64 libatspi2.0-0t64 \

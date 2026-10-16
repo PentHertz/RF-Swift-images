@@ -848,10 +848,23 @@ function wifite2_soft_install () {
 	goodecho "[+] Installing wifite2"
 	[ -d /rftools/wifi ] || mkdir -p /rftools/wifi
 	cd /rftools/wifi
-	installfromnet "git" "clone" "https://github.com/derv82/wifite2.git"
-	cd wifite2/
-	pipx install .
-	pipx ensurepath
+	# derv82/wifite2 is frozen since 2018; kimocoder's fork is the maintained one
+	gitinstall "https://github.com/kimocoder/wifite2.git" "wifite2_soft_install" || return 0
+	pipx_install_tool "wifite2" "/rftools/wifi/wifite2" "wifite"
+	# pipx leaves the bundled wordlist behind; put it where wifite looks by default
+	mkdir -p /usr/local/share/dict/wordlists
+	cp wifite2/wordlists/*.txt /usr/local/share/dict/wordlists/
+}
+
+function wifit3_soft_install () {
+	goodecho "[+] Installing wifit3"
+	# libusb-package (hard dependency) only ships x86_64/aarch64 wheels and no sdist
+	ARCH=$(uname -m)
+	if [[ "$ARCH" != "x86_64" && "$ARCH" != "aarch64" ]]; then
+		record_build_failure "pip" "wifit3" "libusb-package has no wheel for $ARCH"
+		return 0
+	fi
+	pipx_install_tool "wifit3" "git+https://github.com/derv82/wifit3.git" "wifit3"
 }
 
 function roguehostapd_soft_install () {
