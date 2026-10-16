@@ -24,7 +24,7 @@ function caringcaribou_soft_install() {
 function savvycan_soft_install() {
 	goodecho "[+] Cloning and installing SavvyCAN"
 	# Qt5 serialbus is gone in Ubuntu 26.04 - SavvyCAN now builds against Qt6
-	install_dependencies "qmake6 qt6-base-dev qt6-declarative-dev qt6-serialport-dev qt6-serialbus-dev qt6-tools-dev libqt6serialbus6-plugins"
+	install_dependencies "qmake6 qt6-base-dev qt6-declarative-dev qt6-serialport-dev qt6-serialbus-dev qt6-tools-dev libqt6serialbus6"
 	[ -d /automotive ] || mkdir /automotive
 	cd /automotive
 	installfromnet "git" "clone" "https://github.com/collin80/SavvyCAN.git"
@@ -39,9 +39,11 @@ function savvycan_soft_install() {
 		-e 's/if (re.indexIn(file) != -1) {/QRegularExpressionMatch rem = re.match(file);\n        if (rem.hasMatch()) {/' \
 		-e 's/codes << re.cap(1);/codes << rem.captured(1);/' mainsettingsdialog.cpp
 	sed -i 's/maxCount = std::max(maxCount, graph.x.count());/maxCount = std::max<qsizetype>(maxCount, graph.x.count());/' re/graphingwindow.cpp
+	# PR #450 (merged 2026-10-14) still uses the pre-refactor multiplexLow/HighValue fields
+	sed -i 's/(val >= sig->multiplexLowValue) && (val <= sig->multiplexHighValue)/sig->isValueMatchingMultiplex(val)/' dbc/dbc_classes.cpp
 	qmake6 -makefile
 	make -j$(nproc)
-	ln -s SavvyCAN /usr/bin/SavvyCAN
+	ln -sf /automotive/SavvyCAN/SavvyCAN /usr/bin/SavvyCAN
 }
 
 function gallia_soft_install() { #TODO: not valid yet on RISCV64
