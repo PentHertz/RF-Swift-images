@@ -389,9 +389,9 @@ function grsignalhound_Receiver_grmod_install() {
     fi
 
     install_signalhound_api() {
-        local series="$1" prefix="$2" library base version major
+        local series="$1" prefix="$2" pattern="${3:-$SH_LIB_PATTERN}" library base version major
         library=$(find "$INIT_PATH/signal_hound_sdk/device_apis/$series/lib" \
-            -path "*/$SH_LIB_PATTERN/*" -type f -name "$prefix.so.*" \
+            -path "*/$pattern/*" -type f -name "$prefix.so.*" \
             2>/dev/null | sort -V | tail -1)
         if [[ -z "$library" ]]; then
             criticalecho-noexit "[!] No $prefix library for $ARCH; skipping $series"
@@ -420,18 +420,12 @@ function grsignalhound_Receiver_grmod_install() {
     [[ -n "$sp_include" ]] && cp "$sp_include"/*.h /usr/local/include/ 2>/dev/null || true
     ldconfig -v
 
-    # Install tg_series library (x86_64 only based on tree output)
+    # Install tg_series library (x86_64 only). Since SDK 10_05_26 it ships one
+    # build per Ubuntu release (lib/linux/Ubuntu 14.04, Ubuntu 24.04); take the
+    # newest. Its bundled libftd2xx is not needed: FTDI 1.4.34 is installed above.
     if [[ "$ARCH" == "x86_64" ]]; then
-        cd "$INIT_PATH/signal_hound_sdk/device_apis/tg_series/lib/linux"
-        cp libtg_api.so.1.1.0 /usr/local/lib/
-        chmod 0755 /usr/local/lib/libtg_api.so.1.1.0
-        ln -sf /usr/local/lib/libtg_api.so.1.1.0 /usr/local/lib/libtg_api.so
-        ln -sf /usr/local/lib/libtg_api.so.1.1.0 /usr/lib/libtg_api.so
-        # Copy FTDI library if needed
-        if [[ -f libftd2xx.so && ! -f /usr/local/lib/libftd2xx.so ]]; then
-            cp libftd2xx.so /usr/local/lib/
-            chmod 0755 /usr/local/lib/libftd2xx.so
-        fi
+        install_signalhound_api tg_series libtg_api "linux/Ubuntu *"
+        [[ -e /usr/local/lib/libtg_api.so ]] && ln -sf /usr/local/lib/libtg_api.so /usr/lib/libtg_api.so
         ldconfig -v
     fi
 
