@@ -254,7 +254,15 @@ function cyberther_soft_install() {
 	# libatomic, which upstream never links. With meson's --no-undefined the
 	# libjetstream.so link then fails.
 	meson setup -Dbuildtype=${BUILDTYPE} -Dcpp_link_args=-latomic build && cd build
-	ninja -j${NINJA_JOBS} install
+	ninja -j${NINJA_JOBS}
+	# v1.14.0 vendors ~40 subprojects (glib, openssl, gstreamer, libusb, SDR libs,
+	# and a minimum=true libxml2 with XPath compiled out). All are linked
+	# statically, but `ninja install` also puts their headers, .pc files and tools
+	# under /usr/local, ahead of the system copies: later builds then pick them up
+	# (telive got the XPath-less libxml2 via /usr/local/bin/xml2-config). Install
+	# only CyberEther itself, plus fmt, whose headers its public headers include.
+	_ce_skip=$(meson introspect --projectinfo . | python3 -c 'import json,sys; print(",".join(s["name"] for s in json.load(sys.stdin)["subprojects"] if s["name"] != "fmt"))')
+	meson install --no-rebuild --skip-subprojects "$_ce_skip"
 }
 
 function inspectrum_soft_install () {
