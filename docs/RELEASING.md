@@ -23,6 +23,7 @@ corebuild
 └── sdrsa_devices            (+ variants: sdrsa_devices_antsdr, sdrsa_devices_rtlsdrv4)
     ├── sdr_light
     │   ├── sdr_gnuradio4    (GNU Radio 4.0 add-on, experimental/RC)
+    │   ├── sdr_hacks        (repurposed chips as SDRs: ESP32, LR2021, MediaTek Wi-Fi, ...)
     │   ├── sdr_full         (staged multi-stage build)
     │   └── ...GPU variants  (sdr_light_intelgpu / _nvidiagpu)
     ├── hardware, deeptempest

@@ -543,3 +543,128 @@ function glasgow_install() {
     fi
     return 0
 }
+
+# MediaTek Wi-Fi firmware reverse-engineering tools (github.com/MtkWifiRev).
+# Mtk79ICAP (MT7921 as an SDR) lives in the sdr_hacks image instead.
+function mtkwifitools_install() {
+    goodecho "[+] Installing MtkWifiTools (MediaTek Wi-Fi firmware RE tools)"
+    install_dependencies "build-essential linux-libc-dev"
+    [ -d /hardware ] || mkdir /hardware
+    cd /hardware
+    gitinstall "https://github.com/MtkWifiRev/MtkWifiTools.git" "mtkwifitools_install" || return 0
+    cd MtkWifiTools
+    mkdir -p bin
+    # Single-file host tools (libc + Linux UAPI headers, no build system).
+    # Most sources include BOTH linux/byteorder/little_endian.h and big_endian.h,
+    # which define the same static inline helpers -> redefinition errors. All
+    # image arches are little-endian, so pre-define big_endian.h's include guard.
+    # -fpermissive: GCC 14+ made implicit-decl/int-conversion/pointer errors fatal.
+    local cflags="-std=gnu17 -O2 -w -fpermissive -I. -D_LINUX_BYTEORDER_BIG_ENDIAN_H"
+    local src name failed=""
+    # dump_gen4.c calls open(..., O_CREAT | O_WRONLY) without a mode, which glibc's
+    # _FORTIFY_SOURCE rejects at compile time: build a fixed copy (checkout untouched)
+    mkdir -p bin/.src
+    sed 's/O_CREAT | O_WRONLY)/O_CREAT | O_WRONLY, 0644)/' dump_gen4.c > bin/.src/dump_gen4.c
+    for src in add_wf_region.c clc_parser.c crc_brute.c bin/.src/dump_gen4.c extract_fw.c \
+               mapperremapper.c mt7921_split.c MT7961Merge.c MT7981Merge.c MTKMerge.c \
+               mtkmerge_mt7981_w_rom_patch.c mtk_region_customizer.c \
+               patch_add_region_advanced.c patch_add_region_fixed.c PatchIncorporator.c \
+               patch_ram_merger.c patch_reader.c patch_splitter.c cmd_to_realid/mtk_real_cmd.c; do
+        name=$(basename "$src" .c)
+        if gcc $cflags -o "bin/$name" "$src"; then
+            ln -sf "/hardware/MtkWifiTools/bin/$name" "/usr/local/bin/$name"
+        else
+            failed="$failed $name"
+        fi
+    done
+    [ -z "$failed" ] || record_build_failure "build" "MtkWifiTools" "gcc failed:$failed"
+
+    # ramreader/barepatcher: live NDS32 RAM read/patch through mt76 debugfs. They
+    # link the repo's prebuilt x86-64 static binutils 2.38 (nds32 libopcodes), so
+    # x86_64 only; bfd.h needs ansidecl.h/diagnostics.h from binutils-dev.
+    if [ "$(uname -m)" != "x86_64" ]; then
+        goodecho "[!] MtkWifiTools: ramreader/barepatcher skipped on $(uname -m) (bundled libbfd is x86-64 only)"
+        return 0
+    fi
+    install_dependencies "binutils-dev wget"
+    local bflags="-std=gnu17 -O2 -w -fpermissive -static -I./include"
+    if ( cd ramreader && mkdir -p build && gcc $bflags -o build/ramreader src/ramreader.c \
+            libs/libopcodes.a libs/libbfd.a libs/libiberty.a libs/libz.a ); then
+        ln -sf /hardware/MtkWifiTools/ramreader/build/ramreader /usr/local/bin/mtk_ramreader
+    else
+        record_build_failure "build" "MtkWifiTools-ramreader" "static link with bundled x86 binutils 2.38 failed"
+    fi
+    # barepatcher.c includes <dis-asm.h> but the bundle ships it as disasm.h; without
+    # this link the newer system dis-asm.h (4-arg init_disassemble_info) is used.
+    if ( cd barepatcher && ln -sf disasm.h include/dis-asm.h && mkdir -p build compiler binary_output && \
+         gcc $bflags -o build/barepatcher src/barepatcher.c \
+            libs/x86/libopcodes.a libs/x86/libbfd.a libs/x86/libiberty.a libs/x86/libz.a ); then
+        cat > /usr/local/bin/mtk_barepatcher <<'EOF'
+#!/bin/sh
+# Edit /hardware/MtkWifiTools/barepatcher/code_output/nds32_code.c first.
+# Needs the NDS32 toolchain: run mtk_nds32_toolchain_fetch once.
+cd /hardware/MtkWifiTools/barepatcher && exec ./build/barepatcher "$@"
+EOF
+        cat > /usr/local/bin/mtk_nds32_toolchain_fetch <<'EOF'
+#!/bin/sh
+# On demand: prebuilt NDS32 gcc used by barepatcher (x86-64 host, ~68 MB).
+set -e
+cd /hardware/MtkWifiTools/barepatcher/compiler
+wget -q --show-progress https://github.com/VincentZWC/prebuilt-nds32-toolchain/releases/download/20180521/nds32le-linux-glibc-v3-upstream.tar.gz
+tar -xf nds32le-linux-glibc-v3-upstream.tar.gz && rm -f nds32le-linux-glibc-v3-upstream.tar.gz
+EOF
+        chmod +x /usr/local/bin/mtk_barepatcher /usr/local/bin/mtk_nds32_toolchain_fetch
+    else
+        record_build_failure "build" "MtkWifiTools-barepatcher" "static link with bundled x86 binutils 2.38 failed"
+    fi
+    return 0
+}
+
+function mtkicaptool_install() {
+    # icaptool itself runs on a rooted MT6769 Android phone (built with the NDK);
+    # the PC side is the TCP spectrum plotter
+    goodecho "[+] Installing MtkICAPtool (MediaTek Android ICAP spectrum: PC-side plotter)"
+    install_dependencies "python3-numpy python3-matplotlib python3-tk adb"
+    [ -d /hardware ] || mkdir /hardware
+    cd /hardware
+    gitinstall "https://github.com/MtkWifiRev/MtkICAPtool.git" "mtkicaptool_install" || return 0
+    cat > /usr/local/bin/mtk_icap_plot <<'EOF'
+#!/bin/sh
+# icaptool runs on a rooted MT6769 phone (see /hardware/MtkICAPtool/README.md).
+# First: adb forward tcp:9090 tcp:9090 ; then on the phone: icaptool -i1 / -i11 / -i2
+exec python3 /hardware/MtkICAPtool/plot_spectrum_tcp.py "$@"
+EOF
+    chmod +x /usr/local/bin/mtk_icap_plot
+    return 0
+}
+
+function mtkcsidump_install() {
+    # The CSIdump server runs on an OpenWrt One / mt7981 router (prebuilt in the
+    # upstream v0.1 release); the PC side is the live CSI GUI client
+    goodecho "[+] Installing MtkCSIdump (CSI GUI client)"
+    install_dependencies "python3-pyqt5 python3-pyqtgraph python3-numpy"
+    python3 -c 'import pyqtgraph' 2>/dev/null || pip3install --no-deps pyqtgraph || true
+    [ -d /hardware ] || mkdir /hardware
+    cd /hardware
+    gitinstall "https://github.com/MtkWifiRev/MtkCSIdump.git" "mtkcsidump_install" || return 0
+    cat > /usr/local/bin/mtk_csi_client <<'EOF'
+#!/bin/sh
+# Router (OpenWrt One, binaries from the upstream v0.1 release): CSIdump phy0-sta0 <rate> <port>
+# Usage: mtk_csi_client <router ip> <udp port>
+exec python3 /hardware/MtkCSIdump/csi_udp_client_gui.py "$@"
+EOF
+    chmod +x /usr/local/bin/mtk_csi_client
+    return 0
+}
+
+function mtkmon_install() {
+    # Nexmon port to NDS32 (MediaTek Wi-Fi firmware patching). Sources only:
+    # building patches needs the x86-64 NDS32 gcc 8 toolchain (cd buildtools && make),
+    # then make -C buildtools/gcc-nexmon-plugin; source setup_env.sh; make in patches/<chip>/...
+    goodecho "[+] Cloning MtkMon (Nexmon port for MediaTek Wi-Fi firmware)"
+    install_dependencies "gawk"
+    [ -d /hardware ] || mkdir /hardware
+    cd /hardware
+    gitinstall "https://github.com/MtkWifiRev/MtkMon.git" "mtkmon_install" || return 0
+    return 0
+}

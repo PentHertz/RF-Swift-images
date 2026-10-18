@@ -130,6 +130,9 @@ sdrlight_nvidiagpu:
 sdrgnuradio4:
 	$(call build_and_push,sdr_gnuradio4,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light_$(ARCH),$(CURDIR)/SDR/sdr_gnuradio4.docker)
 
+sdrhacks:
+	$(call build_and_push,sdr_hacks,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdr_light_$(ARCH),$(CURDIR)/SDR/sdr_hacks.docker)
+
 #
 # SDR Full - Multi-stage build targets
 #
@@ -318,6 +321,7 @@ help:
 	@echo "  sdrsadevices        - Build SDR SA devices image"
 	@echo "  sdrlight            - Build SDR light image"
 	@echo "  sdrgnuradio4        - Build GNU Radio 4.0 (GR4) add-on image on top of sdr_light"
+	@echo "  sdrhacks            - Build SDR hacks add-on image (repurposed chips as SDRs) on top of sdr_light"
 	@echo "  sdrfull             - Build complete SDR full image (with caching)"
 	@echo "  sdrfull_staged      - Build SDR full with explicit stage-by-stage building"
 	@echo ""
@@ -338,7 +342,7 @@ help:
 	@echo "  make sdrfull_staged ARCH=amd64 STORAGE_TYPE=registry"
 	@echo "  make sdrfull_stage_extraoot1 ARCH=arm64 STORAGE_TYPE=registry"
 
-.PHONY: common sdrsadevices sdrsadevicesantsdr sdrsadevicesrtlsdrv4 sdrlight sdrlight_intelgpu sdrlight_nvidiagpu sdrgnuradio4 \
+.PHONY: common sdrsadevices sdrsadevicesantsdr sdrsadevicesrtlsdrv4 sdrlight sdrlight_intelgpu sdrlight_nvidiagpu sdrgnuradio4 sdrhacks \
 	sdrfull sdrfull_staged sdrfull_stage_begin sdrfull_stage_extraoot1 sdrfull_stage_extraoot2 \
 	sdrfull_stage_extrasofts sdrfull_stage_mldlsofts sdrfull_final \
 	sdrfull1 sdrfull2 sdrfull3 sdrfull4 sdrfull_intelgpu sdrfull_nvidiagpu \

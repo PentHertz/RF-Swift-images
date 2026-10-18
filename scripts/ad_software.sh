@@ -179,3 +179,39 @@ WRAP
     fi
     return 0
 }
+
+function adminer_soft_install() {
+    # AD Miner: Cypher queries over a BloodHound Neo4j (4.4.x) graph -> static
+    # HTML AD risk report (render_<prefix>/ in the CWD). Not on PyPI, and it needs
+    # two Python 3.14 fixes, so pipx-install a patched local checkout:
+    #  * pyproject pins numpy==2.1.1, which has no cp314 wheels -> relax to >=2.1.1
+    #  * 3.14 made "forkserver" the default multiprocessing start method on Linux;
+    #    AD Miner's Pool workers read a global (nodes_cache) that only the parent
+    #    sets, so force "fork" as on <= 3.13.
+    goodecho "[+] Installing AD Miner"
+    install_dependencies "pipx git"
+    pipx ensurepath > /dev/null 2>&1 || true
+    [ -d "$AD_DIR" ] || mkdir -p "$AD_DIR"
+    cd "$AD_DIR"
+    # Drop our patches from a previous run so gitinstall's `git pull` can fast-forward
+    if [ -d AD_Miner ]; then git -C AD_Miner checkout -- . || true; fi
+    gitinstall "https://github.com/AD-Security/AD_Miner.git" "adminer_soft_install" || return 0
+    cd AD_Miner
+    sed -i -E 's/^([[:space:]]*numpy[[:space:]]*=[[:space:]]*)"==([^"]+)"/\1">=\2"/' pyproject.toml
+    grep -q 'set_start_method("fork"' ad_miner/__main__.py \
+        || sed -i '1a import multiprocessing as _rfswift_mp; _rfswift_mp.set_start_method("fork", force=True)  # RF-Swift: py3.14 defaults to forkserver' ad_miner/__main__.py
+
+    local pipx_args=(--force)
+    # No riscv64 numpy wheels on PyPI: reuse Ubuntu's python3-numpy instead of
+    # compiling numpy inside the pipx venv
+    if [ "$(uname -m)" = "riscv64" ]; then
+        install_dependencies "python3-numpy"
+        pipx_args+=(--system-site-packages)
+    fi
+    if pipx install "${pipx_args[@]}" "$AD_DIR/AD_Miner"; then
+        [ -e /root/.local/bin/AD-miner ] && ln -sf /root/.local/bin/AD-miner /usr/local/bin/AD-miner
+    else
+        record_build_failure "pip" "AD_Miner" "pipx install failed"
+    fi
+    return 0
+}

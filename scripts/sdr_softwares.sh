@@ -265,6 +265,44 @@ function cyberther_soft_install() {
 	meson install --no-rebuild --skip-subprojects "$_ce_skip"
 }
 
+function decsat_soft_install() {
+	# DecSAT (ex-DecDVB): Rust satellite receiver - DVB-S2/S2X with ACM (GSE->IP
+	# PCAP, MPEG-TS), DVB-S, SCPC modems, DVB-CID; SDR++-style egui GUI + CLI.
+	# Live input is HackRF One only, via a pure-Rust USB driver (no libhackrf);
+	# other SDRs through IQ captures. Not on crates.io and upstream only ships
+	# Windows builds, so build from git with corebuild's rustup toolchain
+	# (GUI needs Rust >= 1.95). libopus/libxaac are git submodules built by build.rs.
+	goodecho "[+] Installing DecSAT (DVB-S2/S2X receiver)"
+	if ! command -v cargo >/dev/null 2>&1; then
+		record_build_failure "build" "decsat" "cargo toolchain unavailable"
+		return 0
+	fi
+	# cmake: libopus; pkg-config + libasound2-dev: cpal -> alsa-sys. X11/Wayland/GL
+	# are dlopen'ed by winit/glutin; ffmpeg (TV player) and curl (radar map) are
+	# spawned at runtime.
+	install_dependencies "build-essential cmake pkg-config git libasound2-dev"
+	install_dependencies "libxkbcommon-x11-0 libegl1 libgl1 libxcursor1 libxi6 libxrandr2 ffmpeg curl"
+
+	local repo="https://github.com/CasualArclamp/DecSAT.git" pkgs="decsat-cli decsat-gui" jobs pkg tdir
+	jobs=$(nproc)
+	if [ "$(uname -m)" = "riscv64" ]; then
+		# egui + thin LTO under riscv64 emulation would take hours: CLI only
+		pkgs="decsat-cli"
+		jobs=2
+	fi
+	# Shared target dir so the GUI reuses the workspace crates built for the CLI
+	tdir=$(mktemp -d)
+	for pkg in $pkgs; do
+		CARGO_TARGET_DIR="$tdir" cargo install --git "$repo" --root /usr/local --locked -j "$jobs" "$pkg" \
+			|| CARGO_TARGET_DIR="$tdir" cargo install --git "$repo" --root /usr/local -j "$jobs" "$pkg" \
+			|| record_build_failure "build" "$pkg" "cargo install --git failed"
+	done
+	rm -rf "$tdir"
+	# Drop cargo's git checkout (with the libopus/libxaac submodules) to keep the layer small
+	find "${CARGO_HOME:-$HOME/.cargo}/git" -mindepth 2 -maxdepth 2 -iname 'decsat-*' -exec rm -rf {} + 2>/dev/null || true
+	return 0
+}
+
 function inspectrum_soft_install () {
 	goodecho "[+] Installing inspectrum"
 	[ -d /root/thirdparty ] || mkdir -p /root/thirdparty

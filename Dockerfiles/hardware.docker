@@ -65,6 +65,12 @@ RUN ./entrypoint.sh serial_tools_install && \
 	./entrypoint.sh chipwhisperer_install && \
 	./entrypoint.sh glasgow_install
 
+# MediaTek Wi-Fi firmware RE tools (MtkWifiRev)
+RUN ./entrypoint.sh mtkwifitools_install && \
+	./entrypoint.sh mtkicaptool_install && \
+	./entrypoint.sh mtkcsidump_install && \
+	./entrypoint.sh mtkmon_install
+
 # Cleaning and quitting
 WORKDIR /root/
 #RUN rm -rf /root/scripts/

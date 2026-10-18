@@ -3,6 +3,7 @@
 source common.sh
 source sdr_peripherals.sh
 source sdr_softwares.sh
+source sdr_hacks.sh
 source gr_oot_modules.sh
 source lab_software.sh
 source sa_devices.sh

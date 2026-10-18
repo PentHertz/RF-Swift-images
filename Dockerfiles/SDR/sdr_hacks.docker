@@ -1,0 +1,51 @@
+# This DockerFile is part of the RFSwift project
+# Install type: SDR hacks add-on on top of sdr_light (repurposed chips as SDRs)
+# Author(s): Sébastien Dudek (@FlUxIuS) @Penthertz
+# website: penthertz.com
+
+ARG BASE_IMAGE=sdr_light
+FROM ${BASE_IMAGE}
+
+LABEL "org.container.project"="rfswift"
+LABEL "org.container.author"="Sébastien Dudek (FlUxIuS)"
+
+RUN echo 'APT::Install-Suggests "0";' >> /etc/apt/apt.conf.d/00-docker
+RUN echo 'APT::Install-Recommends "0";' >> /etc/apt/apt.conf.d/00-docker
+
+RUN apt-fast update
+
+COPY scripts /root/scripts/
+COPY rules /root/rules/
+COPY config /root/config/
+
+WORKDIR /root/scripts/
+RUN chmod +x entrypoint.sh
+
+# Flashing/console tools (esptool, picocom, tio) used by the firmware-based hacks
+RUN ./entrypoint.sh sdrhacks_common_tools_install
+
+# MediaTek Wi-Fi: MT7921AU/MT7961 USB dongles (BirriaSDR, Mtk79ICAP) and the
+# Gemtek W1700K Wi-Fi 7 router (MT7996 host tools + firmware)
+RUN ./entrypoint.sh birriasdr_sdrhacks_install && \
+	./entrypoint.sh mtk79icap_sdrhacks_install && \
+	./entrypoint.sh w1700ksdr_sdrhacks_install
+
+# ESP32 family (ESP-SDR prebuilt firmware, esp-sdr-bridge, SoapyESPSDR) and the
+# Semtech LR2021 LoRa transceiver on an ESP32-P4 board
+RUN ./entrypoint.sh espsdr_sdrhacks_install && \
+	./entrypoint.sh soapyespsdr_sdrhacks_install && \
+	./entrypoint.sh lr2021sdr_sdrhacks_install
+
+# Build report (tools that failed to install)
+RUN ./entrypoint.sh print_build_report
+
+RUN mkdir -p /sdrtools/
+COPY run /sdrtools/run
+
+# Cleaning and quitting
+WORKDIR /root/
+RUN rm -rf /root/thirdparty
+RUN rm -rf /root/rules/
+RUN rm -rf /root/config/
+RUN apt-fast clean
+RUN DEBIAN_FRONTEND=noninteractive rm -rf /var/lib/apt/lists/*
