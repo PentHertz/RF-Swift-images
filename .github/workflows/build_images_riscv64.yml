@@ -306,7 +306,7 @@ jobs:
           else
             echo "run_job_sdrsa_devices=false" >> $GITHUB_OUTPUT
           fi
-          if [[ "$MODIFIED_FILES" == *"Dockerfiles/SDR/hardware.docker"* || "$MODIFIED_FILES" == *"scripts/hardware.sh"* ]]; then
+          if [[ "$MODIFIED_FILES" == *"Dockerfiles/hardware.docker"* || "$MODIFIED_FILES" == *"scripts/hardware.sh"* ]]; then
             echo "run_job_hardware=true" >> $GITHUB_OUTPUT
           else
             echo "run_job_hardware=false" >> $GITHUB_OUTPUT

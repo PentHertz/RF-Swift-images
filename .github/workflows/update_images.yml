@@ -29,6 +29,7 @@ on:
           - sdrsa_devices
           - sdr_light
           - sdr_gnuradio4
+          - sdr_hacks
           - sdr_full
           - automotive
           - android
