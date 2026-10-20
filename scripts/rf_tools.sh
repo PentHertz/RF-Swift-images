@@ -996,21 +996,36 @@ EOF
 }
 
 function airgorah_soft_install() {
+    # Airgorah: GTK4 Wi-Fi auditing GUI (scan, deauth, handshake/PMKID capture,
+    # cracking). Since 0.9.0 the GUI drives a separate privileged airgorah-agent
+    # that must sit in the same directory as the GUI binary, so both workspace
+    # crates are installed side by side. Run as root (as in RF-Swift) the GUI
+    # starts the agent directly, without pkexec (X11 only, not Wayland).
     goodecho "[+] Installing airgorah"
     [ -d /rftools/wifi ] || mkdir -p /rftools/wifi
     cd /rftools/wifi
-    install_dependencies "libgtk-4-1 dbus-x11 wireshark-common iproute2 mdk4 crunch"
-    install_dependencies "dbus build-essential libgtk-4-dev libglib2.0-dev macchanger"
-    gitinstall "https://github.com/martin-olivier/airgorah.git" "airgorah_soft_install ruby ruby-dev rubygems rpm zstd libarchive-tools"
-    gem install fpm
-    if ! command -v rustup &> /dev/null; then
+    # Required at runtime: iw, ip, macchanger, xterm (corebuild); aircrack-ng and crunch are optional
+    install_dependencies "libgtk-4-1 dbus-x11 wireshark-common iproute2 iw mdk4 crunch macchanger"
+    install_dependencies "dbus build-essential pkg-config libgtk-4-dev libglib2.0-dev"
+    gitinstall "https://github.com/martin-olivier/airgorah.git" "airgorah_soft_install" || return 0
+    if ! command -v cargo > /dev/null 2>&1; then
         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
         . "/root/.cargo/env"
     fi
-    rustup component add clippy
-    rustup component add rustfmt
-    cd airgorah
-    cargo install airgorah
+    # Pre-0.9 images installed the GUI alone into ~/.cargo/bin, which is first in
+    # PATH and would shadow the new install (and has no agent next to it)
+    cargo uninstall airgorah > /dev/null 2>&1 || true
+    cd /rftools/wifi/airgorah
+    local tdir crate
+    # Shared target dir: the agent reuses airgorah-common built for the GUI
+    tdir=$(mktemp -d)
+    for crate in gui agent; do
+        CARGO_TARGET_DIR="$tdir" cargo install --locked --force --root /usr/local --path "crates/$crate" \
+            || CARGO_TARGET_DIR="$tdir" cargo install --force --root /usr/local --path "crates/$crate" \
+            || record_build_failure "build" "airgorah-$crate" "cargo install failed"
+    done
+    rm -rf "$tdir"
+    return 0
 }
 
 function macstealer_soft_install() {
