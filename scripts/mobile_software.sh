@@ -147,7 +147,7 @@ function reflutter_soft_install() {
 function ios_tools_soft_install() {
     goodecho "[+] Installing iOS tooling (libimobiledevice utilities, ipsw)"
     install_dependencies "libimobiledevice-utils ideviceinstaller libusbmuxd-tools usbmuxd ifuse"
-    local IPSW_VERSION="3.1.732" arch tmp
+    local IPSW_VERSION="v3.1.739" arch tmp
     case "$(uname -m)" in
         x86_64|amd64)  arch="x86_64" ;;
         aarch64|arm64) arch="arm64" ;;
