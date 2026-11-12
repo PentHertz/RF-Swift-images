@@ -59,15 +59,10 @@ function atuin_soft_fromsource_install() {
 function atuin_soft_install() {
     ARCH=$(uname -m)
 
+    local triple
     case "$ARCH" in
-        x86_64|amd64)
-            goodecho "[+] Architecture: x86_64"
-            goodecho "[+] Installing atuin for x86_64"
-            ;;
-        aarch64|arm64)
-            goodecho "[+] Architecture: aarch64"
-            goodecho "[+] Installing atuin for aarch64"
-            ;;
+        x86_64|amd64) triple="x86_64-unknown-linux-gnu" ;;
+        aarch64|arm64) triple="aarch64-unknown-linux-gnu" ;;
         *)
             criticalecho-noexit "[-] Officially unsupported architecture: $ARCH"
             atuin_soft_fromsource_install
@@ -75,10 +70,28 @@ function atuin_soft_install() {
             ;;
     esac
 
-    goodecho "[+] Proceeding with atuin installation"
-    cd /opt || exit  # Fail the script if /opt is inaccessible
-    curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh -s -- --non-interactive
-    echo 'source $HOME/.atuin/bin/env' >> ~/.zshrc
-    echo 'eval "$(atuin init zsh)"' >> ~/.zshrc
-    goodecho "[+] atuin installed and initialized in zshrc"
+    # Fetch the release tarball straight from GitHub, with retries and its
+    # checksum. setup.atuin.sh is a wrapper with two more unretried hops (it
+    # fetches the GitHub installer, which fetches this tarball) and a 502 there
+    # used to abort the whole corebuild layer.
+    goodecho "[+] Installing atuin for $ARCH"
+    local name="atuin-${triple}.tar.gz"
+    local url="https://github.com/atuinsh/atuin/releases/latest/download/${name}"
+    local tmp
+    tmp=$(mktemp -d)
+    if installfromnet curl --proto '=https' --tlsv1.2 -fsSL -o "$tmp/$name" "$url" \
+        && installfromnet curl --proto '=https' --tlsv1.2 -fsSL -o "$tmp/$name.sha256" "$url.sha256" \
+        && (cd "$tmp" && sha256sum -c "$name.sha256") \
+        && tar -xzf "$tmp/$name" -C "$tmp" \
+        && install -m755 "$tmp/atuin-${triple}/atuin" /usr/local/bin/atuin; then
+        # Only hook the shells once the binary is there, or every new shell
+        # would print "atuin: command not found".
+        grep -qF 'atuin init zsh' ~/.zshrc 2>/dev/null || echo 'eval "$(atuin init zsh)"' >> ~/.zshrc
+        grep -qF 'atuin init bash' ~/.bashrc 2>/dev/null || echo 'eval "$(atuin init bash)"' >> ~/.bashrc
+        goodecho "[+] atuin $(atuin --version | cut -d' ' -f2) installed and initialized in zshrc/bashrc"
+    else
+        record_build_failure "net" "atuin" "release download/verify failed: $url"
+    fi
+    rm -rf "$tmp"
+    return 0
 }
