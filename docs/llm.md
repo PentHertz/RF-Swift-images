@@ -1,8 +1,8 @@
 # RF Swift `llm` image
 
-Coding agents, shared skill packs and agent-side reverse-engineering tools, on top of
-`corebuild`. Built for amd64 and arm64 (Claude Code, Codex and OpenCode ship no riscv64 build).
-In the image this file is `/opt/llm/README.md`.
+Coding agents, shared skill packs, agent-side reverse-engineering tools, local speech-to-text
+(whisper.cpp) and a web chat UI (Open WebUI), on top of `corebuild`. Built for amd64 and arm64
+(Claude Code, Codex and OpenCode ship no riscv64 build). In the image this file is `/opt/llm/README.md`.
 
 | Tool | Command | Installed from | Its own config |
 |---|---|---|---|
@@ -14,6 +14,8 @@ In the image this file is `/opt/llm/README.md`.
 | REA, Reverse Engineer Anything | `rea` (MCP server `rea mcp`) | npm `rea-agents` | registered in each agent |
 | Craft Anything | `craft-anything`, `craft-anything-cli` (MCP server `craft-anything-cli mcp`) | GitHub release, `/opt/craft-anything` | `craft-anything-cli ai list` |
 | Skill packs | `llm-skills` | git, `/opt/llm-skills/src` | `~/.agents/skills`, `~/.claude/skills` |
+| whisper.cpp | `whisper-cli`, `whisper-server`, `whisper-stream`, `whisper-download-model` | source, `/opt/whisper.cpp` | models in `/opt/whisper.cpp/models` |
+| Open WebUI | `open-webui serve` | PyPI `open-webui` (uv tool, Python 3.11) | `~/.open-webui/` (`$DATA_DIR`) |
 
 Node.js 24 LTS is in `/usr/local` (Ubuntu's 22.22 is too old for REA).
 
@@ -27,6 +29,8 @@ docker run -it --rm \
   -v ~/.rfswift-llm/claude:/root/.claude -v ~/.rfswift-llm/codex:/root/.codex \
   -v ~/.rfswift-llm/opencode-data:/root/.local/share/opencode \
   -v ~/.rfswift-llm/vibe:/root/.vibe -v ~/.rfswift-llm/hermes:/root/.hermes \
+  -v ~/.rfswift-llm/open-webui:/root/.open-webui -v ~/.rfswift-llm/hf-cache:/root/.cache/huggingface \
+  -v ~/.rfswift-llm/whisper-models:/root/whisper-models \
   -v "$PWD:/work" -w /work \
   penthertz/rfswift_resolute:llm_amd64
 ```
@@ -174,14 +178,94 @@ The map's **Ask bar** answers through the Claude Code or Codex CLI only (it runs
 Ask bar works; force one with `node floorplan/serve.mjs --engine codex`. Without either, ask
 OpenCode itself: it can query the map with `node floorplan/query.mjs` and read the code.
 
+## whisper.cpp (speech-to-text)
+
+A CPU build of [whisper.cpp](https://github.com/ggml-org/whisper.cpp) (portable: AVX2 baseline on
+amd64). The image holds no model; fetch one first:
+
+```sh
+whisper-download-model base.en                   # into /opt/whisper.cpp/models
+whisper-download-model small /root/whisper-models   # or a mounted folder (see above)
+whisper-download-model                           # list: tiny, base, small, medium, large-v3-turbo, -q5_0...
+```
+
+`.en` models are English-only and better at it; the others do 99 languages (`-l auto` or `-l fr`).
+
+```sh
+whisper-cli -m /opt/whisper.cpp/models/ggml-base.en.bin -f recording.wav        # wav, mp3, flac, ogg
+whisper-cli -m /opt/whisper.cpp/models/ggml-base.en.bin -f recording.wav -osrt  # + subtitles file
+whisper-stream -m /opt/whisper.cpp/models/ggml-base.en.bin                       # live, from the microphone
+```
+
+`whisper-stream` needs the container's audio (RF Swift's PulseAudio sharing). For audio coming out
+of an SDR app, record it to a file first, or let an agent do it: "transcribe the voice in
+/work/capture.wav with whisper-cli" works in any of the agents.
+
+`whisper-server` serves the same model over HTTP. With these options it speaks OpenAI's
+transcription API (Open WebUI and other clients can use it) and accepts any format ffmpeg reads:
+
+```sh
+whisper-server -m /opt/whisper.cpp/models/ggml-base.en.bin --port 8178 \
+  --inference-path /v1/audio/transcriptions --convert
+curl -F file=@recording.wav -F model=whisper-1 http://127.0.0.1:8178/v1/audio/transcriptions
+```
+
+## Open WebUI
+
+[Open WebUI](https://openwebui.com) is a ChatGPT-style web interface for any model API. It runs on
+its own Python 3.11 (Open WebUI does not support Ubuntu's 3.14), installed with
+`uv tool install --python 3.11 open-webui`; PyTorch, used for document search, is the CPU build.
+
+```sh
+open-webui serve                 # http://127.0.0.1:8080, `--port` to change it
+```
+
+The first account you create is the administrator. Chats, users and settings go to
+`~/.open-webui` (`DATA_DIR`); mount it to keep them (see above).
+
+The first start downloads Open WebUI's document-search embedding model from Hugging Face
+(`all-MiniLM-L6-v2`, about 1 GB with all its formats) into `~/.cache/huggingface`; mount that
+folder too, or it is downloaded again in every new container. `OFFLINE_MODE=true open-webui serve`
+skips the download and starts in seconds; chats and speech-to-text work, document search does
+not.
+
+The image runs no model itself. Add one under **Admin Panel → Settings → Connections**:
+
+- **OpenAI API**: OpenAI, or any OpenAI-compatible endpoint with its key, such as Mistral
+  (`https://api.mistral.ai/v1`), OpenRouter (`https://openrouter.ai/api/v1`) or a llama.cpp/vLLM
+  server.
+- **Ollama**: an Ollama running on the host, `http://<host-ip>:11434` (or `http://127.0.0.1:11434`
+  with host networking).
+
+The same can be set for the first start only with environment variables (`OPENAI_API_BASE_URL`,
+`OPENAI_API_KEY`, `OLLAMA_BASE_URL`); after that the admin settings win.
+
+### Speech-to-text through whisper.cpp
+
+The microphone button in a chat uses Open WebUI's own Whisper unless told otherwise. To use
+whisper.cpp instead, start `whisper-server` as above, then in **Admin Panel → Settings → Audio**
+set Speech-to-Text engine **OpenAI**, API base URL `http://127.0.0.1:8178/v1`, any key, model
+`whisper-1`. Or on the first start:
+
+```sh
+AUDIO_STT_ENGINE=openai AUDIO_STT_OPENAI_API_BASE_URL=http://127.0.0.1:8178/v1 \
+AUDIO_STT_OPENAI_API_KEY=none AUDIO_STT_MODEL=whisper-1 open-webui serve
+```
+
+The browser only gives the microphone to `http://127.0.0.1`/`localhost` or HTTPS pages.
+
 ## Updating
 
 ```sh
 npm update -g @anthropic-ai/claude-code @openai/codex @opencode/cli rea-agents
 uv tool upgrade mistral-vibe
+uv tool install --force --python 3.11 --torch-backend cpu open-webui
 hermes update
 llm-skills update
 ```
 
-Craft Anything is pinned (`CRAFT_VERSION` in `scripts/llm_software.sh`); the image rebuild
-picks up a new release once that is bumped.
+Open WebUI is reinstalled rather than upgraded: uv does not save `--torch-backend cpu`, so
+`uv tool upgrade open-webui` could swap in the CUDA build of PyTorch (about 4 GB more).
+
+Craft Anything and whisper.cpp are pinned (`CRAFT_VERSION`, `WHISPERCPP_VERSION` in
+`scripts/llm_software.sh`); the image rebuild picks up a new release once that is bumped.

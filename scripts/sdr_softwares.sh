@@ -166,23 +166,54 @@ function sdrpp_soft_install () {
 	cd /root
 }
 
+# SigDigger needs sigutils, suscan (DSP core + suscli) and SuWidgets, all from source:
+# Ubuntu packages none of them. Upstream's actinid.org/blsd build script is gone (404);
+# this follows its replacement, Scripts/dist-common.sh (all four on master, Qt 6, cmake/qmake).
 function sigdigger_soft_install() {
-	# Check architecture
-    ARCH=$(uname -m)
-    if [[ "$ARCH" != "x86_64" && "$ARCH" != "aarch64" ]]; then
-        criticalecho-noexit "[-] Unsupported architecture: $ARCH"
-        exit 0
+    goodecho "[+] Installing SigDigger (sigutils, suscan, SuWidgets, SigDigger)"
+    install_dependencies "build-essential cmake git pkg-config qt6-base-dev qt6-base-dev-tools qt6-l10n-tools libqt6opengl6-dev \
+        libsndfile1-dev libxml2-dev libfftw3-dev libsoapysdr-dev libvolk-dev libjson-c-dev zlib1g-dev \
+        libcurl4-openssl-dev libasound2-dev portaudio19-dev"
+    local src=/rftools/sdr/sigdigger repo qmake
+    qmake=$(command -v qmake6 || echo /usr/lib/qt6/bin/qmake)
+    mkdir -p "$src"
+    # replaces the old blsd tree and its /usr/sbin link
+    rm -rf /rftools/sdr/blsd-dir /rftools/sdr/blsd
+    rm -f /usr/sbin/SigDigger
+    for repo in sigutils suscan SuWidgets SigDigger; do
+        rm -rf "${src:?}/$repo"
+        if ! installfromnet git clone --recurse-submodules "https://github.com/BatchDrake/$repo.git" "$src/$repo"; then
+            record_build_failure "git" "SigDigger" "clone of $repo failed"
+            return 0
+        fi
+    done
+    for repo in sigutils suscan; do
+        if ! { cmake -S "$src/$repo" -B "$src/$repo/build" -DCMAKE_BUILD_TYPE=Release \
+                && cmake --build "$src/$repo/build" -j"$(nproc)" \
+                && cmake --install "$src/$repo/build"; }; then
+            record_build_failure "build" "SigDigger" "$repo build failed"
+            return 0
+        fi
+        ldconfig
+    done
+    # qmake runs in the source dir: SigDigger.pro reads files relative to it
+    if ! (cd "$src/SuWidgets" && "$qmake" SuWidgetsLib.pro "CONFIG += release" PREFIX=/usr/local \
+            && make -j"$(nproc)" && make install); then
+        record_build_failure "build" "SigDigger" "SuWidgets build failed"
+        return 0
     fi
-    goodecho "[+] Installing dependencies"
-    install_dependencies "libxml2-dev libxml2-utils libfftw3-dev libasound-dev"
-    goodecho "[+] Downloading and launching auto-script"
-    [ -d /rftools/sdr ] || mkdir -p /rftools/sdr
-    cd /rftools/sdr
-    installfromnet "wget" "--no-check-certificate" "https://actinid.org/blsd"
-    chmod +x blsd
-    ./blsd
-    cd /root
-    ln -s /rftools/sdr/blsd-dir/SigDigger/SigDigger /usr/sbin/SigDigger
+    ldconfig
+    if ! (cd "$src/SigDigger" && "$qmake" SigDigger.pro "CONFIG += release" PREFIX=/usr/local SUWIDGETS_PREFIX=/usr/local \
+            && make -j"$(nproc)" && make install); then
+        record_build_failure "build" "SigDigger" "SigDigger build failed"
+        return 0
+    fi
+    ldconfig
+    # sources stay for rebuilds; drop the build trees
+    rm -rf "$src"/sigutils/build "$src"/suscan/build
+    (cd "$src/SuWidgets" && make distclean > /dev/null 2>&1) || true
+    (cd "$src/SigDigger" && make distclean > /dev/null 2>&1) || true
+    command -v SigDigger > /dev/null || record_build_failure "build" "SigDigger" "SigDigger missing from PATH after install"
 }
 
 function cyberther_soft_install() {

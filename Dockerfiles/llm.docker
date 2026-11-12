@@ -1,5 +1,6 @@
 # This DockerFile is part of the RFSwift project
-# Install type: LLM coding agents, shared skill packs and agent-side analysis tools
+# Install type: LLM coding agents, shared skill packs, agent-side analysis tools,
+#               whisper.cpp (speech-to-text) and Open WebUI
 # Author(s): Sébastien Dudek (@FlUxIuS) @Penthertz
 # website: penthertz.com
 # Usage: /opt/llm/README.md in the image (docs/llm.md in this repository)
@@ -43,6 +44,12 @@ RUN ./entrypoint.sh llm_skills_install
 # Analysis MCP servers, registered with every agent
 RUN ./entrypoint.sh rea_soft_install && \
 	./entrypoint.sh craftanything_soft_install
+
+# Local speech-to-text (whisper.cpp) and a web chat UI (Open WebUI)
+RUN ./entrypoint.sh whispercpp_soft_install
+RUN ./entrypoint.sh openwebui_soft_install
+# Open WebUI's chats, users and settings; its default is inside the package, lost on upgrade
+ENV DATA_DIR="/root/.open-webui"
 
 # Build report (tools that failed to install)
 RUN ./entrypoint.sh print_build_report

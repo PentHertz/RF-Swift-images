@@ -1,7 +1,8 @@
 #!/bin/bash
 # This file is part of the RFSwift project (llm image).
 # Coding agents (Claude Code, Codex, OpenCode 2.x, Mistral Vibe, Hermes Agent), shared skill
-# packs managed by llm-skills, and the REA / Craft Anything analysis MCP servers.
+# packs managed by llm-skills, the REA / Craft Anything analysis MCP servers, whisper.cpp
+# (local speech-to-text) and Open WebUI.
 # Usage notes for the image: docs/llm.md (copied to /opt/llm/README.md).
 
 LLM_SCRIPTS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -16,6 +17,8 @@ CRAFT_VERSION="0.6.1"
 CRAFT_SHA256_X86_64="83ec0730c9117f399122b315c63ed4c3a8d31ac55bddd74cb8b33cd2f76ef704"
 CRAFT_SHA256_AARCH64="b4255ac806e2a598b9fc6dba4e8ed2190e49baafd2f68dd7e037f3294e472941"
 CRAFT_SHA256_RISCV64="d82468c2daef97811f0b9b63dba523516860f238d46873ad6fbccccadedd62c1"
+
+WHISPERCPP_VERSION="v1.9.5"
 
 # Agents configured by REA and Craft Anything's own setup commands (Vibe is done by hand).
 LLM_SETUP_CLIENTS=(--client claude_code --client codex --client opencode --client hermes)
@@ -248,4 +251,57 @@ function craftanything_soft_install() {
     # OpenCode as an extra builder backend (Claude Code stays the default one)
     craft-anything-cli ai add OpenCode --kind agent_cli --model opencode \
         || record_build_failure "other" "craft-anything OpenCode backend" "ai add failed"
+}
+
+function whispercpp_soft_install() {
+    # whisper.cpp: local speech-to-text (whisper-cli, whisper-server with an OpenAI-compatible
+    # endpoint, whisper-stream for the microphone). Models are not in the image:
+    # `whisper-download-model base.en` puts one in /opt/whisper.cpp/models.
+    goodecho "[+] Installing whisper.cpp ${WHISPERCPP_VERSION}"
+    # SDL2: microphone examples (whisper-stream, whisper-command); ffmpeg: whisper-server --convert
+    install_dependencies "build-essential cmake git libsdl2-dev ffmpeg"
+    local src=/opt/whisper.cpp
+    rm -rf "$src"
+    if ! installfromnet git clone --depth 1 -b "$WHISPERCPP_VERSION" https://github.com/ggml-org/whisper.cpp.git "$src"; then
+        record_build_failure "git" "whisper.cpp" "clone failed (${WHISPERCPP_VERSION})"
+        return 0
+    fi
+    # GGML_NATIVE=OFF: a portable build (AVX2/FMA baseline on x86_64) instead of one tuned
+    # for, and possibly crashing off, the CPU of the machine that built the image
+    if cmake -S "$src" -B "$src/build" -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=OFF -DWHISPER_SDL2=ON \
+            -DWHISPER_BUILD_TESTS=OFF \
+        && cmake --build "$src/build" -j"$(nproc)" \
+        && cmake --install "$src/build"; then
+        ldconfig
+    else
+        record_build_failure "build" "whisper.cpp" "cmake build failed"
+    fi
+    rm -rf "$src/build"
+    cat > /usr/local/bin/whisper-download-model << 'EOS'
+#!/bin/sh
+# whisper-download-model <model> [dir]: fetch a ggml Whisper model from Hugging Face
+# (tiny, base.en, small, medium, large-v3-turbo, ...; -q5_0/-q8_0 for quantized ones).
+# Default dir: /opt/whisper.cpp/models. Run without arguments for the full list.
+exec /opt/whisper.cpp/models/download-ggml-model.sh "$@"
+EOS
+    chmod 0755 /usr/local/bin/whisper-download-model
+    whisper-cli --help > /dev/null 2>&1 || record_build_failure "build" "whisper.cpp" "whisper-cli does not run"
+}
+
+function openwebui_soft_install() {
+    # Open WebUI supports Python 3.11-3.12 only (Ubuntu 26.04 ships 3.14): uv brings its own 3.11.
+    # PyTorch, used for local RAG embeddings and reranking, comes CPU-only: the default CUDA
+    # wheels would add ~4 GB. Data goes to $DATA_DIR (set to ~/.open-webui by llm.docker).
+    goodecho "[+] Installing Open WebUI"
+    if ! command -v uv > /dev/null; then
+        record_build_failure "toolchain" "open-webui" "uv unavailable"
+        return 0
+    fi
+    install_dependencies "ffmpeg"   # pydub, for speech-to-text uploads
+    if ! installfromnet uv tool install --force --no-cache --python 3.11 --torch-backend cpu open-webui; then
+        record_build_failure "pip" "open-webui" "uv tool install failed"
+        return 0
+    fi
+    [ -e "$HOME/.local/bin/open-webui" ] && ln -sf "$HOME/.local/bin/open-webui" /usr/local/bin/open-webui
+    open-webui --help > /dev/null || record_build_failure "other" "open-webui" "open-webui does not run after install"
 }
