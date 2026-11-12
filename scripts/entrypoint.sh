@@ -15,6 +15,7 @@ source automotive_software.sh
 source mobile_software.sh
 source ad_software.sh
 source osint_software.sh
+source llm_software.sh
 source telecom_software.sh
 source terminal_harness.sh
 source corebuild.sh

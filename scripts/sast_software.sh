@@ -78,7 +78,10 @@ function joernsast_install() {
         | sudo tee /etc/apt/trusted.gpg.d/scalasbt-release.gpg > /dev/null
     sudo chmod 644 /etc/apt/trusted.gpg.d/scalasbt-release.gpg
 
-    sudo apt-get update
+    # One bad third-party list makes apt-get update exit 100 and errexit abort the layer,
+    # e.g. corebuild's netbird repo serving a Release file dated in the future ("not valid
+    # yet"). The other lists still refresh, and a missing sbt is caught by install_dependencies.
+    sudo apt-get update || criticalecho-noexit "[!] apt-get update reported errors, continuing with the lists that refreshed"
     install_dependencies "sbt"
     [ -d /sast ] || mkdir -p /sast
     cd /sast

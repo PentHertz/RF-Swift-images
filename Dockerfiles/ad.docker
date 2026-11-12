@@ -41,6 +41,7 @@ RUN ./entrypoint.sh ldapdomaindump_soft_install && \
 	./entrypoint.sh bloodyad_soft_install && \
 	./entrypoint.sh certsync_soft_install && \
 	./entrypoint.sh sprayhound_soft_install && \
+	./entrypoint.sh roadtools_soft_install && \
 	./entrypoint.sh kerbrute_soft_install && \
 	./entrypoint.sh sharplaps_soft_install && \
 	./entrypoint.sh install_pyGoldenGMSA && \

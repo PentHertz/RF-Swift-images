@@ -39,9 +39,12 @@ DRYRUN="false"
 DEV_REGISTRY="${DEV_REGISTRY:-penthertz/rfswiftdev_resolute}"
 RELEASE_REGISTRY="${RELEASE_REGISTRY:-penthertz/rfswift_resolute}"
 
-VALID_IMAGES="corebuild sdrsa_devices sdr_light sdr_gnuradio4 sdr_hacks sdr_full automotive android osint reversing rfid network ad wifi bluetooth hardware telecom_utils telecom_2Gto3G telecom_4G_5GNSA telecom_5G deeptempest"
+VALID_IMAGES="corebuild sdrsa_devices sdr_light sdr_gnuradio4 sdr_hacks sdr_full automotive android osint llm reversing rfid network ad wifi bluetooth hardware telecom_utils telecom_2Gto3G telecom_4G_5GNSA telecom_5G deeptempest"
 # Topological order (each image builds FROM an earlier one). Used for `all`.
-ALL_IMAGES="corebuild sdrsa_devices sdr_light sdr_gnuradio4 sdr_hacks sdr_full reversing rfid automotive android osint network ad wifi bluetooth hardware deeptempest telecom_utils telecom_2Gto3G telecom_4G_5GNSA telecom_5G"
+ALL_IMAGES="corebuild sdrsa_devices sdr_light sdr_gnuradio4 sdr_hacks sdr_full reversing rfid automotive android osint llm network ad wifi bluetooth hardware deeptempest telecom_utils telecom_2Gto3G telecom_4G_5GNSA telecom_5G"
+
+# Images that have no build for some arch (llm: Claude Code, Codex and OpenCode ship no riscv64).
+NO_RISCV64_IMAGES="llm"
 
 # ---- helpers ---------------------------------------------------------------
 die()  { printf '\033[1;31m[!] %s\033[0m\n' "$*" >&2; exit 1; }
@@ -65,6 +68,7 @@ make_target() {
 
 require_version() { [ -n "$VERSION" ] || die "this command needs --version X.Y.Z"; }
 valid_image() { case " $VALID_IMAGES " in *" $1 "*) return 0 ;; *) return 1 ;; esac; }
+arch_supported() { [ "$2" != riscv64 ] || case " $NO_RISCV64_IMAGES " in *" $1 "*) return 1 ;; esac; }
 
 # ---- operations ------------------------------------------------------------
 do_build() {
@@ -143,6 +147,7 @@ run_all() {
     local cmd="$1" img ok=() fail=()
     info "Running '$cmd' for ALL images (arch=$ARCH): $ALL_IMAGES"
     for img in $ALL_IMAGES; do
+        if ! arch_supported "$img" "$ARCH"; then info "skipping $img: no $ARCH build"; continue; fi
         echo; info "================= $cmd: $img ================="
         if ( do_one "$cmd" "$img" ); then ok+=("$img"); else fail+=("$img"); fi
     done
@@ -195,6 +200,9 @@ for a in $ARCHS; do
     [ "$ARCH" = all ] || info "########## arch: $ARCH ##########"
     if [ "$IMAGE" = "all" ]; then
         run_all "$CMD" || overall_fail=1
+    elif ! arch_supported "$IMAGE" "$ARCH"; then
+        printf '\033[1;31m[!] %s has no %s build\033[0m\n' "$IMAGE" "$ARCH"
+        overall_fail=1
     elif ( do_one "$CMD" "$IMAGE" ); then
         :
     else

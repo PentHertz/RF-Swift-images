@@ -1,0 +1,55 @@
+# This DockerFile is part of the RFSwift project
+# Install type: LLM coding agents, shared skill packs and agent-side analysis tools
+# Author(s): Sébastien Dudek (@FlUxIuS) @Penthertz
+# website: penthertz.com
+# Usage: /opt/llm/README.md in the image (docs/llm.md in this repository)
+
+ARG BASE_IMAGE=corebuild
+FROM ${BASE_IMAGE}
+
+LABEL "org.container.project"="rfswift"
+LABEL "org.container.author"="Sébastien Dudek (FlUxIuS)"
+
+RUN echo 'APT::Install-Suggests "0";' >> /etc/apt/apt.conf.d/00-docker
+RUN echo 'APT::Install-Recommends "0";' >> /etc/apt/apt.conf.d/00-docker
+RUN apt-fast update && \
+    apt-get install -y software-properties-common && \
+    add-apt-repository universe && \
+    apt-fast update
+
+ENV PATH="/root/.local/bin:/root/.cargo/bin:${PATH}"
+
+COPY scripts /root/scripts/
+COPY rules /root/rules/
+COPY docs/llm.md /opt/llm/README.md
+
+WORKDIR /root/scripts/
+RUN chmod +x entrypoint.sh
+
+# Node.js LTS (the npm-distributed agents and REA need a newer one than Ubuntu's)
+RUN ./entrypoint.sh llm_nodejs_install
+
+# Coding agents
+RUN ./entrypoint.sh claudecode_soft_install && \
+	./entrypoint.sh codex_soft_install && \
+	./entrypoint.sh opencode_soft_install && \
+	./entrypoint.sh mistralvibe_soft_install
+
+RUN ./entrypoint.sh hermes_agent_soft_install
+
+# Skill packs (Trail of Bits, farmage, Floorplan, cybersecurity) for every agent, via llm-skills
+RUN ./entrypoint.sh llm_skills_install
+
+# Analysis MCP servers, registered with every agent
+RUN ./entrypoint.sh rea_soft_install && \
+	./entrypoint.sh craftanything_soft_install
+
+# Build report (tools that failed to install)
+RUN ./entrypoint.sh print_build_report
+
+# Cleaning and quitting
+WORKDIR /root/
+RUN rm -rf /root/thirdparty && \
+	rm -rf /root/rules/ && \
+	apt-fast clean
+RUN DEBIAN_FRONTEND=noninteractive rm -rf /var/lib/apt/lists/*

@@ -254,6 +254,10 @@ android:
 osint:
 	$(call build_and_push,osint,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild_$(ARCH),$(CURDIR)/osint.docker)
 
+# LLM coding agents + skills (amd64/arm64 only: Claude Code, Codex and OpenCode ship no riscv64 builds)
+llm:
+	$(call build_and_push,llm,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):corebuild_$(ARCH),$(CURDIR)/llm.docker)
+
 ad:
 	$(call build_and_push,ad,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):network_$(ARCH),$(CURDIR)/ad.docker)
 
@@ -295,6 +299,7 @@ clean_cache:
 	@docker buildx prune -af
 	@docker volume prune -f
 	@docker system prune -af --volumes
+
 # Print the build report (tools/packages that failed to install) baked into an
 # already-built image. Pulls the image if needed.
 #   make report IMG=corebuild ARCH=amd64
@@ -306,7 +311,7 @@ report:
 #
 # Convenience targets
 #
-build: common sdrsadevices sdrlight sdrfull sdrsadevicesantsdr sdrsadevicesrtlsdrv4 rfid network ad telecom_utils telecom_2Gto3G telecom_4G_5GNSA telecom_5G bluetooth wifi automotive android osint reversing
+build: common sdrsadevices sdrlight sdrfull sdrsadevicesantsdr sdrsadevicesrtlsdrv4 rfid network ad telecom_utils telecom_2Gto3G telecom_4G_5GNSA telecom_5G bluetooth wifi automotive android osint llm reversing
 	@echo "Done!"
 
 # Help target
@@ -333,7 +338,8 @@ help:
 	@echo "  sdrfull_final            - Build final stage"
 	@echo ""
 	@echo "Other image targets:"
-	@echo "  rfid, network, wifi, bluetooth, reversing, automotive, hardware"
+	@echo "  rfid, network, wifi, bluetooth, reversing, automotive, hardware, osint, ad"
+	@echo "  llm                 - LLM coding agents (Claude Code, Codex, OpenCode, Vibe, Hermes) + skills (amd64/arm64)"
 	@echo "  telecom_utils, telecom_2Gto3G, telecom_4G_5GNSA, telecom_5G, telecom_5G_oai, telecom_ltesniffer, deeptempest"
 	@echo ""
 	@echo "Examples:"
@@ -345,6 +351,6 @@ help:
 	sdrfull sdrfull_staged sdrfull_stage_begin sdrfull_stage_extraoot1 sdrfull_stage_extraoot2 \
 	sdrfull_stage_extrasofts sdrfull_stage_mldlsofts sdrfull_final \
 	sdrfull1 sdrfull2 sdrfull3 sdrfull4 sdrfull_intelgpu sdrfull_nvidiagpu \
-	rfid network wifi bluetooth reversing automotive hardware \
+	rfid network wifi bluetooth reversing automotive hardware osint ad llm \
 	telecom_utils telecom_2Gto3G telecom_4Gto5G telecom_4G_5GNSA telecom_5G telecom_5G_oai telecom_ltesniffer telecom_5G_bladerf \
 	deeptempest build help

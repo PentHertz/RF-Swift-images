@@ -76,6 +76,43 @@ function sprayhound_soft_install() {
     _ad_pipx "sprayhound" "sprayhound" "sprayhound"
 }
 
+# geckodriver for roadtx's browser-based auth flows (it looks for `geckodriver` on PATH)
+GECKODRIVER_VERSION="v0.37.1"
+GECKODRIVER_SHA256_LINUX64="e815130ea95983e162ae91843b48d3a3ce991735635fce83a647afde21e09f7e"
+GECKODRIVER_SHA256_AARCH64="8fd90b951422fbad5b56539fb344dff66eb3f986d615d8d6fde9f1f62dad610c"
+
+function roadtools_soft_install() {
+    # ROADtools (dirkjanm) for Entra ID / Azure AD:
+    #  - roadrecon: tenant enumeration into roadrecon.db, plus its web GUI (`roadrecon gui`,
+    #    http://127.0.0.1:5000); the Angular front end ships prebuilt in the PyPI wheel.
+    #  - roadtx: token exchange, device registration, PRT. Its interactive flows
+    #    (interactiveauth, keepassauth, browserprtauth...) drive Firefox through geckodriver.
+    goodecho "[+] Installing ROADtools (roadrecon + GUI, roadtx)"
+    install_dependencies "pipx git"; pipx ensurepath
+    _ad_pipx "roadrecon" "roadrecon" "roadrecon"
+    _ad_pipx "roadtx" "roadtx" "roadtx"
+
+    local asset sha tmp
+    case "$(uname -m)" in
+        x86_64|amd64) asset="linux64"; sha="$GECKODRIVER_SHA256_LINUX64" ;;
+        aarch64|arm64) asset="linux-aarch64"; sha="$GECKODRIVER_SHA256_AARCH64" ;;
+        *) criticalecho-noexit "[-] geckodriver has no $(uname -m) build: roadtx browser flows unavailable"
+           return 0 ;;
+    esac
+    tmp=$(mktemp -d)
+    if ! installfromnet curl -fsSL -o "$tmp/geckodriver.tar.gz" \
+        "https://github.com/mozilla/geckodriver/releases/download/${GECKODRIVER_VERSION}/geckodriver-${GECKODRIVER_VERSION}-${asset}.tar.gz"; then
+        record_build_failure "net" "geckodriver" "download failed (${GECKODRIVER_VERSION} ${asset})"
+    elif ! echo "${sha}  $tmp/geckodriver.tar.gz" | sha256sum -c -; then
+        record_build_failure "net" "geckodriver" "checksum mismatch (${GECKODRIVER_VERSION} ${asset})"
+    else
+        tar -xzf "$tmp/geckodriver.tar.gz" -C /usr/local/bin geckodriver
+        chmod 0755 /usr/local/bin/geckodriver
+    fi
+    rm -rf "$tmp"
+    return 0
+}
+
 function kerbrute_soft_install() {
     goodecho "[+] Installing kerbrute (Go)"
     install_dependencies "golang-go git"

@@ -1092,9 +1092,18 @@ function ssrfmap_soft_install() {
     gitinstall "https://github.com/swisskyrepo/SSRFmap.git" "ssrfmap_soft_install"
     if [ -d SSRFmap ]; then
         cd SSRFmap
-        python3 -m venv venv
-        ./venv/bin/pip install -r requirements.txt \
-            || record_build_failure "pip" "SSRFmap" "requirements install failed"
+        # Upstream moved from requirements.txt to pyproject.toml + uv.lock (an app, `package = false`,
+        # default groups lint/test): sync only the runtime deps into ./venv, the path the wrapper uses
+        if [ -f uv.lock ] && command -v uv > /dev/null; then
+            UV_PROJECT_ENVIRONMENT=venv installfromnet uv sync --frozen --no-default-groups \
+                || record_build_failure "pip" "SSRFmap" "uv sync failed"
+        elif [ -f requirements.txt ]; then
+            python3 -m venv venv
+            ./venv/bin/pip install -r requirements.txt \
+                || record_build_failure "pip" "SSRFmap" "requirements install failed"
+        else
+            record_build_failure "pip" "SSRFmap" "neither uv.lock (with uv) nor requirements.txt to install from"
+        fi
         cat > /usr/local/bin/ssrfmap <<EOF
 #!/bin/bash
 cd /opt/network/SSRFmap && exec ./venv/bin/python ssrfmap.py "\$@"

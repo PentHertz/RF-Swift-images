@@ -28,7 +28,7 @@ corebuild
     │   └── ...GPU variants  (sdr_light_intelgpu / _nvidiagpu)
     ├── hardware, deeptempest
     └── telecom_*, wifi, bluetooth, rfid, network, automotive,
-        android, osint, ad, reversing
+        android, osint, llm (amd64/arm64), ad, reversing
 ```
 
 An image can only be (re)built after its base exists in the dev registry.

@@ -1101,6 +1101,45 @@ function hydrasdr433_soft_install() {
     make install
 }
 
+function hydrasdradsb_soft_install() {
+    # Mode S / ADS-B 1090 MHz decoder for HydraSDR (hydrasdr/hydrasdr_adsb).
+    # Live input needs libhydrasdr >= 1.1.4; against an older one CMake quietly
+    # builds a recordings-only binary. The sdrsa_devices base can carry 1.1.3,
+    # so refresh libhydrasdr from hydrasdr-host first when needed (SOVERSION is
+    # unchanged, so gr-hydrasdr and SoapyHydraSDR keep working).
+    # Upstream has no install() rule on Linux: the binary is copied by hand.
+    goodecho "[+] Installing hydrasdr_adsb"
+    local hdr=/usr/include/libhydrasdr/hydrasdr.h ver="" p
+    if [ -f "$hdr" ]; then
+        for p in MAJOR MINOR REVISION; do
+            ver="${ver:+$ver.}$(sed -n "s/^#define HYDRASDR_VER_${p}[[:space:]]\+\([0-9]\+\).*/\1/p" "$hdr")"
+        done
+    fi
+    if ! dpkg --compare-versions "${ver:-0}" ge 1.1.4; then
+        goodecho "[+] libhydrasdr ${ver:-not found} is older than 1.1.4, updating it"
+        hydrasdr_rfone_install || true   # its trailing ln -s fails on existing links
+        ldconfig
+    fi
+    [ -d /rftools/sdr ] || mkdir -p /rftools/sdr
+    cd /rftools/sdr
+    gitinstall "https://github.com/hydrasdr/hydrasdr_adsb.git" "hydrasdradsb_soft_install"
+    if [ ! -d hydrasdr_adsb ]; then
+        record_build_failure "git" "hydrasdr_adsb" "clone failed"
+        return 0
+    fi
+    cd hydrasdr_adsb
+    rm -rf build
+    if cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build -j"$(nproc)"; then
+        install -m 0755 build/hydrasdr_adsb /usr/local/bin/hydrasdr_adsb
+        # no grep -q: with pipefail an early grep exit can SIGPIPE readelf
+        readelf -d /usr/local/bin/hydrasdr_adsb | grep 'NEEDED.*libhydrasdr' > /dev/null \
+            || record_build_failure "build" "hydrasdr_adsb" "built without libhydrasdr: recordings only, no live input"
+    else
+        record_build_failure "build" "hydrasdr_adsb" "cmake build failed"
+    fi
+    rm -rf build
+}
+
 FISSURE_DIR="/rftools/sdr/FISSURE"
 FISSURE_VENV="${FISSURE_DIR}/venv"
 
