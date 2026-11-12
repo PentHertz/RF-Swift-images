@@ -20,6 +20,11 @@ ENV CMAKE_POLICY_VERSION_MINIMUM="3.5"
 
 RUN echo 'APT::Install-Suggests "0";' >> /etc/apt/apt.conf.d/00-docker
 RUN echo 'APT::Install-Recommends "0";' >> /etc/apt/apt.conf.d/00-docker
+# Third-party repos (Tailscale, NetBird) sometimes serve a Release file dated minutes ahead of
+# the build machine's clock: `apt-get update` then exits 100 ("not valid yet") and aborts whatever
+# layer it is in. Accept up to 1 h of skew (apt's default is 10 s); a Release file further in the
+# future is still refused, and signatures and Valid-Until are still checked.
+RUN echo 'Acquire::Max-FutureTime "3600";' > /etc/apt/apt.conf.d/99-rfswift-max-futuretime
 
 # Set-up scripts
 COPY scripts /root/scripts/

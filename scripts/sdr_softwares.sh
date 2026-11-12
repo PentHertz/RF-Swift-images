@@ -800,16 +800,21 @@ function meshtastic_sdr_soft_install () {
 
 function gpredict_sdr_soft_install () {
 	goodecho "[+] Installing GPredict dependencies"
-	install_dependencies "libtool intltool autoconf automake libcurl4-openssl-dev pkg-config libglib2.0-dev libgtk-3-dev libgoocanvas-2.0-dev"
+	# autopoint (gettext): autogen.sh runs `autopoint --force` since upstream e68e4b3e (2026-11-01)
+	install_dependencies "libtool intltool autoconf automake autopoint gettext libcurl4-openssl-dev pkg-config libglib2.0-dev libgtk-3-dev libgoocanvas-2.0-dev"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	goodecho "[+] Cloning Meshtastic_SDR"
+	goodecho "[+] Cloning GPredict"
 	gitinstall "https://github.com/csete/gpredict.git" "gpredict_sdr_soft_install"
+	if [ ! -d gpredict ]; then record_build_failure "git" "gpredict" "clone failed"; return 0; fi
 	cd gpredict
-	./autogen.sh
-	./configure
-	make -j$(nproc)
-	make install
+	# autogen.sh ends by running ./configure itself
+	if ./autogen.sh && make -j"$(nproc)" && make install; then
+		goodecho "[+] GPredict installed"
+	else
+		record_build_failure "build" "gpredict" "autogen/configure/make failed"
+	fi
+	cd /root
 }
 
 function v2verifier_sdr_soft_install () {
