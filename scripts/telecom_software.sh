@@ -138,7 +138,7 @@ function openbts_umts_soft_install_call() {
 	# then, don't abort the whole telecom_2Gto3G image build.
 	set +e
 	set +o pipefail
-	( ./install_dependences.sh && ./autogen.sh && ./configure && make && sudo make install )
+	( ./install_dependences.sh && ./autogen.sh && ./configure CXXFLAGS="-O2 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0" CFLAGS="-O2 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0" && make && sudo make install )
 	if [ $? -ne 0 ]; then
 		record_build_failure "make" "OpenBTS-UMTS" "Legacy C++ fails to build under GCC 15; needs upstream source update"
 	fi
@@ -155,7 +155,7 @@ function srsran4G_5GNSA_soft_install() {
 	[ -d /telecom/4G ] || mkdir -p /telecom/4G
 	cd /telecom/4G
 	goodecho "[+] Cloninig and installing srsRAN 4G"
-	installfromnet "git" "clone" "https://github.com/PentHertz/srsRAN_4G_resolute.git"
+	installfromnet "git" "clone" "https://github.com/srsran/srsRAN_4G.git"
 	cd srsRAN_4G_resolute
 	mkdir build
 	cd build

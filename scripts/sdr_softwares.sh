@@ -209,7 +209,7 @@ function cyberther_soft_install() {
 	goodecho "[CyberEther][+] Cloning GitHub repository"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	git clone --depth=1 --branch v1.16.2 https://github.com/luigifcruz/CyberEther.git CyberEther
+	git clone --depth=1 --branch v1.19.2 https://github.com/luigifcruz/CyberEther.git CyberEther
 	cd CyberEther
 	goodecho "[CyberEther][+] Configuring build options for architecture"
 	BUILDTYPE="debugoptimized"
@@ -300,6 +300,116 @@ function decsat_soft_install() {
 	rm -rf "$tdir"
 	# Drop cargo's git checkout (with the libopus/libxaac submodules) to keep the layer small
 	find "${CARGO_HOME:-$HOME/.cargo}/git" -mindepth 2 -maxdepth 2 -iname 'decsat-*' -exec rm -rf {} + 2>/dev/null || true
+	return 0
+}
+
+function sdrmm_soft_install() {
+	# SDRmm: modular client-server SDR in Rust (AM/FM/SSB, digital voice, ADS-B,
+	# AIS, pagers, weather sats, DAB/DRM/DVB, recording, scanning, DF, REST/MCP).
+	# Installs the headless `sdrmm` server, which embeds its web UI. Upstream ships
+	# portable Linux builds for x86_64 and aarch64 only; anything else (riscv64)
+	# builds the same tag from the release source tarball, which already carries
+	# the built web UI, so node/pnpm are not needed. SDRMM_FROM_SOURCE=1 forces
+	# the source build on any arch.
+	goodecho "[+] Installing SDRmm"
+	# Latest stable tag, read from the /releases/latest redirect (no API rate limit,
+	# skips the "nightly" pre-release). Falls back to the last version tested here.
+	local version
+	version=$(curl -fsSLI -o /dev/null -w '%{url_effective}' https://github.com/Newspicel/sdrmm/releases/latest 2>/dev/null \
+		| sed -n 's#.*/tag/v\([0-9][0-9.]*\)$#\1#p')
+	version="${version:-2.4.3}"
+	colorecho "[SDRmm] Using release v${version}"
+	local url="https://github.com/Newspicel/sdrmm/releases/download/v${version}"
+	local triple="" tarball tmp dir stage lib
+	case "$(uname -m)" in
+		x86_64|amd64) triple="x86_64-unknown-linux-gnu" ;;
+		aarch64|arm64) triple="aarch64-unknown-linux-gnu" ;;
+	esac
+	[ "${SDRMM_FROM_SOURCE:-0}" = "1" ] && triple=""
+	if [ -n "$triple" ]; then
+		tarball="sdrmm-${version}-${triple}.tar.gz"
+	else
+		tarball="sdrmm-${version}-src.tar.gz"
+	fi
+
+	tmp=$(mktemp -d)
+	if ! installfromnet curl -fsSL -o "$tmp/$tarball" "$url/$tarball" \
+		|| ! installfromnet curl -fsSL -o "$tmp/SHA256SUMS" "$url/SHA256SUMS"; then
+		record_build_failure "net" "sdrmm" "download failed: $url/$tarball"
+		rm -rf "$tmp"
+		return 0
+	fi
+	if ! (cd "$tmp" && grep " ${tarball}\$" SHA256SUMS | sha256sum -c -); then
+		record_build_failure "net" "sdrmm" "checksum mismatch: $tarball"
+		rm -rf "$tmp"
+		return 0
+	fi
+	tar -xzf "$tmp/$tarball" -C "$tmp"
+	dir="$tmp/${tarball%.tar.gz}"
+	stage="$dir"
+
+	if [ -z "$triple" ]; then
+		# Same toolchain as upstream's Dockerfile: cmake + cc for the vendored libopus
+		# and aws-lc, clang/libclang for bindgen, python3 + nasm for the minimal FFmpeg.
+		# SoapySDR is dlopen'ed at runtime, so nothing SDR-related is linked here.
+		install_dependencies "build-essential cmake pkg-config python3 clang libclang-dev nasm curl"
+		if ! command -v rustup >/dev/null 2>&1; then
+			record_build_failure "build" "sdrmm" "rustup toolchain unavailable"
+			rm -rf "$tmp"
+			return 0
+		fi
+		if [ ! -f "$dir/web/dist/index.html" ]; then
+			record_build_failure "build" "sdrmm" "source tarball has no prebuilt web/dist"
+			rm -rf "$tmp"
+			return 0
+		fi
+		# Feature set of upstream's release builds (xtask/release/src/dist.rs).
+		local features="soapy,sdrplay,aaronia,rtlsdr,hackrf,airspy,airspyhf,funcube,espsdr,ad936x,net-client,gpu-fft"
+		local chan profile="release" jobs media="$tmp/media"
+		jobs=$(nproc)
+		chan=$(sed -n 's/^channel *= *"\(.*\)"/\1/p' "$dir/rust-toolchain.toml")
+		if [ "$(uname -m)" = "riscv64" ]; then
+			# `ci` is upstream's release profile without LTO: thin LTO under riscv64
+			# emulation would take hours.
+			profile="ci"
+			jobs=2
+		fi
+		# build-media.py maps every non-arm machine to x86_64, so name the target
+		# explicitly. Its "cross" mode then just uses the native <arch>-linux-gnu-*
+		# tools, and FFmpeg gets the right --arch.
+		# RUSTUP_TOOLCHAIN overrides rust-toolchain.toml, which would also pull
+		# clippy, rustfmt, llvm-tools and a wasm32 std that this build never uses.
+		# A private CARGO_HOME keeps the crate registry out of the image layer.
+		if python3 "$dir/scripts/build-media.py" --target "$(uname -m)-unknown-linux-gnu" --prefix "$media" \
+			&& rustup toolchain install "$chan" --profile minimal \
+			&& (cd "$dir" && RUSTUP_TOOLCHAIN="$chan" CARGO_HOME="$tmp/cargo" FFMPEG_DIR="$media" \
+				cargo build --profile "$profile" --locked -j "$jobs" -p sdrmm \
+				--no-default-features --features "$features"); then
+			stage="$tmp/stage"
+			install -Dm755 "$dir/target/$profile/sdrmm" "$stage/sdrmm"
+			cp "$dir/LICENSE" "$dir/THIRD_PARTY_NOTICES.md" "$stage/"
+			# Only the SONAME names (libavutil.so.61, ...) the binary links against
+			for lib in "$media"/lib/lib*.so.*; do
+				if [[ "$lib" =~ \.so\.[0-9]+$ ]]; then install -m755 "$lib" "$stage/"; fi
+			done
+		else
+			record_build_failure "build" "sdrmm" "source build failed (FFmpeg or cargo)"
+		fi
+		rustup toolchain uninstall "$chan" > /dev/null 2>&1 || true
+	fi
+
+	# The binary's rpath ($ORIGIN/../lib/sdrmm) finds its private FFmpeg build here,
+	# so it never clashes with the system FFmpeg and needs no ldconfig.
+	if [ -f "$stage/sdrmm" ]; then
+		install -Dm755 "$stage/sdrmm" /usr/local/bin/sdrmm
+		rm -rf /usr/local/lib/sdrmm
+		install -Dm755 -t /usr/local/lib/sdrmm "$stage"/lib*.so.*
+		install -Dm644 -t /usr/share/doc/sdrmm "$stage/LICENSE" "$stage/THIRD_PARTY_NOTICES.md"
+		goodecho "[+] SDRmm ${version} installed: run 'sdrmm' and open the URL it prints"
+	elif [ -n "$triple" ]; then
+		record_build_failure "other" "sdrmm" "no sdrmm binary in $tarball"
+	fi
+	rm -rf "$tmp"
 	return 0
 }
 
