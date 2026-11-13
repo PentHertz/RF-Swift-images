@@ -417,59 +417,46 @@ function harogic_sa_device_latest() {
     [ -d /rftools/analysers ] || mkdir -p /rftools/analysers
     cd /rftools/analysers
     arch=`uname -m`  # uname -m is reliable in containers; uname -i can return "unknown"
-    tag="v0.55.88"
+    local sa_version="4.4.55.64"
+    local base="https://github.com/PentHertz/rfswift_harogic_install/releases/download/sa_v${sa_version}"
     prog=""
     sdkarch=""
     case "$arch" in
         x86_64|amd64)
-            prog="SAStudio4_4.4.55.48_amd64"
+            prog="SAStudio4_x86_64_${sa_version}"
             sdkarch="x86_64";;
         aarch64|unknown|arm64)
-            prog="SAStudio4_4.4.55.48_arm64"
+            prog="SAStudio4_arm64_${sa_version}"
             sdkarch="aarch64";;
         *)
             printf 'Unsupported architecture: "%s"!\n' "$arch" >&2; exit 0;;
     esac
-    installfromnet "wget" "https://github.com/PentHertz/rfswift_harogic_install/releases/download/${tag}/$prog.zip"
-    case "$arch" in
-        x86_64|amd64)
-            # SAStudio4 >= 4.4 ships as a flat portable bundle: the zip has no
-            # root directory and no install.sh; bin/SAStudio4 runs directly with
-            # the bundled SDK libs (lib/) on LD_LIBRARY_PATH.
-            unzip -q "$prog.zip" -d "$prog"
-            rm "$prog.zip"
-            chmod +x /rftools/analysers/${prog}/bin/SAStudio4
-            install_dependencies "qtbase5-dev libxcb-cursor-dev"
-            cat > /usr/sbin/sastudio <<EOF
+    install_dependencies "unzip libusb-1.0-0 libgomp1 qtbase5-dev libxcb-cursor-dev"
+    installfromnet "wget" "${base}/$prog.zip"
+    # Since 4.4.55.64 both arches ship the same portable bundle: the zip has a
+    # $prog/ root directory, no install.sh, and bin/SAStudio4 runs directly with
+    # the bundled Qt + HTRA SDK libs (lib/, symlinks included) on LD_LIBRARY_PATH.
+    rm -rf "/rftools/analysers/${prog}"
+    unzip -q "$prog.zip"
+    rm "$prog.zip"
+    chmod +x /rftools/analysers/${prog}/bin/SAStudio4
+    rm -f /usr/sbin/sastudio
+    cat > /usr/sbin/sastudio <<EOF
 #!/bin/bash
 export LD_LIBRARY_PATH="/rftools/analysers/${prog}/lib:\$LD_LIBRARY_PATH"
 cd /rftools/analysers/${prog}/bin
 exec ./SAStudio4 "\$@"
 EOF
-            chmod +x /usr/sbin/sastudio
-            ;;
-        aarch64|unknown|arm64)
-            # arm64 still ships the 4.3-style bundle with its install.sh
-            unzip -q "$prog.zip"
-            rm "$prog.zip"
-            cd "$prog"
-            mkdir -p /root/Desktop
-            mkdir -p /home/root/Desktop/
-            sed -i 's/actual_user=$(logname)/actual_user="root"/g' install.sh
-            sed -i 's/$SUDO_USER/root/g' install.sh
-            ./install.sh
-            ln -s /usr/lib/aarch64-linux-gnu/libffi.so.8 /usr/lib/libffi.so.6
-            ln -s /usr/local/bin/sastudio/.sastudio.sh /usr/sbin/sastudio
-            cd /rftools/analysers
-            ;;
-    esac
-    goodecho "[+] Installing htraapi"
-    installfromnet "wget" "https://github.com/PentHertz/rfswift_harogic_install/releases/download/${tag}/Install_HTRA_SDK.zip"
-    # Since v0.55.88 the SDK zip has no root directory either
-    unzip -q Install_HTRA_SDK.zip -d Install_HTRA_SDK
-    rm Install_HTRA_SDK.zip
-    cd Install_HTRA_SDK/
+    chmod +x /usr/sbin/sastudio
+
+    goodecho "[+] Installing htraapi (SA_Linux_API)"
+    installfromnet "wget" "${base}/SA_Linux_API.zip"
+    rm -rf SA_Linux_API
+    unzip -q SA_Linux_API.zip
+    rm SA_Linux_API.zip
+    cd SA_Linux_API/
     cp htraapi/configs/htrausb.conf /etc/
+    mkdir -p /etc/udev/rules.d
     cp htraapi/configs/htra-cyusb.rules /etc/udev/rules.d/
     rm -rf /opt/htraapi/
     cp -r htraapi/ /opt/
@@ -487,17 +474,157 @@ EOF
     ln -sf /opt/htraapi/lib/${sdkarch}/libusb-1.0.so.0.2.0 /opt/htraapi/lib/${sdkarch}/libusb-1.0.so.0
     ln -sf /opt/htraapi/lib/${sdkarch}/libusb-1.0.so.0 /opt/htraapi/lib/${sdkarch}/libusb-1.0.so
 
-    # Copy libraries to system paths
+    # Copy libraries to system paths (libusb/libgomp come from the distro packages
+    # so the bundled copies don't shadow them for other SDR tools)
     cd "/opt/htraapi/lib/${sdkarch}"
     [ -f libhtraapi.so ] || { echo "Error: symlink setup failed"; exit 1; }
-    cp libh* /usr/lib/
+    rm -f /usr/lib/libhtraapi.so*   # drop older SDK versions
+    cp -P libhtraapi.so* /usr/lib/
     ln -sf $(pwd)/libliquid.so /usr/lib/libliquid.so
-    cp /opt/htraapi/inc/htra_api.h /usr/include
+    # New in 4.4.55.64: optional DSP helpers (demodulation, MKL/ArmRAL), dlopen'ed by the API
+    for l in libDigitalSigDemod.so libmkl.so libiomp5.so libarmral.so; do
+        [ -f "$l" ] && ln -sf $(pwd)/$l /usr/lib/$l
+    done
+    cp /opt/htraapi/inc/htra_api*.h /usr/include/
 
     # Update linker cache
     ldconfig
+    cd /rftools/analysers
+    rm -rf SA_Linux_API
 
     colorecho "[+] Note: you'll have to put your calibration data after!"
     mkdir -p /rftools/analysers/${prog}/bin/CalFile
-    ln -sf /rftools/analysers/${prog}/bin/CalFile /usr/bin/CalFile
+    ln -sfn /rftools/analysers/${prog}/bin/CalFile /usr/bin/CalFile
+}
+
+# Harogic H2 API (SG_Linux_API): used by SGStudio and by gr-harogic_sg.
+HAROGIC_SG_RELEASE="https://github.com/PentHertz/rfswift_harogic_install/releases/download/gen_v2.0.40"
+
+function harogic_h2api_install() {
+    local sdkarch
+    case "$(uname -m)" in  # uname -m is reliable in containers; uname -i can return "unknown"
+        x86_64|amd64) sdkarch="x86_64";;
+        aarch64|unknown|arm64) sdkarch="aarch64";;
+        armv7l|armv7) sdkarch="armv7";;
+        *) criticalecho-noexit "[!] H2 API: unsupported architecture $(uname -m)"; return 0;;
+    esac
+    goodecho "[+] Installing Harogic H2 API (SG_Linux_API)"
+    install_dependencies "libusb-1.0-0 libgomp1 unzip"
+    local workdir
+    workdir=$(mktemp -d)
+    (
+        cd "$workdir" || exit 1
+        if ! installfromnet "wget" "${HAROGIC_SG_RELEASE}/SG_Linux_API.zip"; then
+            record_build_failure "download" "h2api" "SG_Linux_API.zip"
+            exit 0
+        fi
+        unzip -q SG_Linux_API.zip
+        # Vendor installer: /opt/h2api, /etc/h2usb_enum.conf (VID:PID allow-list that
+        # libh2api needs to enumerate anything over USB), udev rule, libgomp fix, ldconfig
+        sh SG_Linux_API/install_h2_lib.sh \
+            || record_build_failure "install" "h2api" "install_h2_lib.sh failed"
+    )
+    rm -rf "$workdir"
+    # install_h2_lib.sh registers /opt/h2api/lib/<arch> as 00-h2api.conf, ahead of
+    # the system dirs: keep its old bundled libusb out of the loader path so it
+    # doesn't shadow the system libusb for every other SDR tool in the image.
+    if [ -d "/opt/h2api/lib/${sdkarch}" ]; then
+        mkdir -p /opt/h2api/lib/bundled_libusb
+        mv /opt/h2api/lib/${sdkarch}/libusb-1.0.so* /opt/h2api/lib/bundled_libusb/ 2>/dev/null
+        ldconfig
+    fi
+    [ -f /opt/h2api/inc/h2_api.h ] && cp /opt/h2api/inc/h2_*.h /usr/include/
+    return 0
+}
+
+# libh2api loads <directory of the running program>/CalFile/<model>.ini. GNU Radio
+# runs under /usr/bin/python3, so the SG calibration files must be in
+# /usr/bin/CalFile (which may already be a symlink to SAStudio's CalFile: the SA
+# files are .txt, so they don't collide).
+function harogic_sg_install_calfiles() {
+    local src="$1" dst="/usr/bin/CalFile"
+    ls "$src"/*.ini > /dev/null 2>&1 || return 0
+    [ -L "$dst" ] && dst="$(readlink -f "$dst")"
+    mkdir -p "$dst"
+    cp -f "$src"/*.ini "$dst"/
+    colorecho "[+] SG calibration files copied to $dst"
+}
+
+function harogic_sg_device() {
+    # Harogic H2 signal generators (e.g. 367f:0101): H2 API + SGStudio
+    local version="2.7.6.1"
+    local base="${HAROGIC_SG_RELEASE}"
+    local arch sdkarch prog
+    arch=`uname -m`  # uname -m is reliable in containers; uname -i can return "unknown"
+    case "$arch" in
+        x86_64|amd64) sdkarch="x86_64";;
+        aarch64|unknown|arm64) sdkarch="aarch64";;
+        armv7l|armv7) sdkarch="armv7";;
+        *)
+            printf 'Unsupported architecture: "%s"!\n' "$arch" >&2; return 0;;
+    esac
+    [ -d /rftools/generators ] || mkdir -p /rftools/generators
+    cd /rftools/generators
+
+    harogic_h2api_install
+
+    case "$sdkarch" in
+        x86_64)  prog="SGStudio_x86_64_${version}";;
+        aarch64) prog="SGStudio_arm64_${version}";;
+        *)
+            criticalecho-noexit "[!] SGStudio is only published for x86_64 and arm64; skipping the GUI (H2 API installed)."
+            return 0;;
+    esac
+
+    goodecho "[+] Downloading Harogic SGStudio ${version} (${sdkarch})"
+    rm -rf "$prog" "$prog.tar.gz"
+    if ! installfromnet "wget" "${base}/${prog}.tar.gz"; then
+        record_build_failure "download" "SGStudio" "${prog}.tar.gz"
+        return 0
+    fi
+    tar -xzf "$prog.tar.gz"   # contains a single ${prog}/ root directory
+    rm "$prog.tar.gz"
+    [ -f "/rftools/generators/${prog}/bin/SGStudio" ] || { record_build_failure "install" "SGStudio" "bin/SGStudio missing in ${prog}.tar.gz"; return 0; }
+    chmod +x "/rftools/generators/${prog}/bin/SGStudio"
+    harogic_sg_install_calfiles "/rftools/generators/${prog}/bin/CalFile"
+    install_dependencies "libxcb-cursor0 libpulse0 libsndfile1 libegl1 libgl1 libdbus-1-3"
+
+    # Fallback if the API step failed: without this file libh2api never scans USB
+    if [ ! -f /etc/h2usb_enum.conf ]; then
+        cat > /etc/h2usb_enum.conf <<'EOF'
+# Vital Product Data : Vendor/Device IDs - one per line.
+# Format - vendorID DeviceID    FriendlyName (Max 30 chars or end of line)
+
+<VPD>
+367f    0101    H2_Devices
+367f    0102    H2_Devices
+367f    0103    H2_Devices
+367f    0104    H2_Devices
+367f    0105    H2_Devices
+367f    0106    H2_Devices
+367f    0107    H2_Devices
+367f    0108    H2_Devices
+04b4    00f0    GENERICDEVICES
+</VPD>
+EOF
+        chmod 644 /etc/h2usb_enum.conf
+    fi
+
+    # The app writes debug.log and Settings.ini inside its own tree
+    mkdir -p "/rftools/generators/${prog}/bin/CalFile"
+    cat > /usr/sbin/sgstudio <<EOF
+#!/bin/bash
+BASE_DIR="/rftools/generators/${prog}"
+# X11 by default (the arm64 bundle also ships Wayland: QT_QPA_PLATFORM=wayland sgstudio)
+export QT_QPA_PLATFORM="\${QT_QPA_PLATFORM:-xcb}"
+export QT_PLUGIN_PATH="\$BASE_DIR/bin"
+export QT_QPA_PLATFORM_PLUGIN_PATH="\$BASE_DIR/bin/platforms"
+unset WAYLAND_DISPLAY QT_WAYLAND_SHELL_INTEGRATION
+# RUNPATH is not inherited by transitive deps of bundled Qt libs, so expose every bundle dir
+export LD_LIBRARY_PATH="\$BASE_DIR/lib:\$BASE_DIR/bin:\$BASE_DIR/plugin:\$BASE_DIR/updater\${LD_LIBRARY_PATH:+:\$LD_LIBRARY_PATH}"
+cd "\$BASE_DIR/bin"
+exec ./SGStudio "\$@"
+EOF
+    chmod +x /usr/sbin/sgstudio
+    colorecho "[+] SGStudio installed: run 'sgstudio'. Put calibration data in /rftools/generators/${prog}/bin/CalFile"
 }
