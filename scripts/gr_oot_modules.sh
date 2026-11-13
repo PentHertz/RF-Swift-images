@@ -556,15 +556,61 @@ function grcessb_grmod_install() {
 }
 
 function grhtra_grmod_install() {
-    ARCH=$(uname -m)
-    if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then
-        grclone_and_build "https://github.com/HAROGIC-Technologies/gr-htra.git" "" "grhtra_grmod_install"
-    #elif [ "$ARCH" = "arm64" ] || [ "$ARCH" = "aarch64" ]; then
-        # ARM64 specific flags to avoid LTO segmentation fault
-        #grclone_and_build "https://github.com/HAROGIC-Technologies/gr-htra.git" "" "grhtra_grmod_install" \
-        #    -DCMAKE_CXX_FLAGS="-fno-lto -O2" \
-        #    -DCMAKE_C_FLAGS="-fno-lto -O2" // TODO: support ARM64 
+    # gr-htra: HAROGIC HTRA (SA series analyzers) IQ source for GNU Radio.
+    # x86_64 and arm64 (gr-htra ships x86_64/aarch64 htraapi builds).
+    local sdkarch pattern
+    case "$(uname -m)" in
+        x86_64|amd64)  sdkarch="x86_64";  pattern="x86-64" ;;
+        aarch64|arm64) sdkarch="aarch64"; pattern="ARM aarch64" ;;
+        *) criticalecho-noexit "[!] gr-htra: unsupported architecture $(uname -m)"; return 0 ;;
+    esac
+    install_dependencies "file libusb-1.0-0 libgomp1"
+
+    local cmake_args=()
+    if [ "$sdkarch" = "aarch64" ]; then
+        # ARM64: avoid the LTO segmentation fault seen when building with GCC
+        cmake_args+=(-DCMAKE_CXX_FLAGS="-fno-lto -O2" -DCMAKE_C_FLAGS="-fno-lto -O2")
     fi
+
+    # gr-htra links against a system libhtraapi when there is one (installed by
+    # harogic_sa_device*). Otherwise its CMake falls back to the bundled copy but
+    # nothing puts that library on the loader path, and upstream install.sh would
+    # copy its old libusb/libgomp into /usr/local/lib, shadowing the system ones.
+    # So use a private directory + RPATH, without the bundled libusb/libgomp.
+    local lib found=""
+    for lib in $(ldconfig -p 2>/dev/null | awk '/libhtraapi\.so/{print $NF}'); do
+        if file -L "$lib" 2>/dev/null | grep -q "$pattern"; then found="$lib"; break; fi
+    done
+    if [ -n "$found" ] && [ -z "${HTRA_USE_BUNDLED:-}" ]; then
+        colorecho "[+] gr-htra: using system HTRA API $(readlink -f "$found")"
+    else
+        # Fetch the bundled libraries from a throw-away clone: cloning into
+        # /rftools/sdr/oot here would make grclone_and_build see an up-to-date
+        # repository and skip the build.
+        local tmp dst="/opt/gr-htra/lib/${sdkarch}" htra
+        tmp=$(mktemp -d)
+        installfromnet "git" "clone" "--depth" "1" "https://github.com/HAROGIC-Technologies/gr-htra.git" "$tmp/gr-htra"
+        htra=$(ls "$tmp/gr-htra/htraapi/lib/${sdkarch}"/libhtraapi.so.* 2>/dev/null | sort -V | tail -1)
+        if [ -z "$htra" ]; then
+            rm -rf "$tmp"
+            record_build_failure "build" "gr-htra" "no bundled libhtraapi for ${sdkarch}"
+            return 0
+        fi
+        colorecho "[+] gr-htra: no system HTRA API, using the bundled one from $dst"
+        mkdir -p "$dst"
+        cp -f "$htra" "$(dirname "$htra")"/libliquid.so "$dst"/
+        [ -f "$(dirname "$htra")/libarmral.so" ] && cp -f "$(dirname "$htra")/libarmral.so" "$dst"/
+        rm -rf "$tmp"
+        ln -sf "$(basename "$htra")" "$dst/libhtraapi.so.0"
+        ln -sf libhtraapi.so.0 "$dst/libhtraapi.so"
+        htra="$dst/$(basename "$htra")"
+        cmake_args+=(-DHTRAAPI_LIBRARY="$htra"
+                     -DCMAKE_INSTALL_RPATH="$dst"
+                     -DCMAKE_BUILD_RPATH="$dst")
+    fi
+
+    grclone_and_build "https://github.com/HAROGIC-Technologies/gr-htra.git" "" "grhtra_grmod_install" "${cmake_args[@]}"
+    ldconfig
 }
 
 function grharogic_sg_grmod_install() {
