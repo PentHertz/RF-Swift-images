@@ -67,6 +67,9 @@ function radare2_soft_install() {
 	cd radare2 ; sys/install.sh
 }
 
+KALEIDO_VERSION="v0.2.1"
+KALEIDO_SHA256_X64="3eaa3efd41a00db05dd71add7f54ad4e9d4259552e3f7470ac4c1a8594cea214"
+KALEIDO_SHA256_ARM64="a6040fa4d95692b7047d3880391f539ea7af9353b0c7b0558ea7b8e280013703"
 function binwalkv3_soft_install() {
     goodecho "[+] Installing Binwalk v3 dependencies"
     install_dependencies "p7zip-full zstd unzip tar sleuthkit cabextract lz4 lzop device-tree-compiler unrar"
@@ -108,11 +111,40 @@ function binwalkv3_soft_install() {
         fi
     fi
 
-    # Build with explicit edition support
-    cargo build --release
-    ln -sf $(pwd)/target/release/binwalk /usr/bin/binwalkv3
-    
-    goodecho "[+] Binwalk v3 installed successfully"
+    # plotly_kaleido's build.rs fetches Kaleido (the PNG export of `binwalk -E`) by installing and
+    # running `ruget`, which now fails ("Error when executing client") and leaves build.rs
+    # panicking on the missing zip. It skips the download when ~/.config/kaleido/bin/kaleido
+    # already exists (where binwalk also looks for it at run time), so provide it ourselves.
+    local kdir="$HOME/.config/kaleido" kzip="" ksha="" ktmp
+    case "$ARCH" in
+        x86_64) kzip="kaleido_linux_x64.zip"; ksha="$KALEIDO_SHA256_X64" ;;
+        aarch64) kzip="kaleido_linux_arm64.zip"; ksha="$KALEIDO_SHA256_ARM64" ;;
+    esac
+    if [ ! -x "$kdir/bin/kaleido" ] && [ -n "$kzip" ]; then
+        ktmp=$(mktemp -d)
+        if installfromnet curl -fsSL -o "$ktmp/kaleido.zip" "https://github.com/plotly/Kaleido/releases/download/${KALEIDO_VERSION}/${kzip}" \
+            && echo "${ksha}  $ktmp/kaleido.zip" | sha256sum -c -; then
+            mkdir -p "$kdir"
+            unzip -q -o "$ktmp/kaleido.zip" -d "$kdir"
+        else
+            record_build_failure "net" "kaleido (binwalk v3)" "download or checksum failed: ${kzip}"
+        fi
+        rm -rf "$ktmp"
+    fi
+    if [ ! -x "$kdir/bin/kaleido" ]; then
+        # no Kaleido build for this arch (riscv64) or the download failed: a stub stops build.rs
+        # from trying; only `binwalk -E` PNG export is unavailable
+        mkdir -p "$kdir/bin"
+        printf '#!/bin/sh\necho "Kaleido (binwalk -E PNG export) is not available on %s" >&2\nexit 1\n' "$ARCH" > "$kdir/bin/kaleido"
+        chmod 0755 "$kdir/bin/kaleido"
+    fi
+
+    if cargo build --release; then
+        ln -sf "$(pwd)/target/release/binwalk" /usr/bin/binwalkv3
+        goodecho "[+] Binwalk v3 installed successfully"
+    else
+        record_build_failure "build" "binwalk v3" "cargo build failed"
+    fi
 }
 
 function binwalk_soft_install() {
