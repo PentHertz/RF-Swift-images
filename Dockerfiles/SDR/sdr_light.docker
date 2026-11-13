@@ -37,6 +37,7 @@ RUN ./entrypoint.sh gnuradio_soft_install && \
 	./entrypoint.sh grbladerf_grmod_install && \
 	./entrypoint.sh grsignalhound_Receiver_grmod_install && \
 	./entrypoint.sh grhtra_grmod_install && \
+	./entrypoint.sh grharogic_sg_grmod_install && \
 	./entrypoint.sh grhydrasdr_grmod_install
 
 # Installing extra software

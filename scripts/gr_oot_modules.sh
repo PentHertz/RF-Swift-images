@@ -567,6 +567,31 @@ function grhtra_grmod_install() {
     fi
 }
 
+function grharogic_sg_grmod_install() {
+    # gr-harogic_sg: GNU Radio blocks for Harogic H2 signal generators
+    # (one sink block: GNU Radio IQ in real time, CW, frequency sweep, level sweep).
+    # Needs the H2 API (harogic_h2api_install in sa_devices.sh).
+    case "$(uname -m)" in
+        x86_64|amd64|aarch64|arm64|armv7l|armv7) ;;
+        *) criticalecho-noexit "[!] gr-harogic_sg: unsupported architecture $(uname -m)"; return 0;;
+    esac
+    [ -f /opt/h2api/inc/h2_api.h ] || harogic_h2api_install
+    if [ ! -f /opt/h2api/inc/h2_api.h ]; then
+        record_build_failure "build" "gr-harogic_sg" "H2 API (/opt/h2api) missing"
+        return 0
+    fi
+    grclone_and_build "https://github.com/PentHertz/gr-harogic_sg.git" "" "grharogic_sg_grmod_install"
+    ldconfig
+    # Calibration files ship with SGStudio (harogic_sg_device)
+    local cal
+    cal=$(ls -d /rftools/generators/SGStudio_*/bin/CalFile 2>/dev/null | head -1)
+    if [ -n "$cal" ]; then
+        harogic_sg_install_calfiles "$cal"
+    else
+        colorecho "[!] gr-harogic_sg: copy your generator's <model>.ini calibration file(s) from SGStudio's bin/CalFile/ to /usr/bin/CalFile/"
+    fi
+}
+
 function grradioastro_grmod_install() {
     install_dependencies "python3-ephem git cmake liborc-0.4-dev"
     grclone_and_build "https://github.com/WVURAIL/gr-radio_astro.git" "" "grradioastro_grmod_install"
