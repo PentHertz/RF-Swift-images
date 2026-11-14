@@ -186,7 +186,7 @@ function cutter_soft_install() { # TODO: fix installation
 
 function ghidra_soft_install() {
 	goodecho "[+] Installing Ghidra dependencies"
-	install_dependencies "openjdk-21-jdk"
+	install_dependencies "openjdk-25-jdk"
 	goodecho "[+] Downloading Ghidra"
 	[ -d /reverse ] || mkdir /reverse
 	cd /reverse
@@ -195,12 +195,18 @@ function ghidra_soft_install() {
     ghidra_date="20261016"
 	prog="ghidra_${ghidra_version}_PUBLIC_${ghidra_date}"
 
-	installfromnet "wget" "https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_${ghidra_version}_build/${prog}.zip"
-	unzip "$prog"
-	cd "ghidra_${ghidra_version}_PUBLIC"
-	ln -s $(pwd)/ghidraRun /usr/sbin/ghidraRun
-	cd ..
-	rm "$prog.zip"
+	# Always write to the exact name (-O) and drop leftovers from earlier runs: otherwise
+	# wget saves as "$prog.zip.1", ".2", ... and unzip opens a stale or truncated copy.
+	rm -f "$prog.zip" "$prog.zip."*
+	if ! installfromnet wget -O "$prog.zip" "https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_${ghidra_version}_build/${prog}.zip" \
+		|| ! unzip -tq "$prog.zip" > /dev/null; then
+		rm -f "$prog.zip"
+		criticalecho-noexit "[-] Ghidra ${ghidra_version} download failed or archive is corrupt"
+		return 1
+	fi
+	unzip -oq "$prog.zip"
+	rm -f "$prog.zip"
+	ln -sf "/reverse/ghidra_${ghidra_version}_PUBLIC/ghidraRun" /usr/sbin/ghidraRun
 }
 
 function qiling_soft_install() {
@@ -247,58 +253,38 @@ function imhex_soft_install() {
     ARCH=$(uname -m)
     IMH_VERSION="1.38.1"
     
-    if [ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]; then
-        goodecho "[+] Installing ImHex for x86_64"
-        install_dependencies "libmbedtls21 libmbedx509-7 libmbedcrypto16 libglfw3-dev"
-        # No Ubuntu 26.04 build published yet, so we reuse the 25.04 deb. Its
-        # Depends lists libmbedtls14 (the 25.04 package name), which does not
-        # exist on resolute (mbedtls 3.6.5 is shipped as libmbedtls21 +
-        # libmbedcrypto16). ImHex only actually links libmbedcrypto.so.16, which
-        # libmbedcrypto16 provides, so override the stale declared dependency.
-        installfromnet "wget" "https://github.com/WerWolv/ImHex/releases/download/v$IMH_VERSION/imhex-$IMH_VERSION-Ubuntu-25.04-x86_64.deb"
-        dpkg -i --ignore-depends=libmbedtls14 imhex-$IMH_VERSION-Ubuntu-25.04-x86_64.deb
-        
-    elif [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
-        goodecho "[+] Installing ImHex for arm64"
-        install_dependencies "libmbedtls21 libmbedx509-7 libglfw3-dev libfuse2"
-        
-        # Download the AppImage
-        installfromnet "wget" "https://github.com/WerWolv/ImHex/releases/download/v$IMH_VERSION/imhex-$IMH_VERSION-arm64.AppImage"
-        chmod +x imhex-$IMH_VERSION-arm64.AppImage
-        
-        # Try extraction with better error handling
-        if ! ./imhex-$IMH_VERSION-arm64.AppImage --appimage-extract 2>/dev/null; then
-            goodecho "[!] AppImage extraction failed, trying manual extraction..."
-            
-            # Fallback: manual extraction using offset
-            # AppImages are ISO9660 filesystems at a specific offset
-            offset=$(./imhex-$IMH_VERSION-arm64.AppImage --appimage-offset 2>/dev/null || echo "")
-            
-            if [ -n "$offset" ]; then
-                dd if=imhex-$IMH_VERSION-arm64.AppImage of=imhex.iso bs=1 skip=$offset
-                mkdir -p squashfs-root
-                mount -o loop imhex.iso squashfs-root
-                cp -r squashfs-root /opt/imhex
-                umount squashfs-root
-            else
-                criticalecho-noexit "[-] Could not extract ImHex AppImage, skipping..."
-                return 1
-            fi
-        else
-            # Normal extraction succeeded
-            cp -r squashfs-root /opt/imhex
+    # AppImage on every arch: there is no Ubuntu 26.04 deb, and the 25.04 one
+    # declares libmbedtls14, which does not exist on resolute.
+    case "$ARCH" in
+        x86_64|amd64)  IMH_APPIMAGE="imhex-$IMH_VERSION-x86_64.AppImage" ;;
+        aarch64|arm64) IMH_APPIMAGE="imhex-$IMH_VERSION-arm64.AppImage" ;;
+        *) criticalecho-noexit "[-] Unsupported architecture: $ARCH"; return 1 ;;
+    esac
+
+    goodecho "[+] Installing ImHex for $ARCH (AppImage)"
+    install_dependencies "libglfw3-dev libfuse2"
+
+    installfromnet "wget" "https://github.com/WerWolv/ImHex/releases/download/v$IMH_VERSION/$IMH_APPIMAGE"
+    chmod +x "$IMH_APPIMAGE"
+
+    # Extract so it runs without FUSE inside the container
+    rm -rf squashfs-root
+    if ! ./"$IMH_APPIMAGE" --appimage-extract >/dev/null 2>&1; then
+        goodecho "[!] AppImage extraction failed, trying unsquashfs at the embedded offset..."
+        offset=$(./"$IMH_APPIMAGE" --appimage-offset 2>/dev/null || echo "")
+        if [ -z "$offset" ] || ! { install_dependencies "squashfs-tools" && unsquashfs -o "$offset" -d squashfs-root "$IMH_APPIMAGE"; }; then
+            criticalecho-noexit "[-] Could not extract ImHex AppImage, skipping..."
+            rm -f "$IMH_APPIMAGE"
+            return 1
         fi
-        
-        # Create symlink in /usr/local/bin
-        ln -sf /opt/imhex/AppRun /usr/local/bin/imhex
-        
-        # Clean up
-        rm -f imhex-$IMH_VERSION-arm64.AppImage imhex.iso
-        rm -rf squashfs-root
-        
-    else
-        criticalecho-noexit "[-] Unsupported architecture: $ARCH"
     fi
+
+    rm -rf /opt/imhex
+    cp -r squashfs-root /opt/imhex
+    ln -sf /opt/imhex/AppRun /usr/local/bin/imhex
+
+    rm -f "$IMH_APPIMAGE"
+    rm -rf squashfs-root
 }
 
 function imhex_soft_install_fromsource() {
