@@ -200,7 +200,22 @@ function grtiming_utils_grmod_install() {
 
 function grdab_grmod_install() {
     install_dependencies "libfaad-dev"
-    grclone_and_build "https://github.com/bkerler/gr-dab.git" "" "grdab_grmod_install"
+    # Not grclone_and_build: python/app generates adjustment_gui.py (cp *.py + grcc) in one
+    # custom command that two targets depend on (`run` and GR_PYTHON_INSTALL's pygen target).
+    # Makefile generators give each target its own copy of the command, so under make -j they
+    # race and cp fails with "File exists". Build `run` alone first, then the rest in parallel.
+    [ -d /rftools/sdr/oot ] || mkdir -p /rftools/sdr/oot
+    cd /rftools/sdr/oot || return 1
+    rm -rf gr-dab
+    gitinstall "https://github.com/bkerler/gr-dab.git" "grdab_grmod_install"
+    cd gr-dab || return 1
+    mkdir -p build && cd build || return 1
+    cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../
+    make run
+    make -j"$(nproc)"
+    sudo make install
+    cd ..
+    rm -rf build/
 }
 
 function grdect2_grmod_install() {
