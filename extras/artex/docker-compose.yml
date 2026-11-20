@@ -1,0 +1,87 @@
+# ARTEX (https://github.com/BaaRai/ARTEX) as a standalone RF Swift extra.
+#
+# This is NOT an RF Swift single image launched by the `rfswift` tool: ARTEX is a
+# web platform (Go backend + embedded Next.js UI) that needs PostgreSQL, so it runs
+# as its own two-container compose stack. The ARTEX image is built straight from the
+# upstream repository at the pinned ref below (its own multi-stage Dockerfile), so we
+# stay in sync with upstream instead of vendoring their build.
+#
+# Usage:
+#   cd extras/artex
+#   cp .env.example .env         # set POSTGRES_PASSWORD, optionally an LLM key
+#   docker compose up -d --build # first build clones + compiles ARTEX, takes a while
+#   docker compose logs artex | grep "Setup token"   # open http://localhost:8787/setup
+#
+# Builds the latest ARTEX from upstream main by default. Set ARTEX_REF to a release
+# tag or commit to pin it instead, then rebuild.
+#
+# License: ARTEX is AGPL-3.0 with additional maintainer terms — an offensive-security
+# tool to be run only against systems you own or are explicitly authorized to test.
+# See its README/LICENSE.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-artex}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Please set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-artex}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-artex} -d ${POSTGRES_DB:-artex}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  artex:
+    # Built from upstream (its own Dockerfile): latest main by default, or ARTEX_REF if
+    # set. The ref is a Git fragment on the build context URL; ARTEX_VERSION labels it.
+    build:
+      context: "https://github.com/BaaRai/ARTEX.git#${ARTEX_REF:-main}"
+      args:
+        ARTEX_VERSION: ${ARTEX_REF:-main}
+    image: artex:${ARTEX_REF:-main}
+    # Agent processes run as an unprivileged executor: no setuid program may raise them
+    # back to root.
+    security_opt:
+      - "no-new-privileges:true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ARTEX_PG_DSN: postgres://${POSTGRES_USER:-artex}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-artex}?sslmode=disable
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ARTEX_LLM_PROVIDER: ${ARTEX_LLM_PROVIDER:-}
+      ARTEX_LLM_MODEL: ${ARTEX_LLM_MODEL:-}
+      ARTEX_LLM_BASE_URL: ${ARTEX_LLM_BASE_URL:-}
+      ARTEX_LLM_PROXY: ${ARTEX_LLM_PROXY:-}
+      # Exact host:port list the model-list fetch may reach on private addresses
+      # (e.g. host.docker.internal:11434 for a local Ollama).
+      ARTEX_LLM_PRIVATE_ENDPOINTS: ${ARTEX_LLM_PRIVATE_ENDPOINTS:-}
+      ARTEX_JWT_KEY_DIR: /app/keys
+      ARTEX_SECRET_KEY: ${ARTEX_SECRET_KEY:-}
+      ARTEX_TRUSTED_PROXIES: ${ARTEX_TRUSTED_PROXIES:-}
+      ARTEX_UNTRUSTED_BOUNDARY: ${ARTEX_UNTRUSTED_BOUNDARY:-}
+      ARTEX_UPDATE_CHECK: ${ARTEX_UPDATE_CHECK:-}
+      ARTEX_NOISE_PROFILE: ${ARTEX_NOISE_PROFILE:-}
+      ARTEX_TARGET_USER_AGENT: ${ARTEX_TARGET_USER_AGENT:-}
+      ARTEX_TASK_BUDGET_TOKENS: ${ARTEX_TASK_BUDGET_TOKENS:-}
+      ARTEX_TASK_BUDGET_TURNS: ${ARTEX_TASK_BUDGET_TURNS:-}
+      ARTEX_INTENT_BUDGET_TOKENS: ${ARTEX_INTENT_BUDGET_TOKENS:-}
+      ARTEX_INTENT_BUDGET_TURNS: ${ARTEX_INTENT_BUDGET_TURNS:-}
+    ports:
+      - "${ARTEX_BIND_ADDR:-127.0.0.1}:8787:8787"
+      - "127.0.0.1:8788:8788"
+    volumes:
+      # Runtime data (traffic index, task files, transcripts) and the signing/secret
+      # keys, persisted next to this compose file so they survive rebuilds. The image's
+      # built-in /app/skills is used as-is (no host skills/ override here).
+      - ./data:/app/data
+      - ./keys:/app/keys
+    restart: unless-stopped
+
+volumes:
+  pgdata:

@@ -1185,6 +1185,44 @@ function feroxbuster_soft_install() {
     return 0
 }
 
+function nuclei_soft_install() {
+    # Nuclei (ProjectDiscovery): template-based vulnerability scanner (HTTP, DNS, TCP, SSL,
+    # headless...). Upstream release binary on amd64/arm64, `go install` elsewhere; the
+    # community templates are fetched into ~/nuclei-templates (`nuclei -ut` refreshes them).
+    goodecho "[+] Installing Nuclei"
+    install_dependencies "unzip"
+    local arch tag ver tmp asset
+    case "$(uname -m)" in
+        x86_64|amd64)  arch="amd64" ;;
+        aarch64|arm64) arch="arm64" ;;
+        *)             arch="" ;;
+    esac
+    if [ -n "$arch" ]; then
+        tmp=$(mktemp -d)
+        tag=$(curl -fsSL -o /dev/null -w '%{url_effective}' https://github.com/projectdiscovery/nuclei/releases/latest | sed 's#.*/tag/##')
+        ver="${tag#v}"
+        asset="nuclei_${ver}_linux_${arch}.zip"
+        if [ -n "$ver" ] \
+            && installfromnet wget -q -O "$tmp/$asset" "https://github.com/projectdiscovery/nuclei/releases/download/${tag}/${asset}" \
+            && installfromnet wget -q -O "$tmp/checksums.txt" "https://github.com/projectdiscovery/nuclei/releases/download/${tag}/nuclei_${ver}_checksums.txt" \
+            && (cd "$tmp" && grep " ${asset}\$" checksums.txt | sha256sum -c -) \
+            && unzip -o -q "$tmp/$asset" -d "$tmp" && [ -f "$tmp/nuclei" ]; then
+            install -m 0755 "$tmp/nuclei" /usr/local/bin/nuclei
+        else
+            record_build_failure "download" "nuclei" "release download or checksum failed (${tag:-no tag})"
+        fi
+        rm -rf "$tmp"
+    fi
+    if ! command -v nuclei > /dev/null 2>&1; then
+        go_install_tool "nuclei" "github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest" "nuclei"
+    fi
+    if command -v nuclei > /dev/null 2>&1; then
+        nuclei -update-templates -silent -duc \
+            || criticalecho-noexit "[!] nuclei templates download failed, run 'nuclei -ut' in the container"
+    fi
+    return 0
+}
+
 function enum4linux_ng_soft_install() {
     goodecho "[+] Installing enum4linux-ng"
     install_dependencies "smbclient ldap-utils"

@@ -38,7 +38,11 @@ RUN ./entrypoint.sh claudecode_soft_install && \
 
 RUN ./entrypoint.sh hermes_agent_soft_install
 
-# Skill packs (Trail of Bits, farmage, Floorplan, cybersecurity) for every agent, via llm-skills
+# Agent-driven security testing (Strix) and the Semgrep CLI the Trail of Bits / Cloudflare skills call
+RUN ./entrypoint.sh strix_soft_install && \
+	./entrypoint.sh semgrep_install
+
+# Skill packs (Trail of Bits, farmage, Floorplan, cybersecurity, Cloudflare, Strix, ARTEX) for every agent, via llm-skills
 RUN ./entrypoint.sh llm_skills_install
 
 # Analysis MCP servers, registered with every agent
@@ -50,6 +54,9 @@ RUN ./entrypoint.sh whispercpp_soft_install
 RUN ./entrypoint.sh openwebui_soft_install
 # Open WebUI's chats, users and settings; its default is inside the package, lost on upgrade
 ENV DATA_DIR="/root/.open-webui"
+
+# NodeTerm Server Edition: browser terminal/agent canvas (`nodeterm-server`, :8443)
+RUN ./entrypoint.sh nodeterm_server_soft_install
 
 # Build report (tools that failed to install)
 RUN ./entrypoint.sh print_build_report

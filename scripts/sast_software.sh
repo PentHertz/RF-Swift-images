@@ -26,7 +26,7 @@ function LLVM_install() { # expects llvm version TODO: not available on RISCV64 
 }
 
 function semgrep_install() {
-    goodecho "[+] installing AFL deps"
+    goodecho "[+] installing Semgrep"
     pip3install "semgrep"
 }
 

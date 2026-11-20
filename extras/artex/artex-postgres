@@ -1,0 +1,63 @@
+#!/bin/bash
+# Start (and, on first use, initialize) the PostgreSQL that ships inside the ARTEX
+# image. Run it from the container shell before `artex-start`, the same way Open5GS
+# is brought up by hand from /sdrtools/run/Open5GS.sh.
+#
+#   artex-postgres            init if needed, start, ensure the role + database
+#   artex-postgres stop       stop the server
+#   artex-postgres status     report whether it is running
+#
+# The data lives in $PGDATA (default /var/lib/postgresql/data) — mount a volume there
+# to keep it across container restarts. Credentials come from POSTGRES_USER /
+# POSTGRES_PASSWORD / POSTGRES_DB (defaults artex/artex/artex).
+set -euo pipefail
+
+PGDATA="${PGDATA:-/var/lib/postgresql/data}"
+PGBIN="$(ls -d /usr/lib/postgresql/*/bin 2>/dev/null | sort -V | tail -n1)"
+POSTGRES_USER="${POSTGRES_USER:-artex}"
+POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-artex}"
+POSTGRES_DB="${POSTGRES_DB:-artex}"
+
+[ -n "$PGBIN" ] || { echo "[artex] PostgreSQL binaries not found under /usr/lib/postgresql" >&2; exit 1; }
+
+as_postgres() { su -s /bin/sh postgres -c "$*"; }
+
+case "${1:-start}" in
+  stop)
+    as_postgres "$PGBIN/pg_ctl -D '$PGDATA' -m fast -w stop"
+    exit 0 ;;
+  status)
+    as_postgres "$PGBIN/pg_ctl -D '$PGDATA' status"
+    exit $? ;;
+  start|"") ;;
+  *) echo "usage: artex-postgres [start|stop|status]" >&2; exit 2 ;;
+esac
+
+install -d -o postgres -g postgres "$PGDATA" /var/run/postgresql
+
+if [ ! -s "$PGDATA/PG_VERSION" ]; then
+  echo "[artex] initializing PostgreSQL in $PGDATA"
+  as_postgres "$PGBIN/initdb -D '$PGDATA' --locale=C --encoding=UTF8 --auth-local=trust --auth-host=scram-sha-256 -U postgres"
+fi
+
+if as_postgres "$PGBIN/pg_ctl -D '$PGDATA' status" >/dev/null 2>&1; then
+  echo "[artex] PostgreSQL already running"
+else
+  as_postgres "$PGBIN/pg_ctl -D '$PGDATA' -o '-c listen_addresses=127.0.0.1' -w start"
+fi
+
+# Ensure the login role exists with the configured password, and the database exists.
+as_postgres "$PGBIN/psql -v ON_ERROR_STOP=1 -U postgres -d postgres" <<SQL
+DO \$\$ BEGIN
+  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '${POSTGRES_USER}') THEN
+    CREATE ROLE "${POSTGRES_USER}" LOGIN PASSWORD '${POSTGRES_PASSWORD}';
+  ELSE
+    ALTER ROLE "${POSTGRES_USER}" LOGIN PASSWORD '${POSTGRES_PASSWORD}';
+  END IF;
+END \$\$;
+SQL
+as_postgres "$PGBIN/psql -U postgres -tAc \"SELECT 1 FROM pg_database WHERE datname='${POSTGRES_DB}'\" | grep -q 1 \
+  || $PGBIN/createdb -U postgres -O '${POSTGRES_USER}' '${POSTGRES_DB}'"
+
+echo "[artex] PostgreSQL ready: postgres://${POSTGRES_USER}@127.0.0.1:5432/${POSTGRES_DB}"
+echo "[artex] now run: artex-start"

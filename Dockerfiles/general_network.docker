@@ -95,7 +95,8 @@ RUN ./entrypoint.sh caido_soft_install && \
 	./entrypoint.sh mic_soft_install && \
 	./entrypoint.sh sstimap_soft_install && \
 	./entrypoint.sh sqlmap_soft_install && \
-	./entrypoint.sh  hexhttp_soft_install
+	./entrypoint.sh  hexhttp_soft_install && \
+	./entrypoint.sh nuclei_soft_install
 
 # OSINT
 RUN ./entrypoint.sh wiretapper_soft_install_fromsource

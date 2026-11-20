@@ -36,9 +36,12 @@ PACKS = {
     "floorplan": {"glob": "floorplan/skills/*", "url": "https://github.com/haydenschmitty/floorplan"},
     "cybersecurity": {"glob": "cybersecurity/skills/*",
                       "url": "https://github.com/mukul975/Anthropic-Cybersecurity-Skills"},
+    "cloudflare": {"glob": "cloudflare/skills/*", "url": "https://github.com/cloudflare/security-audit-skill"},
+    "strix": {"glob": "strix/skills/*", "url": "https://github.com/usestrix/strix"},
+    "artex": {"glob": "artex/skills/*", "url": "https://github.com/BaaRai/ARTEX"},
 }
 INDEX_ID = "cybersecurity-skills"   # generated index skill for the cybersecurity pack
-DEFAULTS = ["trailofbits", "farmage", "floorplan", INDEX_ID]
+DEFAULTS = ["trailofbits", "farmage", "floorplan", "cloudflare", "strix", "artex", INDEX_ID]
 
 
 def die(msg):
@@ -335,7 +338,7 @@ def main():
     for name, fn, hlp in (("enable", cmd_enable, "register skills with every agent"),
                           ("disable", cmd_disable, "unregister skills")):
         p = sub.add_parser(name, help=hlp,
-                           description="TARGET: a pack (trailofbits, farmage, floorplan, cybersecurity), "
+                           description="TARGET: a pack (trailofbits, farmage, floorplan, cybersecurity, cloudflare, strix, artex), "
                                        "pack:keyword (matches id, subdomain or tags), a skill id, "
                                        f"{INDEX_ID}, or all. Default set: {' '.join(DEFAULTS)}")
         p.add_argument("--project", action="store_true", help="use ./.agents/skills and ./.claude/skills")

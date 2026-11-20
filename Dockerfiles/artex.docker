@@ -1,0 +1,52 @@
+# This Dockerfile is part of the RFSwift project
+# Install type: ARTEX single image (ARTEX + PostgreSQL, started from the CLI)
+# Author(s): Sébastien Dudek (@FlUxIuS) @Penthertz
+# website: penthertz.com
+#
+# ARTEX (https://github.com/BaaRai/ARTEX) is a web platform that requires PostgreSQL
+# and normally runs as a two-container compose stack. This image puts PostgreSQL in
+# the same image as ARTEX so everything runs in a single container. Nothing is
+# auto-started: you open a shell and bring the services up by hand — the same pattern
+# RF Swift uses for Open5GS (run/Open5GS.sh) — with two helper commands:
+#
+#   artex-postgres     # init (first time) + start the database
+#   artex-start        # launch ARTEX  -> http://localhost:8787
+#
+# BASE_IMAGE is the upstream ARTEX image built straight from its own repository at a
+# pinned ref (the `artex_base` Makefile target), so this layer stays thin and does not
+# vendor ARTEX's build. External-PostgreSQL deployment stays available as the compose
+# stack under extras/artex/.
+
+ARG BASE_IMAGE=artex_base
+FROM ${BASE_IMAGE}
+
+LABEL "org.container.project"="rfswift"
+LABEL "org.container.author"="Sébastien Dudek (FlUxIuS)"
+
+# PostgreSQL server + client, colocated with ARTEX. `su` (from the base) switches to
+# the postgres user; the helper scripts call initdb/pg_ctl against a fixed data dir.
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends postgresql postgresql-client \
+ && rm -rf /var/lib/apt/lists/* \
+ && install -d -o postgres -g postgres /var/lib/postgresql/data /var/run/postgresql
+
+# Defaults for the embedded database; override at `docker run` with -e.
+ENV POSTGRES_USER=artex \
+    POSTGRES_PASSWORD=artex \
+    POSTGRES_DB=artex \
+    PGDATA=/var/lib/postgresql/data
+
+# CLI helpers (started by hand, like Open5GS).
+COPY extras/artex/artex-postgres extras/artex/artex-start /usr/local/bin/
+RUN chmod +x /usr/local/bin/artex-postgres /usr/local/bin/artex-start
+
+WORKDIR /app
+EXPOSE 8787 8788
+# ARTEX runtime data + keys (from the base image) and the embedded database. Mount a
+# volume on /var/lib/postgresql/data to keep the database across container restarts.
+VOLUME ["/app/data", "/app/keys", "/var/lib/postgresql/data"]
+
+# Land in a shell instead of the base image's auto-start supervisor.
+ENTRYPOINT []
+CMD ["/bin/bash"]

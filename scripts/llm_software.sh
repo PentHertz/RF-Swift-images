@@ -148,8 +148,9 @@ function hermes_agent_soft_install() {
 
 function llm_skills_install() {
     # Skill packs shared by every agent. All of them are rendered; the default set is enabled
-    # (Trail of Bits, farmage, Floorplan and one index skill standing for the 818 cybersecurity
-    # skills, whose descriptions alone would add ~80K tokens to every turn).
+    # (Trail of Bits, farmage, Floorplan, Cloudflare's security-audit, Strix, ARTEX and one index
+    # skill standing for the 818 cybersecurity skills, whose descriptions alone would add ~80K
+    # tokens to every turn).
     goodecho "[+] Installing agent skill packs"
     install_dependencies "git python3"
     mkdir -p "$LLM_SKILLS_ROOT/src"
@@ -158,7 +159,10 @@ function llm_skills_install() {
         "trailofbits https://github.com/trailofbits/skills.git" \
         "farmage https://github.com/farmage/opencode-skills.git" \
         "floorplan https://github.com/haydenschmitty/floorplan.git" \
-        "cybersecurity https://github.com/mukul975/Anthropic-Cybersecurity-Skills.git"; do
+        "cybersecurity https://github.com/mukul975/Anthropic-Cybersecurity-Skills.git" \
+        "cloudflare https://github.com/cloudflare/security-audit-skill.git" \
+        "strix https://github.com/usestrix/strix.git" \
+        "artex https://github.com/BaaRai/ARTEX.git"; do
         name="${spec%% *}"
         url="${spec#* }"
         if [ -d "$LLM_SKILLS_ROOT/src/$name/.git" ]; then
@@ -174,7 +178,7 @@ function llm_skills_install() {
         record_build_failure "other" "llm-skills" "render failed"
         return 0
     fi
-    llm-skills enable trailofbits farmage floorplan cybersecurity-skills \
+    llm-skills enable trailofbits farmage floorplan cybersecurity-skills cloudflare strix artex \
         || record_build_failure "other" "llm-skills" "enabling the default skill set failed"
 
     # farmage's OpenCode workflow commands (/common-ground, /planning/..., as its installer does)
@@ -199,6 +203,24 @@ function llm_skills_install() {
         codex plugin marketplace add "$LLM_SKILLS_ROOT/src/trailofbits" \
             || record_build_failure "other" "trailofbits marketplace (Codex)" "codex plugin marketplace add failed"
     fi
+}
+
+function strix_soft_install() {
+    # Strix: autonomous AI pentest agent (PyPI strix-agent). Each scan runs in a sandbox
+    # container, so it needs a reachable Docker daemon (mount /var/run/docker.sock) and an
+    # LLM (STRIX_LLM + LLM_API_KEY). Its agent skills come with the `strix` llm-skills pack.
+    goodecho "[+] Installing Strix"
+    if ! command -v uv > /dev/null; then
+        record_build_failure "toolchain" "strix" "uv unavailable"
+        return 0
+    fi
+    if ! installfromnet uv tool install --force --python 3.12 strix-agent; then
+        record_build_failure "pip" "strix" "uv tool install strix-agent failed"
+        return 0
+    fi
+    [ -e "$HOME/.local/bin/strix" ] && ln -sf "$HOME/.local/bin/strix" /usr/local/bin/strix
+    strix --version || record_build_failure "other" "strix" "strix --version failed after install"
+    return 0
 }
 
 function rea_soft_install() {
@@ -251,6 +273,59 @@ function craftanything_soft_install() {
     # OpenCode as an extra builder backend (Claude Code stays the default one)
     craft-anything-cli ai add OpenCode --kind agent_cli --model opencode \
         || record_build_failure "other" "craft-anything OpenCode backend" "ai add failed"
+}
+
+function nodeterm_server_soft_install() {
+    # NodeTerm Server Edition (https://nodeterm.dev): a headless server that serves NodeTerm's
+    # browser canvas over HTTP/WebSocket, managing terminals and coding agents in tmux sessions.
+    # Built from source with the image's Node (the prebuilt desktop app is x86_64-only; this
+    # builds on amd64 and arm64). node-pty is rebuilt against Node's ABI, since the server runs
+    # under node, not electron. Run it with `nodeterm-server`. Data (auth, sessions, scrollback)
+    # lives in ~/.nodeterm-server. Licensed BUSL-1.1 (converts to MIT 4 years after each release;
+    # internal, non-compete use permitted).
+    goodecho "[+] Installing NodeTerm Server Edition"
+    if ! command -v node > /dev/null || ! command -v npm > /dev/null; then
+        record_build_failure "toolchain" "nodeterm" "node/npm unavailable (llm_nodejs_install failed?)"
+        return 0
+    fi
+    # tmux: terminal session continuity; git: the Source Control panel; build-essential + python3:
+    # node-pty's native build.
+    install_dependencies "tmux git curl build-essential python3"
+    local src=/opt/nodeterm
+    rm -rf "$src"
+    if ! installfromnet git clone --depth 1 https://github.com/eneskirca/nodeterm.git "$src"; then
+        record_build_failure "git" "nodeterm" "clone failed"
+        return 0
+    fi
+    cd "$src" || { record_build_failure "other" "nodeterm" "cd $src failed"; return 0; }
+    # --ignore-scripts skips the electron-rebuild postinstall and electron's binary download,
+    # neither of which the server needs (devDependencies are required to build the bundle).
+    if ! installfromnet npm ci --ignore-scripts; then
+        record_build_failure "npm" "nodeterm" "npm ci failed"
+        return 0
+    fi
+    if ! npm run build || ! npm run server:build; then
+        record_build_failure "build" "nodeterm" "renderer/server build failed"
+        return 0
+    fi
+    # Drop dev dependencies, then compile node-pty against Node's ABI (the server runs under node).
+    npm prune --omit=dev || true
+    npm rebuild node-pty || record_build_failure "build" "nodeterm" "node-pty rebuild failed"
+    if [ ! -f "$src/out/server/main.cjs" ]; then
+        record_build_failure "build" "nodeterm" "out/server/main.cjs missing after build"
+        return 0
+    fi
+    cat > /usr/local/bin/nodeterm-server << 'EOS'
+#!/bin/sh
+# NodeTerm Server Edition. First run prints a one-time setup URL (open it, choose a password),
+# or seed it headlessly with NODETERM_SERVER_PASSWORD. Binds 127.0.0.1:8443 by default; publish
+# or forward that port to reach it from the host. To bind a non-loopback interface, set
+# NODETERM_HOST=0.0.0.0 and pass --insecure-http (intended behind a TLS-terminating proxy).
+# Data (auth, sessions, scrollback): ~/.nodeterm-server, or set NODETERM_DATA_DIR.
+cd /opt/nodeterm || exit 1
+exec node out/server/main.cjs "$@"
+EOS
+    chmod 0755 /usr/local/bin/nodeterm-server
 }
 
 function whispercpp_soft_install() {

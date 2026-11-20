@@ -98,9 +98,11 @@ endef
 ifeq ($(STORAGE_TYPE),registry)
     build_and_push = $(build_and_push_registry)
     build_stage = $(build_stage_registry)
+    ARTEX_BASE_OUTPUT = --push
 else
     build_and_push = $(build_and_push_local)
     build_stage = $(build_stage_local)
+    ARTEX_BASE_OUTPUT = --load
 endif
 
 #
@@ -261,6 +263,22 @@ llm:
 ad:
 	$(call build_and_push,ad,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):network_$(ARCH),$(CURDIR)/ad.docker)
 
+# ARTEX single image (ARTEX + embedded PostgreSQL). `artex_base` builds the upstream
+# ARTEX image straight from its own repository (its own Dockerfile, which
+# is buildx-native and cross-compiles per TARGETARCH); `artex` adds PostgreSQL and the
+# CLI helpers on top. amd64/arm64 only.
+ARTEX_REF ?= main
+
+artex_base:
+	@docker buildx build --label org.opencontainers.image.revision=$(REVISION_LABEL) --platform $(PLATFORM) \
+		--build-arg ARTEX_VERSION=$(ARTEX_REF) \
+		$(ARTEX_BASE_OUTPUT) \
+		-t $(REGISTRY_IMAGE):artex_base_$(ARCH) \
+		"https://github.com/BaaRai/ARTEX.git#$(ARTEX_REF)"
+
+artex: artex_base
+	$(call build_and_push,artex,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):artex_base_$(ARCH),$(CURDIR)/artex.docker)
+
 hardware:
 	$(call build_and_push,hardware,--build-arg BASE_IMAGE=$(REGISTRY_IMAGE):sdrsa_devices_$(ARCH),$(CURDIR)/hardware.docker)
 
@@ -340,6 +358,7 @@ help:
 	@echo "Other image targets:"
 	@echo "  rfid, network, wifi, bluetooth, reversing, automotive, hardware, osint, ad"
 	@echo "  llm                 - LLM coding agents (Claude Code, Codex, OpenCode, Vibe, Hermes) + skills (amd64/arm64)"
+	@echo "  artex               - ARTEX single image: ARTEX + embedded PostgreSQL, started from the CLI (amd64/arm64); tracks upstream main; set ARTEX_REF to pin"
 	@echo "  telecom_utils, telecom_2Gto3G, telecom_4G_5GNSA, telecom_5G, telecom_5G_oai, telecom_ltesniffer, deeptempest"
 	@echo ""
 	@echo "Examples:"
@@ -351,6 +370,6 @@ help:
 	sdrfull sdrfull_staged sdrfull_stage_begin sdrfull_stage_extraoot1 sdrfull_stage_extraoot2 \
 	sdrfull_stage_extrasofts sdrfull_stage_mldlsofts sdrfull_final \
 	sdrfull1 sdrfull2 sdrfull3 sdrfull4 sdrfull_intelgpu sdrfull_nvidiagpu \
-	rfid network wifi bluetooth reversing automotive hardware osint ad llm \
+	rfid network wifi bluetooth reversing automotive hardware osint ad llm artex artex_base \
 	telecom_utils telecom_2Gto3G telecom_4Gto5G telecom_4G_5GNSA telecom_5G telecom_5G_oai telecom_ltesniffer telecom_5G_bladerf \
 	deeptempest build help

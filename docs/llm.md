@@ -16,6 +16,9 @@ Coding agents, shared skill packs, agent-side reverse-engineering tools, local s
 | Skill packs | `llm-skills` | git, `/opt/llm-skills/src` | `~/.agents/skills`, `~/.claude/skills` |
 | whisper.cpp | `whisper-cli`, `whisper-server`, `whisper-stream`, `whisper-download-model` | source, `/opt/whisper.cpp` | models in `/opt/whisper.cpp/models` |
 | Open WebUI | `open-webui serve` | PyPI `open-webui` (uv tool, Python 3.11) | `~/.open-webui/` (`$DATA_DIR`) |
+| NodeTerm (Server Edition) | `nodeterm-server` | source, `/opt/nodeterm` | `~/.nodeterm-server/` |
+| Strix (AI pentest agent) | `strix` | PyPI `strix-agent` (uv tool, Python 3.12) | `~/.strix/` |
+| Semgrep | `semgrep` | PyPI `semgrep` | `~/.semgrep/` |
 
 Node.js 24 LTS is in `/usr/local` (Ubuntu's 22.22 is too old for REA).
 
@@ -30,6 +33,7 @@ docker run -it --rm \
   -v ~/.rfswift-llm/opencode-data:/root/.local/share/opencode \
   -v ~/.rfswift-llm/vibe:/root/.vibe -v ~/.rfswift-llm/hermes:/root/.hermes \
   -v ~/.rfswift-llm/open-webui:/root/.open-webui -v ~/.rfswift-llm/hf-cache:/root/.cache/huggingface \
+  -v ~/.rfswift-llm/nodeterm:/root/.nodeterm-server \
   -v ~/.rfswift-llm/whisper-models:/root/whisper-models \
   -v "$PWD:/work" -w /work \
   penthertz/rfswift_resolute:llm_amd64
@@ -51,7 +55,7 @@ a fresh container once), or rerun the setup steps below after the first start.
 
 ## Skills
 
-Every agent reads the same skills. They come from four packs:
+Every agent reads the same skills. They come from six packs:
 
 | Pack | Skills | Enabled by default |
 |---|---:|---|
@@ -59,9 +63,18 @@ Every agent reads the same skills. They come from four packs:
 | `farmage` ([farmage/opencode-skills](https://github.com/farmage/opencode-skills)): language/framework experts, code review, testing | 67 | yes |
 | `floorplan` ([haydenschmitty/floorplan](https://github.com/haydenschmitty/floorplan)): interactive architecture map of a codebase | 1 | yes |
 | `cybersecurity` ([mukul975/Anthropic-Cybersecurity-Skills](https://github.com/mukul975/Anthropic-Cybersecurity-Skills), the skills-hub.ai "Cybersecurity Skills" source): pentest, red team, DFIR, malware, threat intel, cloud/AD/ICS | 818 | through one index skill |
+| `cloudflare` ([cloudflare/security-audit-skill](https://github.com/cloudflare/security-audit-skill)): source-first security audit workflow with findings/coverage validators (Node.js) | 1 | yes |
+| `strix` ([usestrix/strix](https://github.com/usestrix/strix)): drive the `strix` CLI for web/API/code pentests, OWASP Top 10, CI scans | 9 | yes |
+| `artex` ([BaaRai/ARTEX](https://github.com/BaaRai/ARTEX)): web/API recon and audit playbooks (api-recon, api-security, codeaudit, patch-diff, php2shell, edr-bypass-re, bbot-recon, playwright-cli, rea, scopesentry) | 10 | yes |
+
+Some `artex` skills drive tools that ship in the separate ARTEX image rather than here
+(`bbot-recon` needs bbot/subfinder/httpx, `playwright-cli` needs the Playwright browsers,
+`scopesentry` needs the ScopeSentry MCP), and `rea` overlaps the REA MCP server already
+installed in this image; the recon/audit playbooks (`api-recon`, `api-security`, `codeaudit`,
+`patch-diff`, `php2shell`, `edr-bypass-re`) are the ones that stand on their own here.
 
 Agents send the name and description of every enabled skill to the model on each turn. The
-default set costs about 16K tokens; all 818 cybersecurity skills would add about 80K. So that
+default set costs about 20K tokens; all 818 cybersecurity skills would add about 80K. So that
 pack is represented by a single `cybersecurity-skills` index skill: the agent runs
 `llm-skills search <words>` and reads the matching `SKILL.md`. Register the ones you use
 natively when you want them offered automatically:
@@ -98,6 +111,20 @@ commands, agents and hooks some plugins add on top of their skills:
 `/plugin install <name>@trailofbits` in Claude Code, `codex plugin add <name>@trailofbits`.
 The plugin's skills then appear twice (`<plugin>:<skill>` and the plain one); disable the plain
 one with `llm-skills disable <id>` if that bothers you.
+
+## Strix
+
+Strix starts one sandbox container per scan, so it needs a Docker daemon: run the image with
+`-v /var/run/docker.sock:/var/run/docker.sock` (this gives the container control of the host's
+Docker). Point it at a model, then a target you are authorized to test:
+
+```sh
+export STRIX_LLM="anthropic/claude-sonnet-5-5" LLM_API_KEY=...
+strix --target ./app                 # a local codebase
+strix --target https://staging.example.test
+```
+
+The `strix` skills let any agent above run and triage Strix scans for you.
 
 ## OpenCode
 
@@ -253,6 +280,35 @@ AUDIO_STT_OPENAI_API_KEY=none AUDIO_STT_MODEL=whisper-1 open-webui serve
 ```
 
 The browser only gives the microphone to `http://127.0.0.1`/`localhost` or HTTPS pages.
+
+## NodeTerm (Server Edition)
+
+[NodeTerm](https://nodeterm.dev) is a node-based terminal manager for coding agents: terminals and
+agents sit as draggable nodes on an infinite canvas, each in a persistent tmux session. The desktop
+app is x86_64-only, so the image installs the **Server Edition** — the same canvas served in a
+browser by a headless Node server — which builds on amd64 and arm64.
+
+```sh
+nodeterm-server                  # http://127.0.0.1:8443
+```
+
+The first run prints a one-time setup URL on stdout; open it and choose a password (min 8 chars).
+For an unattended start, seed it instead:
+
+```sh
+NODETERM_SERVER_PASSWORD='choose-a-strong-one' nodeterm-server
+```
+
+It binds `127.0.0.1:8443` by default — publish or forward that port to reach it from the host
+(`-p 127.0.0.1:8443:8443`). To bind a non-loopback interface, set `NODETERM_HOST=0.0.0.0` and pass
+`--insecure-http` (plain HTTP is refused off loopback otherwise; the intended public setup is behind
+a TLS-terminating reverse proxy). Auth, sessions, workspace and scrollback live in
+`~/.nodeterm-server` (`NODETERM_DATA_DIR`); mount it to keep them (see above). The tmux server runs
+inside the container, so a container restart ends the live sessions; scrollback and resumable agents
+are restored from the data directory on the next attach.
+
+> Licensed BUSL-1.1 (each release converts to MIT four years after publication): internal and
+> non-competing use is permitted; offering it as a competing hosted product/service is not.
 
 ## Updating
 

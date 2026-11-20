@@ -1,0 +1,23 @@
+#!/bin/bash
+# Launch ARTEX against the embedded PostgreSQL. Start the database first:
+#
+#   artex-postgres        # once per container start
+#   artex-start           # then this (Ctrl-C to stop)
+#
+# Extra arguments pass through to the artex binary (e.g. artex-start -addr :9000).
+# The setup token for http://localhost:8787/setup is printed in this output on first run.
+set -euo pipefail
+
+POSTGRES_USER="${POSTGRES_USER:-artex}"
+POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-artex}"
+POSTGRES_DB="${POSTGRES_DB:-artex}"
+export ARTEX_PG_DSN="${ARTEX_PG_DSN:-postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@127.0.0.1:5432/${POSTGRES_DB}?sslmode=disable}"
+
+PGBIN="$(ls -d /usr/lib/postgresql/*/bin 2>/dev/null | sort -V | tail -n1)"
+if [ -n "$PGBIN" ] && ! su -s /bin/sh postgres -c "$PGBIN/pg_ctl -D '${PGDATA:-/var/lib/postgresql/data}' status" >/dev/null 2>&1; then
+  echo "[artex] PostgreSQL is not running — start it first with: artex-postgres" >&2
+  exit 1
+fi
+
+cd /app
+exec /app/start.sh "$@"
