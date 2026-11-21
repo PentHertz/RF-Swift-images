@@ -23,9 +23,13 @@ function sdrangel_soft_install() {
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
 	# v8+ ships per-Ubuntu .debs directly (the old v7 sdrangel-<build>-master.tar.gz is gone)
-	installfromnet "wget" "https://github.com/f4exb/sdrangel/releases/download/v8.2.0/sdrangel_8.2.0_ubuntu-26.04_amd64.deb"
-	apt-fast install -y ./sdrangel_8.2.0_ubuntu-26.04_amd64.deb
-	rm -f sdrangel_8.2.0_ubuntu-26.04_amd64.deb
+	local SDRANGEL_VERSION="8.2.0"  # known-good; the build takes the newest release
+	SDRANGEL_VERSION=$(latest_release_version f4exb/sdrangel "$SDRANGEL_VERSION" \
+		"https://github.com/f4exb/sdrangel/releases/download/v@V@/sdrangel_@V@_ubuntu-26.04_amd64.deb")
+	local deb="sdrangel_${SDRANGEL_VERSION}_ubuntu-26.04_amd64.deb"
+	installfromnet "wget" "https://github.com/f4exb/sdrangel/releases/download/v${SDRANGEL_VERSION}/${deb}"
+	apt-fast install -y "./${deb}"
+	rm -f "${deb}"
 	cd /root
 }
 
@@ -240,7 +244,10 @@ function cyberther_soft_install() {
 	goodecho "[CyberEther][+] Cloning GitHub repository"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	git clone --depth=1 --branch v1.19.2 https://github.com/luigifcruz/CyberEther.git CyberEther
+	local CYBERETHER_VERSION="1.19.2"  # known-good; the build takes the newest release
+	CYBERETHER_VERSION=$(latest_release_version luigifcruz/CyberEther "$CYBERETHER_VERSION" \
+		"https://github.com/luigifcruz/CyberEther/archive/refs/tags/v@V@.tar.gz")
+	git clone --depth=1 --branch "v${CYBERETHER_VERSION}" https://github.com/luigifcruz/CyberEther.git CyberEther
 	cd CyberEther
 	goodecho "[CyberEther][+] Configuring build options for architecture"
 	BUILDTYPE="debugoptimized"

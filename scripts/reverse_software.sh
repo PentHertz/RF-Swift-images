@@ -191,8 +191,26 @@ function ghidra_soft_install() {
 	[ -d /reverse ] || mkdir /reverse
 	cd /reverse
 
-    ghidra_version="12.2"
+    ghidra_version="12.2"   # known-good (with its build date); the build takes the newest release
     ghidra_date="20261016"
+    # The zip name embeds a build date, so read it from the newest release's asset list
+    # (the expanded_assets page, no API call). Known-good if anything is missing.
+    local gh_latest gh_zip
+    gh_latest=$(version_from_tag "$(github_latest_tag NationalSecurityAgency/ghidra)")
+    if [ -z "$gh_latest" ]; then
+        note_version_fallback NationalSecurityAgency/ghidra "newest release lookup failed" "$ghidra_version"
+    elif version_gt "$gh_latest" "$ghidra_version"; then
+        gh_zip=$(curl -fsSL --max-time 30 \
+            "https://github.com/NationalSecurityAgency/ghidra/releases/expanded_assets/Ghidra_${gh_latest}_build" 2>/dev/null \
+            | grep -oE "ghidra_${gh_latest//./\\.}_PUBLIC_[0-9]{8}\.zip" | head -n1 || true)
+        if [ -n "$gh_zip" ]; then
+            ghidra_version="$gh_latest"
+            ghidra_date="${gh_zip##*_PUBLIC_}"
+            ghidra_date="${ghidra_date%.zip}"
+        else
+            note_version_fallback NationalSecurityAgency/ghidra "no ghidra_${gh_latest}_PUBLIC_<date>.zip asset" "$ghidra_version"
+        fi
+    fi
 	prog="ghidra_${ghidra_version}_PUBLIC_${ghidra_date}"
 
 	# Always write to the exact name (-O) and drop leftovers from earlier runs: otherwise
@@ -251,15 +269,19 @@ function imhex_soft_install() {
     cd /root/thirdparty
     
     ARCH=$(uname -m)
-    IMH_VERSION="1.38.1"
-    
+    IMH_VERSION="1.38.1"  # known-good; the build takes the newest release
+
     # AppImage on every arch: there is no Ubuntu 26.04 deb, and the 25.04 one
     # declares libmbedtls14, which does not exist on resolute.
+    local imh_arch
     case "$ARCH" in
-        x86_64|amd64)  IMH_APPIMAGE="imhex-$IMH_VERSION-x86_64.AppImage" ;;
-        aarch64|arm64) IMH_APPIMAGE="imhex-$IMH_VERSION-arm64.AppImage" ;;
+        x86_64|amd64)  imh_arch="x86_64" ;;
+        aarch64|arm64) imh_arch="arm64" ;;
         *) criticalecho-noexit "[-] Unsupported architecture: $ARCH"; return 1 ;;
     esac
+    IMH_VERSION=$(latest_release_version WerWolv/ImHex "$IMH_VERSION" \
+        "https://github.com/WerWolv/ImHex/releases/download/v@V@/imhex-@V@-${imh_arch}.AppImage")
+    IMH_APPIMAGE="imhex-$IMH_VERSION-${imh_arch}.AppImage"
 
     goodecho "[+] Installing ImHex for $ARCH (AppImage)"
     install_dependencies "libglfw3-dev libfuse2"
@@ -491,6 +513,9 @@ function binary_triage_tools_soft_install() {
         goodecho "[!] Detect-It-Easy only publishes amd64 .deb packages; skipping it on $(uname -m)"
         return 0
     fi
+    # known-good above; the newest release is used only when it ships an Ubuntu 26.04 .deb
+    DIE_VERSION=$(latest_release_version horsicq/DIE-engine "$DIE_VERSION" \
+        "https://github.com/horsicq/DIE-engine/releases/download/@V@/die_@V@_Ubuntu_26.04_amd64.deb")
     tmp=$(mktemp -d)
     if installfromnet wget -q -O "$tmp/die.deb" "https://github.com/horsicq/DIE-engine/releases/download/${DIE_VERSION}/die_${DIE_VERSION}_Ubuntu_26.04_amd64.deb" \
         && apt-fast install -y "$tmp/die.deb"; then

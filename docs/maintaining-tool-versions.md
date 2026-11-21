@@ -1,10 +1,55 @@
 # Maintaining manually-pinned tool versions
 
-Some tools in `scripts/*.sh` are installed at a **hand-pinned version**: a version string
-you edit in the script (as opposed to tools that always pull `latest`, a distro package, or
-build from a tracked git branch). This page lists those pins and how to keep them current.
+Some tools in `scripts/*.sh` carry a version string in their script, as opposed to tools
+that always pull `latest`, a distro package, or build from a tracked git branch. This page
+lists those versions and how to keep them current.
 
-A helper script checks them against upstream:
+## Newest release at build time
+
+Most of these tools **take their newest release on every build**. The version in the script
+is the **known-good fallback**, used when:
+
+- the newest-release lookup fails (GitHub/vendor down, network issue), or
+- the newest release no longer ships the asset the installer expects (renamed file, dropped
+  architecture or Ubuntu build, missing companion patch).
+
+Builds never install anything older than known-good. The helpers live in `scripts/common.sh`:
+`latest_release_version OWNER/REPO KNOWN_GOOD [URL_TEMPLATE...]` and `pick_version`. A
+URL template is the download URL with `@V@` in place of the version. GitHub's newest release
+is read from the `/releases/latest` redirect, which needs no API call and so has no rate limit.
+
+Every fallback is written to the image's build report under category **`fallback`**, with
+the reason, for example `4.0.0 has no die_4.0.0_Ubuntu_26.04_amd64.deb; built known-good 3.21`.
+Read it with `make report IMG=<image>` or in the CI job summary. A fallback is not an error.
+It means upstream changed something and that installer (or its known-good version) needs a look.
+
+**When the lookup actually runs.** The newest release is fetched when an install layer is
+rebuilt, not when a cached layer is reused:
+
+- **CI:** install layers re-run on every image build. The registry cache is only read
+  (`--cache-to` is off), and `COPY scripts` comes before the installs. But CI only builds an
+  image when its files change or on a manual `force_all` dispatch, so an upstream release on
+  its own does not trigger a build.
+- **Local:** buildx reuses cached layers when nothing changed. Use `make <image> NO_CACHE=1`
+  to force a fresh lookup.
+
+Integrity checks are kept where upstream publishes checksums:
+
+| Tool | Newest release is verified with |
+|------|---------------------------------|
+| Node.js (v24 line) | that release's `SHASUMS256.txt` |
+| Craft Anything | that release's `SHA256SUMS.txt` |
+| Go | the sha256 from go.dev's release list (new: the old install had no check) |
+| geckodriver | **TLS only**: Mozilla publishes `.asc` signatures but no checksum file. The pinned SHA256 still applies when the known-good version is installed |
+
+**Still pinned** (the build installs exactly the version in the script): Kaleido (v1.x is a
+different distribution), LLVM (toolchain major, bump deliberately), scapy (locked for Mirage),
+and the vendor downloads Burp Suite and Little Snitch.
+
+## Checking versions
+
+A helper script compares the versions in the scripts with upstream. For floating tools it
+tells you when the known-good fallback has fallen behind:
 
 ```sh
 # check everything (needs network; GitHub API is rate-limited — set GITHUB_TOKEN to raise it)
@@ -40,7 +85,10 @@ Each pin has a **class** that says how safe a bump is:
 
 ## Tracked pins
 
-Versions below are current as of the 2026-11-20 audit.
+Versions below are the values in the scripts as of 2026-11-21. Every tool in the **simple**
+and **needs-care** tables takes the newest release at build time, except **kaleido** and
+**llvm**, so for those tools the version shown is the known-good fallback. The classes still
+describe how safe it is to bump that fallback.
 
 ### simple (auto-bumpable)
 
@@ -86,7 +134,10 @@ Versions below are current as of the 2026-11-20 audit.
 |------|---------|------|----------------|
 | burp | 2026.11.2 | `network_common.sh` | https://portswigger.net/burp/releases |
 | little-snitch | 1.1.1 | `corebuild.sh` | https://obdev.at/products/littlesnitch/ |
-| python310 | 3.10.22 | `rf_tools.sh` | python.org — note 3.10 is **EOL**; 3.10.22 is the final patch |
+
+> Old Python versions are not pinned here: tools that need one (bluing and Mirage need 3.10)
+> get it from `uv python install <ver>` and a `uv venv --seed --python <ver>` venv behind a
+> wrapper. uv serves current patch releases for amd64, arm64 and riscv64.
 
 ## Other vendor / firmware blobs (not tracked by the checker)
 

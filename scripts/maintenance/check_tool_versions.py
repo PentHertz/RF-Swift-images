@@ -54,7 +54,7 @@ MANIFEST = {
                     "source": ("github", "WerWolv/ImHex"), "cls": "simple"},
     "whispercpp":  {"file": "llm_software.sh", "pat": r'WHISPERCPP_VERSION="v(?P<ver>[\d.]+)"',
                     "source": ("github", "ggml-org/whisper.cpp"), "cls": "simple"},
-    "cyberether":  {"file": "sdr_softwares.sh", "pat": r'--branch v(?P<ver>[\d.]+) https://github\.com/luigifcruz/CyberEther',
+    "cyberether":  {"file": "sdr_softwares.sh", "pat": r'CYBERETHER_VERSION="(?P<ver>[\d.]+)"',
                     "source": ("github", "luigifcruz/CyberEther"), "cls": "simple"},
     "qflipper":    {"file": "rf_tools.sh", "pat": r'QFLIPPER_VERSION="(?P<ver>[\d.]+)"',
                     "source": ("github", "flipperdevices/qFlipper"), "cls": "simple",
@@ -79,7 +79,7 @@ MANIFEST = {
     "die":         {"file": "reverse_software.sh", "pat": r'DIE_VERSION="(?P<ver>[\d.]+)"',
                     "source": ("github", "horsicq/DIE-engine"), "cls": "needs-care",
                     "note": "asset name encodes the Ubuntu codename; 4.0.0 has no 26.04/Ubuntu build"},
-    "sdrangel":    {"file": "sdr_softwares.sh", "pat": r'sdrangel/releases/download/v(?P<ver>[\d.]+)/',
+    "sdrangel":    {"file": "sdr_softwares.sh", "pat": r'SDRANGEL_VERSION="(?P<ver>[\d.]+)"',
                     "source": ("github", "f4exb/sdrangel"), "cls": "needs-care",
                     "note": "version appears in the tag AND the .deb file name; v7->v8 changed packaging"},
     "go":          {"file": "corebuild.sh", "pat": r'GO_VERSION="(?P<ver>[\d.]+)"',
@@ -88,10 +88,10 @@ MANIFEST = {
     "llvm":        {"file": "sast_software.sh", "pat": r'LLVM_VERSION=(?P<ver>\d+)',
                     "source": ("github", "llvm/llvm-project"), "cls": "needs-care",
                     "note": "major-only pin via apt.llvm.org; verify resolute packaging + dependents"},
-    "sniffle-fw":  {"file": "rf_tools.sh", "pat": r'Sniffle/releases/download/v(?P<ver>[\d.]+)/',
+    "sniffle-fw":  {"file": "rf_tools.sh", "pat": r'SNIFFLE_FW_VERSION="(?P<ver>[\d.]+)"',
                     "source": ("github", "nccgroup/Sniffle"), "cls": "needs-care",
                     "note": "firmware; confirm the per-board .hex asset set is unchanged"},
-    "hostapd":     {"file": "rf_tools.sh", "pat": r'hostapd-(?P<ver>[\d.]+)\.tar\.gz',
+    "hostapd":     {"file": "rf_tools.sh", "pat": r'HOSTAPD_VERSION="(?P<ver>[\d.]+)"',
                     "source": ("w1fi_hostapd",), "cls": "needs-care",
                     "note": "needs a matching hostapd-<ver>-wpe.patch in aircrack-ng (2.12 has none yet)"},
     "dsview":      {"file": "hardware.sh", "pat": r'DSVIEW_VERSION="(?P<ver>[\d.]+)"',
@@ -115,8 +115,17 @@ MANIFEST = {
     "little-snitch": {"file": "corebuild.sh", "pat": r'local version="(?P<ver>[\d.]+)"',
                     "source": ("manual", "https://obdev.at/products/littlesnitch/"), "cls": "manual",
                     "note": "first `local version=` match in file; verify it is the Little Snitch one"},
-    "python310":   {"file": "rf_tools.sh", "pat": r'python/(?P<ver>3\.10\.\d+)/Python-',
-                    "source": ("manual", "https://www.python.org/downloads/ (3.10 is EOL)"), "cls": "manual"},
+}
+
+
+# Tools whose installer takes the newest release at build time (scripts/common.sh:
+# latest_release_version / pick_version). For these the version in the script is only the
+# known-good fallback, used when the lookup fails or the newest release lacks the expected
+# asset. Everything else is pinned and installs exactly the version in the script.
+FLOATING = {
+    "jadx", "ipsw", "uv", "arduino-ide", "imhex", "whispercpp", "cyberether", "qflipper",
+    "geckodriver", "node-llm", "craft", "ghidra", "die", "sdrangel", "go", "sniffle-fw",
+    "hostapd", "dsview", "pulseview", "antsdr-uhd",
 }
 
 
@@ -205,20 +214,27 @@ def do_check(names, as_json):
         latest = fetch_latest(e["source"])
         rows.append({"tool": name, "current": cur, "latest": latest,
                      "status": status_for(cur, latest), "class": e["cls"],
+                     "build": "latest" if name in FLOATING else "pinned",
                      "file": e["file"], "note": e.get("note", "")})
     if as_json:
         print(json.dumps(rows, indent=2))
         return rows
     w = max(len(r["tool"]) for r in rows)
-    print(f"{'TOOL':<{w}}  {'CURRENT':<12} {'LATEST':<12} {'STATUS':<13} CLASS")
-    for r in sorted(rows, key=lambda x: (x["status"] != "OUTDATED", x["tool"])):
+    print("CURRENT is the version in the script: the installed version for BUILD=pinned, the")
+    print("known-good fallback for BUILD=latest (those builds already take the newest release).\n")
+    print(f"{'TOOL':<{w}}  {'CURRENT':<12} {'LATEST':<12} {'STATUS':<13} {'BUILD':<7} CLASS")
+    for r in sorted(rows, key=lambda x: (x["status"] != "OUTDATED", x["build"] != "pinned", x["tool"])):
         lat = "-" if r["latest"] is None else str(r["latest"])
         print(f"{r['tool']:<{w}}  {str(r['current'] or '?'):<12} {lat:<12} "
-              f"{r['status']:<13} {r['class']}")
+              f"{r['status']:<13} {r['build']:<7} {r['class']}")
         if r["note"] and r["status"] in ("OUTDATED", "manual", "locked") or (r["note"] and r["class"] != "simple"):
             print(f"{'':<{w}}    ^ {r['note']}")
     out = [r for r in rows if r["status"] == "OUTDATED"]
-    print(f"\n{len(out)} outdated of {len(rows)} checked.")
+    pinned_out = [r for r in out if r["build"] == "pinned"]
+    print(f"\n{len(out)} outdated of {len(rows)} checked: {len(pinned_out)} pinned "
+          f"(install an old version), {len(out) - len(pinned_out)} known-good fallbacks behind "
+          f"upstream (builds take the newest when it ships the expected assets; a build that "
+          f"fell back says so in its build report under 'fallback').")
     return rows
 
 

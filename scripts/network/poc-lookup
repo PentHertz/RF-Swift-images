@@ -1,0 +1,79 @@
+#!/usr/bin/python3 -I
+"""poc-lookup: list public PoC repositories for CVEs from the PoC-in-GitHub index.
+
+Usage:
+  poc-lookup CVE-2026-116779 [CVE-... ...]
+  poc-lookup --update                     # git pull the index
+
+The index (nomi-sec/PoC-in-GitHub) only points at GitHub repos. Those repos are
+UNVETTED: review the code before running anything from them. For anything that goes
+into an image, follow docs/network-exploit-pocs.md (review, then pin a commit).
+
+Index location: $POC_IN_GITHUB_DIR, default /opt/network/PoC-in-GitHub.
+"""
+import json
+import os
+import re
+import subprocess
+import sys
+
+ROOT = os.environ.get("POC_IN_GITHUB_DIR", "/opt/network/PoC-in-GitHub")
+CVE_RE = re.compile(r"^CVE-(\d{4})-(\d{4,})$", re.I)
+CTRL_RE = re.compile(r"[\x00-\x1f\x7f-\x9f]")  # index text is untrusted: no terminal escapes
+
+
+def clean(text, limit=None):
+    text = CTRL_RE.sub(" ", str(text or "")).strip()
+    return text if limit is None or len(text) <= limit else text[: limit - 1] + "…"
+
+
+def lookup(cve):
+    m = CVE_RE.match(cve)
+    if not m:
+        print(f"{cve}: not a CVE id (expected CVE-YYYY-NNNN)", file=sys.stderr)
+        return 2
+    cve = cve.upper()
+    path = os.path.join(ROOT, m.group(1), f"{cve}.json")
+    if not os.path.isfile(path):
+        print(f"{cve}: no entry in the index")
+        return 1
+    try:
+        with open(path, encoding="utf-8") as fh:
+            repos = json.load(fh)
+    except (OSError, ValueError) as e:
+        print(f"{cve}: unreadable index entry ({e})", file=sys.stderr)
+        return 2
+    if not isinstance(repos, list) or not repos:
+        print(f"{cve}: no entry in the index")
+        return 1
+    repos = [r for r in repos if isinstance(r, dict)]
+    repos.sort(key=lambda r: r.get("stargazers_count") or 0, reverse=True)
+    print(f"{cve}: {len(repos)} public repo(s) - UNVETTED, review before running")
+    for r in repos:
+        stars = r.get("stargazers_count") or 0
+        pushed = clean(r.get("pushed_at"))[:10] or "?"
+        fork = " (fork)" if r.get("fork") else ""
+        print(f"  {stars:>6}*  {pushed}  {clean(r.get('html_url'))}{fork}")
+        desc = clean(r.get("description"), 110)
+        if desc:
+            print(f"          {desc}")
+    return 0
+
+
+def main(argv):
+    if not argv or argv[0] in ("-h", "--help"):
+        print(__doc__.strip())
+        return 0 if argv else 2
+    if not os.path.isdir(ROOT):
+        print(f"index not found at {ROOT} (set POC_IN_GITHUB_DIR)", file=sys.stderr)
+        return 2
+    if argv[0] == "--update":
+        return subprocess.call(["git", "-C", ROOT, "pull", "--ff-only", "-q"])
+    worst = 0
+    for cve in argv:
+        worst = max(worst, lookup(cve))
+    return worst
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

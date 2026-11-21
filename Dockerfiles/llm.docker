@@ -41,6 +41,10 @@ RUN ./entrypoint.sh hermes_agent_soft_install
 # Agent-driven security testing (Strix) and the Semgrep CLI the Trail of Bits / Cloudflare skills call
 RUN ./entrypoint.sh strix_soft_install && \
 	./entrypoint.sh semgrep_install
+# Opt-in: ARTEMIS (Stanford Trinity) multi-agent red teaming, as `artemis-redteam`. Not built by
+# default (slow Rust build of its Codex fork). Uncomment, or install in a running container:
+#   cd /root/scripts && ./entrypoint.sh artemis_redteam_soft_install
+#RUN ./entrypoint.sh artemis_redteam_soft_install
 
 # Skill packs (Trail of Bits, farmage, Floorplan, cybersecurity, Cloudflare, Strix, ARTEX) for every agent, via llm-skills
 RUN ./entrypoint.sh llm_skills_install

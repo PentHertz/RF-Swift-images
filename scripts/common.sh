@@ -100,6 +100,83 @@ function installfromnet() {
     return "$status"
 }
 
+# ---------------------------------------------------------------------------
+# Newest release at build time. A tool keeps its current version in its script as a
+# known-good fallback; the installer asks for the newest release first and falls back to
+# known-good when the lookup fails or the newest release does not ship the asset the
+# installer expects. Each fallback is recorded in the build report (category "fallback").
+# Never older than known-good. All helpers return 0 (common.sh runs under errexit), so a
+# lookup failure falls back instead of aborting the build.
+# ---------------------------------------------------------------------------
+
+# Newest release tag of a GitHub repo, read from the /releases/latest redirect (no API call,
+# so no rate limit; drafts and pre-releases are skipped). Prints the raw tag, e.g. v1.5.7,
+# 0.13.9 or Ghidra_12.2_build; prints nothing on failure.
+function github_latest_tag() {
+    curl -fsSL -o /dev/null -w '%{url_effective}' --max-time 30 \
+        "https://github.com/$1/releases/latest" 2>/dev/null | sed -n 's#.*/releases/tag/##p' || true
+}
+
+# Numeric version inside a tag: v1.5.7 -> 1.5.7, Ghidra_12.2_build -> 12.2.
+function version_from_tag() {
+    printf '%s' "$1" | grep -oE '[0-9]+(\.[0-9]+)+' | head -n1 || true
+}
+
+# True when $1 is a strictly newer version than $2.
+function version_gt() {
+    [ -n "$1" ] && [ "$1" != "$2" ] && [ "$(printf '%s\n%s\n' "$1" "$2" | sort -V | tail -n1)" = "$1" ]
+}
+
+# One quick existence check without retries (installfromnet would retry a 404 five times).
+function url_exists() {
+    curl -fsIL -o /dev/null --max-time 30 "$1" 2>/dev/null
+}
+
+# note_version_fallback NAME REASON KNOWN_GOOD: log + build-report entry (stderr only, so it
+# is safe inside $(...)).
+function note_version_fallback() {
+    local src stage=""
+    # report the tool's own script as the stage, not common.sh where this helper lives
+    for src in "${BASH_SOURCE[@]}"; do
+        [ "$(basename "$src")" = "common.sh" ] || { stage=$(basename "$src" .sh); break; }
+    done
+    echo "[latest] $1: $2 - building known-good $3" >&2
+    RFSWIFT_BUILD_STAGE="${RFSWIFT_BUILD_STAGE:-${stage:-common}}" \
+        record_build_failure "fallback" "$1" "$2; built known-good $3" >&2 || true
+}
+
+# pick_version NAME NEWEST KNOWN_GOOD [URL_TEMPLATE...]
+#   Prints NEWEST when it is newer than KNOWN_GOOD and every URL_TEMPLATE (a download URL with
+#   @V@ in place of the version) exists; otherwise prints KNOWN_GOOD. Use as VER=$(pick_version ...).
+function pick_version() {
+    local name="$1" newest="$2" good="$3" tmpl url
+    shift 3
+    if [ -z "$newest" ]; then
+        note_version_fallback "$name" "newest release lookup failed" "$good"
+        echo "$good"; return 0
+    fi
+    if ! version_gt "$newest" "$good"; then
+        echo "$good"; return 0
+    fi
+    for tmpl in "$@"; do
+        url="${tmpl//@V@/$newest}"
+        if ! url_exists "$url"; then
+            note_version_fallback "$name" "$newest has no ${url##*/}" "$good"
+            echo "$good"; return 0
+        fi
+    done
+    echo "[latest] $name: building $newest (known-good $good)" >&2
+    echo "$newest"
+}
+
+# latest_release_version OWNER/REPO KNOWN_GOOD [URL_TEMPLATE...]: pick_version for a GitHub
+# project, using its newest release tag.
+function latest_release_version() {
+    local repo="$1"
+    shift
+    pick_version "$repo" "$(version_from_tag "$(github_latest_tag "$repo")")" "$@"
+}
+
 # Best-effort apt install: try the whole list, and if that fails fall back to
 # installing each package individually so one missing package no longer aborts
 # the build (or silently drops the rest of the list). Every package that still

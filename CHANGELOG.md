@@ -7,10 +7,25 @@
 - `network`: Nuclei (ProjectDiscovery), upstream release binary checked against
   its checksums file (amd64/arm64, `go install` elsewhere), with the community
   templates.
+- `network`: recent-CVE exploit PoCs under `/opt/network/exploits/`, each pinned to a
+  statically reviewed commit (authorized testing only): SIP2Shell (CVE-2026-116779, plus
+  its nuclei template in `/opt/network/nuclei-templates-custom/`), the CVE-2026-123007
+  NGINX HTTP/2 PoC and the Censys nginx2root lab suite in the default build;
+  php2shell-poc (CVE-2026-109618/109619) and brotli2crash (CVE-2026-111497) as opt-in
+  because they crash the target. See `docs/network-exploit-pocs.md`.
+- `network`: exploit collections and frameworks that track upstream (not pinned):
+  Exploit-DB with `searchsploit`, commix, RouterSploit (`rsf`, own venv, plus `telnetlib3`
+  for Python ≥ 3.13), and the PoC-in-GitHub index with a `poc-lookup` helper (lookup only;
+  the repos it lists are unvetted). Adds about 450 MB to `network` and `ad`.
 - `llm`: Strix AI pentest agent (`strix-agent`, uv tool) and the Semgrep CLI;
   new `cloudflare` (security-audit), `strix` and `artex` skill packs in
   `llm-skills`, enabled by default; NodeTerm Server Edition (`nodeterm-server`,
   browser terminal/agent canvas on `:8443`), built from source (amd64/arm64).
+- `llm` (opt-in): ARTEMIS (Stanford Trinity) multi-agent red teaming as `artemis-redteam`,
+  pinned to a reviewed commit (upstream has no releases). Its Codex fork is built from source,
+  kept off `PATH` and given its own `CODEX_HOME`, so it never shadows or reconfigures the real
+  Codex CLI. Python 3.12 via uv. Not in the default build because of the slow Rust build.
+  AresValley's Artemis signal-identification app (SDR images) keeps its `Artemis` command.
 - ARTEX (agent-driven web-security platform) built straight from upstream (latest
   `main`, `ARTEX_REF` to pin): a single image `make artex` with PostgreSQL inside,
   started from the shell by hand (`artex-postgres`, `artex-start`) like Open5GS; and
@@ -27,9 +42,26 @@
 
 ### Changed
 
+- Builds take the newest release of 20 hand-pinned tools (jadx, ipsw, uv, Arduino IDE,
+  ImHex, whisper.cpp, CyberEther, qFlipper, geckodriver, Node.js v24, Craft Anything, Ghidra,
+  Detect-It-Easy, sdrangel, Go, Sniffle firmware, hostapd-wpe, DSView, PulseView, ANTSDR UHD).
+  The version in each script is now a known-good fallback, used when the lookup fails or the
+  newest release lacks the expected asset (DIE 4.0.0 has no 26.04 `.deb`; hostapd 2.12 has no
+  WPE patch). Each fallback is recorded in the build report under `fallback`. New helpers in
+  `scripts/common.sh` (`latest_release_version`, `pick_version`) read GitHub's
+  `/releases/latest` redirect, so there is no API rate limit. Node.js and Craft Anything are
+  verified against their release checksum files, and Go now against go.dev's sha256 (it was
+  unchecked before). A newer geckodriver is TLS-only, because upstream publishes no checksum
+  file. Kaleido, LLVM, scapy, Burp Suite and Little Snitch stay pinned.
+- `make <image> NO_CACHE=1` rebuilds every layer (`--no-cache`), so a local rebuild picks up
+  the newest releases even when no script changed.
+
 - Bumped pinned tool versions after an upstream audit: jadx `1.5.6→1.5.7`, uv `0.13.8→0.13.9`,
   Arduino IDE `2.3.10→2.3.11`, Sniffle firmware `v1.10.0→v1.11.0`, Burp Suite Community
-  `2026.10.1→2026.11.2`, and the Mirage-side CPython source build `3.10.13→3.10.22`.
+  `2026.10.1→2026.11.2`.
+- bluing and Mirage get Python 3.10 from uv (`uv python install 3.10` + `uv venv --seed`)
+  on amd64/arm64/riscv64, replacing bluing's riscv64 CPython source build and the
+  deadsnakes PPA. Mirage no longer depends on bluing having installed `python3.10` first.
 - sdrangel `v7.21.3→v8.2.0`: upstream v8 dropped the `sdrangel-<build>-master.tar.gz`
   bundle for a native `sdrangel_8.2.0_ubuntu-26.04_amd64.deb`, so the installer now fetches
   and installs that directly (major version jump; not build-verified here).

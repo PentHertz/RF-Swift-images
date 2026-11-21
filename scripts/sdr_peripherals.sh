@@ -196,7 +196,9 @@ function antsdr_uhd_devices_install() {
             return 0
             ;;
     esac
-    ANTSDR_VERSION="4.1.0.0"
+    ANTSDR_VERSION="4.1.0.0"  # known-good; the build takes the newest PentHertz/antsdr_uhd release
+    ANTSDR_VERSION=$(latest_release_version PentHertz/antsdr_uhd "$ANTSDR_VERSION" \
+        "https://github.com/PentHertz/antsdr_uhd/releases/download/v@V@/antsdr-uhd_@V@-1_${DEB_ARCH}.deb")
     DEB_NAME="antsdr-uhd_${ANTSDR_VERSION}-1_${DEB_ARCH}.deb"
     DEB_URL="https://github.com/PentHertz/antsdr_uhd/releases/download/v${ANTSDR_VERSION}/${DEB_NAME}"
     [ -d /root/thirdparty ] || mkdir -p /root/thirdparty

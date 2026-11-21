@@ -29,11 +29,20 @@ function mirage_soft_install() {
     goodecho "[+] Installing Mirage"
     [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
     cd /root/thirdparty
-    python3.10 -m venv /opt/mirage-env
+    # Mirage needs Python 3.10: take it from uv (every arch) instead of relying on
+    # bluing_soft_install having put a python3.10 on the system first.
+    if ! uv python install 3.10; then
+        record_build_failure "python" "mirage" "uv python install 3.10 failed"
+        return 0
+    fi
+    uv venv --clear --seed --python 3.10 /opt/mirage-env
     source /opt/mirage-env/bin/activate
     installfromnet "git" "clone" "https://github.com/RCayre/mirage"
     cd mirage/
     pip install .
+    # LOCKED: Mirage's ble.py calls HCI_Cmd_LE_Host_Supported / HCI_Cmd_Connect_Accept_Timeout /
+    # HCI_Cmd_LE_Start_Encryption_Request, which scapy renamed or removed after 2.5.0 (2.8.0
+    # breaks BLE connect/encryption). Do not bump; see docs/maintaining-tool-versions.md.
     pip install scapy==2.5.0
     deactivate
     
@@ -119,17 +128,17 @@ function sniffle_soft_install() {
         [ -d /rftools/bluetooth/firmwares/Sniffle ] || mkdir -p /rftools/bluetooth/firmwares/Sniffle
         cd /rftools/bluetooth/firmwares/Sniffle
         goodecho "[+] Downloading firmwares for Sniffle"
-        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.11.0/sniffle_cc1352p1_cc2652p1.hex"
-        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.11.0/sniffle_cc1352p1_cc2652p1_1M.hex"
-        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.11.0/sniffle_cc1352p7.hex"
-        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.11.0/sniffle_cc1352p7_1M.hex"
-        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.11.0/sniffle_cc1352r1.hex"
-        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.11.0/sniffle_cc1354p10.hex"
-        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.11.0/sniffle_cc2651p3.hex"
-        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.11.0/sniffle_cc2652r1.hex"
-        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.11.0/sniffle_cc2652r7.hex"
-        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.11.0/sniffle_cc2652rb.hex"
-        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.11.0/sniffle_cc2652rb_1M.hex"
+        local SNIFFLE_FW_VERSION="1.11.0"  # known-good; the build takes the newest release
+        local fw fw_urls=()
+        local fws="sniffle_cc1352p1_cc2652p1 sniffle_cc1352p1_cc2652p1_1M sniffle_cc1352p7 sniffle_cc1352p7_1M
+            sniffle_cc1352r1 sniffle_cc1354p10 sniffle_cc2651p3 sniffle_cc2652r1 sniffle_cc2652r7
+            sniffle_cc2652rb sniffle_cc2652rb_1M"
+        for fw in $fws; do fw_urls+=("https://github.com/nccgroup/Sniffle/releases/download/v@V@/${fw}.hex"); done
+        # newest release only if it still ships every board image above
+        SNIFFLE_FW_VERSION=$(latest_release_version nccgroup/Sniffle "$SNIFFLE_FW_VERSION" "${fw_urls[@]}")
+        for fw in $fws; do
+            installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v${SNIFFLE_FW_VERSION}/${fw}.hex"
+        done
     else
         goodecho "[!] Skipping Sniffle installation: unsupported architecture ($arch)"
     fi
@@ -156,29 +165,17 @@ function bluing_soft_install() {
     
     install_dependencies "software-properties-common libgirepository1.0-dev libgirepository-2.0-dev libcairo2-dev libdbus-1-dev libbluetooth-dev pkg-config python3-dev"
     
-    if [ "$(uname -m)" = "riscv64" ]; then
-        [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
-        cd /root/thirdparty
-        sudo apt-get update
-        install_dependencies "build-essential libssl-dev zlib1g-dev libncurses-dev libreadline-dev libsqlite3-dev libgdbm-dev libdb5.3-dev libbz2-dev libexpat1-dev liblzma-dev libffi-dev"
-        wget https://www.python.org/ftp/python/3.10.22/Python-3.10.22.tgz
-        tar xzf Python-3.10.22.tgz
-        cd Python-3.10.22
-        export LDFLAGS="-lm -lpthread -ldl -lutil" # TODO: for RISC-V but need to check if good for ARM and x86
-        ./configure #--enable-optimizations
-        make -j $(nproc)
-        sudo make altinstall
-        cd ..
-        rm -rf Python-3.10.22*
-    else
-        add-apt-repository -y ppa:deadsnakes/ppa
-        sudo apt-get update
-        install_dependencies "python3.10 python3.10-venv python3.10-dev"
+    # bluing needs Python 3.10: uv provides it on amd64/arm64/riscv64 (python-build-standalone),
+    # replacing the riscv64 CPython source build and the deadsnakes PPA.
+    if ! uv python install 3.10; then
+        record_build_failure "python" "bluing" "uv python install 3.10 failed"
+        return 0
     fi
-    
+
     [ -d /rftools/bluetooth/bluing ] || mkdir -p /rftools/bluetooth/bluing
     cd /rftools/bluetooth/bluing
-    python3.10 -m venv bluing
+    # --seed puts pip in the venv for the pip installs below; --clear keeps rebuilds non-interactive
+    uv venv --clear --seed --python 3.10 bluing
     source bluing/bin/activate
     
     pip install --upgrade pip
@@ -903,13 +900,21 @@ function hostapdwpe_soft_install () {
     [ -d /rftools/wifi ] || mkdir -p /rftools/wifi
     cd /rftools/wifi
 
-    wget https://raw.githubusercontent.com/aircrack-ng/aircrack-ng/master/patches/wpe/hostapd-wpe/hostapd-2.11-wpe.patch
-    wget https://w1.fi/releases/hostapd-2.11.tar.gz
-    tar -zxf hostapd-2.11.tar.gz
-    cd hostapd-2.11
+    # Newest hostapd that aircrack-ng has a WPE patch for (the patch is what makes it
+    # hostapd-wpe); known-good otherwise.
+    local HOSTAPD_VERSION="2.11" hv_latest
+    hv_latest=$(curl -fsSL --max-time 30 https://w1.fi/releases/ 2>/dev/null \
+        | grep -oE 'hostapd-[0-9]+\.[0-9]+(\.[0-9]+)?\.tar\.gz' | grep -oE '[0-9]+(\.[0-9]+)+' | sort -V | tail -n1 || true)
+    HOSTAPD_VERSION=$(pick_version hostapd "$hv_latest" "$HOSTAPD_VERSION" \
+        "https://raw.githubusercontent.com/aircrack-ng/aircrack-ng/master/patches/wpe/hostapd-wpe/hostapd-@V@-wpe.patch" \
+        "https://w1.fi/releases/hostapd-@V@.tar.gz")
+    wget "https://raw.githubusercontent.com/aircrack-ng/aircrack-ng/master/patches/wpe/hostapd-wpe/hostapd-${HOSTAPD_VERSION}-wpe.patch"
+    wget "https://w1.fi/releases/hostapd-${HOSTAPD_VERSION}.tar.gz"
+    tar -zxf "hostapd-${HOSTAPD_VERSION}.tar.gz"
+    cd "hostapd-${HOSTAPD_VERSION}"
 
     # -f = non-interactive (no prompts), --forward = skip already-applied hunks
-    patch -p1 -f --forward < ../hostapd-2.11-wpe.patch || true
+    patch -p1 -f --forward < "../hostapd-${HOSTAPD_VERSION}-wpe.patch" || true
 
     cd hostapd
     if make -j"$(nproc)"; then
@@ -1082,6 +1087,9 @@ function rfquak_soft_install () {
 }
 
 function artemis_soft_install () {
+    # AresValley Artemis: radio-signal identification database and app (SIGINT reference).
+    # Command: `Artemis`. Not Stanford Trinity's ARTEMIS red-team agent, which is
+    # `artemis-redteam` in the llm image.
     # Check system architecture
     ARCH=$(uname -m)
     if [[ "$ARCH" != "x86_64" && "$ARCH" != "amd64" && "$ARCH" != "aarch64" && "$ARCH" != "arm64" ]]; then
@@ -1110,7 +1118,7 @@ cd /rftools/docs/Artemis
 exec uv run python -m artemis "$@"
 EOF
     chmod +x /usr/sbin/Artemis
-    goodecho "[+] Artemis installed. Use 'Artemis' wrapper to run."
+    goodecho "[+] Artemis (AresValley signal identification) installed: run 'Artemis'."
 }
 
 function airsnitch_soft_install() {
@@ -1246,6 +1254,9 @@ function flipper_zero_soft_install() {
         goodecho "[!] qFlipper's AppImage is only published for x86_64; skipping it on $(uname -m)"
         return 0
     fi
+    # known-good above; the build takes the newest GitHub release (AppImage comes from Flipper's CDN)
+    QFLIPPER_VERSION=$(latest_release_version flipperdevices/qFlipper "$QFLIPPER_VERSION" \
+        "https://update.flipperzero.one/builds/qFlipper/@V@/qFlipper-x86_64-@V@.AppImage")
     [ -d /rftools/rfid/qFlipper ] || mkdir -p /rftools/rfid/qFlipper
     cd /rftools/rfid/qFlipper
     # Extracted rather than run as an AppImage: no FUSE in containers

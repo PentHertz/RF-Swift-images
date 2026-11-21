@@ -96,7 +96,24 @@ RUN ./entrypoint.sh caido_soft_install && \
 	./entrypoint.sh sstimap_soft_install && \
 	./entrypoint.sh sqlmap_soft_install && \
 	./entrypoint.sh  hexhttp_soft_install && \
-	./entrypoint.sh nuclei_soft_install
+	./entrypoint.sh nuclei_soft_install && \
+	./entrypoint.sh commix_soft_install
+
+# Recent-CVE exploit PoCs, pinned to reviewed commits - authorized testing only
+# (docs/network-exploit-pocs.md). Installed, never run at build.
+RUN ./entrypoint.sh sip2shell_soft_install && \
+	./entrypoint.sh nginx_http2_poc_soft_install && \
+	./entrypoint.sh nginx2root_soft_install
+# Opt-in crash-risk PoCs (memory corruption / DoS on the target). Uncomment to bake them in,
+# or install at runtime: cd /root/scripts && ./entrypoint.sh php2shell_soft_install
+#RUN ./entrypoint.sh php2shell_soft_install && \
+#	./entrypoint.sh brotli2crash_soft_install
+
+# Exploit collections and frameworks, tracking upstream (not pinned): Exploit-DB +
+# searchsploit (~360 MB), RouterSploit, and the PoC-in-GitHub index (poc-lookup)
+RUN ./entrypoint.sh exploitdb_soft_install && \
+	./entrypoint.sh routersploit_soft_install && \
+	./entrypoint.sh poc_in_github_soft_install
 
 # OSINT
 RUN ./entrypoint.sh wiretapper_soft_install_fromsource

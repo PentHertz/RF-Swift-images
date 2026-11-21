@@ -12,7 +12,9 @@ function dsview_install() {
             return 0
             ;;
     esac
-    DSVIEW_VERSION="1.3.4"
+    DSVIEW_VERSION="1.3.4"  # known-good; the build takes the newest PentHertz/DSView release
+    DSVIEW_VERSION=$(latest_release_version PentHertz/DSView "$DSVIEW_VERSION" \
+        "https://github.com/PentHertz/DSView/releases/download/v@V@/dsview_@V@-1_${DEB_ARCH}.deb")
     DEB_NAME="dsview_${DSVIEW_VERSION}-1_${DEB_ARCH}.deb"
     DEB_URL="https://github.com/PentHertz/DSView/releases/download/v${DSVIEW_VERSION}/${DEB_NAME}"
     [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
@@ -89,7 +91,9 @@ function pulseview_install() {
             return 0
             ;;
     esac
-    PULSEVIEW_VERSION="0.4.4"
+    PULSEVIEW_VERSION="0.4.4"  # known-good; the build takes the newest PentHertz/pulseview release
+    PULSEVIEW_VERSION=$(latest_release_version PentHertz/pulseview "$PULSEVIEW_VERSION" \
+        "https://github.com/PentHertz/pulseview/releases/download/v@V@/sigrok-pulseview_@V@-1_${DEB_ARCH}.deb")
     DEB_NAME="sigrok-pulseview_${PULSEVIEW_VERSION}-1_${DEB_ARCH}.deb"
     DEB_URL="https://github.com/PentHertz/pulseview/releases/download/v${PULSEVIEW_VERSION}/${DEB_NAME}"
     [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
@@ -185,7 +189,9 @@ function arduino_ide_install() {
     fi
     
     goodecho "[+] Installing Arduino IDE for x86_64 with AppImage"
-    IDE_VERSION="2.3.11"
+    IDE_VERSION="2.3.11"  # known-good; the build takes the newest release
+    IDE_VERSION=$(latest_release_version arduino/arduino-ide "$IDE_VERSION" \
+        "https://downloads.arduino.cc/arduino-ide/arduino-ide_@V@_Linux_64bit.AppImage")
     avrdude_install
     [ -d /hardware ] || mkdir /hardware
     cd /hardware

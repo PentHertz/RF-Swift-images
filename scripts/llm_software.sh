@@ -9,16 +9,16 @@ LLM_SCRIPTS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LLM_SKILLS_ROOT="/opt/llm-skills"
 
 # Node.js LTS from nodejs.org: REA needs ^22.23.4 || ^24.22.1, Ubuntu 26.04 ships 22.22.
-LLM_NODE_VERSION="v24.22.3"
+LLM_NODE_VERSION="v24.22.3"  # known-good (with the SHA256s below); the build takes the newest v24.x
 LLM_NODE_SHA256_X64="4f2b175a6d53a5c617a80dba2676238a0688cef28c6da4eba35c7d844e66fcfb"
 LLM_NODE_SHA256_ARM64="6e51a2ada00f0011cc266f65d98922b403d7ad88f809ca2aa615a5fe1ce6e86c"
 
-CRAFT_VERSION="0.6.1"
+CRAFT_VERSION="0.6.1"  # known-good (with the SHA256s below); the build takes the newest release
 CRAFT_SHA256_X86_64="83ec0730c9117f399122b315c63ed4c3a8d31ac55bddd74cb8b33cd2f76ef704"
 CRAFT_SHA256_AARCH64="b4255ac806e2a598b9fc6dba4e8ed2190e49baafd2f68dd7e037f3294e472941"
 CRAFT_SHA256_RISCV64="d82468c2daef97811f0b9b63dba523516860f238d46873ad6fbccccadedd62c1"
 
-WHISPERCPP_VERSION="v1.9.5"
+WHISPERCPP_VERSION="v1.9.5"  # known-good; the build takes the newest release
 
 # Agents configured by REA and Craft Anything's own setup commands (Vibe is done by hand).
 LLM_SETUP_CLIENTS=(--client claude_code --client codex --client opencode --client hermes)
@@ -64,17 +64,32 @@ function llm_vibe_mcp_add() {
 }
 
 function llm_nodejs_install() {
-    goodecho "[+] Installing Node.js ${LLM_NODE_VERSION} (official LTS build)"
-    local arch sha
+    local arch sha ver latest new_sha
     case "$(uname -m)" in
         x86_64|amd64) arch="x64"; sha="$LLM_NODE_SHA256_X64" ;;
         aarch64|arm64) arch="arm64"; sha="$LLM_NODE_SHA256_ARM64" ;;
         *) record_build_failure "toolchain" "nodejs" "no official Node.js build for $(uname -m)"; return 0 ;;
     esac
     install_dependencies "xz-utils ca-certificates curl"
-    local dir="node-${LLM_NODE_VERSION}-linux-${arch}" tmp
+    # Newest v24.x (the LTS line REA needs), verified against that release's SHASUMS256.txt.
+    # LLM_NODE_VERSION and its pinned SHA256 stay the known-good fallback.
+    latest=$(curl -fsSL --max-time 30 https://nodejs.org/dist/index.json 2>/dev/null \
+        | grep -oE '"version":"v24\.[0-9]+\.[0-9]+"' | head -n1 | cut -d'"' -f4 || true)
+    ver="v$(pick_version nodejs "${latest#v}" "${LLM_NODE_VERSION#v}")"
+    if [ "$ver" != "$LLM_NODE_VERSION" ]; then
+        new_sha=$(curl -fsSL --max-time 30 "https://nodejs.org/dist/${ver}/SHASUMS256.txt" 2>/dev/null \
+            | awk -v f="node-${ver}-linux-${arch}.tar.xz" '$2 == f {print $1}' || true)
+        if [ -n "$new_sha" ]; then
+            sha="$new_sha"
+        else
+            note_version_fallback nodejs "no SHASUMS256.txt entry for ${ver}" "$LLM_NODE_VERSION"
+            ver="$LLM_NODE_VERSION"
+        fi
+    fi
+    goodecho "[+] Installing Node.js ${ver} (official LTS build)"
+    local dir="node-${ver}-linux-${arch}" tmp
     tmp=$(mktemp -d)
-    if llm_fetch_verified "nodejs" "https://nodejs.org/dist/${LLM_NODE_VERSION}/${dir}.tar.xz" "$sha" "$tmp/node.tar.xz"; then
+    if llm_fetch_verified "nodejs" "https://nodejs.org/dist/${ver}/${dir}.tar.xz" "$sha" "$tmp/node.tar.xz"; then
         tar -xJf "$tmp/node.tar.xz" -C /usr/local --strip-components=1 \
             --exclude="${dir}/CHANGELOG.md" --exclude="${dir}/README.md" --exclude="${dir}/LICENSE"
         node --version
@@ -223,6 +238,82 @@ function strix_soft_install() {
     return 0
 }
 
+# ARTEMIS (Stanford Trinity): autonomous multi-agent red teaming. A Python supervisor runs
+# parallel sub-agents built on its own fork of the Codex CLI. Installed as `artemis-redteam`
+# so it is not confused with AresValley's Artemis signal-identification app in the SDR images
+# (`Artemis`). Opt-in: not in the default llm build (slow Rust build).
+# Upstream has no releases, so it is pinned to the reviewed commit; re-review before bumping.
+ARTEMIS_REDTEAM_COMMIT="f309242d2a74493cd41aa3f8b02cec4d3fdd479d"   # reviewed 2026-11-21
+
+# One clone attempt into a clean destination (retries would otherwise hit "already exists").
+function _artemis_redteam_clone() {
+    rm -rf "$2"
+    git clone -q "$1" "$2"
+}
+
+function artemis_redteam_soft_install() {
+    # Authorized testing only: its sub-agents run commands inside this container.
+    # Needs OPENROUTER_API_KEY or OPENAI_API_KEY plus SUBAGENT_MODEL at run time (docs/llm.md).
+    goodecho "[+] Installing ARTEMIS (Stanford Trinity) as artemis-redteam"
+    local dir=/opt/artemis-redteam tc bin
+    if ! command -v uv > /dev/null || ! command -v cargo > /dev/null; then
+        record_build_failure "toolchain" "artemis-redteam" "uv or cargo unavailable"
+        return 0
+    fi
+    install_dependencies "build-essential pkg-config libssl-dev git"
+    if ! installfromnet _artemis_redteam_clone https://github.com/Stanford-Trinity/ARTEMIS.git "$dir"; then
+        record_build_failure "git" "artemis-redteam" "clone failed"
+        return 0
+    fi
+    if ! git -C "$dir" checkout -q "$ARTEMIS_REDTEAM_COMMIT"; then
+        record_build_failure "git" "artemis-redteam" "reviewed commit $ARTEMIS_REDTEAM_COMMIT not found upstream"
+        rm -rf "$dir"
+        return 0
+    fi
+
+    # Build only the fork's `codex` binary. Its rust-toolchain.toml pins a Rust version that
+    # rustup fetches for this build; the build tree and that toolchain are dropped afterwards.
+    tc=$(sed -n 's/^channel *= *"\(.*\)"/\1/p' "$dir/codex-rs/rust-toolchain.toml" 2>/dev/null || true)
+    if ! (cd "$dir/codex-rs" && cargo build --release -p codex-cli --bin codex); then
+        record_build_failure "build" "artemis-redteam" "cargo build of the Codex fork failed"
+        rm -rf "$dir"
+        return 0
+    fi
+    bin=$(mktemp)
+    cp "$dir/codex-rs/target/release/codex" "$bin"
+    rm -rf "$dir/codex-rs/target"
+    install -Dm755 "$bin" "$dir/codex-rs/target/release/codex"   # upstream's default path
+    rm -f "$bin"
+    if [ -n "$tc" ] && [ "$tc" != "stable" ]; then
+        rustup toolchain uninstall "$tc" > /dev/null 2>&1 || true
+    fi
+
+    # Python supervisor: uv-managed Python 3.12 (uv.lock requires >= 3.12), locked deps.
+    if ! uv python install 3.12 || ! (cd "$dir" && uv sync --frozen --no-dev --python 3.12); then
+        record_build_failure "pip" "artemis-redteam" "uv sync of the supervisor failed"
+        return 0
+    fi
+
+    # The fork is deliberately NOT on PATH (it would shadow the real Codex CLI) and gets its
+    # own CODEX_HOME so it never touches ~/.codex, where the real Codex keeps its config and
+    # the MCP servers REA/Craft register. Logs go to ./logs under the current directory.
+    cat > /usr/local/bin/artemis-redteam << 'EOF'
+#!/bin/bash
+# ARTEMIS (Stanford Trinity) autonomous red teaming. Authorized testing only.
+# Not AresValley's Artemis signal app (`Artemis` in the SDR images).
+# Keys: export OPENROUTER_API_KEY (or OPENAI_API_KEY) and SUBAGENT_MODEL, or put them in
+# /opt/artemis-redteam/.env. Example configs: /opt/artemis-redteam/configs/
+export CODEX_HOME="${ARTEMIS_CODEX_HOME:-/root/.artemis-redteam/codex}"
+mkdir -p "$CODEX_HOME"
+exec /opt/artemis-redteam/.venv/bin/codex-supervisor \
+    --codex-binary /opt/artemis-redteam/codex-rs/target/release/codex "$@"
+EOF
+    chmod +x /usr/local/bin/artemis-redteam
+    artemis-redteam --help > /dev/null 2>&1 \
+        || record_build_failure "other" "artemis-redteam" "codex-supervisor --help failed"
+    return 0
+}
+
 function rea_soft_install() {
     # REA (Reverse Engineer Anything): MCP server + workflow skill for native binaries,
     # JavaScript/Electron, .NET and websites. Native analysis uses Ghidra, Hopper, IDA or
@@ -239,7 +330,7 @@ function rea_soft_install() {
 function craftanything_soft_install() {
     # Craft Anything: study a website/app/game and have a coding agent rebuild it. Its CLI is an
     # MCP server (progressive toolsets) and `setup` registers it with the agents.
-    goodecho "[+] Installing Craft Anything ${CRAFT_VERSION}"
+    goodecho "[+] Installing Craft Anything"
     local arch sha
     case "$(uname -m)" in
         x86_64|amd64) arch="x86_64"; sha="$CRAFT_SHA256_X86_64" ;;
@@ -247,12 +338,28 @@ function craftanything_soft_install() {
         riscv64) arch="riscv64"; sha="$CRAFT_SHA256_RISCV64" ;;
         *) record_build_failure "other" "craft-anything" "no release for $(uname -m)"; return 0 ;;
     esac
+    # Newest release, verified against its SHA256SUMS.txt; CRAFT_VERSION and the pinned
+    # SHA256s stay the known-good fallback.
+    local ver new_sha
+    ver=$(latest_release_version storytold/craft-anything "$CRAFT_VERSION" \
+        "https://github.com/storytold/craft-anything/releases/download/v@V@/craft-anything-@V@-linux-${arch}.tar.gz")
+    if [ "$ver" != "$CRAFT_VERSION" ]; then
+        new_sha=$(curl -fsSL --max-time 30 \
+            "https://github.com/storytold/craft-anything/releases/download/v${ver}/SHA256SUMS.txt" 2>/dev/null \
+            | awk -v f="craft-anything-${ver}-linux-${arch}.tar.gz" '$2 == f {print $1}' || true)
+        if [ -n "$new_sha" ]; then
+            sha="$new_sha"
+        else
+            note_version_fallback storytold/craft-anything "no SHA256SUMS.txt entry for ${ver}" "$CRAFT_VERSION"
+            ver="$CRAFT_VERSION"
+        fi
+    fi
     # desktop app runtime (egui on X11/Wayland, GTK file dialogs)
     install_dependencies "libxkbcommon-x11-0 libwayland-client0 libx11-6 libxrandr2 libxi6 libgl1 libgtk-3-0t64"
     local tmp
     tmp=$(mktemp -d)
     if ! llm_fetch_verified "craft-anything" \
-        "https://github.com/storytold/craft-anything/releases/download/v${CRAFT_VERSION}/craft-anything-${CRAFT_VERSION}-linux-${arch}.tar.gz" \
+        "https://github.com/storytold/craft-anything/releases/download/v${ver}/craft-anything-${ver}-linux-${arch}.tar.gz" \
         "$sha" "$tmp/craft.tar.gz"; then
         rm -rf "$tmp"
         return 0
@@ -332,6 +439,10 @@ function whispercpp_soft_install() {
     # whisper.cpp: local speech-to-text (whisper-cli, whisper-server with an OpenAI-compatible
     # endpoint, whisper-stream for the microphone). Models are not in the image:
     # `whisper-download-model base.en` puts one in /opt/whisper.cpp/models.
+    local wver
+    wver=$(latest_release_version ggml-org/whisper.cpp "${WHISPERCPP_VERSION#v}" \
+        "https://github.com/ggml-org/whisper.cpp/archive/refs/tags/v@V@.tar.gz")
+    WHISPERCPP_VERSION="v${wver}"
     goodecho "[+] Installing whisper.cpp ${WHISPERCPP_VERSION}"
     # SDL2: microphone examples (whisper-stream, whisper-command); ffmpeg: whisper-server --convert
     install_dependencies "build-essential cmake git libsdl2-dev ffmpeg"

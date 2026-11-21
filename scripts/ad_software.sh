@@ -77,7 +77,7 @@ function sprayhound_soft_install() {
 }
 
 # geckodriver for roadtx's browser-based auth flows (it looks for `geckodriver` on PATH)
-GECKODRIVER_VERSION="v0.37.1"
+GECKODRIVER_VERSION="v0.37.1"  # known-good (with the SHA256s below); the build takes the newest release
 GECKODRIVER_SHA256_LINUX64="e815130ea95983e162ae91843b48d3a3ce991735635fce83a647afde21e09f7e"
 GECKODRIVER_SHA256_AARCH64="8fd90b951422fbad5b56539fb344dff66eb3f986d615d8d6fde9f1f62dad610c"
 
@@ -99,11 +99,18 @@ function roadtools_soft_install() {
         *) criticalecho-noexit "[-] geckodriver has no $(uname -m) build: roadtx browser flows unavailable"
            return 0 ;;
     esac
+    # Newest release. Mozilla publishes only .asc signatures (no checksum file), so the
+    # SHA256 check applies to the known-good version; a newer release is TLS-only.
+    local gver
+    gver=$(latest_release_version mozilla/geckodriver "${GECKODRIVER_VERSION#v}" \
+        "https://github.com/mozilla/geckodriver/releases/download/v@V@/geckodriver-v@V@-${asset}.tar.gz")
+    [ "v${gver}" = "$GECKODRIVER_VERSION" ] || sha=""
+    GECKODRIVER_VERSION="v${gver}"
     tmp=$(mktemp -d)
     if ! installfromnet curl -fsSL -o "$tmp/geckodriver.tar.gz" \
         "https://github.com/mozilla/geckodriver/releases/download/${GECKODRIVER_VERSION}/geckodriver-${GECKODRIVER_VERSION}-${asset}.tar.gz"; then
         record_build_failure "net" "geckodriver" "download failed (${GECKODRIVER_VERSION} ${asset})"
-    elif ! echo "${sha}  $tmp/geckodriver.tar.gz" | sha256sum -c -; then
+    elif [ -n "$sha" ] && ! echo "${sha}  $tmp/geckodriver.tar.gz" | sha256sum -c -; then
         record_build_failure "net" "geckodriver" "checksum mismatch (${GECKODRIVER_VERSION} ${asset})"
     else
         tar -xzf "$tmp/geckodriver.tar.gz" -C /usr/local/bin geckodriver

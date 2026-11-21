@@ -1223,6 +1223,209 @@ function nuclei_soft_install() {
     return 0
 }
 
+# ---------------------------------------------------------------------------
+# Recent-CVE exploit PoCs — for authorized testing only (your lab, in-scope targets).
+# Installed, never executed at build. Each repo is pinned to the commit that was
+# statically reviewed (no install hooks, exfil, obfuscation or credential access);
+# bump a pin only after re-reviewing the diff. See docs/network-exploit-pocs.md.
+# ---------------------------------------------------------------------------
+EXPLOITS_DIR=/opt/network/exploits
+NUCLEI_CUSTOM_TEMPLATES=/opt/network/nuclei-templates-custom
+
+# One clone attempt into a clean destination (a retry after a partial clone would
+# otherwise fail on "destination path already exists").
+function _exploit_git_clone() {
+    rm -rf "$2"
+    git clone -q "$1" "$2"
+}
+
+# Clone $1 into $EXPLOITS_DIR/$3 and check out the reviewed commit $2. On any failure
+# the checkout is removed (never leave an unreviewed HEAD behind) and it returns 1.
+function exploit_clone_pinned() {
+    local url="$1" sha="$2" dest="$3"
+    [ -d "$EXPLOITS_DIR" ] || mkdir -p "$EXPLOITS_DIR"
+    cd "$EXPLOITS_DIR" || return 1
+    if ! installfromnet _exploit_git_clone "$url" "$dest"; then
+        record_build_failure "git" "$dest" "clone failed"
+        return 1
+    fi
+    if ! git -C "$dest" checkout -q "$sha"; then
+        record_build_failure "git" "$dest" "reviewed commit $sha not found upstream"
+        rm -rf "$dest"
+        return 1
+    fi
+    return 0
+}
+
+function sip2shell_soft_install() {
+    # CVE-2026-116779: FreeSWITCH mod_sofia 'api' chat proto -> OS command execution via one
+    # SIP MESSAGE. Logic bug (no crash risk). Pure-stdlib Python + a nuclei template.
+    goodecho "[+] Installing SIP2Shell (CVE-2026-116779) - authorized testing only"
+    exploit_clone_pinned "https://github.com/DeathShotXD/SIP2Shell.git" \
+        "4b21b7b65bb45c602463826f24bcd272378df81a" "SIP2Shell" || return 0
+    cat > /usr/sbin/sip2shell << 'EOF'
+#!/bin/bash
+# SIP2Shell - FreeSWITCH SIP MESSAGE RCE (CVE-2026-116779). Authorized testing only.
+exec python3 /opt/network/exploits/SIP2Shell/sip2shell.py "$@"
+EOF
+    chmod +x /usr/sbin/sip2shell
+    # Its nuclei template (a plain `network:` SIP matcher, no `code:` block) goes in a custom
+    # dir so `nuclei -ut` never overwrites it: nuclei -t /opt/network/nuclei-templates-custom
+    mkdir -p "$NUCLEI_CUSTOM_TEMPLATES"
+    cp -f "$EXPLOITS_DIR/SIP2Shell/nuclei/"*.yaml "$NUCLEI_CUSTOM_TEMPLATES/" \
+        || record_build_failure "copy" "SIP2Shell" "nuclei template copy failed"
+    return 0
+}
+
+function nginx_http2_poc_soft_install() {
+    # CVE-2026-123007: NGINX HTTP/2 integer underflow (sfewer-r7 / Rapid7). The RCE is
+    # build-specific (profiles/) and runs as the nginx worker; simple-trigger-poc.py only triggers.
+    goodecho "[+] Installing CVE-2026-123007 NGINX HTTP/2 PoC - authorized testing only"
+    exploit_clone_pinned "https://github.com/sfewer-r7/CVE-2026-123007.git" \
+        "ebff45f1b52e70f135fcdb70e3eb334095680fd3" "CVE-2026-123007" || return 0
+    cd "$EXPLOITS_DIR/CVE-2026-123007"
+    python3 -m venv venv
+    if ! venv/bin/pip install -q -r exploit/requirements.txt; then
+        record_build_failure "pip" "CVE-2026-123007" "exploit requirements install failed"
+    fi
+    cat > /usr/sbin/nginx-http2-poc << 'EOF'
+#!/bin/bash
+# CVE-2026-123007 NGINX HTTP/2 integer-underflow exploit. Authorized testing only.
+# Trigger-only check: /opt/network/exploits/CVE-2026-123007/simple-trigger-poc.py
+cd /opt/network/exploits/CVE-2026-123007/exploit
+exec /opt/network/exploits/CVE-2026-123007/venv/bin/python exploit.py "$@"
+EOF
+    chmod +x /usr/sbin/nginx-http2-poc
+    return 0
+}
+
+function nginx2root_soft_install() {
+    # Censys Research isolated-lab reproductions of the nginx2root set (CVE-2026-113425,
+    # -121810, -123633, -123634) — a different CVE set from CVE-2026-123007 above.
+    goodecho "[+] Installing nginx2root lab suite (Censys Research) - authorized testing only"
+    exploit_clone_pinned "https://github.com/Censys-Research/nginx2root.git" \
+        "332d951069bd37e50b317c5b2c2fca607dd17341" "nginx2root" || return 0
+    cd "$EXPLOITS_DIR/nginx2root"
+    python3 -m venv venv
+    if ! venv/bin/pip install -q "click>=8.1" "pydantic>=2.0" "rich>=13.0"; then
+        record_build_failure "pip" "nginx2root" "dependency install failed"
+    fi
+    cat > /usr/sbin/nginx2root << 'EOF'
+#!/bin/bash
+# Censys nginx2root isolated-lab reproduction suite. Authorized testing only.
+cd /opt/network/exploits/nginx2root
+exec /opt/network/exploits/nginx2root/venv/bin/python compatibility_runner.py "$@"
+EOF
+    chmod +x /usr/sbin/nginx2root
+    return 0
+}
+
+# Opt-in (not in the default network build): memory-corruption PoCs that crash the target.
+function php2shell_soft_install() {
+    # CVE-2026-109618/109619: PHP session handling -> 5 RCE chains (UAF chains crash PHP
+    # workers). Pure-stdlib scripts under scanner/, exploit/, poc/; detection rules in detection/.
+    goodecho "[+] Installing php2shell PoC (CVE-2026-109618/109619) - crash risk, authorized testing only"
+    exploit_clone_pinned "https://github.com/ikow/php2shell-poc.git" \
+        "caffb96b0a165eb3796828a9a1dc7445ec7ff77d" "php2shell-poc" || return 0
+    goodecho "[i] php2shell: start with scanner/check.py in $EXPLOITS_DIR/php2shell-poc"
+    return 0
+}
+
+function brotli2crash_soft_install() {
+    # CVE-2026-111497: Node.js zlib Brotli decoder crash reachable over HTTP (HTTP2Shell /
+    # Brotli). poc/craft_payloads.py builds payloads; detection/check_version.sh checks nodes.
+    goodecho "[+] Installing brotli2crash PoC (CVE-2026-111497) - crash risk, authorized testing only"
+    exploit_clone_pinned "https://github.com/ikow/brotli2crash.git" \
+        "6e0b5f1428f22d9a1fd2e5b8058791b6914e44c5" "brotli2crash" || return 0
+    goodecho "[i] brotli2crash: poc/ and detection/ in $EXPLOITS_DIR/brotli2crash"
+    return 0
+}
+
+# ---------------------------------------------------------------------------
+# Exploit collections and frameworks: mature, maintained projects that track upstream
+# (deliberately not pinned). Each wrapper notes how to refresh it in a running container.
+# ---------------------------------------------------------------------------
+NETWORK_SCRIPTS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# One shallow clone attempt into a clean destination.
+function _shallow_git_clone() {
+    rm -rf "$2"
+    git clone -q --depth 1 "$1" "$2"
+}
+
+function exploitdb_soft_install() {
+    # Exploit-DB (OffSec): offline archive of public exploits/shellcodes + searchsploit.
+    # Shallow clone (~360 MB). Its bundled .searchsploit_rc already points at /opt/exploitdb
+    # and is found through the symlink. Update: searchsploit -u. `--nmap` needs xmllint.
+    goodecho "[+] Installing Exploit-DB + searchsploit"
+    install_dependencies "git jq libxml2-utils"
+    if ! installfromnet _shallow_git_clone "https://gitlab.com/exploit-database/exploitdb.git" /opt/exploitdb; then
+        record_build_failure "git" "exploitdb" "clone failed"
+        return 0
+    fi
+    ln -sf /opt/exploitdb/searchsploit /usr/local/bin/searchsploit
+    return 0
+}
+
+function commix_soft_install() {
+    # commix: automated command-injection detection/exploitation (stdlib + bundled thirdparty/).
+    goodecho "[+] Installing commix"
+    [ -d /opt/network ] || mkdir -p /opt/network
+    if ! installfromnet _shallow_git_clone "https://github.com/commixproject/commix.git" /opt/network/commix; then
+        record_build_failure "git" "commix" "clone failed"
+        return 0
+    fi
+    cat > /usr/sbin/commix << 'EOF'
+#!/bin/bash
+# commix - command injection exploitation. Authorized testing only.
+# Update: git -C /opt/network/commix pull
+exec python3 /opt/network/commix/commix.py "$@"
+EOF
+    chmod +x /usr/sbin/commix
+    return 0
+}
+
+function routersploit_soft_install() {
+    # RouterSploit: exploitation framework for embedded devices (routers, cameras, IoT).
+    goodecho "[+] Installing RouterSploit"
+    [ -d /opt/network ] || mkdir -p /opt/network
+    if ! installfromnet _shallow_git_clone "https://github.com/threat9/routersploit.git" /opt/network/routersploit; then
+        record_build_failure "git" "routersploit" "clone failed"
+        return 0
+    fi
+    cd /opt/network/routersploit
+    python3 -m venv venv
+    # Python >= 3.13 has no telnetlib; RouterSploit falls back to telnetlib3, which is only in
+    # its dev requirements, so add it explicitly. SNMP uses the pysnmp 7 asyncio API.
+    if ! venv/bin/pip install -q -r requirements.txt telnetlib3; then
+        record_build_failure "pip" "routersploit" "dependency install failed"
+    fi
+    cat > /usr/sbin/rsf << 'EOF'
+#!/bin/bash
+# RouterSploit console. Authorized testing only.
+# Update: git -C /opt/network/routersploit pull
+cd /opt/network/routersploit
+exec /opt/network/routersploit/venv/bin/python rsf.py "$@"
+EOF
+    chmod +x /usr/sbin/rsf
+    ln -sf /usr/sbin/rsf /usr/sbin/routersploit
+    return 0
+}
+
+function poc_in_github_soft_install() {
+    # nomi-sec/PoC-in-GitHub: daily JSON index (one file per CVE) of public PoC repos.
+    # Lookup only - nothing is ever cloned from it automatically; the repos it lists are
+    # unvetted. `poc-lookup CVE-...` queries it, `poc-lookup --update` refreshes it.
+    goodecho "[+] Installing the PoC-in-GitHub index + poc-lookup"
+    [ -d /opt/network ] || mkdir -p /opt/network
+    if ! installfromnet _shallow_git_clone "https://github.com/nomi-sec/PoC-in-GitHub.git" /opt/network/PoC-in-GitHub; then
+        record_build_failure "git" "PoC-in-GitHub" "clone failed"
+        return 0
+    fi
+    install -m 0755 "$NETWORK_SCRIPTS_DIR/network/poc-lookup" /usr/sbin/poc-lookup
+    return 0
+}
+
 function enum4linux_ng_soft_install() {
     goodecho "[+] Installing enum4linux-ng"
     install_dependencies "smbclient ldap-utils"

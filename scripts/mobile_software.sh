@@ -120,7 +120,9 @@ EOF
 
 function jadx_soft_install() {
     goodecho "[+] Installing jadx"
-    local JADX_VERSION="1.5.7"
+    local JADX_VERSION="1.5.7"  # known-good; the build takes the newest release
+    JADX_VERSION=$(latest_release_version skylot/jadx "$JADX_VERSION" \
+        "https://github.com/skylot/jadx/releases/download/v@V@/jadx-@V@.zip")
     install_dependencies "default-jre unzip"
     [ -d "$MOBILE_DIR" ] || mkdir -p "$MOBILE_DIR"
     cd "$MOBILE_DIR"
@@ -147,12 +149,14 @@ function reflutter_soft_install() {
 function ios_tools_soft_install() {
     goodecho "[+] Installing iOS tooling (libimobiledevice utilities, ipsw)"
     install_dependencies "libimobiledevice-utils ideviceinstaller libusbmuxd-tools usbmuxd ifuse"
-    local IPSW_VERSION="3.1.749" arch tmp  # bare version: URL adds the leading v for the tag
+    local IPSW_VERSION="3.1.749" arch tmp  # known-good, bare (the URL adds the tag's v); the build takes the newest
     case "$(uname -m)" in
         x86_64|amd64)  arch="x86_64" ;;
         aarch64|arm64) arch="arm64" ;;
         *) goodecho "[!] ipsw: no upstream build for $(uname -m)"; return 0 ;;
     esac
+    IPSW_VERSION=$(latest_release_version blacktop/ipsw "$IPSW_VERSION" \
+        "https://github.com/blacktop/ipsw/releases/download/v@V@/ipsw_@V@_linux_${arch}.deb")
     tmp=$(mktemp -d)
     if installfromnet wget -q -O "$tmp/ipsw.deb" "https://github.com/blacktop/ipsw/releases/download/v${IPSW_VERSION}/ipsw_${IPSW_VERSION}_linux_${arch}.deb" \
         && apt-fast install -y "$tmp/ipsw.deb"; then

@@ -18,6 +18,7 @@ Coding agents, shared skill packs, agent-side reverse-engineering tools, local s
 | Open WebUI | `open-webui serve` | PyPI `open-webui` (uv tool, Python 3.11) | `~/.open-webui/` (`$DATA_DIR`) |
 | NodeTerm (Server Edition) | `nodeterm-server` | source, `/opt/nodeterm` | `~/.nodeterm-server/` |
 | Strix (AI pentest agent) | `strix` | PyPI `strix-agent` (uv tool, Python 3.12) | `~/.strix/` |
+| ARTEMIS (multi-agent red teaming, **opt-in**) | `artemis-redteam` | Stanford-Trinity/ARTEMIS @ reviewed commit (Codex fork from source, uv Python 3.12) | `~/.artemis-redteam/` |
 | Semgrep | `semgrep` | PyPI `semgrep` | `~/.semgrep/` |
 
 Node.js 24 LTS is in `/usr/local` (Ubuntu's 22.22 is too old for REA).
@@ -125,6 +126,47 @@ strix --target https://staging.example.test
 ```
 
 The `strix` skills let any agent above run and triage Strix scans for you.
+
+## ARTEMIS (opt-in)
+
+[ARTEMIS](https://github.com/Stanford-Trinity/ARTEMIS) (Stanford Trinity, Apache-2.0) is an
+autonomous multi-agent red-teaming engine. A Python supervisor runs several sub-agents in
+parallel over a long engagement and triages what they find. The sub-agents are its own fork
+of the Codex CLI. It is installed as **`artemis-redteam`**. This is not the AresValley
+**Artemis** signal-identification app in the SDR images, which stays `Artemis`.
+
+It is **not in the default build**, because the Codex fork takes a long Rust build. Enable it
+by uncommenting `artemis_redteam_soft_install` in `Dockerfiles/llm.docker`, or install it in
+a running container:
+
+```sh
+cd /root/scripts && ./entrypoint.sh artemis_redteam_soft_install
+```
+
+Give it a model through OpenRouter (or OpenAI), then try upstream's 10-minute smoke test
+against its bundled easy CTF:
+
+```sh
+export OPENROUTER_API_KEY=... SUBAGENT_MODEL="anthropic/claude-sonnet-5-5"
+cd /opt/artemis-redteam
+artemis-redteam --config-file configs/tests/ctf_easy.yaml --benchmark-mode --duration 10 --skip-todos
+```
+
+Things to know:
+
+- **Authorized targets only.** Its sub-agents run commands **inside this container**. Unlike
+  Strix, there is no separate sandbox container.
+- **Logs and keys:** logs go to `./logs` under the directory you run it from. Keys can also
+  go in `/opt/artemis-redteam/.env`. Exported variables take precedence.
+- **Isolated from the real Codex:** the fork is not on `PATH` (it would shadow the real Codex
+  CLI) and uses its own `CODEX_HOME` (`/root/.artemis-redteam/codex`, override with
+  `ARTEMIS_CODEX_HOME`). It never reads or changes `~/.codex`.
+- **Pinned commit:** upstream publishes no releases, so the install is pinned to a reviewed
+  commit (`ARTEMIS_REDTEAM_COMMIT` in `scripts/llm_software.sh`). Re-review the diff before
+  bumping it, using the checklist in `docs/network-exploit-pocs.md`.
+- `test_files/` contains upstream's CTF challenge samples. Some are deliberately malicious
+  scripts for the agent to *analyze* (one adds a cron job if run). Nothing executes them at
+  install. Don't run them by hand outside a throwaway container.
 
 ## OpenCode
 
@@ -323,5 +365,8 @@ llm-skills update
 Open WebUI is reinstalled rather than upgraded: uv does not save `--torch-backend cpu`, so
 `uv tool upgrade open-webui` could swap in the CUDA build of PyTorch (about 4 GB more).
 
-Craft Anything and whisper.cpp are pinned (`CRAFT_VERSION`, `WHISPERCPP_VERSION` in
-`scripts/llm_software.sh`); the image rebuild picks up a new release once that is bumped.
+Node.js (v24 line), Craft Anything and whisper.cpp take their newest release on every image
+build. `LLM_NODE_VERSION`, `CRAFT_VERSION` and `WHISPERCPP_VERSION` in
+`scripts/llm_software.sh` are the known-good fallbacks. Node and Craft Anything downloads are
+verified against the checksum file each release publishes, or against the pinned SHA256 when
+the build falls back. See `docs/maintaining-tool-versions.md`.

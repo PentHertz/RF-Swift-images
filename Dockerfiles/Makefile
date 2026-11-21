@@ -3,6 +3,11 @@ ARCH ?= amd64
 SOURCE_REVISION ?= $(shell git rev-parse HEAD 2>/dev/null || echo unknown)
 SOURCE_DIRTY := $(shell git status --porcelain --untracked-files=no 2>/dev/null)
 REVISION_LABEL = $(SOURCE_REVISION)$(if $(SOURCE_DIRTY),-dirty,)
+# NO_CACHE=1: rebuild every layer. Installers take the newest upstream release at build time,
+# but a cached layer keeps whatever it fetched last time (e.g. a local rebuild with no
+# script change); use this to force a fresh lookup.
+NO_CACHE ?=
+NO_CACHE_FLAG = $(if $(NO_CACHE),--no-cache,)
 CACHE_REPO ?= penthertz/rfswiftdev_resolute
 REGISTRY_IMAGE ?= penthertz/rfswiftdev_resolute
 STORAGE_TYPE ?= local  # Set to "registry" to use registry-based caching
@@ -27,6 +32,7 @@ endif
 define build_and_push_registry
     @docker buildx build --label org.opencontainers.image.revision=$(REVISION_LABEL) --platform $(PLATFORM) \
         --cache-from=type=registry,ref=$(CACHE_REPO):cache_$(1)_$(ARCH) \
+        $(NO_CACHE_FLAG) \
         $(2) \
         --push \
         -t $(REGISTRY_IMAGE):$(1)_$(ARCH) \
@@ -49,6 +55,7 @@ endef
 # Function to build and push using local cache
 define build_and_push_local
     @docker buildx build --label org.opencontainers.image.revision=$(REVISION_LABEL) --platform $(PLATFORM) \
+        $(NO_CACHE_FLAG) \
         $(2) \
         --load \
         -t $(REGISTRY_IMAGE):$(1)_$(ARCH) \
@@ -75,6 +82,7 @@ define build_stage_registry
     @docker buildx build --label org.opencontainers.image.revision=$(REVISION_LABEL) --platform $(PLATFORM) \
         --target $(1) \
         --cache-from=type=registry,ref=$(CACHE_REPO):cache_sdrfull_$(1)_$(ARCH) \
+        $(NO_CACHE_FLAG) \
         $(2) \
         --push \
         -t $(REGISTRY_IMAGE):sdrfull_$(1)_$(ARCH) \
@@ -87,6 +95,7 @@ define build_stage_local
     @echo "Building stage: $(1) for $(ARCH)"
     @docker buildx build --label org.opencontainers.image.revision=$(REVISION_LABEL) --platform $(PLATFORM) \
         --target $(1) \
+        $(NO_CACHE_FLAG) \
         $(2) \
         --load \
         -t $(REGISTRY_IMAGE):sdrfull_$(1)_$(ARCH) \

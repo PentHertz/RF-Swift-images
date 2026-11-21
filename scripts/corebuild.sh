@@ -228,8 +228,8 @@ install_go() {
     ARCH=$(uname -m)
     
     # Define URL and version
-    GO_VERSION="1.27.4" # Replace with the latest version if needed
-    BASE_URL="https://golang.org/dl/"
+    GO_VERSION="1.27.4" # known-good; the build takes the newest stable release from go.dev
+    BASE_URL="https://go.dev/dl/"
 
     case "$ARCH" in
         "x86_64"|"amd64")
@@ -248,15 +248,22 @@ install_go() {
             ;;
     esac
 
-    # Construct the download URL
+    # Newest stable Go and its sha256 from go.dev's release list; known-good if the lookup
+    # fails. The archive is checked whenever go.dev lists a sha256 for it.
+    local go_json go_latest go_sha
+    go_json=$(curl -fsSL --max-time 30 'https://go.dev/dl/?mode=json' 2>/dev/null || true)
+    go_latest=$(printf '%s\n' "$go_json" | grep -m1 -oE '"version": *"go[0-9]+(\.[0-9]+)+"' \
+        | grep -oE '[0-9]+(\.[0-9]+)+' || true)
+    GO_VERSION=$(pick_version go "$go_latest" "$GO_VERSION")
     GO_TAR="go${GO_VERSION}.linux-${ARCH_DL}.tar.gz"
     GO_URL="${BASE_URL}${GO_TAR}"
+    go_sha=$(printf '%s\n' "$go_json" | grep -A4 "\"filename\": *\"${GO_TAR//./\\.}\"" \
+        | grep -m1 -oE '[0-9a-f]{64}' || true)
 
     # Download and install Go
     echo "Downloading Go $GO_VERSION for $ARCH..."
-    wget $GO_URL -O /tmp/$GO_TAR
-
-    if [ $? -eq 0 ]; then
+    if wget "$GO_URL" -O "/tmp/$GO_TAR" \
+        && { [ -z "$go_sha" ] || echo "${go_sha}  /tmp/$GO_TAR" | sha256sum -c -; }; then
         # Extract and move Go to /usr/bin/go
         sudo tar -C /usr --strip-components=1 -xzf /tmp/$GO_TAR go/bin go/pkg go/src
         rm /tmp/$GO_TAR
@@ -301,7 +308,9 @@ function uvpython_install() { # Avoid terrible long builds
     install_dependencies "clang libclang-dev llvm-dev build-essential"
     [ -d /root/thirdparty ] || mkdir /root/thirdparty
     cd /root/thirdparty
-    UV_VERSION="0.13.9"
+    UV_VERSION="0.13.9"  # known-good; the build takes the newest release
+    UV_VERSION=$(latest_release_version astral-sh/uv "$UV_VERSION" \
+        "https://github.com/astral-sh/uv/releases/download/@V@/uv-installer.sh")
     installfromnet "wget" "https://github.com/astral-sh/uv/releases/download/$UV_VERSION/uv-installer.sh"
     chmod +x uv-installer.sh
     ./uv-installer.sh
