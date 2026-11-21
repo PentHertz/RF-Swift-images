@@ -21,7 +21,28 @@
   it for amd64/arm64; the full-build workflows deliberately leave ARTEX out since it
   tracks upstream rather than this repo's image chain.
 
+- Tool-version maintenance: `scripts/maintenance/check_tool_versions.py` to check (and
+  bump the simple ones) against upstream, and `docs/maintaining-tool-versions.md` listing
+  every hand-pinned version with its update caveats.
+
+### Changed
+
+- Bumped pinned tool versions after an upstream audit: jadx `1.5.6→1.5.7`, uv `0.13.8→0.13.9`,
+  Arduino IDE `2.3.10→2.3.11`, Sniffle firmware `v1.10.0→v1.11.0`, Burp Suite Community
+  `2026.10.1→2026.11.2`, and the Mirage-side CPython source build `3.10.13→3.10.22`.
+- sdrangel `v7.21.3→v8.2.0`: upstream v8 dropped the `sdrangel-<build>-master.tar.gz`
+  bundle for a native `sdrangel_8.2.0_ubuntu-26.04_amd64.deb`, so the installer now fetches
+  and installs that directly (major version jump; not build-verified here).
+- Left pinned on purpose: scapy stays at `2.5.0` (Mirage's BLE code depends on `HCI_Cmd_*`
+  names scapy renamed afterwards); Detect-It-Easy (`4.0.0` has no Ubuntu-26.04 build), Kaleido
+  (v1.x is pip-only), LLVM (`17`→`23` is a 6-major jump), and hostapd (`2.12` has no aircrack-ng
+  WPE patch yet) all need manual work and were not bumped.
+
 ### Fixed
+
+- ipsw installer: version was pinned as `v3.1.745` but the URL template already prepends
+  `v`, producing a broken `.../vv3.1.745/ipsw_v3.1.745_...` path; the pin is now the bare
+  version (`3.1.749`), matching the real release asset names.
 
 - Installation retries return the last failure after five attempts. Call sites
   pass argument vectors, preserving spaces and literal glob characters. The npm

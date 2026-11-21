@@ -185,7 +185,7 @@ function arduino_ide_install() {
     fi
     
     goodecho "[+] Installing Arduino IDE for x86_64 with AppImage"
-    IDE_VERSION="2.3.10"
+    IDE_VERSION="2.3.11"
     avrdude_install
     [ -d /hardware ] || mkdir /hardware
     cd /hardware

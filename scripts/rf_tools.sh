@@ -119,17 +119,17 @@ function sniffle_soft_install() {
         [ -d /rftools/bluetooth/firmwares/Sniffle ] || mkdir -p /rftools/bluetooth/firmwares/Sniffle
         cd /rftools/bluetooth/firmwares/Sniffle
         goodecho "[+] Downloading firmwares for Sniffle"
-        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc1352p1_cc2652p1.hex"
-        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc1352p1_cc2652p1_1M.hex"
-        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc1352p7.hex"
-        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc1352p7_1M.hex"
-        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc1352r1.hex"
-        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc1354p10.hex"
-        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc2651p3.hex"
-        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc2652r1.hex"
-        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc2652r7.hex"
-        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc2652rb.hex"
-        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.10.0/sniffle_cc2652rb_1M.hex"
+        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.11.0/sniffle_cc1352p1_cc2652p1.hex"
+        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.11.0/sniffle_cc1352p1_cc2652p1_1M.hex"
+        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.11.0/sniffle_cc1352p7.hex"
+        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.11.0/sniffle_cc1352p7_1M.hex"
+        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.11.0/sniffle_cc1352r1.hex"
+        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.11.0/sniffle_cc1354p10.hex"
+        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.11.0/sniffle_cc2651p3.hex"
+        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.11.0/sniffle_cc2652r1.hex"
+        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.11.0/sniffle_cc2652r7.hex"
+        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.11.0/sniffle_cc2652rb.hex"
+        installfromnet "wget" "https://github.com/nccgroup/Sniffle/releases/download/v1.11.0/sniffle_cc2652rb_1M.hex"
     else
         goodecho "[!] Skipping Sniffle installation: unsupported architecture ($arch)"
     fi
@@ -161,15 +161,15 @@ function bluing_soft_install() {
         cd /root/thirdparty
         sudo apt-get update
         install_dependencies "build-essential libssl-dev zlib1g-dev libncurses-dev libreadline-dev libsqlite3-dev libgdbm-dev libdb5.3-dev libbz2-dev libexpat1-dev liblzma-dev libffi-dev"
-        wget https://www.python.org/ftp/python/3.10.13/Python-3.10.13.tgz
-        tar xzf Python-3.10.13.tgz
-        cd Python-3.10.13
+        wget https://www.python.org/ftp/python/3.10.22/Python-3.10.22.tgz
+        tar xzf Python-3.10.22.tgz
+        cd Python-3.10.22
         export LDFLAGS="-lm -lpthread -ldl -lutil" # TODO: for RISC-V but need to check if good for ARM and x86
         ./configure #--enable-optimizations
         make -j $(nproc)
         sudo make altinstall
         cd ..
-        rm -rf Python-3.10.13*
+        rm -rf Python-3.10.22*
     else
         add-apt-repository -y ppa:deadsnakes/ppa
         sudo apt-get update

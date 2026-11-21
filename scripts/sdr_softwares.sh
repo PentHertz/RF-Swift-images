@@ -22,10 +22,10 @@ function sdrangel_soft_install() {
 	goodecho "[+] Downloading and unpacking SDR Angel"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	installfromnet "wget" "https://github.com/f4exb/sdrangel/releases/download/v7.21.3/sdrangel-2700-master.tar.gz"
-	tar xvzf sdrangel-2700-master.tar.gz
-	cd sdrangel-2700-master
-	dpkg -i sdrangel_7.21.3-1_amd64.deb
+	# v8+ ships per-Ubuntu .debs directly (the old v7 sdrangel-<build>-master.tar.gz is gone)
+	installfromnet "wget" "https://github.com/f4exb/sdrangel/releases/download/v8.2.0/sdrangel_8.2.0_ubuntu-26.04_amd64.deb"
+	apt-fast install -y ./sdrangel_8.2.0_ubuntu-26.04_amd64.deb
+	rm -f sdrangel_8.2.0_ubuntu-26.04_amd64.deb
 	cd /root
 }
 

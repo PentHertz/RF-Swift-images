@@ -120,7 +120,7 @@ EOF
 
 function jadx_soft_install() {
     goodecho "[+] Installing jadx"
-    local JADX_VERSION="1.5.6"
+    local JADX_VERSION="1.5.7"
     install_dependencies "default-jre unzip"
     [ -d "$MOBILE_DIR" ] || mkdir -p "$MOBILE_DIR"
     cd "$MOBILE_DIR"
@@ -147,7 +147,7 @@ function reflutter_soft_install() {
 function ios_tools_soft_install() {
     goodecho "[+] Installing iOS tooling (libimobiledevice utilities, ipsw)"
     install_dependencies "libimobiledevice-utils ideviceinstaller libusbmuxd-tools usbmuxd ifuse"
-    local IPSW_VERSION="v3.1.745" arch tmp
+    local IPSW_VERSION="3.1.749" arch tmp  # bare version: URL adds the leading v for the tag
     case "$(uname -m)" in
         x86_64|amd64)  arch="x86_64" ;;
         aarch64|arm64) arch="arm64" ;;
