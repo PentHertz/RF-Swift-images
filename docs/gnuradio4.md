@@ -11,7 +11,7 @@ own headers, prefix and tools, so the two do not conflict.
 |---|---|
 | Source | [`gnuradio/gnuradio4`](https://github.com/gnuradio/gnuradio4), the GNU Radio project's own repository. `fair-acc/gnuradio4` is the FAIR prototype GR4 grew out of, not the release line |
 | Version | The **newest release tag** at image build time (currently **4.0.0-RC3**, a release candidate). Each tag pins the commit of every component in its `modules.cmake`, so a build is reproducible |
-| Components | `gnuradio4-core`, `gnuradio4-library`, `gnuradio4-blocks` (with the **SDR** (SoapySDR), **Audio** (RtAudio) and **ZeroMQ** block families), `gnuradio4-control-plane` (`gr4cp_server`, `gr4cp-cli`), **GR4 Studio** (desktop and browser) |
+| Components | `gnuradio4-core`, `gnuradio4-library`, `gnuradio4-blocks` (with the **SDR** (SoapySDR), **Audio** (libsoundio) and **ZeroMQ** block families), `gnuradio4-control-plane` (`gr4cp_server`, `gr4cp-cli`), **GR4 Studio** (desktop and browser) |
 | Install prefix | `/opt/gnuradio4/install` (sources stay in `/opt/gnuradio4`; the build tree is removed to keep the image small) |
 | Studio | amd64 and arm64 only (it bundles an Electron runtime, and Electron has no riscv64 build) |
 
@@ -43,9 +43,19 @@ by hand:
 
 ```sh
 . /opt/gnuradio4/env.sh
-ls "$GR4_PREFIX/bin"                       # gr4cp_server, gr4cp-cli, gr4-studio, ...
-ls "$GR4_PREFIX/lib/gnuradio-4/plugins"    # block plugins (incl. SDR and audio families)
+grinfo version                             # framework, plugin directories and what each held
+ls "$GR4_PREFIX/lib/gnuradio-4/plugins"    # block plugins: Basic, Filter, Sdr, ...
 ```
+
+## Command-line tools
+
+Besides Studio, GR4 installs three command-line tools:
+
+| Command | What it does |
+|---|---|
+| `grinfo` | Report the GR4 framework, its plugins and its blocks (`grinfo version`, `grinfo --help`) |
+| `rungraph --graph <file>` | Run a flowgraph saved in GR4's GRC YAML dialect (for example from Studio). Use `-` to read it from standard input |
+| `graphdoc <graph.yaml>` | Describe a flowgraph as Markdown or HTML (`--format md\|html`) |
 
 ## GR4 Studio in the browser (recommended in a container)
 
@@ -143,5 +153,11 @@ How the image builds it, following upstream's own Ubuntu 26.04 recipe
 - **Parallelism:** `GR4_BUILD_PARALLEL_LEVEL` is sized from available RAM, at about 3 GB per
   compiler job, or 6 GB on arm64. This setting is what limits the nested component builds;
   `-j` does not.
+- **No precompiled headers:** `GR4_EXTRA_CMAKE_ARGS=-DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON`. Each
+  block family's precompiled header is 400–600 MB, and they would fill a CI runner's disk. On
+  Ubuntu 26.04 with GCC 15, the core + library + blocks build peaked at about 1.5 GB without
+  them, against 5.9 GB after only 4 % of the blocks with them. On 24 cores it took about 31 minutes.
+- **Audio blocks:** the Audio family needs `libsoundio-dev`, which the installer adds. Upstream's
+  26.04 package list does not include it, so without it the family would be skipped.
 - **Older tags:** tags up to 4.0.0-RC2 used a single-repository layout without Studio. The
   installer still builds them when selected with `GR4_REF`.

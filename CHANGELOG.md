@@ -25,7 +25,7 @@
   `gr4-studio-web` serves the browser app on `127.0.0.1:8080` (`GR4_STUDIO_WEB_BIND` /
   `GR4_STUDIO_WEB_PORT` to change), with `gr4cp_server` kept on a loopback port. `gr4-studio`
   starts the desktop Electron app, made to run as root in a container (no-sandbox shim, which
-  bypasses the host AppArmor setup step). Also the ZeroMQ, SDR (SoapySDR) and Audio (RtAudio)
+  bypasses the host AppArmor setup step). Also the ZeroMQ, SDR (SoapySDR) and Audio (libsoundio)
   block families. See `docs/gnuradio4.md`.
 - `llm`: Vulnhuntr (Protect AI), LLM-driven vulnerability discovery in Python projects, from
   `protectai/vulnhuntr` latest main. It is not taken from the PyPI project of the same name,
@@ -93,7 +93,12 @@
   follows upstream's own Ubuntu 26.04 recipe (dependency list and `full` preset, with Release,
   no tests and warnings not fatal), requires CMake ≥ 3.27, installs to `/opt/gnuradio4/install`
   with a POSIX `env.sh`, removes the build tree afterwards, and runs upstream's `oot-smoke` and
-  `control-plane-smoke` checks against the installed result.
+  `control-plane-smoke` checks against the installed result. Precompiled headers are now off
+  (each block family's was 400-600 MB; the blocks build had used 5.9 GB after 4 % of it,
+  against a ~1.5 GB peak for the whole build without them), and `libsoundio-dev` is added so
+  the Audio block family is built instead of silently skipped. Verified natively on Ubuntu
+  26.04 / GCC 15.2: core, library and blocks (with the SDR family) built with no errors in 31 min
+  on 24 cores, and `oot-smoke` passed against the installed SDK.
 
 - Fluxion installer: it announced itself as "Installing eaphammer" and passed a misspelled
   label (`fluxius_soft_install`) to `gitinstall`, so failures were reported under that name.

@@ -1292,6 +1292,9 @@ function gnuradio4_soft_install() {
         libboost-dev libbrotli-dev libcli11-dev libcpp-httplib-dev cppzmq-dev libcurl4-openssl-dev \
         libgtest-dev libncurses-dev nlohmann-json3-dev libsoapysdr-dev libssl-dev libtbb-dev \
         librtaudio-dev python3 python3-dev python3-numpy zlib1g-dev"
+    # The Audio block family is built only when libsoundio is found (gnuradio4-blocks looks for
+    # soundio/soundio.h); upstream's 26.04 list lacks it, so without it audio is silently skipped.
+    install_dependencies "libsoundio-dev"
 
     # Upstream requires CMake >= 3.27 and GCC >= 14 for C++23. Check up front: a toolchain miss
     # otherwise shows up as a wall of template errors 40 minutes in.
@@ -1375,6 +1378,10 @@ function gnuradio4_soft_install() {
         # and Studio; we override what an image build should not carry: tests (the slowest and
         # most memory-hungry part), warnings-as-errors (any new GCC warning would fail the build)
         # and the RelWithAssert build type. The preset owns the generator and binary dir.
+        # Precompiled headers are off for every component (GR4_EXTRA_CMAKE_ARGS reaches them all):
+        # each block family's PCH is 400-600 MB, and on Ubuntu 26.04 / GCC 15 the blocks build had
+        # used 5.9 GB of disk after 25 of 614 objects with PCH, against a ~1.5 GB peak for the
+        # whole core + library + blocks build without it.
         # Configure + build clone the pinned components and fetch deps: needs git/npm egress.
         local groups="base;full"
         [ "$GR4_STUDIO" -eq 1 ] || groups="base"
@@ -1386,6 +1393,7 @@ function gnuradio4_soft_install() {
                 -DGR4_WARNINGS_AS_ERRORS=OFF \
                 -DGR4_MODULE_GROUPS="$groups" \
                 -DGR4_BUILD_PARALLEL_LEVEL="$GR4JOBS" \
+                -DGR4_EXTRA_CMAKE_ARGS=-DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON \
                 -DCMAKE_INSTALL_PREFIX="$GR4_PREFIX" \
            && cmake --build --preset full; then
             GR4_BUILT=1
