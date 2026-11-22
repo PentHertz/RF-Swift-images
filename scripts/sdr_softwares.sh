@@ -244,7 +244,7 @@ function cyberther_soft_install() {
 	goodecho "[CyberEther][+] Cloning GitHub repository"
 	[ -d /root/thirdparty ] || mkdir /root/thirdparty
 	cd /root/thirdparty
-	local CYBERETHER_VERSION="1.19.2"  # known-good; the build takes the newest release
+	local CYBERETHER_VERSION="1.20.1"  # known-good; the build takes the newest release
 	CYBERETHER_VERSION=$(latest_release_version luigifcruz/CyberEther "$CYBERETHER_VERSION" \
 		"https://github.com/luigifcruz/CyberEther/archive/refs/tags/v@V@.tar.gz")
 	git clone --depth=1 --branch "v${CYBERETHER_VERSION}" https://github.com/luigifcruz/CyberEther.git CyberEther
@@ -287,6 +287,20 @@ function cyberther_soft_install() {
 	for _ne_f in $(grep -oE "ne_10m_[A-Za-z0-9_]+\.geojson" resources/geodata/meson.build | sort -u); do
 	    [ -s "resources/geodata/$_ne_f" ] || installfromnet "wget" "-q" "-O" "resources/geodata/$_ne_f" "$_ne_url/$_ne_f"
 	done
+	# v1.20+ replaced that with one precompiled archive from cdn.cyberether.org, named in
+	# resources/geodata/manifest.json. fetch.py also tries it only once, and skips the download
+	# when .cache/geodata/<sha256>.bin is present and matches, so fetch it there with retries.
+	if [ -f resources/geodata/manifest.json ]; then
+	    local _gd_url _gd_sha _gd_bin
+	    read -r _gd_url _gd_sha < <(python3 -c 'import json,sys; m=json.load(open(sys.argv[1])); print(m["url"], m["sha256"])' resources/geodata/manifest.json)
+	    _gd_bin=".cache/geodata/${_gd_sha}.bin"
+	    mkdir -p .cache/geodata
+	    if ! echo "${_gd_sha}  ${_gd_bin}" | sha256sum -c --status - 2>/dev/null; then
+	        installfromnet "wget" "-q" "-O" "${_gd_bin}" "${_gd_url}?sha256=${_gd_sha}" \
+	            && echo "${_gd_sha}  ${_gd_bin}" | sha256sum -c --status - \
+	            || { rm -f "${_gd_bin}"; criticalecho-noexit "[CyberEther][!] geodata pre-fetch failed, meson will retry it once"; }
+	    fi
+	fi
 	# v1.14.0's Soapy module keeps a std::atomic<std::optional<Range>> (~32 bytes,
 	# not lock-free), so GCC emits __atomic_load/__atomic_store calls into
 	# libatomic, which upstream never links. With meson's --no-undefined the

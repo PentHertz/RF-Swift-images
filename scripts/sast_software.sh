@@ -6,22 +6,59 @@
 # set -euo pipefail // -> some scripts fails to install properly, and binaries are normally working. TODO: Need see why some install processes are failing with it.
 
 
-function LLVM_install() { # expects llvm version TODO: not available on RISCV64 yet
+function LLVM_install() { # newest stable LLVM from apt.llvm.org; no riscv64 builds there
+    # ARCH is not set globally: each ./entrypoint.sh call is its own process
+    local ARCH
+    ARCH=$(uname -m)
     if [[ "$ARCH" == "x86_64" ]] || [[ "$ARCH" == "amd64" ]] || [[ "$ARCH" == "aarch64" ]] || [[ "$ARCH" == "arm64" ]]; then
-        LLVM_VERSION=17
+        # apt.llvm.org publishes 21+ for resolute (17-20 are 404); the distro ships 21 and 22
+        LLVM_VERSION=23
 
         goodecho "[+] installing LLVM ${LLVM_VERSION}"
 
         [ -d /root/thirdparty ] || mkdir -p /root/thirdparty
         cd /root/thirdparty
 
-        installfromnet "wget" "-c" "https://apt.llvm.org/llvm.sh"
+        rm -f llvm.sh  # wget -c would append to a stale copy
+        installfromnet "wget" "-q" "-O" "llvm.sh" "https://apt.llvm.org/llvm.sh"
 
         chmod +x llvm.sh
-        ./llvm.sh ${LLVM_VERSION}
+        ./llvm.sh ${LLVM_VERSION}  # clang, lldb, lld, clangd (versioned names: clang-${LLVM_VERSION}, ...)
+        # llvm-config plus llvm-objdump/-readelf/-nm/-symbolizer/... (bin dir /usr/lib/llvm-N/bin)
+        install_dependencies "llvm-${LLVM_VERSION}"
 
-        export LLVM_CONFIG=llvm-config-${LLVM_VERSION}
-        echo "Defaults env_keep += \"${LLVM_CONFIG}\"" | sudo EDITOR='tee -a' visudo
+        # Clang picks the newest /usr/lib/gcc/<triple>/N even when that GCC has no libstdc++
+        # headers (resolute: libopenmpi-dev -> gfortran-16 brings GCC 16's dir while only
+        # libstdc++-15-dev is installed), and then every C++ build fails on <atomic>. If so,
+        # pin it to the system gcc's install dir through clang's default config files.
+        local llvm_bin="/usr/lib/llvm-${LLVM_VERSION}/bin" gcc_dir cfg
+        if command -v gcc > /dev/null 2>&1 && [ -x "${llvm_bin}/clang" ] \
+            && ! echo '#include <atomic>' | "${llvm_bin}/clang++" -x c++ -fsyntax-only - > /dev/null 2>&1; then
+            gcc_dir=$(dirname "$(gcc -print-libgcc-file-name)")
+            for cfg in clang clang++; do
+                echo "--gcc-install-dir=${gcc_dir}" > "${llvm_bin}/${cfg}.cfg"
+            done
+            if echo '#include <atomic>' | "${llvm_bin}/clang++" -x c++ -fsyntax-only - > /dev/null 2>&1; then
+                goodecho "[+] clang-${LLVM_VERSION} pinned to ${gcc_dir} (libstdc++ headers)"
+            else
+                record_build_failure "build" "llvm-${LLVM_VERSION}" "clang++ cannot find libstdc++ headers"
+            fi
+        fi
+
+        # Export LLVM_CONFIG for interactive shells (and keep it through sudo); an export
+        # here would die with this process.
+        if command -v "llvm-config-${LLVM_VERSION}" > /dev/null 2>&1; then
+            local rc line="export LLVM_CONFIG=llvm-config-${LLVM_VERSION}"
+            for rc in ~/.zshrc ~/.bashrc; do
+                [ -f "$rc" ] || continue
+                sed -i '/^export LLVM_CONFIG=llvm-config-[0-9]*$/d' "$rc"
+                echo "$line" >> "$rc"
+            done
+            if [ -d /etc/sudoers.d ]; then
+                echo 'Defaults env_keep += "LLVM_CONFIG"' > /etc/sudoers.d/rfswift-llvm
+                chmod 0440 /etc/sudoers.d/rfswift-llvm
+            fi
+        fi
     fi
 }
 

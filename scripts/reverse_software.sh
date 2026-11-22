@@ -508,16 +508,31 @@ function binary_triage_tools_soft_install() {
     install_dependencies "yara python3-yara"
     pipx_install_tool "capa" "flare-capa" "capa"
     pipx_install_tool "floss" "flare-floss" "floss"
-    local DIE_VERSION="3.21" tmp
-    if [ "$(uname -m)" != "x86_64" ]; then
-        goodecho "[!] Detect-It-Easy only publishes amd64 .deb packages; skipping it on $(uname -m)"
-        return 0
-    fi
-    # known-good above; the newest release is used only when it ships an Ubuntu 26.04 .deb
+    # Known-good Detect-It-Easy is 3.21 (die_3.21_Ubuntu_26.04_amd64.deb, amd64 only). 4.0.0 is
+    # used on purpose but regresses against it: diec prints nothing for a symlink (exit 0), and
+    # GCC/Clang ELF binaries get a false "Compiler: TinyCC (0.9.27)". To roll back, set 3.21
+    # and download that old asset name instead of the codename-based one below.
+    local DIE_VERSION="4.0.0" debarch tmp deb="" codename base
+    debarch=$(dpkg --print-architecture)
+    case "$debarch" in
+        amd64|arm64|riscv64) ;;
+        *) goodecho "[!] Detect-It-Easy publishes no .deb for ${debarch}; skipping it"; return 0 ;;
+    esac
+    # Since 4.0 the .debs are named by Ubuntu codename (die_<V>_noble_<arch>.deb, no more
+    # die_<V>_Ubuntu_26.04_amd64.deb) and none targets resolute yet. noble's depends only on
+    # Qt5 + libcurl and installs and runs on resolute; resolute's is preferred once published.
+    # known-good above; the newest release is used when it ships a noble .deb for this arch.
     DIE_VERSION=$(latest_release_version horsicq/DIE-engine "$DIE_VERSION" \
-        "https://github.com/horsicq/DIE-engine/releases/download/@V@/die_@V@_Ubuntu_26.04_amd64.deb")
+        "https://github.com/horsicq/DIE-engine/releases/download/@V@/die_@V@_noble_${debarch}.deb")
+    base="https://github.com/horsicq/DIE-engine/releases/download/${DIE_VERSION}"
+    for codename in resolute noble; do
+        if url_exists "${base}/die_${DIE_VERSION}_${codename}_${debarch}.deb"; then
+            deb="die_${DIE_VERSION}_${codename}_${debarch}.deb"
+            break
+        fi
+    done
     tmp=$(mktemp -d)
-    if installfromnet wget -q -O "$tmp/die.deb" "https://github.com/horsicq/DIE-engine/releases/download/${DIE_VERSION}/die_${DIE_VERSION}_Ubuntu_26.04_amd64.deb" \
+    if [ -n "$deb" ] && installfromnet wget -q -O "$tmp/die.deb" "${base}/${deb}" \
         && apt-fast install -y "$tmp/die.deb"; then
         goodecho "[+] Detect-It-Easy ${DIE_VERSION} installed (die, diec, diel)"
     else
