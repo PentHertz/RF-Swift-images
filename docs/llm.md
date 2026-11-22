@@ -18,6 +18,7 @@ Coding agents, shared skill packs, agent-side reverse-engineering tools, local s
 | Open WebUI | `open-webui serve` | PyPI `open-webui` (uv tool, Python 3.11) | `~/.open-webui/` (`$DATA_DIR`) |
 | NodeTerm (Server Edition) | `nodeterm-server` | source, `/opt/nodeterm` | `~/.nodeterm-server/` |
 | Strix (AI pentest agent) | `strix` | PyPI `strix-agent` (uv tool, Python 3.12) | `~/.strix/` |
+| Vulnhuntr (Protect AI) | `vulnhuntr` | `protectai/vulnhuntr`, latest main (uv tool, Python 3.10) | API keys from the environment |
 | ARTEMIS (multi-agent red teaming, **opt-in**) | `artemis-redteam` | Stanford-Trinity/ARTEMIS @ reviewed commit (Codex fork from source, uv Python 3.12) | `~/.artemis-redteam/` |
 | Semgrep | `semgrep` | PyPI `semgrep` | `~/.semgrep/` |
 
@@ -126,6 +127,35 @@ strix --target https://staging.example.test
 ```
 
 The `strix` skills let any agent above run and triage Strix scans for you.
+
+## Vulnhuntr
+
+[Vulnhuntr](https://github.com/protectai/vulnhuntr) (Protect AI, AGPL-3.0) uses an LLM to find
+remotely exploitable vulnerabilities in **Python** projects. It follows call chains from user
+input to dangerous sinks (RCE, SQLi, SSRF, XSS, LFI, AFO, IDOR) and reports each finding with a
+proof-of-concept. Point it at a project, or narrow it to the files that handle user input:
+
+```sh
+export ANTHROPIC_API_KEY=...
+vulnhuntr -r /path/to/project                 # the whole project
+vulnhuntr -r /path/to/project -a server.py    # one file or subdirectory
+vulnhuntr -r /path/to/project -l gpt          # OpenAI instead (OPENAI_API_KEY, OPENAI_MODEL)
+```
+
+Things to know:
+
+- **Model:** the `vulnhuntr` command defaults to `ANTHROPIC_MODEL=claude-opus-4-5`.
+  - Vulnhuntr pre-fills the start of Claude's reply on every call. Current Claude models (4.6
+    and later) reject that with a 400.
+  - Its own default, `claude-3-5-sonnet-latest`, is retired.
+  - Claude Opus 4.5 is the newest model that accepts prefill. Set `ANTHROPIC_MODEL` to change it,
+    but keep to a model that accepts prefill (for example `claude-haiku-4-5`).
+- **Source:** it is installed from `github.com/protectai/vulnhuntr` itself. The PyPI project named
+  `vulnhuntr` is a third-party fork, not Protect AI's.
+- **Version:** builds take the latest upstream commit. `VULNHUNTR_REVIEWED_COMMIT` in
+  `scripts/llm_software.sh` records the last commit that was reviewed. A build on a newer commit
+  adds a `review` entry to the build report.
+- **Packaging fix:** the install adds `requests`, which upstream imports but does not declare.
 
 ## ARTEMIS (opt-in)
 

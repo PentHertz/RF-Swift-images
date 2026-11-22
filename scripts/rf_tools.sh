@@ -812,10 +812,10 @@ function eaphammer_soft_install() {
 }
 
 function fluxion_soft_install() {
-    goodecho "[+] Installing eaphammer"
+    goodecho "[+] Installing Fluxion"
     [ -d /rftools/wifi ] || mkdir -p /rftools/wifi
     cd /rftools/wifi
-    gitinstall "https://github.com/FluxionNetwork/fluxion.git" "fluxius_soft_install"
+    gitinstall "https://github.com/FluxionNetwork/fluxion.git" "fluxion_soft_install"
     install_dependencies "bc cowpatty dsniff php-cgi psmisc"
     cd fluxion
 }

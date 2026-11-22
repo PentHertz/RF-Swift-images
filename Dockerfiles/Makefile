@@ -326,6 +326,7 @@ clean_cache:
 	@docker buildx prune -af
 	@docker volume prune -f
 	@docker system prune -af --volumes
+
 # Print the build report (tools/packages that failed to install) baked into an
 # already-built image. Pulls the image if needed.
 #   make report IMG=corebuild ARCH=amd64
@@ -350,7 +351,7 @@ help:
 	@echo "  common              - Build corebuild base image"
 	@echo "  sdrsadevices        - Build SDR SA devices image"
 	@echo "  sdrlight            - Build SDR light image"
-	@echo "  sdrgnuradio4        - Build GNU Radio 4.0 (GR4) add-on image on top of sdr_light"
+	@echo "  sdrgnuradio4        - GNU Radio 4.0 (GR4) + GR4 Studio add-on image on top of sdr_light (docs/gnuradio4.md)"
 	@echo "  sdrhacks            - Build SDR hacks add-on image (repurposed chips as SDRs) on top of sdr_light"
 	@echo "  sdrfull             - Build complete SDR full image (with caching)"
 	@echo "  sdrfull_staged      - Build SDR full with explicit stage-by-stage building"

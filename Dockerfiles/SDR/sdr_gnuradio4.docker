@@ -21,11 +21,13 @@ COPY config /root/config/
 WORKDIR /root/scripts/
 RUN chmod +x entrypoint.sh
 
-# GNU Radio 4.0 (GR4) built from source in parallel to the apt GNU Radio 3.10
-# already present in sdr_light. It has its own Python 3.12 venv for the embedded
-# interpreter and is exposed via /etc/profile.d/gnuradio4.sh. Experimental (RC),
-# heavy template build; kept out of sdr_light so only those who want to try GR4
-# pull this image.
+# GNU Radio 4.0 (GR4, newest release tag of gnuradio/gnuradio4) built from source in parallel
+# to the apt GNU Radio 3.10 already present in sdr_light, together with GR4 Studio (desktop
+# `gr4-studio`, browser `gr4-studio-web` on :8080) and the control plane. Installed under
+# /opt/gnuradio4/install; environment in /opt/gnuradio4/env.sh (/etc/profile.d/gnuradio4.sh).
+# The build runs upstream's oot-smoke / control-plane-smoke checks. Release candidate, heavy
+# template build; kept out of sdr_light so only those who want GR4 pull this image.
+# Usage: docs/gnuradio4.md
 RUN ./entrypoint.sh gnuradio4_soft_install
 
 RUN mkdir -p /sdrtools/

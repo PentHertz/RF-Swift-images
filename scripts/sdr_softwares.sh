@@ -1271,35 +1271,35 @@ EOF
 GNURADIO4_HOME="/opt/gnuradio4"
 
 function gnuradio4_soft_install() {
-    # GNU Radio 4.0 (GR4, github.com/gnuradio/gnuradio4) built from source
-    # ALONGSIDE the apt GNU Radio 3.10. GR4 is a separate C++23 codebase with its
-    # own headers/namespace/prefix, so it does not conflict with 3.10. Upstream's
-    # own binary packages use CPACK_PACKAGING_INSTALL_PREFIX=/opt/gnuradio4 for
-    # exactly the same coexistence reason, so we keep that prefix and expose it
-    # via /etc/profile.d. Upstream calls GR4 a maturing beta; heavy, template-
-    # heavy build, best-effort so it never aborts the image.
+    # GNU Radio 4.0 (GR4, github.com/gnuradio/gnuradio4 -- the GNU Radio project's own repo;
+    # fair-acc/gnuradio4 is the FAIR prototype it grew out of) built from source ALONGSIDE the
+    # apt GNU Radio 3.10. GR4 is a separate C++23 codebase with its own headers/namespace/prefix,
+    # so it does not conflict with 3.10. Installed under /opt/gnuradio4/install; the shell
+    # environment comes from /opt/gnuradio4/env.sh (sourced by /etc/profile.d/gnuradio4.sh).
     #
-    # 2026-08 restructure: gnuradio/gnuradio4 is now a *super-repo* driven by
-    # CMake presets (dev / full) that clones its components (gnuradio4-core,
-    # -blocks, -library) into src/ at configure time. fair-acc/gnuradio4 is
-    # superseded. Tags up to 4.0.0-RC2 still carry the pre-restructure monorepo
-    # layout, and the repo README still documents it, so we detect the layout at
-    # runtime rather than trusting the ref. Set GR4_REF to override the tag.
-    goodecho "[+] Installing GNU Radio 4.0 (GR4) in parallel to 3.10 -- heavy build"
-    # GR4 wants Python >= 3.12 for its embedded PythonBlock. Use the distro's
-    # default Python packages (3.14 on Resolute); versioned 3.12 packages
-    # are no longer published for Resolute ARM64. A private venv still isolates
-    # GR4 from GNU Radio 3.10's Python packages.
-    install_dependencies "build-essential g++ cmake ninja-build git pkg-config libfftw3-dev python3 python3-dev python3-venv"
+    # Since 4.0.0-RC3, gnuradio/gnuradio4 is a super-repo: CMake presets clone the components
+    # (core, library, blocks, control-plane, Studio) at commits pinned in modules.cmake. We
+    # follow upstream's own Ubuntu 26.04 recipe (containers/ubuntu-26.04/Dockerfile) with the
+    # `full` preset, so GR4 Studio is included:
+    #   - gnuradio4-control-plane (gr4cp_server) + Studio blocks + the Node/Vite Studio app
+    #   - desktop Studio (Electron, `gr4-studio`) and browser Studio (`gr4-studio-web`, :8080)
+    # Studio needs Node.js 22 + npm and an Electron build for the arch (amd64/arm64); elsewhere
+    # only the base modules are built. Usage: docs/gnuradio4.md. Set GR4_REF to pick a tag.
+    goodecho "[+] Installing GNU Radio 4.0 (GR4) + GR4 Studio in parallel to 3.10 -- heavy build"
 
-    # Upstream requires CMake >= 3.25 and GCC >= 14 (>= 15 recommended) for C++23.
-    # Check up front: a toolchain miss otherwise shows up as a wall of template
-    # errors 40 minutes in.
+    # Upstream's Ubuntu 26.04 dependency set (containers/ubuntu-26.04/Dockerfile)
+    install_dependencies "build-essential ca-certificates cmake ninja-build git pkg-config \
+        libboost-dev libbrotli-dev libcli11-dev libcpp-httplib-dev cppzmq-dev libcurl4-openssl-dev \
+        libgtest-dev libncurses-dev nlohmann-json3-dev libsoapysdr-dev libssl-dev libtbb-dev \
+        librtaudio-dev python3 python3-dev python3-numpy zlib1g-dev"
+
+    # Upstream requires CMake >= 3.27 and GCC >= 14 for C++23. Check up front: a toolchain miss
+    # otherwise shows up as a wall of template errors 40 minutes in.
     local CMAKE_VER GCC_VER
-    CMAKE_VER=$(cmake --version 2>/dev/null | awk 'NR==1{print $3}')
-    GCC_VER=$(g++ -dumpfullversion -dumpversion 2>/dev/null | cut -d. -f1)
-    if [ -z "$CMAKE_VER" ] || [ "$(printf '%s\n3.25\n' "$CMAKE_VER" | sort -V | head -1)" != "3.25" ]; then
-        record_build_failure "toolchain" "gnuradio4" "cmake >= 3.25 required (found: ${CMAKE_VER:-none})"
+    CMAKE_VER=$(cmake --version 2>/dev/null | awk 'NR==1{print $3}' || true)
+    GCC_VER=$(g++ -dumpfullversion -dumpversion 2>/dev/null | cut -d. -f1 || true)
+    if [ -z "$CMAKE_VER" ] || ! [ "$(printf '%s\n3.27\n' "$CMAKE_VER" | sort -V | head -1)" = "3.27" ]; then
+        record_build_failure "toolchain" "gnuradio4" "cmake >= 3.27 required (found: ${CMAKE_VER:-none})"
         return 1
     fi
     if [ -z "$GCC_VER" ] || [ "$GCC_VER" -lt 14 ]; then
@@ -1307,18 +1307,39 @@ function gnuradio4_soft_install() {
         return 1
     fi
 
+    # GR4 Studio: Node.js 22 + npm (Ubuntu 26.04 ships Node 22), nginx for the browser app,
+    # and the runtime libraries of the Electron build that the desktop app bundles.
+    local GR4_STUDIO=0 node_major
+    case "$(uname -m)" in
+        x86_64|aarch64)
+            install_dependencies "nodejs npm nginx-light curl"
+            install_dependencies "libnss3 libgtk-3-0t64 libasound2t64 libgbm1 libxss1 libxtst6 \
+                libatk-bridge2.0-0t64 libcups2t64 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 \
+                libxrandr2 libsecret-1-0 libnotify4 xdg-utils"
+            node_major=$(node -p 'process.versions.node.split(".")[0]' 2>/dev/null || echo 0)
+            if [ "${node_major:-0}" -ge 22 ] && command -v npm > /dev/null 2>&1; then
+                GR4_STUDIO=1
+            else
+                record_build_failure "toolchain" "gr4-studio" "Node.js >= 22 + npm required (found: node ${node_major:-none}); building GR4 without Studio"
+            fi
+            ;;
+        *)
+            goodecho "[!] GR4 Studio needs an Electron build, none for $(uname -m): building GR4 without Studio"
+            ;;
+    esac
+
     [ -d /opt ] || mkdir -p /opt
     cd /opt
 
-    # Track the newest upstream tag rather than a hard pin. versionsort.suffix=-
-    # makes any dashed suffix a *pre*-release, so 4.0.0 will correctly outrank
-    # 4.0.0-RC2 once it ships (git's default sort does the opposite).
+    # Newest upstream tag (4.0.0-RC3 at the time of writing) rather than a hard pin; the tag pins
+    # every component commit in modules.cmake. versionsort.suffix=- makes any dashed suffix a
+    # *pre*-release, so 4.0.0 will outrank 4.0.0-RC3 once it ships (git's default does the opposite).
     local GR4_URL="https://github.com/gnuradio/gnuradio4.git"
     local GR4_TAG="${GR4_REF:-}"
     if [ -z "$GR4_TAG" ]; then
         GR4_TAG=$(git -c 'versionsort.suffix=-' ls-remote --tags --refs \
                       --sort=-v:refname "$GR4_URL" 2>/dev/null \
-                  | awk -F/ 'NR==1 {print $NF}')
+                  | awk -F/ 'NR==1 {print $NF}' || true)
     fi
     if [ -z "$GR4_TAG" ]; then
         GR4_TAG="main"
@@ -1334,108 +1355,231 @@ function gnuradio4_soft_install() {
     fi
     cd "$GNURADIO4_HOME"
 
-    # RC2 adds its standalone microbenchmark helper to ALL unconditionally;
-    # ENABLE_EXAMPLES does not cover it and the tag has no ENABLE_BENCHMARKS
-    # option. Keep the target available to developers, but do not build it as
-    # part of the image's default runtime/development installation.
-    if grep -q '^add_subdirectory(bench)' CMakeLists.txt; then
-        sed -i 's/^add_subdirectory(bench).*/add_subdirectory(bench EXCLUDE_FROM_ALL) # RF-Swift: optional microbenchmarks/' CMakeLists.txt
-    fi
-
-    # GR4's isolated Python env for the embedded PythonBlock interpreter.
-    # Upstream is still re-wiring the GR4 python bindings after the split, so this
-    # may end up unused on the preset path -- cheap and harmless either way.
-    local GR4_VENV="$GNURADIO4_HOME/venv"
-    local GR4_PYTHON=""
-    if command -v python3 > /dev/null 2>&1 \
-       && python3 -c 'import sys; raise SystemExit(sys.version_info < (3, 12))'; then
-        GR4_PYTHON="$(command -v python3)"
-        "$GR4_PYTHON" -m venv "$GR4_VENV"
-        "$GR4_VENV/bin/python" -m pip install --upgrade pip numpy > /dev/null 2>&1 \
-            || record_build_failure "pip" "gnuradio4 venv numpy" "GR4 python env setup failed"
-    else
-        record_build_failure "toolchain" "Python (GR4)" "Python >= 3.12 unavailable; GR4 will build without Python"
-    fi
-    local PYARGS=""
-    [ -x "$GR4_VENV/bin/python" ] && PYARGS="-DPYTHON_FORCE_INCLUDE=ON -DPython3_EXECUTABLE=$GR4_VENV/bin/python"
-
-    # GR4's generated block TUs peak at several GB RSS each. Four concurrent
-    # GCC processes fit the old 3 GB estimate on a 16 GB ARM runner, but the
-    # generated Converter/DataSink units exceed it and BuildKit is terminated
-    # with SIGTERM (143). Reserve 6 GB per ARM64 compiler job, leaving room for
-    # Docker, Ninja and the linker; retain 3 GB/job on other architectures.
-    # Upstream's enableZRAM.sh needs host kernel access and is unusable here.
-    # -Wno-psabi: drop the (harmless) arm64 std::simd ABI-change note flood.
-    # WARNINGS_AS_ERRORS defaults to ON upstream -- turn it off, or any new
-    # upstream warning fails a build we only ever wanted best-effort.
-    # Ship the runtime and development libraries, not upstream examples. Those
-    # contain several of GR4's slowest template-heavy units and made native
-    # ARM64 builds vulnerable to runner cancellation.
-    local COMMON_ARGS="-DCMAKE_CXX_FLAGS=-Wno-psabi -DWARNINGS_AS_ERRORS=OFF -DENABLE_EXAMPLES=OFF"
+    # GR4's template-heavy translation units peak at several GB RSS each. Reserve 6 GB per
+    # compiler job on ARM64 (generated Converter/DataSink units got BuildKit SIGTERMed at less)
+    # and 3 GB elsewhere. GR4_BUILD_PARALLEL_LEVEL is what limits the nested component builds;
+    # -j on the outer build does not.
     local MEMKB MEM_PER_JOB_KB GR4JOBS
     MEMKB=$(awk '/MemAvailable/{print $2}' /proc/meminfo 2>/dev/null || echo 0)
     MEM_PER_JOB_KB=$((3 * 1024 * 1024))
-    if [ "$(uname -m)" = "aarch64" ]; then
-        MEM_PER_JOB_KB=$((6 * 1024 * 1024))
-    fi
+    [ "$(uname -m)" = "aarch64" ] && MEM_PER_JOB_KB=$((6 * 1024 * 1024))
     GR4JOBS=$(( MEMKB / MEM_PER_JOB_KB ))
     [ "$GR4JOBS" -lt 1 ] && GR4JOBS=1
     [ "$GR4JOBS" -gt "$(nproc)" ] && GR4JOBS="$(nproc)"
 
-    # Layout detection. src/ is populated *by* configure, so it cannot be used as
-    # a probe -- CMakePresets.json plus a 'dev' preset is the only reliable tell.
-    local GR4_BUILD_DIR GR4_CONFIGURED=0
-    if [ -f CMakePresets.json ] && cmake --list-presets 2>/dev/null | grep -q '"dev"'; then
-        # Super-repo: the preset owns generator, build type and binary dir
-        # (build/dev), so -G / -B / -DCMAKE_BUILD_TYPE must NOT be passed.
-        # 'dev' is the headless workspace; 'full' would drag in the incubator,
-        # control plane and the Qt/GUI Studio app, which we don't want here.
-        # Configure clones the component repos: this step needs git egress.
-        goodecho "[+] GR4 super-repo layout -- preset 'dev', -j${GR4JOBS} ($(nproc) cores, ~$((MEMKB / 1024 / 1024)) GB RAM available)"
-        GR4_BUILD_DIR="$GNURADIO4_HOME/build/dev"
-        if cmake --preset dev $COMMON_ARGS \
-                -DCMAKE_INSTALL_PREFIX="$GNURADIO4_HOME/install" $PYARGS \
-           && cmake --build --preset dev -j"$GR4JOBS"; then
-            GR4_CONFIGURED=1
+    local GR4_PREFIX="$GNURADIO4_HOME/install"
+    local GR4_BUILD_DIR GR4_BUILT=0
+
+    if [ -f CMakePresets.json ] && cmake --list-presets 2>/dev/null | grep -q '"full"'; then
+        # Super-repo (4.0.0-RC3+). The `full` preset adds ZeroMQ/SDR/Audio blocks, control-plane
+        # and Studio; we override what an image build should not carry: tests (the slowest and
+        # most memory-hungry part), warnings-as-errors (any new GCC warning would fail the build)
+        # and the RelWithAssert build type. The preset owns the generator and binary dir.
+        # Configure + build clone the pinned components and fetch deps: needs git/npm egress.
+        local groups="base;full"
+        [ "$GR4_STUDIO" -eq 1 ] || groups="base"
+        GR4_BUILD_DIR="$GNURADIO4_HOME/build/full"
+        goodecho "[+] GR4 super-repo ($GR4_TAG), preset 'full' (modules: $groups), ${GR4JOBS} jobs ($(nproc) cores, ~$((MEMKB / 1024 / 1024)) GB RAM available)"
+        if cmake --preset full \
+                -DCMAKE_BUILD_TYPE=Release \
+                -DGR4_BUILD_TESTING=OFF \
+                -DGR4_WARNINGS_AS_ERRORS=OFF \
+                -DGR4_MODULE_GROUPS="$groups" \
+                -DGR4_BUILD_PARALLEL_LEVEL="$GR4JOBS" \
+                -DCMAKE_INSTALL_PREFIX="$GR4_PREFIX" \
+           && cmake --build --preset full; then
+            GR4_BUILT=1
+        fi
+
+        if [ "$GR4_BUILT" -eq 1 ]; then
+            # "Does it work": upstream's own checks, run against the *installed* prefix.
+            # oot-smoke builds and runs an out-of-tree consumer of the installed SDK;
+            # control-plane-smoke starts the installed gr4cp_server and checks its block catalog.
+            cmake --build --preset full --target oot-smoke \
+                || record_build_failure "test" "gnuradio4" "oot-smoke failed: installed GR4 SDK unusable"
+            if [ "$GR4_STUDIO" -eq 1 ]; then
+                cmake --build --preset full --target control-plane-smoke \
+                    || record_build_failure "test" "gr4-studio" "control-plane-smoke failed: gr4cp_server/plugin catalog"
+                # Browser Studio bundle (upstream's studio-web image does the same after the superbuild)
+                if (cd "$GNURADIO4_HOME/src/gnuradio4-studio" && npm run build:web) \
+                   && [ -f "$GNURADIO4_HOME/src/gnuradio4-studio/dist/index.html" ]; then
+                    rm -rf "$GR4_PREFIX/share/gr4-studio-web"
+                    mkdir -p "$GR4_PREFIX/share"
+                    cp -r "$GNURADIO4_HOME/src/gnuradio4-studio/dist" "$GR4_PREFIX/share/gr4-studio-web"
+                else
+                    record_build_failure "build" "gr4-studio-web" "npm run build:web failed; browser Studio unavailable"
+                fi
+            fi
         fi
     else
-        # Pre-restructure monorepo (tags <= 4.0.0-RC2). Deps (vir-simd,
-        # magic_enum, ExprTk, ...) auto-resolve via system-or-fetch; SoapySDR
-        # from sdr_light is reused (system). Neither flag exists post-split.
-        goodecho "[+] GR4 pre-restructure layout ($GR4_TAG) -- classic configure, -j${GR4JOBS} ($(nproc) cores, ~$((MEMKB / 1024 / 1024)) GB RAM available)"
+        # Pre-restructure monorepo (tags <= 4.0.0-RC2, only via GR4_REF). Deps (vir-simd,
+        # magic_enum, ExprTk, ...) auto-resolve via system-or-fetch; no Studio in that layout.
+        GR4_STUDIO=0
         GR4_BUILD_DIR="$GNURADIO4_HOME/build"
-        if cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release $COMMON_ARGS \
-                -DGR_ENABLE_BLOCK_REGISTRY=ON -DENABLE_TESTING=OFF $PYARGS \
-           && cmake --build build -j"$GR4JOBS"; then
-            GR4_CONFIGURED=1
+        if grep -q '^add_subdirectory(bench)' CMakeLists.txt; then
+            sed -i 's/^add_subdirectory(bench).*/add_subdirectory(bench EXCLUDE_FROM_ALL) # RF-Swift: optional microbenchmarks/' CMakeLists.txt
+        fi
+        goodecho "[+] GR4 pre-restructure layout ($GR4_TAG) -- classic configure, -j${GR4JOBS}"
+        if cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+                -DWARNINGS_AS_ERRORS=OFF -DENABLE_EXAMPLES=OFF -DENABLE_TESTING=OFF \
+                -DGR_ENABLE_BLOCK_REGISTRY=ON -DCMAKE_INSTALL_PREFIX="$GR4_PREFIX" \
+           && cmake --build build -j"$GR4JOBS" \
+           && cmake --install build; then
+            GR4_BUILT=1
         fi
     fi
 
-    if [ "$GR4_CONFIGURED" -eq 1 ]; then
-        # The post documents no install step for the workspace -- activate.sh is
-        # the sanctioned entry point. Try installing anyway (harmless if the
-        # workspace exposes no install rules) so downstream find_package works.
-        cmake --install "$GR4_BUILD_DIR" --prefix "$GNURADIO4_HOME/install" 2>/dev/null || true
-        {
-            echo "# GNU Radio 4.0 (GR4) - parallel to the apt GNU Radio 3.10 (ref: $GR4_TAG)"
-            echo "export GNURADIO4_HOME=\"$GNURADIO4_HOME\""
-            echo "export GNURADIO4_VENV=\"$GR4_VENV\""
-            echo "export GNURADIO4_BUILD=\"$GR4_BUILD_DIR\""
-            if [ -f "$GR4_BUILD_DIR/activate.sh" ]; then
-                # Workspace activation wins; it sets PATH and the CMake package
-                # paths for every component in dependency order.
-                echo "[ -f \"$GR4_BUILD_DIR/activate.sh\" ] && . \"$GR4_BUILD_DIR/activate.sh\""
-            else
-                echo "export PATH=\"$GR4_BUILD_DIR/bin:\$PATH\""
-            fi
-            echo "export PATH=\"$GNURADIO4_HOME/install/bin:\$PATH\""
-            echo "export CMAKE_PREFIX_PATH=\"$GNURADIO4_HOME/install:\$CMAKE_PREFIX_PATH\""
-        } > /etc/profile.d/gnuradio4.sh
-        goodecho "[+] GNU Radio 4.0 built at $GNURADIO4_HOME (ref: $GR4_TAG; build: $GR4_BUILD_DIR; own Python venv: $GR4_VENV; env: /etc/profile.d/gnuradio4.sh). apt GNU Radio 3.10 remains the default."
-    else
-        record_build_failure "build" "gnuradio4" "GR4 source build failed (ref: $GR4_TAG, beta)"
+    if [ "$GR4_BUILT" -ne 1 ]; then
+        record_build_failure "build" "gnuradio4" "GR4 source build failed (ref: $GR4_TAG)"
+        cd /opt
+        return 0
     fi
+
+    gnuradio4_write_env "$GR4_PREFIX" "$GR4_TAG" "$GR4_STUDIO"
+
+    # Keep the installed prefix and the sources (a rebuild re-runs `cmake --preset full`);
+    # drop the multi-GB build trees, Studio's node_modules and npm's cache.
+    rm -rf "$GNURADIO4_HOME/build" "$GNURADIO4_HOME/src/gnuradio4-studio/node_modules"
+    npm cache clean --force > /dev/null 2>&1 || true
+
+    goodecho "[+] GNU Radio 4.0 installed at $GR4_PREFIX (ref: $GR4_TAG; Studio: $([ "$GR4_STUDIO" -eq 1 ] && echo yes || echo no)). apt GNU Radio 3.10 remains the default. See docs/gnuradio4.md."
     cd /opt
+}
+
+# Environment + launchers for the installed GR4 prefix (called by gnuradio4_soft_install).
+function gnuradio4_write_env() {
+    local prefix="$1" ref="$2" studio="$3" libdir py electron
+    libdir="$prefix/lib"
+    [ -d "$prefix/lib64" ] && [ ! -d "$prefix/lib/gnuradio-4" ] && libdir="$prefix/lib64"
+
+    # POSIX env file mirroring upstream's activate.sh, with paths resolved now so it also works
+    # in sh and zsh (no globs or bashisms at source time).
+    {
+        echo "# GNU Radio 4.0 (GR4) environment - ref $ref. apt GNU Radio 3.10 stays the default."
+        echo "export GNURADIO4_HOME=\"$GNURADIO4_HOME\""
+        echo "export GR4_PREFIX=\"$prefix\""
+        echo "export PATH=\"$prefix/bin\${PATH:+:\$PATH}\""
+        echo "export CMAKE_PREFIX_PATH=\"$prefix\${CMAKE_PREFIX_PATH:+:\$CMAKE_PREFIX_PATH}\""
+        echo "export PKG_CONFIG_PATH=\"$libdir/pkgconfig:$prefix/share/pkgconfig\${PKG_CONFIG_PATH:+:\$PKG_CONFIG_PATH}\""
+        echo "export LD_LIBRARY_PATH=\"$libdir\${LD_LIBRARY_PATH:+:\$LD_LIBRARY_PATH}\""
+        echo "export GNURADIO4_PLUGIN_DIRECTORIES=\"$libdir/gnuradio-4/plugins:$libdir\${GNURADIO4_PLUGIN_DIRECTORIES:+:\$GNURADIO4_PLUGIN_DIRECTORIES}\""
+        for py in "$libdir"/python*/site-packages "$libdir"/python*/dist-packages; do
+            [ -d "$py" ] && echo "export PYTHONPATH=\"$py\${PYTHONPATH:+:\$PYTHONPATH}\""
+        done
+    } > "$GNURADIO4_HOME/env.sh"
+
+    if [ "$studio" -eq 1 ]; then
+        # Desktop Studio in a container: Electron runs as root, which needs --no-sandbox, and the
+        # upstream launcher refuses to start when the *host* kernel restricts unprivileged user
+        # namespaces (Ubuntu 24.04+ default) unless an AppArmor profile was installed on the host.
+        # Pointing GR4_STUDIO_ELECTRON_BIN at a no-sandbox shim covers both.
+        electron=$(find "$prefix/libexec/gr4-studio/electron" -maxdepth 1 -type f -name electron 2>/dev/null | head -n1 || true)
+        if [ -n "$electron" ]; then
+            mkdir -p "$GNURADIO4_HOME/libexec"
+            cat > "$GNURADIO4_HOME/libexec/electron-no-sandbox" << EOF
+#!/bin/sh
+# RF Swift: bundled Electron for GR4 Studio, without the Chromium sandbox (root in a container).
+exec "$electron" --no-sandbox "\$@"
+EOF
+            chmod 0755 "$GNURADIO4_HOME/libexec/electron-no-sandbox"
+            echo "export GR4_STUDIO_ELECTRON_BIN=\"$GNURADIO4_HOME/libexec/electron-no-sandbox\"" >> "$GNURADIO4_HOME/env.sh"
+        else
+            record_build_failure "build" "gr4-studio" "bundled Electron runtime not found under $prefix/libexec/gr4-studio"
+        fi
+
+        # Desktop Studio from any shell (loads the GR4 env first)
+        cat > /usr/local/bin/gr4-studio << EOF
+#!/bin/sh
+# GNU Radio 4 Studio, desktop (Electron): needs a display (X11/Wayland forwarding).
+# Remote backend: gr4-studio --remote=http://host:8080   (see docs/gnuradio4.md)
+. "$GNURADIO4_HOME/env.sh"
+exec "$prefix/bin/gr4-studio" "\$@"
+EOF
+        chmod 0755 /usr/local/bin/gr4-studio
+
+        # Browser Studio: nginx serves the web bundle and proxies /api to gr4cp_server -- the
+        # layout of upstream's ghcr.io/gnuradio/gnuradio4-studio image, with two changes for RF
+        # Swift's default host networking: the backend uses GR4CP_PORT=0 (a fixed port would make
+        # gr4cp_server listen on 0.0.0.0; port 0 binds a free 127.0.0.1 port and writes it to
+        # GR4CP_PORT_FILE), and nginx binds 127.0.0.1 unless GR4_STUDIO_WEB_BIND says otherwise.
+        if [ -f "$prefix/share/gr4-studio-web/index.html" ]; then
+            cat > /usr/local/bin/gr4-studio-web << EOF
+#!/bin/sh
+# GNU Radio 4 Studio in the browser: http://localhost:\${GR4_STUDIO_WEB_PORT:-8080}
+# Binds 127.0.0.1 by default (RF Swift containers use host networking, so this is reachable
+# from the host's browser). In a bridge/NAT container, set GR4_STUDIO_WEB_BIND=0.0.0.0 and
+# publish the port (-p 127.0.0.1:8080:8080). The gr4cp_server backend always stays on a
+# random loopback port behind nginx. Studio can start flowgraphs, including SDR transmit:
+# do not expose it beyond machines you trust.
+set -eu
+. "$GNURADIO4_HOME/env.sh"
+WEB_PORT="\${GR4_STUDIO_WEB_PORT:-8080}"
+WEB_BIND="\${GR4_STUDIO_WEB_BIND:-127.0.0.1}"
+run=\$(mktemp -d /tmp/gr4-studio-web.XXXXXX)
+mkdir -p "\$run/client_body" "\$run/fastcgi" "\$run/proxy" "\$run/scgi" "\$run/uwsgi"
+backend=""
+nginx_pid=""
+cleanup() {
+  [ -n "\$nginx_pid" ] && kill "\$nginx_pid" 2>/dev/null || true
+  [ -n "\$backend" ] && kill "\$backend" 2>/dev/null || true
+  rm -rf "\$run"
+}
+trap cleanup EXIT INT TERM
+GR4CP_PORT=0 GR4CP_PORT_FILE="\$run/backend.port" gr4cp_server &
+backend=\$!
+n=0
+until [ -s "\$run/backend.port" ] && curl -fsS -o /dev/null "http://127.0.0.1:\$(cat "\$run/backend.port")/healthz"; do
+  kill -0 "\$backend" 2>/dev/null || { echo "gr4cp_server exited before becoming ready" >&2; exit 1; }
+  n=\$((n + 1)); [ "\$n" -ge 30 ] && { echo "gr4cp_server not ready after 30 s" >&2; exit 1; }
+  sleep 1
+done
+BACKEND_PORT=\$(cat "\$run/backend.port")
+cat > "\$run/nginx.conf" << NGINX
+worker_processes auto;
+pid \$run/nginx.pid;
+error_log /dev/stderr info;
+events { worker_connections 1024; }
+http {
+  include /etc/nginx/mime.types;
+  default_type application/octet-stream;
+  access_log /dev/stdout;
+  sendfile on;
+  client_body_temp_path \$run/client_body;
+  fastcgi_temp_path \$run/fastcgi;
+  proxy_temp_path \$run/proxy;
+  scgi_temp_path \$run/scgi;
+  uwsgi_temp_path \$run/uwsgi;
+  map \\\$http_upgrade \\\$connection_upgrade { default upgrade; '' close; }
+  server {
+    listen \$WEB_BIND:\$WEB_PORT;
+    server_name _;
+    root $prefix/share/gr4-studio-web;
+    index index.html;
+    location = /api { proxy_pass http://127.0.0.1:\$BACKEND_PORT/; }
+    location /api/ {
+      proxy_pass http://127.0.0.1:\$BACKEND_PORT/;
+      proxy_http_version 1.1;
+      proxy_set_header Host \\\$host;
+      proxy_set_header X-Real-IP \\\$remote_addr;
+      proxy_set_header X-Forwarded-For \\\$proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto \\\$scheme;
+      proxy_set_header Upgrade \\\$http_upgrade;
+      proxy_set_header Connection \\\$connection_upgrade;
+    }
+    location / { try_files \\\$uri \\\$uri/ /index.html; }
+  }
+}
+NGINX
+echo "GR4 Studio: http://\$WEB_BIND:\$WEB_PORT  (backend gr4cp_server on 127.0.0.1:\$BACKEND_PORT)"
+nginx -c "\$run/nginx.conf" -g 'daemon off;' &
+nginx_pid=\$!
+wait "\$nginx_pid"
+EOF
+            chmod 0755 /usr/local/bin/gr4-studio-web
+        fi
+    fi
+
+    echo ". \"$GNURADIO4_HOME/env.sh\"" > /etc/profile.d/gnuradio4.sh
 }
 
 function rfcat_soft_install() {

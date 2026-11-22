@@ -21,6 +21,19 @@
   new `cloudflare` (security-audit), `strix` and `artex` skill packs in
   `llm-skills`, enabled by default; NodeTerm Server Edition (`nodeterm-server`,
   browser terminal/agent canvas on `:8443`), built from source (amd64/arm64).
+- `sdr_gnuradio4`: GR4 Studio, built in the GR4 `full` preset with the control plane (amd64/arm64).
+  `gr4-studio-web` serves the browser app on `127.0.0.1:8080` (`GR4_STUDIO_WEB_BIND` /
+  `GR4_STUDIO_WEB_PORT` to change), with `gr4cp_server` kept on a loopback port. `gr4-studio`
+  starts the desktop Electron app, made to run as root in a container (no-sandbox shim, which
+  bypasses the host AppArmor setup step). Also the ZeroMQ, SDR (SoapySDR) and Audio (RtAudio)
+  block families. See `docs/gnuradio4.md`.
+- `llm`: Vulnhuntr (Protect AI), LLM-driven vulnerability discovery in Python projects, from
+  `protectai/vulnhuntr` latest main. It is not taken from the PyPI project of the same name,
+  which is a third-party fork. The last reviewed commit is recorded as
+  `VULNHUNTR_REVIEWED_COMMIT`, and a build on a newer commit adds a `review` entry to the build
+  report. Python 3.10 via uv, the missing `requests` dependency added, and the wrapper defaults
+  `ANTHROPIC_MODEL` to `claude-opus-4-5`. Vulnhuntr pre-fills Claude's reply, which current
+  Claude models reject, and its own default model is retired.
 - `llm` (opt-in): ARTEMIS (Stanford Trinity) multi-agent red teaming as `artemis-redteam`,
   pinned to a reviewed commit (upstream has no releases). Its Codex fork is built from source,
   kept off `PATH` and given its own `CODEX_HOME`, so it never shadows or reconfigures the real
@@ -72,6 +85,18 @@
 
 ### Fixed
 
+- `sdr_gnuradio4`: the GNU Radio 4 build is aligned with 4.0.0-RC3, the newest tag. RC3 turned
+  `gnuradio/gnuradio4` into a super-repo with renamed CMake options. The old flags
+  (`WARNINGS_AS_ERRORS`, `ENABLE_TESTING`, `ENABLE_EXAMPLES`) were ignored, so the build ran
+  with warnings-as-errors and the full test suite on. The old dependency list also lacked
+  `cpp-httplib`, which `gnuradio4-core` requires, so configure stopped there. The installer now
+  follows upstream's own Ubuntu 26.04 recipe (dependency list and `full` preset, with Release,
+  no tests and warnings not fatal), requires CMake ≥ 3.27, installs to `/opt/gnuradio4/install`
+  with a POSIX `env.sh`, removes the build tree afterwards, and runs upstream's `oot-smoke` and
+  `control-plane-smoke` checks against the installed result.
+
+- Fluxion installer: it announced itself as "Installing eaphammer" and passed a misspelled
+  label (`fluxius_soft_install`) to `gitinstall`, so failures were reported under that name.
 - ipsw installer: version was pinned as `v3.1.745` but the URL template already prepends
   `v`, producing a broken `.../vv3.1.745/ipsw_v3.1.745_...` path; the pin is now the bare
   version (`3.1.749`), matching the real release asset names.

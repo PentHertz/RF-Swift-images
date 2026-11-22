@@ -238,6 +238,55 @@ function strix_soft_install() {
     return 0
 }
 
+# Vulnhuntr (Protect AI): LLM-driven discovery of remotely exploitable vulnerabilities in Python
+# projects (call-chain analysis from user input to sinks). Installed from protectai/vulnhuntr
+# itself: the PyPI project named "vulnhuntr" is a third-party fork (github.com/diaz3618/vulnhuntr),
+# not Protect AI's. Builds take the latest commit of upstream main. Upstream strictly requires
+# Python 3.10 (Jedi bugs), which uv provides.
+# Review tracking: VULNHUNTR_REVIEWED_COMMIT is the last commit that was statically reviewed (no
+# install hooks, exfiltration, obfuscation or credential access). A build on a newer commit says so
+# in the build report (category "review") so the new code can be reviewed and this note updated.
+VULNHUNTR_REVIEWED_COMMIT="ead88c5adba4279dae5c56d65124c530a9a1c5ae"   # reviewed 2026-11-22 (main, 2025-02-06)
+
+function vulnhuntr_soft_install() {
+    goodecho "[+] Installing Vulnhuntr (Protect AI), latest main"
+    if ! command -v uv > /dev/null; then
+        record_build_failure "toolchain" "vulnhuntr" "uv unavailable"
+        return 0
+    fi
+    local head
+    head=$(git ls-remote https://github.com/protectai/vulnhuntr.git HEAD 2>/dev/null | awk '{print $1}' || true)
+    if [ -n "$head" ] && [ "$head" != "$VULNHUNTR_REVIEWED_COMMIT" ]; then
+        goodecho "[!] Vulnhuntr main is at ${head:0:12}, newer than the reviewed commit ${VULNHUNTR_REVIEWED_COMMIT:0:12}"
+        record_build_failure "review" "vulnhuntr" "built main at ${head:0:12}; last reviewed commit is ${VULNHUNTR_REVIEWED_COMMIT:0:12}" || true
+    fi
+    # Private bin dir: /root/.local/bin comes first on PATH in this image, so a uv entrypoint
+    # there would shadow the wrapper below (and its default model). --with requests: LLMs.py
+    # imports requests but pyproject.toml does not declare it (upstream's Docker build gets it
+    # from requirements.txt), so a plain git install fails at import time.
+    if ! UV_TOOL_BIN_DIR=/opt/vulnhuntr/bin installfromnet uv tool install --force --python 3.10 \
+            --with requests "git+https://github.com/protectai/vulnhuntr.git"; then
+        record_build_failure "pip" "vulnhuntr" "uv tool install failed"
+        return 0
+    fi
+    if [ ! -x /opt/vulnhuntr/bin/vulnhuntr ]; then
+        record_build_failure "pip" "vulnhuntr" "entrypoint missing after install"
+        return 0
+    fi
+    cat > /usr/local/bin/vulnhuntr << 'EOF'
+#!/bin/sh
+# Vulnhuntr (Protect AI): authorized targets only. Keys: ANTHROPIC_API_KEY or OPENAI_API_KEY.
+# Its Claude mode pre-fills the assistant turn, which current Claude models (4.6 and later)
+# reject with a 400, and its own default model (claude-3-5-sonnet-latest) is retired. Default
+# to Claude Opus 4.5, the newest model that still accepts prefill; override with ANTHROPIC_MODEL.
+export ANTHROPIC_MODEL="${ANTHROPIC_MODEL:-claude-opus-4-5}"
+exec /opt/vulnhuntr/bin/vulnhuntr "$@"
+EOF
+    chmod +x /usr/local/bin/vulnhuntr
+    vulnhuntr --help > /dev/null 2>&1 || record_build_failure "other" "vulnhuntr" "vulnhuntr --help failed after install"
+    return 0
+}
+
 # ARTEMIS (Stanford Trinity): autonomous multi-agent red teaming. A Python supervisor runs
 # parallel sub-agents built on its own fork of the Codex CLI. Installed as `artemis-redteam`
 # so it is not confused with AresValley's Artemis signal-identification app in the SDR images

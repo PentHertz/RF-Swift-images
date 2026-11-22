@@ -9,3 +9,5 @@ This repository hosts all Dockerfiles to build different types of images as long
 See [docs/RELEASING.md](docs/RELEASING.md) for how images are built, updated and released (CI workflows and `release.sh`).
 
 See [docs/maintaining-tool-versions.md](docs/maintaining-tool-versions.md) for the hand-pinned tool versions and the `scripts/maintenance/check_tool_versions.py` helper that checks/bumps them.
+
+See [docs/gnuradio4.md](docs/gnuradio4.md) for running GNU Radio 4 and GR4 Studio in the `sdr_gnuradio4` image.
