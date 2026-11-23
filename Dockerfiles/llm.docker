@@ -46,6 +46,13 @@ RUN ./entrypoint.sh strix_soft_install && \
 # default (slow Rust build of its Codex fork). Uncomment, or install in a running container:
 #   cd /root/scripts && ./entrypoint.sh artemis_redteam_soft_install
 #RUN ./entrypoint.sh artemis_redteam_soft_install
+# Opt-in: LangGraph, for writing your own agents (venv /opt/langgraph; `langgraph`, `langgraph-python`).
+# Not built by default. Uncomment, or install in a running container:
+#   cd /root/scripts && ./entrypoint.sh langgraph_soft_install
+# Its CLI analytics, dev-server version check and LangSmith tracing stay off; the ENV is harmless
+# when LangGraph is not installed. Set LANGSMITH_TRACING=true to opt in to tracing.
+ENV LANGGRAPH_CLI_NO_ANALYTICS=1 LANGGRAPH_NO_VERSION_CHECK=true LANGSMITH_TRACING=false
+#RUN ./entrypoint.sh langgraph_soft_install
 
 # Skill packs (Trail of Bits, farmage, Floorplan, cybersecurity, Cloudflare, Strix, ARTEX) for every agent, via llm-skills
 RUN ./entrypoint.sh llm_skills_install

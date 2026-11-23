@@ -116,7 +116,7 @@ describe how safe it is to bump that fallback.
 | arduino-ide | 2.3.11 | `hardware.sh` | arduino/arduino-ide |
 | imhex | 1.38.1 | `reverse_software.sh` | WerWolv/ImHex |
 | whispercpp | 1.9.5 | `llm_software.sh` | ggml-org/whisper.cpp |
-| cyberether | 1.19.2 | `sdr_softwares.sh` | luigifcruz/CyberEther |
+| cyberether | 1.20.1 | `sdr_softwares.sh` | luigifcruz/CyberEther |
 | qflipper | 1.3.3 | `rf_tools.sh` | flipperdevices/qFlipper (x86_64 AppImage only) |
 
 ### needs-care
@@ -128,10 +128,10 @@ describe how safe it is to bump that fallback.
 | node-llm | 24.22.3 | `llm_software.sh` | tracks the **v24 LTS** line on purpose; update `LLM_NODE_SHA256_*` |
 | craft | 0.6.1 | `llm_software.sh` | update `CRAFT_SHA256_X86_64` / `_AARCH64` / `_RISCV64` |
 | ghidra | 12.2 | `reverse_software.sh` | `ghidra_date` must match the release build date |
-| die | 3.21 | `reverse_software.sh` | asset name encodes Ubuntu codename; 4.0.0 has no 26.04 build |
+| die | 4.0.0 | `reverse_software.sh` | since 4.0 the `.deb` is named by Ubuntu codename; uses `noble` until a `resolute` build ships. 4.0.0 regresses against 3.21 (see the script comment) |
 | sdrangel | 8.2.0 | `sdr_softwares.sh` | version is in the tag **and** the `.deb` file name |
 | go | 1.27.4 | `corebuild.sh` | toolchain; bump deliberately, rebuild dependents |
-| llvm | 17 | `sast_software.sh` | major-only via apt.llvm.org; verify resolute packaging + dependents |
+| llvm | 23 | `sast_software.sh` | major-only via apt.llvm.org; verify resolute packaging + dependents |
 | sniffle-fw | 1.11.0 | `rf_tools.sh` | firmware; confirm the per-board `.hex` asset set is unchanged |
 | hostapd | 2.11 | `rf_tools.sh` | needs a matching `hostapd-<ver>-wpe.patch` in aircrack-ng (2.12 has none yet) |
 | dsview | 1.3.4 | `hardware.sh` | **PentHertz fork**; cut a fork release before bumping |

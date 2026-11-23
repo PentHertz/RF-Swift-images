@@ -322,6 +322,49 @@ EOF
     return 0
 }
 
+# LangGraph (LangChain, MIT): a library for writing your own stateful agents as graphs of LLM calls
+# and tools. OPT-IN: llm.docker leaves it commented. Install in a running container with
+#   cd /root/scripts && ./entrypoint.sh langgraph_soft_install
+# Own venv in /opt/langgraph with the Anthropic and OpenAI integrations, the MCP adapters (to use this
+# image's MCP servers as tools) and the `langgraph` CLI with its local dev server. Three calls home
+# are on upstream and off here: the CLI's usage analytics, the dev server's version check, and
+# LangSmith tracing (which uploads prompts and tool output once a LangSmith key is set). llm.docker
+# sets the switches, and the wrappers set them again unless they are already set.
+function langgraph_soft_install() {
+    goodecho "[+] Installing LangGraph"
+    if ! command -v uv > /dev/null; then
+        record_build_failure "toolchain" "langgraph" "uv unavailable"
+        return 0
+    fi
+    rm -rf /opt/langgraph
+    if ! uv venv --python 3.14 /opt/langgraph \
+        || ! installfromnet uv pip install --no-cache --python /opt/langgraph/bin/python \
+            langgraph "langgraph-cli[inmem]" langchain-anthropic langchain-openai langchain-mcp-adapters; then
+        record_build_failure "pip" "langgraph" "install failed"
+        return 0
+    fi
+    local name target
+    for name in langgraph langgraph-python; do
+        target=/opt/langgraph/bin/langgraph
+        [ "$name" = "langgraph-python" ] && target=/opt/langgraph/bin/python
+        cat > "/usr/local/bin/$name" << EOF
+#!/bin/sh
+# LangGraph (opt-in install, /opt/langgraph). Nothing goes to LangChain unless you opt in:
+# set LANGSMITH_TRACING=true (with a LangSmith key) for tracing, LANGGRAPH_CLI_NO_ANALYTICS=0 for CLI analytics.
+: "\${LANGGRAPH_CLI_NO_ANALYTICS:=1}"
+: "\${LANGGRAPH_NO_VERSION_CHECK:=true}"
+: "\${LANGSMITH_TRACING:=false}"
+export LANGGRAPH_CLI_NO_ANALYTICS LANGGRAPH_NO_VERSION_CHECK LANGSMITH_TRACING
+exec $target "\$@"
+EOF
+        chmod 755 "/usr/local/bin/$name"
+    done
+    langgraph-python -c 'import langgraph, langchain_anthropic, langchain_openai, langchain_mcp_adapters, langgraph_api' \
+        && langgraph --version \
+        || record_build_failure "other" "langgraph" "import or CLI check failed after install"
+    return 0
+}
+
 # ARTEMIS (Stanford Trinity): autonomous multi-agent red teaming. A Python supervisor runs
 # parallel sub-agents built on its own fork of the Codex CLI. Installed as `artemis-redteam`
 # so it is not confused with AresValley's Artemis signal-identification app in the SDR images

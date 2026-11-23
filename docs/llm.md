@@ -21,6 +21,7 @@ Coding agents, shared skill packs, agent-side reverse-engineering tools, local s
 | Vulnhuntr (Protect AI) | `vulnhuntr` | `protectai/vulnhuntr`, latest main (uv tool, Python 3.10) | API keys from the environment |
 | CodeGraph | `codegraph` (MCP server `codegraph serve --mcp`) | npm `@colbymchenry/codegraph` | per project: `.codegraph/` |
 | ARTEMIS (multi-agent red teaming, **opt-in**) | `artemis-redteam` | Stanford-Trinity/ARTEMIS @ reviewed commit (Codex fork from source, uv Python 3.12) | `~/.artemis-redteam/` |
+| LangGraph (agent framework, **opt-in**) | `langgraph`, `langgraph-python` | PyPI `langgraph`, `langgraph-cli[inmem]`, `langchain-anthropic`, `langchain-openai`, `langchain-mcp-adapters` (venv `/opt/langgraph`) | per project |
 | Semgrep | `semgrep` | PyPI `semgrep` | `~/.semgrep/` |
 
 Node.js 24 LTS is in `/usr/local` (Ubuntu's 22.22 is too old for REA).
@@ -235,6 +236,104 @@ Things to know:
 - `test_files/` contains upstream's CTF challenge samples. Some are deliberately malicious
   scripts for the agent to *analyze* (one adds a cron job if run). Nothing executes them at
   install. Don't run them by hand outside a throwaway container.
+
+## LangGraph (opt-in)
+
+[LangGraph](https://github.com/langchain-ai/langgraph) (LangChain, MIT) is a library for writing
+**your own** agents. You describe a workflow as a graph of LLM calls and tools, with saved state
+and points where a human approves the next step. Unlike the agents above, it does nothing until
+you write code with it, so it is not built by default. Install it in a running container:
+
+```sh
+cd /root/scripts && ./entrypoint.sh langgraph_soft_install    # about 190 MB, /opt/langgraph
+```
+
+That gives you `langgraph-python` (the environment's Python) and `langgraph` (the CLI with a local
+API server). The environment has `langgraph`, `langchain-anthropic`, `langchain-openai` and
+`langchain-mcp-adapters`, so a graph can use the MCP servers this image ships as tools.
+
+**Nothing goes to LangChain by default.** Upstream turns on three calls home; this image turns
+them off in `llm.docker`, and the wrappers set the same values when they are not already set:
+
+| What | Upstream default | Here | To opt in |
+|------|------------------|------|-----------|
+| CLI usage analytics (every `langgraph` command, to LangChain's Supabase) | on | `LANGGRAPH_CLI_NO_ANALYTICS=1` | `LANGGRAPH_CLI_NO_ANALYTICS=0` |
+| Dev server version check | on | `LANGGRAPH_NO_VERSION_CHECK=true` | unset it |
+| LangSmith tracing (uploads every prompt and tool result) | on once a LangSmith key is set | `LANGSMITH_TRACING=false` | `LANGSMITH_TRACING=true` plus `LANGSMITH_API_KEY` |
+
+A minimal agent with one local tool. Claude calls `file_type` until it can answer:
+
+```python
+# triage.py: a minimal LangGraph agent with one local tool.
+# Run with: langgraph-python triage.py   (needs ANTHROPIC_API_KEY)
+import subprocess
+
+from langchain_anthropic import ChatAnthropic
+from langchain_core.tools import tool
+from langgraph.graph import START, MessagesState, StateGraph
+from langgraph.prebuilt import ToolNode, tools_condition
+
+
+@tool
+def file_type(path: str) -> str:
+    """Identify a file's type with the `file` command (following symlinks)."""
+    return subprocess.run(["file", "-bL", path], capture_output=True, text=True).stdout
+
+
+tools = [file_type]
+model = ChatAnthropic(model="claude-opus-5-5").bind_tools(tools)
+
+
+def agent(state: MessagesState):
+    return {"messages": [model.invoke(state["messages"])]}
+
+
+graph = StateGraph(MessagesState)
+graph.add_node("agent", agent)
+graph.add_node("tools", ToolNode(tools))
+graph.add_edge(START, "agent")
+graph.add_conditional_edges("agent", tools_condition)  # a tool call goes to "tools", otherwise end
+graph.add_edge("tools", "agent")
+app = graph.compile()
+
+if __name__ == "__main__":
+    out = app.invoke({"messages": [("user", "What kind of file is /bin/ls?")]})
+    print(out["messages"][-1].content)
+```
+
+```sh
+export ANTHROPIC_API_KEY=...
+langgraph-python triage.py
+```
+
+Use the image's MCP servers as tools. For example, CodeGraph, from a project you indexed with
+`codegraph init`:
+
+```python
+import asyncio
+from langchain_mcp_adapters.client import MultiServerMCPClient
+
+async def main():
+    client = MultiServerMCPClient({
+        "codegraph": {"command": "codegraph", "args": ["serve", "--mcp"], "transport": "stdio"},
+    })
+    tools = await client.get_tools()   # LangChain tools: pass them to bind_tools() and ToolNode()
+    print([t.name for t in tools])
+
+asyncio.run(main())
+```
+
+**Local API server.** Put a `langgraph.json` next to your graph (the `__main__` guard above keeps the
+server from running the example when it loads the file), for example
+`{"dependencies": ["."], "graphs": {"triage": "./triage.py:app"}}`, then:
+
+```sh
+langgraph dev --no-browser          # API on http://127.0.0.1:2024 (POST /runs/wait, /threads, ...)
+```
+
+The "Studio UI" link it prints is a page on smith.langchain.com that your browser loads and points
+at the local server. The page comes from LangChain and your graph's data passes through it in the
+browser. Leave it closed and use the REST API if that matters for the engagement.
 
 ## OpenCode
 

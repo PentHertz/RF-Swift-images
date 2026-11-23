@@ -80,7 +80,7 @@ MANIFEST = {
                     "note": "ghidra_date must match the release's build date"},
     "die":         {"file": "reverse_software.sh", "pat": r'DIE_VERSION="(?P<ver>[\d.]+)"',
                     "source": ("github", "horsicq/DIE-engine"), "cls": "needs-care",
-                    "note": "asset name encodes the Ubuntu codename; 4.0.0 has no 26.04/Ubuntu build"},
+                    "note": "since 4.0 the .deb is named by Ubuntu codename; noble is used until a resolute build ships"},
     "sdrangel":    {"file": "sdr_softwares.sh", "pat": r'SDRANGEL_VERSION="(?P<ver>[\d.]+)"',
                     "source": ("github", "f4exb/sdrangel"), "cls": "needs-care",
                     "note": "version appears in the tag AND the .deb file name; v7->v8 changed packaging"},
@@ -91,7 +91,7 @@ MANIFEST = {
                     "source": ("go_dl",), "cls": "needs-care",
                     "note": "toolchain; bump deliberately and rebuild dependents"},
     "llvm":        {"file": "sast_software.sh", "pat": r'LLVM_VERSION=(?P<ver>\d+)',
-                    "source": ("github", "llvm/llvm-project"), "cls": "needs-care",
+                    "source": ("github", "llvm/llvm-project"), "cls": "needs-care", "major_only": True,
                     "note": "major-only pin via apt.llvm.org; verify resolute packaging + dependents"},
     "sniffle-fw":  {"file": "rf_tools.sh", "pat": r'SNIFFLE_FW_VERSION="(?P<ver>[\d.]+)"',
                     "source": ("github", "nccgroup/Sniffle"), "cls": "needs-care",
@@ -197,13 +197,15 @@ def read_current(entry):
     return (m.group("ver") if m else None), text, path
 
 
-def status_for(cur, latest):
+def status_for(cur, latest, major_only=False):
     if latest is None:
         return "manual"
     if isinstance(latest, str) and latest.startswith("ERR:"):
         return latest
     if cur is None:
         return "pin-not-found"
+    if major_only:  # the pin is a major version (e.g. LLVM 23); a newer point release is still current
+        latest = latest.split(".")[0]
     if vkey(cur) == vkey(latest):
         return "up-to-date"
     if vkey(cur) < vkey(latest):
@@ -218,7 +220,7 @@ def do_check(names, as_json):
         cur, _, _ = read_current(e)
         latest = fetch_latest(e["source"])
         rows.append({"tool": name, "current": cur, "latest": latest,
-                     "status": status_for(cur, latest), "class": e["cls"],
+                     "status": status_for(cur, latest, e.get("major_only", False)), "class": e["cls"],
                      "build": "latest" if name in FLOATING else "pinned",
                      "file": e["file"], "note": e.get("note", "")})
     if as_json:

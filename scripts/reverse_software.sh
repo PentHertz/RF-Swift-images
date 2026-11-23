@@ -634,3 +634,56 @@ function sage_soft_install() {
         || record_build_failure "other" "sage" "sage -c smoke test failed"
     return 0
 }
+
+# OFRAK (Red Balloon Security): unpack, analyse, modify and repack firmware, with a web GUI.
+# OPT-IN, never pre-installed: the free OFRAK Community License covers academic and personal
+# non-commercial use only (work use needs an OFRAK Pro licence) and gives no right to redistribute
+# OFRAK, so published images must not carry it. Installing OFRAK counts as accepting Red Balloon's
+# licence (https://ofrak.com/license), so the installer only runs when you say so:
+#   cd /root/scripts && OFRAK_ACCEPT_LICENSE=yes ./entrypoint.sh ofrak_soft_install
+# Then register before the first analysis: `ofrak license --community` (asks you to type "I agree")
+# or `ofrak license -l <OFRAK Pro licence file>`. The check is local: a signed license.json.
+# PyPI only has Linux wheels for x86_64 and Python 3.9 to 3.13: amd64 only, Python 3.13 through uv.
+# UEFIExtract and yaffs2utils (built from old sources upstream) are not included.
+function ofrak_soft_install() {
+    goodecho "[+] Installing OFRAK (Red Balloon Security)"
+    if [ "$(uname -m)" != "x86_64" ]; then
+        criticalecho-noexit "[-] OFRAK: PyPI has no Linux build for $(uname -m), skipping"
+        return 0
+    fi
+    if [ "${OFRAK_ACCEPT_LICENSE:-}" != "yes" ]; then
+        criticalecho-noexit "[!] OFRAK is licensed by Red Balloon Security. The free Community License covers academic and personal non-commercial use only; work use needs an OFRAK Pro licence. Installing OFRAK means accepting https://ofrak.com/license. To install: OFRAK_ACCEPT_LICENSE=yes ./entrypoint.sh ofrak_soft_install"
+        return 0
+    fi
+    if ! command -v uv > /dev/null; then
+        record_build_failure "toolchain" "ofrak" "uv unavailable"
+        return 0
+    fi
+    # External tools its unpackers and packers call (`ofrak deps` lists them)
+    install_dependencies "build-essential liblzo2-dev libmagic1t64 7zip aapt apktool binutils cpio e2fsprogs genisoimage lzop mtd-utils pigz squashfs-tools unar unzip util-linux-extra zip zstd"
+    rm -rf /opt/ofrak
+    # binwalk 2.3.4 is the Python module OFRAK's binwalk analyzer imports (requirements-non-pypi.txt)
+    if ! uv venv --python 3.13 /opt/ofrak \
+        || ! installfromnet uv pip install --no-cache --python /opt/ofrak/bin/python \
+            ofrak ofrak-capstone ofrak-angr python-lzo \
+            "binwalk @ git+https://github.com/ReFirmLabs/binwalk.git@v2.3.4"; then
+        record_build_failure "pip" "ofrak" "install failed"
+        return 0
+    fi
+    local name target
+    for name in ofrak ofrak-python; do
+        target=/opt/ofrak/bin/ofrak
+        [ "$name" = "ofrak-python" ] && target=/opt/ofrak/bin/python
+        cat > "/usr/local/bin/$name" << EOF
+#!/bin/sh
+# OFRAK (opt-in install, /opt/ofrak). Its own tools (binwalk 2.3.4, jefferson) come first on PATH,
+# for OFRAK only. Register a licence first: ofrak license --community, or ofrak license -l <file>.
+PATH="/opt/ofrak/bin:\$PATH" exec $target "\$@"
+EOF
+        chmod 755 "/usr/local/bin/$name"
+    done
+    # Lists missing external tools; needs no licence (that is checked when an analysis starts)
+    ofrak deps --missing-only || record_build_failure "other" "ofrak" "ofrak deps failed after install"
+    goodecho "[i] OFRAK installed. Before the first analysis, register a licence: ofrak license --community (academic or personal non-commercial use) or ofrak license -l <OFRAK Pro licence file>"
+    return 0
+}

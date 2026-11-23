@@ -34,6 +34,10 @@
 - `reversing`: crypto-analysis tools. bkcrack (ZipCrypto known-plaintext attack) is built from the
   newest release's source on every architecture, with `bkcrack-inflate` / `bkcrack-deflate` helpers.
   fplll and fpylll (LLL / BKZ lattice reduction) come from Ubuntu's packages.
+- `reversing`: opt-in OFRAK (`ofrak_soft_install`, amd64 only, Python 3.13 via uv, with the capstone and angr
+  backends and the unpackers' tools). It is never pre-installed: the OFRAK Community License covers academic
+  and personal non-commercial use and does not allow redistributing it. The installer only runs with
+  `OFRAK_ACCEPT_LICENSE=yes`, and each user then registers their own licence with `ofrak license`.
 - `reversing`: opt-in SageMath through passagemath (`sage_soft_install`, amd64/arm64). It is about
   1.3 GB of wheels and 4 to 5 GB installed, so its RUN line is commented. Install it in a running
   container with `cd /root/scripts && ./entrypoint.sh sage_soft_install`.
@@ -46,6 +50,10 @@
   U220 PAL/NTSC test transmitter: `u220-fpv-tx`, which transmits only with `--transmit`, plus
   `u220-fpv-gui` and `u220-fpv-generate`. Host tools track master against a reviewed commit, and
   the boot files are listed in `check_tool_versions.py`.
+- `llm`: opt-in LangGraph (`langgraph_soft_install`), for writing your own agents. It installs to a
+  venv in `/opt/langgraph` with the Anthropic, OpenAI and MCP integrations and the `langgraph` CLI with
+  its local dev server, and provides the `langgraph` and `langgraph-python` commands. Its CLI analytics,
+  dev-server version check and LangSmith tracing are turned off in `llm.docker` and in the wrappers.
 - `llm`: opt-in skill packs `ponytail` (6 skills: write only what is needed, plus review and audit)
   and `caveman` (16 voice and workflow skills). Enable them with `llm-skills enable <pack>`.
   caveman's CLI and proxy are not installed, and its Caveman Cloud / gateway skills are excluded
