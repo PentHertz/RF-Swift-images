@@ -27,6 +27,25 @@
   starts the desktop Electron app, made to run as root in a container (no-sandbox shim, which
   bypasses the host AppArmor setup step). Also the ZeroMQ, SDR (SoapySDR) and Audio (libsoundio)
   block families. See `docs/gnuradio4.md`.
+- `sdr_light`: Harogic VNA Studio 1.0.8 for Harogic vector network analysers, with `vnastudio`
+  (GUI) and `vnaserver` (headless VNAServer: `--no-gui`, `--list-devices-json`), the udev rules
+  for its USB devices, and the amd64 and arm64 portable bundles checked against their published
+  SHA-256. It is skipped on riscv64, which has no build.
+- `sdr_hacks`: fpv_capture (black-pigeon), the analog FPV scanner firmware for the AntSDR E200 and
+  E310. The image stages the v0.1 boot files for the SD card under `/rftools/sdr/fpv_capture/bootfiles/`
+  (checked against SHA-256) and installs `fpv-receive`, the host frame recorder. It also builds the
+  U220 PAL/NTSC test transmitter: `u220-fpv-tx`, which transmits only with `--transmit`, plus
+  `u220-fpv-gui` and `u220-fpv-generate`. Host tools track master against a reviewed commit, and
+  the boot files are listed in `check_tool_versions.py`.
+- `llm`: opt-in skill packs `ponytail` (6 skills: write only what is needed, plus review and audit)
+  and `caveman` (16 voice and workflow skills). Enable them with `llm-skills enable <pack>`.
+  caveman's CLI and proxy are not installed, and its Caveman Cloud / gateway skills are excluded
+  through a new per-pack `exclude` list in `llm-skills`.
+- `llm`: CodeGraph, a code knowledge graph that the agents query over MCP. It is registered with
+  Claude Code, Codex, OpenCode and Hermes. It comes from npm `@colbymchenry/codegraph` with its
+  platform build (about 300 MB, own Node runtime), so nothing is downloaded at run time
+  (`CODEGRAPH_NO_DOWNLOAD=1`). Telemetry and the update check are off by default. Builds take
+  the newest release, and `CODEGRAPH_REVIEWED_VERSION` records the last version reviewed.
 - `llm`: Vulnhuntr (Protect AI), LLM-driven vulnerability discovery in Python projects, from
   `protectai/vulnhuntr` latest main. It is not taken from the PyPI project of the same name,
   which is a third-party fork. The last reviewed commit is recorded as

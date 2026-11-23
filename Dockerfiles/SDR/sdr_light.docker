@@ -65,6 +65,7 @@ RUN ./entrypoint.sh jupyter_soft_install && \
 	./entrypoint.sh KCSDI_cal_device && \
 	./entrypoint.sh NanoVNASaver_cal_device && \
 	./entrypoint.sh NanoVNA_QT_cal_device && \
+	./entrypoint.sh harogic_vna_cal_device && \
 	./entrypoint.sh gnsslogger_cal_device
 	
 RUN	./entrypoint.sh librevna_cal_device_buildx

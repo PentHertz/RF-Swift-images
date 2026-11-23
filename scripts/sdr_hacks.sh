@@ -1,7 +1,8 @@
 #!/bin/bash
 #
 # sdr_hacks: hardware that was never meant to be an SDR, repurposed as one
-# (MediaTek Wi-Fi dongles and routers, LoRa transceivers, ESP32 radios).
+# (MediaTek Wi-Fi dongles and routers, LoRa transceivers, ESP32 radios), and alternative
+# firmware that turns an SDR into a dedicated tool (AntSDR E200/E310 FPV scanner).
 # Built on top of sdr_light. Host-side tools are installed; device firmware is
 # either prebuilt (downloaded) or kept as sources under /rftools/sdr.
 
@@ -258,5 +259,87 @@ EOF
     if [ -f userspace/udev/99-mt7921-iq.rules ]; then
         cp userspace/udev/99-mt7921-iq.rules /etc/udev/rules.d/ || true
     fi
+    return 0
+}
+
+# fpv_capture (black-pigeon): analog FPV scanner firmware for the AntSDR E200 and E310. The board
+# scans for PAL/NTSC video, shows it in its own web UI (http://192.168.1.10) and streams frames to
+# the host. Building the firmware needs Vivado/Vitis 2022.2, which the image does not ship, so the
+# image stages the release boot files for the SD card and installs the host tools:
+#   fpv-receive        records the board's frame stream (BMP + JSON metadata) per frequency
+#   u220-fpv-tx        PAL/NTSC test transmitter for a MicroPhase U220 (UHD); --dry-run by default
+#   u220-fpv-gui       Tk front end for it; u220-fpv-generate makes the test signals
+# Host tools track master; FPVCAPTURE_REVIEWED_COMMIT is the last commit reviewed, and a newer one
+# adds a "review" entry to the build report. The boot files are pinned to a release by SHA-256.
+# Upstream has no licence file yet (only the kernel driver carries GPL-2.0).
+FPVCAPTURE_REVIEWED_COMMIT="5b0318bc99cdda4a1cf5314b3dd3d33f43c477aa"   # reviewed 2026-11-23
+FPVCAPTURE_RELEASE="v0.1"
+FPVCAPTURE_BOOTFILES=(
+    "e200 e200-fpv-spectrum-ui-20261120-bootfiles.tar.gz 45d88a8dc51883e38eb4b19caaf664d006819aebeb47a50e5ea51284bc226e59"
+    "e310 e310-fpv-spectrum-ui-20261120-bootfiles.tar.gz c343133c982d74c72f2c5b4a13541beb8544e03c80ae9c2bb84cf4b45b35761b"
+)
+
+function fpvcapture_sdrhacks_install() {
+    goodecho "[+] Installing fpv_capture (AntSDR E200/E310 FPV scanner): boot files and host tools"
+    install_dependencies "python3-numpy python3-pil python3-tk fonts-dejavu-core libssl-dev pkg-config g++ curl"
+    local top="${FPVCAPTURE_DIR:-/rftools/sdr/fpv_capture}" bindir="${FPVCAPTURE_BIN_DIR:-/usr/local/bin}"
+    local head spec board file sum latest tmp
+    mkdir -p "$(dirname "$top")"
+    cd "$(dirname "$top")"
+    gitinstall "https://github.com/black-pigeon/fpv_capture.git" "fpvcapture_sdrhacks_install" || true
+    if [ ! -f "$top/tools/fpv_receiver/receive.py" ]; then
+        record_build_failure "git" "fpv_capture" "clone failed"
+        return 0
+    fi
+    head=$(git -C "$top" rev-parse HEAD 2>/dev/null || true)
+    if [ -n "$head" ] && [ "$head" != "$FPVCAPTURE_REVIEWED_COMMIT" ]; then
+        record_build_failure "review" "fpv_capture" "built master at ${head:0:12}; last reviewed commit is ${FPVCAPTURE_REVIEWED_COMMIT:0:12}" || true
+    fi
+
+    # Boot files, one directory per board: copy its contents to the SD card's FAT32 boot partition.
+    # They sit in the checkout, excluded locally so `git status` and pulls stay clean.
+    grep -qx '/bootfiles/' "$top/.git/info/exclude" 2>/dev/null || echo '/bootfiles/' >> "$top/.git/info/exclude"
+    for spec in "${FPVCAPTURE_BOOTFILES[@]}"; do
+        read -r board file sum <<< "$spec"
+        tmp=$(mktemp -d)
+        rm -rf "$top/bootfiles/$board"
+        mkdir -p "$top/bootfiles/$board"
+        if installfromnet curl -fsSL -o "$tmp/$file" \
+                "https://github.com/black-pigeon/fpv_capture/releases/download/${FPVCAPTURE_RELEASE}/${file}" \
+            && echo "$sum  $tmp/$file" | sha256sum -c --quiet - \
+            && tar -xzf "$tmp/$file" -C "$top/bootfiles/$board" --no-same-owner \
+            && (cd "$top/bootfiles/$board" && sha256sum -c --quiet SHA256SUMS); then
+            goodecho "[+] fpv_capture ${FPVCAPTURE_RELEASE} boot files for ${board}: $top/bootfiles/$board"
+        else
+            rm -rf "$top/bootfiles/$board"
+            record_build_failure "net" "fpv_capture boot files" "${board}: download or SHA-256 check failed"
+        fi
+        rm -rf "$tmp"
+    done
+    latest=$(github_latest_tag black-pigeon/fpv_capture)
+    if [ -n "$latest" ] && [ "$latest" != "$FPVCAPTURE_RELEASE" ]; then
+        record_build_failure "review" "fpv_capture boot files" "release ${latest} is out; the image stages ${FPVCAPTURE_RELEASE}" || true
+    fi
+
+    # Host receiver: Python standard library only
+    mkdir -p "$bindir"
+    printf '#!/bin/sh\nexec python3 %s "$@"\n' "$top/tools/fpv_receiver/receive.py" > "$bindir/fpv-receive"
+    chmod 755 "$bindir/fpv-receive"
+
+    # U220 test transmitter. build.sh compiles it against UHD, runs its unit tests and --help;
+    # it opens no radio. Upstream builds with -Werror: on failure, retry once without it.
+    local out="$top/build/u220-fpv-source" src="$top/tools/u220_fpv_tx"
+    if ! bash "$src/build.sh" "$out"; then
+        criticalecho-noexit "[!] u220_fpv_tx strict build failed, retrying without -Werror"
+        sed -i 's/ -Werror//g' "$src/build.sh"
+        bash "$src/build.sh" "$out" || record_build_failure "build" "u220_fpv_tx" "build.sh failed"
+        git -C "$top" checkout -- tools/u220_fpv_tx/build.sh 2>/dev/null || true
+    fi
+    if [ -x "$out/u220_fpv_tx" ]; then
+        ln -sf "$out/u220_fpv_tx" "$bindir/u220-fpv-tx"
+    fi
+    printf '#!/bin/sh\nexec python3 %s "$@"\n' "$src/gui.py" > "$bindir/u220-fpv-gui"
+    printf '#!/bin/sh\nexec python3 %s "$@"\n' "$src/generate_fpv.py" > "$bindir/u220-fpv-generate"
+    chmod 755 "$bindir/u220-fpv-gui" "$bindir/u220-fpv-generate"
     return 0
 }

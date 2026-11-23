@@ -225,3 +225,57 @@ function kalibrate_hydrasdr_device() {
     cd /root/thirdparty
 	cmake_clone_and_build "https://github.com/hydrasdr/kalibrate-hydrasdr.git" "build" "" "" "kalibrate_hydrasdr_device"
 }
+
+# Harogic VNA Studio (VNStudio): GUI for Harogic vector network analysers, plus VNAServer for
+# headless use (--no-gui, --list-devices-json). Portable Qt 5 bundles re-hosted by PentHertz;
+# pinned to the release and checked against the SHA-256 GitHub publishes for each asset. The
+# bundle carries Qt and its X11/xcb libraries: only glibc and EGL/GL/DRM come from the system.
+HAROGIC_VNA_VERSION="1.0.8"
+HAROGIC_VNA_SHA256_X86_64="6cacd4aa3a2c25d3f8d7da57c0f28884f2bb70bb7d3efee91cd294876dd0f526"
+HAROGIC_VNA_SHA256_ARM64="073976d3f4ac70c375a2a7a46abb7172d2ac7cc5b673e88f86365fa5edfea017"
+
+function harogic_vna_cal_device() {
+	goodecho "[+] Installing Harogic VNA Studio ${HAROGIC_VNA_VERSION}"
+	local asset root sha tmp dest=/rftools/calibration/VNStudio
+	# the two archives name their root directory differently
+	case "$(uname -m)" in
+		x86_64|amd64)  asset="VNStudio_x86_64.tar.gz"; root="VNStudio_x86_64"; sha="$HAROGIC_VNA_SHA256_X86_64" ;;
+		aarch64|arm64) asset="VNStudio-arm64.tar.gz";  root="VNStudio";        sha="$HAROGIC_VNA_SHA256_ARM64" ;;
+		*) goodecho "[!] Harogic VNA Studio has no $(uname -m) build; skipping"; return 0 ;;
+	esac
+	install_dependencies "libegl1 libgl1 libdrm2"
+	tmp=$(mktemp -d)
+	if ! installfromnet wget -q -O "$tmp/$asset" \
+	        "https://github.com/PentHertz/rfswift_harogic_install/releases/download/vna_${HAROGIC_VNA_VERSION}/${asset}"; then
+		record_build_failure "download" "harogic-vna-studio" "download failed (${asset})"
+		rm -rf "$tmp"; return 0
+	fi
+	if ! echo "${sha}  $tmp/$asset" | sha256sum -c - > /dev/null; then
+		record_build_failure "download" "harogic-vna-studio" "checksum mismatch (${asset})"
+		rm -rf "$tmp"; return 0
+	fi
+	mkdir -p /rftools/calibration
+	rm -rf "$dest"
+	tar -xzf "$tmp/$asset" -C "$tmp" && mv "$tmp/$root" "$dest"
+	rm -rf "$tmp"
+	if [ ! -f "$dest/app.sh" ] || [ ! -f "$dest/server/app.sh" ]; then
+		record_build_failure "download" "harogic-vna-studio" "unexpected archive layout (${asset})"
+		return 0
+	fi
+	chmod +x "$dest/app.sh" "$dest/bin/app" "$dest/server/app.sh" "$dest/server/VNAServer.bin"
+	# USB access for its devices (0483:564e/4121/4122, 1209:4121/4122)
+	mkdir -p /etc/udev/rules.d
+	install -m 0644 "$dest/server/51-vna.rules" /etc/udev/rules.d/51-vna.rules
+	cat > /usr/sbin/vnastudio << 'EOF'
+#!/bin/sh
+# Harogic VNA Studio (GUI): needs a display (X11 or Wayland forwarding).
+exec /rftools/calibration/VNStudio/app.sh "$@"
+EOF
+	cat > /usr/sbin/vnaserver << 'EOF'
+#!/bin/sh
+# Harogic VNA server, headless: `vnaserver --list-devices-json`, `vnaserver --no-gui`.
+exec /rftools/calibration/VNStudio/server/app.sh "$@"
+EOF
+	chmod +x /usr/sbin/vnastudio /usr/sbin/vnaserver
+	return 0
+}

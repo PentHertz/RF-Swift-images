@@ -19,6 +19,7 @@ Coding agents, shared skill packs, agent-side reverse-engineering tools, local s
 | NodeTerm (Server Edition) | `nodeterm-server` | source, `/opt/nodeterm` | `~/.nodeterm-server/` |
 | Strix (AI pentest agent) | `strix` | PyPI `strix-agent` (uv tool, Python 3.12) | `~/.strix/` |
 | Vulnhuntr (Protect AI) | `vulnhuntr` | `protectai/vulnhuntr`, latest main (uv tool, Python 3.10) | API keys from the environment |
+| CodeGraph | `codegraph` (MCP server `codegraph serve --mcp`) | npm `@colbymchenry/codegraph` | per project: `.codegraph/` |
 | ARTEMIS (multi-agent red teaming, **opt-in**) | `artemis-redteam` | Stanford-Trinity/ARTEMIS @ reviewed commit (Codex fork from source, uv Python 3.12) | `~/.artemis-redteam/` |
 | Semgrep | `semgrep` | PyPI `semgrep` | `~/.semgrep/` |
 
@@ -68,12 +69,21 @@ Every agent reads the same skills. They come from six packs:
 | `cloudflare` ([cloudflare/security-audit-skill](https://github.com/cloudflare/security-audit-skill)): source-first security audit workflow with findings/coverage validators (Node.js) | 1 | yes |
 | `strix` ([usestrix/strix](https://github.com/usestrix/strix)): drive the `strix` CLI for web/API/code pentests, OWASP Top 10, CI scans | 9 | yes |
 | `artex` ([BaaRai/ARTEX](https://github.com/BaaRai/ARTEX)): web/API recon and audit playbooks (api-recon, api-security, codeaudit, patch-diff, php2shell, edr-bypass-re, bbot-recon, playwright-cli, rea, scopesentry) | 10 | yes |
+| `ponytail` ([DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail)): write only what the task needs (reuse what exists, never cut validation, error handling or security), plus `/ponytail-review` and `/ponytail-audit` | 6 | no |
+| `caveman` ([JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman)): terser answers (`/caveman`, `/ultracave`) and focused workflow skills (review, commit, surgical-patch, safe-refactor, verify-and-stop...) | 16 | no |
 
 Some `artex` skills drive tools that ship in the separate ARTEX image rather than here
 (`bbot-recon` needs bbot/subfinder/httpx, `playwright-cli` needs the Playwright browsers,
 `scopesentry` needs the ScopeSentry MCP), and `rea` overlaps the REA MCP server already
 installed in this image; the recon/audit playbooks (`api-recon`, `api-security`, `codeaudit`,
 `patch-diff`, `php2shell`, `edr-bypass-re`) are the ones that stand on their own here.
+
+`ponytail` and `caveman` are **opt-in**: `llm-skills enable ponytail` or `llm-skills enable caveman`.
+They change how every agent answers or writes code, and add their descriptions to every turn.
+Only caveman's skills are included. Its CLI, local proxy and browser extension are not installed,
+and the skills that drive the Caveman Cloud service (`caveman-setup`, which reroutes an
+application's LLM calls through the Caveman gateway, `-discover`, `-evidence-review`, `-manage`,
+`-optimize` and `-learn`) are left out of the pack.
 
 Agents send the name and description of every enabled skill to the model on each turn. The
 default set costs about 20K tokens; all 818 cybersecurity skills would add about 80K. So that
@@ -127,6 +137,34 @@ strix --target https://staging.example.test
 ```
 
 The `strix` skills let any agent above run and triage Strix scans for you.
+
+## CodeGraph
+
+[CodeGraph](https://github.com/colbymchenry/codegraph) (MIT) keeps a pre-indexed knowledge graph
+of a code base: symbols, calls and imports. The agents query it over MCP instead of reading files
+one by one, which means fewer tokens and fewer tool calls. The image already registers it with
+Claude Code, Codex, OpenCode and Hermes (Mistral Vibe is not supported). Index each project once:
+
+```sh
+cd /work/my-project
+codegraph init        # builds .codegraph/ for this project; the agents then use it
+codegraph status      # index state
+```
+
+Things to know:
+
+- **Telemetry and update check are off.** The image sets `CODEGRAPH_TELEMETRY=0` and
+  `CODEGRAPH_NO_UPDATE_CHECK=1`, and the build also stores the telemetry opt-out. Set
+  `CODEGRAPH_TELEMETRY=1` to opt in; `codegraph telemetry status` shows the state.
+- **Nothing is downloaded at run time.** Its platform build (`@colbymchenry/codegraph-linux-<arch>`,
+  about 300 MB with its own Node runtime) is installed by npm with the package.
+  `CODEGRAPH_NO_DOWNLOAD=1` stops its fallback that would fetch a bundle from GitHub.
+- **Version:** builds take the newest release. `CODEGRAPH_REVIEWED_VERSION` in
+  `scripts/llm_software.sh` is the last version that was reviewed, and a newer build adds a
+  `review` entry to the build report.
+- **Instructions file:** `codegraph install` adds a marked CodeGraph section to each agent's
+  instructions file (`~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, ...). `codegraph uninstall --yes`
+  removes it, along with the MCP entries.
 
 ## Vulnhuntr
 

@@ -177,7 +177,9 @@ function llm_skills_install() {
         "cybersecurity https://github.com/mukul975/Anthropic-Cybersecurity-Skills.git" \
         "cloudflare https://github.com/cloudflare/security-audit-skill.git" \
         "strix https://github.com/usestrix/strix.git" \
-        "artex https://github.com/BaaRai/ARTEX.git"; do
+        "artex https://github.com/BaaRai/ARTEX.git" \
+        "ponytail https://github.com/DietrichGebert/ponytail.git" \
+        "caveman https://github.com/JuliusBrussee/caveman.git"; do
         name="${spec%% *}"
         url="${spec#* }"
         if [ -d "$LLM_SKILLS_ROOT/src/$name/.git" ]; then
@@ -235,6 +237,39 @@ function strix_soft_install() {
     fi
     [ -e "$HOME/.local/bin/strix" ] && ln -sf "$HOME/.local/bin/strix" /usr/local/bin/strix
     strix --version || record_build_failure "other" "strix" "strix --version failed after install"
+    return 0
+}
+
+# CodeGraph (colbymchenry): a pre-indexed code knowledge graph that the agents query over MCP
+# instead of re-reading files. npm package @colbymchenry/codegraph. Its platform build
+# (@colbymchenry/codegraph-linux-<arch>, ~300 MB with its own Node runtime) arrives with it as an
+# npm optional dependency, so nothing is downloaded at run time; llm.docker sets
+# CODEGRAPH_NO_DOWNLOAD=1 to keep it that way, and turns telemetry and the update check off.
+# Builds take the newest release; CODEGRAPH_REVIEWED_VERSION is the last one that was reviewed, and a
+# newer build adds a "review" entry to the build report.
+CODEGRAPH_REVIEWED_VERSION="1.6.4"   # reviewed 2026-11-23
+
+function codegraph_soft_install() {
+    goodecho "[+] Installing CodeGraph"
+    local ver
+    if ! installfromnet npm install -g @colbymchenry/codegraph; then
+        record_build_failure "npm" "codegraph" "npm install failed"
+        return 0
+    fi
+    # The platform build must have come from npm: with downloads forbidden, it still has to start.
+    if ! ver=$(CODEGRAPH_NO_DOWNLOAD=1 codegraph --version 2>/dev/null); then
+        record_build_failure "npm" "codegraph" "platform package missing (it would be downloaded at run time)"
+        return 0
+    fi
+    ver=$(printf '%s' "$ver" | grep -oE '[0-9]+(\.[0-9]+)+' | head -n1 || true)
+    if [ -n "$ver" ] && [ "$ver" != "$CODEGRAPH_REVIEWED_VERSION" ]; then
+        record_build_failure "review" "codegraph" "built ${ver}; last reviewed version is ${CODEGRAPH_REVIEWED_VERSION}" || true
+    fi
+    # Stored opt-out too, for processes started without the image's environment
+    codegraph telemetry off > /dev/null 2>&1 || true
+    # MCP server + instructions for the agents this image ships (Mistral Vibe is not supported)
+    codegraph install --yes --target=claude,codex,opencode,hermes \
+        || record_build_failure "other" "codegraph" "agent wiring (codegraph install) failed"
     return 0
 }
 

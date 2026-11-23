@@ -54,6 +54,12 @@ RUN ./entrypoint.sh llm_skills_install
 RUN ./entrypoint.sh rea_soft_install && \
 	./entrypoint.sh craftanything_soft_install
 
+# CodeGraph: code knowledge graph MCP server for Claude Code, Codex, OpenCode and Hermes. Telemetry
+# and its daily update check are off, and it may not download code at run time (its platform build
+# comes from npm). Set CODEGRAPH_TELEMETRY=1 to opt in; unset CODEGRAPH_NO_UPDATE_CHECK for update notices.
+ENV CODEGRAPH_TELEMETRY=0 CODEGRAPH_NO_UPDATE_CHECK=1 CODEGRAPH_NO_DOWNLOAD=1
+RUN ./entrypoint.sh codegraph_soft_install
+
 # Local speech-to-text (whisper.cpp) and a web chat UI (Open WebUI)
 RUN ./entrypoint.sh whispercpp_soft_install
 RUN ./entrypoint.sh openwebui_soft_install

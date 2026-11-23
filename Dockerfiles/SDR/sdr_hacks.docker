@@ -1,5 +1,5 @@
 # This DockerFile is part of the RFSwift project
-# Install type: SDR hacks add-on on top of sdr_light (repurposed chips as SDRs)
+# Install type: SDR hacks add-on on top of sdr_light (repurposed chips as SDRs, alternative SDR firmware)
 # Author(s): Sébastien Dudek (@FlUxIuS) @Penthertz
 # website: penthertz.com
 
@@ -35,6 +35,10 @@ RUN ./entrypoint.sh birriasdr_sdrhacks_install && \
 RUN ./entrypoint.sh espsdr_sdrhacks_install && \
 	./entrypoint.sh soapyespsdr_sdrhacks_install && \
 	./entrypoint.sh lr2021sdr_sdrhacks_install
+
+# AntSDR E200/E310 FPV scanner firmware (fpv_capture): release boot files for the SD card,
+# the host frame receiver and the U220 PAL/NTSC test transmitter
+RUN ./entrypoint.sh fpvcapture_sdrhacks_install
 
 # Build report (tools that failed to install)
 RUN ./entrypoint.sh print_build_report

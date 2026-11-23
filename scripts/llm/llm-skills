@@ -39,6 +39,13 @@ PACKS = {
     "cloudflare": {"glob": "cloudflare/skills/*", "url": "https://github.com/cloudflare/security-audit-skill"},
     "strix": {"glob": "strix/skills/*", "url": "https://github.com/usestrix/strix"},
     "artex": {"glob": "artex/skills/*", "url": "https://github.com/BaaRai/ARTEX"},
+    # Opt-in (not in DEFAULTS): they change how every agent answers and writes code.
+    "ponytail": {"glob": "ponytail/skills/*", "url": "https://github.com/DietrichGebert/ponytail"},
+    # caveman's voice and workflow skills only. The excluded ones drive the Caveman Cloud product
+    # (caveman-setup rewires an application's LLM calls through the Caveman gateway).
+    "caveman": {"glob": "caveman/skills/*", "url": "https://github.com/JuliusBrussee/caveman",
+                "exclude": ["caveman-setup", "caveman-discover", "caveman-evidence-review",
+                            "caveman-manage", "caveman-optimize", "caveman-learn"]},
 }
 INDEX_ID = "cybersecurity-skills"   # generated index skill for the cybersecurity pack
 DEFAULTS = ["trailofbits", "farmage", "floorplan", "cloudflare", "strix", "artex", INDEX_ID]
@@ -91,8 +98,9 @@ def frontmatter(text):
 
 def skill_dirs():
     for pack, spec in PACKS.items():
+        exclude = set(spec.get("exclude", ()))
         for d in sorted(SRC.glob(spec["glob"])):
-            if (d / "SKILL.md").is_file():
+            if (d / "SKILL.md").is_file() and d.name not in exclude:
                 yield pack, spec, d
 
 
@@ -338,7 +346,7 @@ def main():
     for name, fn, hlp in (("enable", cmd_enable, "register skills with every agent"),
                           ("disable", cmd_disable, "unregister skills")):
         p = sub.add_parser(name, help=hlp,
-                           description="TARGET: a pack (trailofbits, farmage, floorplan, cybersecurity, cloudflare, strix, artex), "
+                           description="TARGET: a pack (trailofbits, farmage, floorplan, cybersecurity, cloudflare, strix, artex, ponytail, caveman), "
                                        "pack:keyword (matches id, subdomain or tags), a skill id, "
                                        f"{INDEX_ID}, or all. Default set: {' '.join(DEFAULTS)}")
         p.add_argument("--project", action="store_true", help="use ./.agents/skills and ./.claude/skills")

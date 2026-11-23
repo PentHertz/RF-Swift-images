@@ -46,6 +46,22 @@ Integrity checks are kept where upstream publishes checksums:
 different distribution), LLVM (toolchain major, bump deliberately), scapy (locked for Mirage),
 and the vendor downloads Burp Suite and Little Snitch.
 
+## Tracking upstream against a reviewed version
+
+Some tools take upstream's newest code at every build, but the installer records the last
+version someone reviewed. If a build installs something newer, it adds an entry to the build
+report under category **`review`**. The build still succeeds; the entry means "read the diff,
+then move the marker":
+
+| Tool | Marker | File |
+|------|--------|------|
+| Vulnhuntr | `VULNHUNTR_REVIEWED_COMMIT` (main) | `llm_software.sh` |
+| CodeGraph | `CODEGRAPH_REVIEWED_VERSION` (npm release) | `llm_software.sh` |
+| fpv_capture host tools | `FPVCAPTURE_REVIEWED_COMMIT` (master) | `sdr_hacks.sh` |
+
+The fpv_capture installer also adds a `review` entry when a release newer than
+`FPVCAPTURE_RELEASE` is out, because its boot files stay pinned by SHA-256.
+
 ## Checking versions
 
 A helper script compares the versions in the scripts with upstream. For floating tools it
@@ -121,6 +137,7 @@ describe how safe it is to bump that fallback.
 | dsview | 1.3.4 | `hardware.sh` | **PentHertz fork**; cut a fork release before bumping |
 | pulseview | 0.4.4 | `hardware.sh` | **PentHertz fork**; cut a fork release before bumping |
 | antsdr-uhd | 4.1.0.0 | `sdr_peripherals.sh` | PentHertz repackage of MicroPhase UHD |
+| fpv-capture | 0.1 | `sdr_hacks.sh` | AntSDR boot files: asset names carry a build date; update the names and SHA-256 in `FPVCAPTURE_BOOTFILES` |
 
 ### locked (do not bump)
 
@@ -146,6 +163,8 @@ re-hosted artifacts; bumping them means re-packaging/re-hosting, not editing a n
 by hand when you refresh the artifact:
 
 - Harogic SAStudio4 (`sa_devices.sh`), Harogic SGStudio / H2 API, Harogic HTRA SDK
+- Harogic VNA Studio (`cal_devices.sh`, `HAROGIC_VNA_VERSION` plus the two `HAROGIC_VNA_SHA256_*`
+  values, taken from the SHA-256 digests GitHub shows for the `vna_<version>` release assets)
 - SignalHound SDK (`sa_devices.sh`, dated zip), FTDI D2XX (`gr_oot_modules.sh`)
 - AMD GPU installer (`corebuild.sh`), nRF Sniffer for BLE (`rf_tools.sh`)
 - btlejack (`rf_tools.sh`), dex2jar (`mobile_software.sh`), injectable-firmware / blerp /
