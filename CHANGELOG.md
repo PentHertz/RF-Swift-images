@@ -31,6 +31,9 @@
   (GUI) and `vnaserver` (headless VNAServer: `--no-gui`, `--list-devices-json`), the udev rules
   for its USB devices, and the amd64 and arm64 portable bundles checked against their published
   SHA-256. It is skipped on riscv64, which has no build.
+- `reversing`: Ropper, next to pwntools, ROPgadget and one_gadget. It is installed with uv on Python 3.13
+  because its filebytes dependency does not build on Python 3.14. `ropper --chain` needs keystone-engine,
+  which is installed on amd64 only.
 - `sdr_hacks`: fpv_capture (black-pigeon), the analog FPV scanner firmware for the AntSDR E200 and
   E310. The image stages the v0.1 boot files for the SD card under `/rftools/sdr/fpv_capture/bootfiles/`
   (checked against SHA-256) and installs `fpv-receive`, the host frame recorder. It also builds the

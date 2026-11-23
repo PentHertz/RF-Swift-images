@@ -488,7 +488,7 @@ WRAP
 }
 
 function exploitdev_tools_soft_install() {
-    goodecho "[+] Installing pwntools, ROPgadget, one_gadget and checksec"
+    goodecho "[+] Installing pwntools, ROPgadget, Ropper, one_gadget and checksec"
     install_dependencies "checksec ruby ruby-dev build-essential python3-dev libffi-dev libssl-dev"
     pipx_install_tool "pwntools" "pwntools" "pwn"
     local b
@@ -496,6 +496,26 @@ function exploitdev_tools_soft_install() {
         [ -e "/root/.local/bin/$b" ] && ln -sf "/root/.local/bin/$b" "/usr/local/bin/$b"
     done
     pipx_install_tool "ROPgadget" "ropgadget" "ROPgadget"
+    # Ropper on Python 3.13 via uv: its dependency filebytes (sdist only, 0.10.2) calls ast.Str in
+    # setup.py, which Python 3.14 removed. The fix is on filebytes master but not released yet.
+    # keystone-engine (needed only by `ropper --chain`) has a Linux wheel for x86_64 alone, so the
+    # other architectures get Ropper without it (gadget search works, --chain does not).
+    if command -v uv > /dev/null; then
+        local ropper_ok=0
+        if [ "$(uname -m)" = "x86_64" ]; then
+            installfromnet uv tool install --force --python 3.13 --with keystone-engine ropper && ropper_ok=1
+        fi
+        if [ "$ropper_ok" -eq 0 ]; then
+            installfromnet uv tool install --force --python 3.13 ropper && ropper_ok=1
+        fi
+        if [ "$ropper_ok" -eq 1 ] && [ -e "$HOME/.local/bin/ropper" ]; then
+            ln -sf "$HOME/.local/bin/ropper" /usr/local/bin/ropper
+        else
+            record_build_failure "pip" "ropper" "uv tool install failed"
+        fi
+    else
+        record_build_failure "toolchain" "ropper" "uv unavailable"
+    fi
     gem install one_gadget || record_build_failure "build" "one_gadget" "gem install failed"
     return 0
 }
