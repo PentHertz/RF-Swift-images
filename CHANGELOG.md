@@ -31,6 +31,12 @@
   (GUI) and `vnaserver` (headless VNAServer: `--no-gui`, `--list-devices-json`), the udev rules
   for its USB devices, and the amd64 and arm64 portable bundles checked against their published
   SHA-256. It is skipped on riscv64, which has no build.
+- `reversing`: crypto-analysis tools. bkcrack (ZipCrypto known-plaintext attack) is built from the
+  newest release's source on every architecture, with `bkcrack-inflate` / `bkcrack-deflate` helpers.
+  fplll and fpylll (LLL / BKZ lattice reduction) come from Ubuntu's packages.
+- `reversing`: opt-in SageMath through passagemath (`sage_soft_install`, amd64/arm64). It is about
+  1.3 GB of wheels and 4 to 5 GB installed, so its RUN line is commented. Install it in a running
+  container with `cd /root/scripts && ./entrypoint.sh sage_soft_install`.
 - `reversing`: Ropper, next to pwntools, ROPgadget and one_gadget. It is installed with uv on Python 3.13
   because its filebytes dependency does not build on Python 3.14. `ropper --chain` needs keystone-engine,
   which is installed on amd64 only.

@@ -56,6 +56,8 @@ MANIFEST = {
                     "source": ("github", "ggml-org/whisper.cpp"), "cls": "simple"},
     "cyberether":  {"file": "sdr_softwares.sh", "pat": r'CYBERETHER_VERSION="(?P<ver>[\d.]+)"',
                     "source": ("github", "luigifcruz/CyberEther"), "cls": "simple"},
+    "bkcrack":     {"file": "reverse_software.sh", "pat": r'BKCRACK_VERSION="(?P<ver>[\d.]+)"',
+                    "source": ("github", "kimci86/bkcrack"), "cls": "simple"},
     "qflipper":    {"file": "rf_tools.sh", "pat": r'QFLIPPER_VERSION="(?P<ver>[\d.]+)"',
                     "source": ("github", "flipperdevices/qFlipper"), "cls": "simple",
                     "note": "x86_64-only AppImage; version string itself is a clean bump"},
@@ -128,7 +130,7 @@ MANIFEST = {
 FLOATING = {
     "jadx", "ipsw", "uv", "arduino-ide", "imhex", "whispercpp", "cyberether", "qflipper",
     "geckodriver", "node-llm", "craft", "ghidra", "die", "sdrangel", "go", "sniffle-fw",
-    "hostapd", "dsview", "pulseview", "antsdr-uhd",
+    "hostapd", "dsview", "pulseview", "antsdr-uhd", "bkcrack",
 }
 
 

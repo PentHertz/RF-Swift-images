@@ -561,3 +561,76 @@ function binary_triage_tools_soft_install() {
     rm -rf "$tmp"
     return 0
 }
+
+# ---------------------------------------------------------------------------
+# Crypto analysis
+# ---------------------------------------------------------------------------
+# bkcrack (kimci86, Zlib): known-plaintext attack on legacy ZipCrypto archives, common for
+# encrypted firmware ZIPs. Built from the newest release's source, so every architecture gets it.
+BKCRACK_VERSION="1.8.1"   # known-good; the build takes the newest release
+
+function bkcrack_soft_install() {
+    goodecho "[+] Installing bkcrack"
+    install_dependencies "cmake g++ git"
+    local ver dir
+    ver=$(latest_release_version kimci86/bkcrack "$BKCRACK_VERSION" \
+        "https://github.com/kimci86/bkcrack/archive/refs/tags/v@V@.tar.gz")
+    dir=$(mktemp -d)
+    if installfromnet git clone --depth 1 -b "v${ver}" https://github.com/kimci86/bkcrack.git "$dir/bkcrack" \
+        && cmake -S "$dir/bkcrack" -B "$dir/build" -DCMAKE_BUILD_TYPE=Release \
+        && cmake --build "$dir/build" -j"$(nproc)" \
+        && rm -rf /opt/bkcrack && cmake --install "$dir/build" --prefix /opt/bkcrack; then
+        ln -sf /opt/bkcrack/bkcrack /usr/local/bin/bkcrack
+        # Helpers from the release: decompress a deciphered entry / compress a guessed plaintext
+        printf '#!/bin/sh\nexec python3 /opt/bkcrack/tools/inflate.py "$@"\n' > /usr/local/bin/bkcrack-inflate
+        printf '#!/bin/sh\nexec python3 /opt/bkcrack/tools/deflate.py "$@"\n' > /usr/local/bin/bkcrack-deflate
+        chmod 755 /usr/local/bin/bkcrack-inflate /usr/local/bin/bkcrack-deflate
+    else
+        record_build_failure "build" "bkcrack" "v${ver} build failed"
+    fi
+    rm -rf "$dir"
+    return 0
+}
+
+# fplll / fpylll: lattice reduction (LLL, BKZ) for lattice attacks on RSA, ECDSA nonces, knapsacks.
+# Ubuntu packages both: the `fplll` / `latticegen` CLIs and the Python module for python3.
+function fpylll_soft_install() {
+    goodecho "[+] Installing fplll and fpylll"
+    install_dependencies "fplll-tools python3-fpylll"
+    python3 -c 'import fpylll' || record_build_failure "apt" "fpylll" "python3 cannot import fpylll"
+    return 0
+}
+
+# SageMath through passagemath (pip packages of Sage, prebuilt for Python 3.14 on x86_64 and aarch64;
+# none for riscv64). OPT-IN: about 1.3 GB of wheels, roughly 4 to 5 GB installed, so reversing.docker
+# leaves it commented. Install in a running container: cd /root/scripts && ./entrypoint.sh sage_soft_install
+# Own venv in /opt/sage (it also carries fpylll for `sage-python`); `sage` and `sage-python` on PATH.
+function sage_soft_install() {
+    goodecho "[+] Installing SageMath (passagemath)"
+    case "$(uname -m)" in
+        x86_64|aarch64) ;;
+        *)
+            criticalecho-noexit "[-] SageMath: no passagemath wheels for $(uname -m), skipping"
+            return 0
+            ;;
+    esac
+    if ! command -v uv > /dev/null; then
+        record_build_failure "toolchain" "sage" "uv unavailable"
+        return 0
+    fi
+    rm -rf /opt/sage
+    # --no-cache: a cache would keep a second copy of the wheels in the image
+    if ! uv venv --python 3.14 /opt/sage \
+        || ! installfromnet uv pip install --no-cache --python /opt/sage/bin/python passagemath-standard; then
+        record_build_failure "pip" "sage" "passagemath-standard install failed"
+        return 0
+    fi
+    local b
+    for b in sage sage-python; do
+        printf '#!/bin/sh\nexec /opt/sage/bin/%s "$@"\n' "$b" > "/usr/local/bin/$b"
+        chmod 755 "/usr/local/bin/$b"
+    done
+    sage -c 'assert factor(2^64 + 1) == 274177 * 67280421310721' \
+        || record_build_failure "other" "sage" "sage -c smoke test failed"
+    return 0
+}

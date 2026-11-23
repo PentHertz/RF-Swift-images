@@ -66,6 +66,14 @@ RUN ./entrypoint.sh bytecaster_install && \
 	./entrypoint.sh exploitdev_tools_soft_install && \
 	./entrypoint.sh binary_triage_tools_soft_install
 
+# Crypto analysis: bkcrack (ZipCrypto known-plaintext), fplll / fpylll (lattice reduction)
+RUN ./entrypoint.sh bkcrack_soft_install && \
+	./entrypoint.sh fpylll_soft_install
+# Opt-in: SageMath through passagemath (amd64/arm64; about 1.3 GB of wheels, 4 to 5 GB installed).
+# Not built by default. Uncomment, or install in a running container:
+#   cd /root/scripts && ./entrypoint.sh sage_soft_install
+#RUN ./entrypoint.sh sage_soft_install
+
 # Cleaning and quitting
 WORKDIR /root/
 #RUN rm -rf /root/scripts/
