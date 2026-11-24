@@ -489,8 +489,30 @@ function bromelia_soft_install() {
 }
 
 function pyhss_soft_install() {
-	goodecho "[+] Installing bromelia"
-	pip3install "bromelia"
+	# Used to install bromelia (copy of bromelia_soft_install), so the documented
+	# PyHSS was missing. PyHSS moved to github.com/pyhss/pyhss (AGPL-3.0). It is a set
+	# of services talking over Redis (>= 7): pyhss_diameter, pyhss_hss and pyhss_api
+	# are the minimum; they bind to 127.0.0.1 by default (config.yaml bind_ip).
+	goodecho "[+] Installing PyHSS"
+	install_dependencies "redis-server"
+	[ -d /telecom/core ] || mkdir -p /telecom/core
+	cd /telecom/core
+	gitinstall "https://github.com/pyhss/pyhss.git" "pyhss_soft_install"
+	cd pyhss
+	if ! uv venv --clear --seed --python 3.12 .venv; then
+		record_build_failure "python" "PyHSS" "uv venv (Python 3.12) failed"
+		return 0
+	fi
+	if ! uv pip install --python .venv/bin/python -r requirements.txt . ; then
+		record_build_failure "pip" "PyHSS" "requirements or package install failed"
+		return 0
+	fi
+	for svc in api database diameter geored gsup hss log metric; do
+		ln -sf "/telecom/core/pyhss/.venv/bin/pyhss_${svc}" "/usr/local/bin/pyhss_${svc}"
+	done
+	# PyHSS reads $PYHSS_CONFIG, then /etc/pyhss/config.yaml: start from upstream's.
+	mkdir -p /etc/pyhss
+	[ -f /etc/pyhss/config.yaml ] || cp config.yaml /etc/pyhss/config.yaml
 }
 
 function pysim_soft_install() {

@@ -1106,21 +1106,23 @@ function op25_soft_install () {
 }
 
 function trunkrecorder_soft_install () {
+	# This used to run `./install`, copied from op25: trunk-recorder has no such script,
+	# so the call failed behind `|| true` and nothing was installed (and the function
+	# was defined twice). Upstream's install.sh apt-installs Debian's GNU Radio with
+	# sudo, which would replace the image's own build, so build it with CMake against
+	# the GNU Radio, gr-osmosdr, UHD and HackRF already in the image.
 	goodecho "[+] Installing trunk-recorder"
+	install_dependencies "libboost-all-dev libgmp-dev libssl-dev libcurl4-openssl-dev liborc-0.4-dev libusb-1.0-0-dev pkg-config fdkaac sox"
 	[ -d /rftools/sdr ] || mkdir /rftools/sdr
 	cd /rftools/sdr
 	gitinstall "https://github.com/TrunkRecorder/trunk-recorder.git" "trunkrecorder_soft_install"
 	cd trunk-recorder
-	yes | ./install || true
-}
-
-function trunkrecorder_soft_install () {
-	goodecho "[+] Installing trunk-recorder"
-	[ -d /rftools/sdr ] || mkdir /rftools/sdr
-	cd /rftools/sdr
-	gitinstall "https://github.com/TrunkRecorder/trunk-recorder.git" "trunkrecorder_soft_install"
-	cd trunk-recorder
-	yes | ./install || true
+	rm -rf build && mkdir build && cd build
+	if ! { cmake .. && make -j"$(nproc)" && make install; }; then
+		record_build_failure "build" "trunk-recorder" "cmake/make failed"
+		return 0
+	fi
+	ldconfig
 }
 
 function intercept_soft_install () {

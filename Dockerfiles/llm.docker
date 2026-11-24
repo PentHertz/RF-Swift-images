@@ -42,6 +42,11 @@ RUN ./entrypoint.sh hermes_agent_soft_install
 RUN ./entrypoint.sh strix_soft_install && \
 	./entrypoint.sh vulnhuntr_soft_install && \
 	./entrypoint.sh semgrep_install
+# pentest-ai (`ptai`): MCP server registered with every agent. Its Acceptable Use Policy is not
+# accepted here: the operator runs `ptai-aup` once, and the agents' `ptai-mcp` entry starts only
+# after that. Its telemetry (opt-in upstream) and PyPI version check stay off.
+ENV PENTEST_AI_TELEMETRY=0 PTAI_SKIP_VERSION_CHECK=1
+RUN ./entrypoint.sh pentestai_soft_install
 # Opt-in: ARTEMIS (Stanford Trinity) multi-agent red teaming, as `artemis-redteam`. Not built by
 # default (slow Rust build of its Codex fork). Uncomment, or install in a running container:
 #   cd /root/scripts && ./entrypoint.sh artemis_redteam_soft_install
@@ -53,8 +58,13 @@ RUN ./entrypoint.sh strix_soft_install && \
 # when LangGraph is not installed. Set LANGSMITH_TRACING=true to opt in to tracing.
 ENV LANGGRAPH_CLI_NO_ANALYTICS=1 LANGGRAPH_NO_VERSION_CHECK=true LANGSMITH_TRACING=false
 #RUN ./entrypoint.sh langgraph_soft_install
+# Opt-in: Cairn (oritera, AGPL-3.0), fact-graph problem solving/pentest engine, in local mode with
+# the claude and codex CLIs as workers (`cairn serve` on 127.0.0.1:8000, `cairn dispatch`). Installed
+# from upstream only. Not built by default. Uncomment, or install in a running container:
+#   cd /root/scripts && ./entrypoint.sh cairn_soft_install
+#RUN ./entrypoint.sh cairn_soft_install
 
-# Skill packs (Trail of Bits, farmage, Floorplan, cybersecurity, Cloudflare, Strix, ARTEX) for every agent, via llm-skills
+# Skill packs (Trail of Bits, farmage, Floorplan, cybersecurity, Cloudflare, Strix, ARTEX, Decepticon) for every agent, via llm-skills
 RUN ./entrypoint.sh llm_skills_install
 
 # Analysis MCP servers, registered with every agent

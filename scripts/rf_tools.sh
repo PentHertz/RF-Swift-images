@@ -589,12 +589,17 @@ function chameleon_ultra_soft_install() {
     cd /rftools/nfc
     gitinstall "https://github.com/RfidResearchGroup/ChameleonUltra.git" "chameleon_ultra_soft_install"
     cd ChameleonUltra/software
-    uv sync
+    if ! uv sync; then
+        record_build_failure "python" "ChameleonUltra CLI" "uv sync failed"
+        return 0
+    fi
     cd src
     mkdir -p build && cd build
-    cmake ..
-    make
-    make install
+    # Native key-recovery helpers (nested, hardnested, ...) used by the CLI; the CLI
+    # itself still works without them.
+    if ! { cmake .. && make && make install; }; then
+        record_build_failure "build" "ChameleonUltra native helpers" "cmake/make failed; key-recovery commands unavailable"
+    fi
     cd /rftools/nfc/ChameleonUltra/software
     cat << 'EOF' > /usr/sbin/chameleon_cli
 #!/bin/bash
@@ -602,11 +607,6 @@ cd /rftools/nfc/ChameleonUltra/software/script
 uv run chameleon_cli_main.py "$@"
 EOF
     chmod +x /usr/sbin/chameleon_cli
-}
-
-function chameleon_ultra_soft_install() {
-    goodecho "[+] Installing ChameleonUltra"
-    pip3install nfcpy
 }
 
 
@@ -716,11 +716,6 @@ function wifipumpkin3_soft_install() {
 function pixiewps_soft_install() {
 	goodecho "[+] Installing pixiewps"
 	install_dependencies "pixiewps"
-}
-
-function hcxdumptool_soft_install() {
-	goodecho "[+] Installing hcxdumptool"
-	install_dependencies "hcxdumptool"
 }
 
 function hcxdumptool_soft_install() {

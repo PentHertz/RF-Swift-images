@@ -1,8 +1,8 @@
 #!/bin/bash
 # This file is part of the RFSwift project (llm image).
 # Coding agents (Claude Code, Codex, OpenCode 2.x, Mistral Vibe, Hermes Agent), shared skill
-# packs managed by llm-skills, the REA / Craft Anything analysis MCP servers, whisper.cpp
-# (local speech-to-text) and Open WebUI.
+# packs managed by llm-skills, the REA / Craft Anything / pentest-ai MCP servers, whisper.cpp
+# (local speech-to-text) and Open WebUI; opt-in ARTEMIS, LangGraph and Cairn.
 # Usage notes for the image: docs/llm.md (copied to /opt/llm/README.md).
 
 LLM_SCRIPTS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -61,6 +61,71 @@ function llm_vibe_mcp_add() {
     vibe mcp remove "$name" > /dev/null 2>&1 || true
     vibe mcp add "$name" --transport stdio --command "$cmd" "${argv[@]}" \
         || record_build_failure "other" "$name (Mistral Vibe)" "vibe mcp add failed"
+}
+
+# llm_opencode_mcp_add <name> <command> [args...]: add a local MCP server to OpenCode's global
+# config in OpenCode 2's native shape, mcp.servers.<name> (as CodeGraph writes it; REA reads both
+# shapes). An entry of that name, in either shape, is kept. A .jsonc with comments is not rewritten.
+function llm_opencode_mcp_add() {
+    command -v opencode > /dev/null || return 0
+    python3 -I - "$@" << 'EOF' || record_build_failure "other" "$1 (OpenCode)" "could not add it to opencode.json"
+import json, os, sys, tempfile
+name, argv = sys.argv[1], sys.argv[2:]
+d = os.path.join(os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser("~/.config"), "opencode")
+path = next((os.path.join(d, f) for f in ("opencode.json", "opencode.jsonc")
+             if os.path.isfile(os.path.join(d, f))), os.path.join(d, "opencode.json"))
+cfg = {}
+if os.path.isfile(path):
+    with open(path) as f:
+        text = f.read()
+    if text.strip():
+        cfg = json.loads(text)   # comments (JSONC) raise: the file is left as it is
+mcp = cfg.setdefault("mcp", {})
+servers = mcp.setdefault("servers", {})
+if name in servers or (isinstance(mcp.get(name), dict) and "type" in mcp[name]):
+    sys.exit(0)
+cfg.setdefault("$schema", "https://opencode.ai/config.json")
+servers[name] = {"type": "local", "command": argv, "disabled": False}
+os.makedirs(d, exist_ok=True)
+fd, tmp = tempfile.mkstemp(dir=d, suffix=".tmp")
+with os.fdopen(fd, "w") as f:
+    json.dump(cfg, f, indent=2)
+    f.write("\n")
+os.replace(tmp, path)
+EOF
+}
+
+# llm_hermes_mcp_add <name> <command> [args...]: mcp_servers.<name> in ~/.hermes/config.yaml,
+# written by Hermes itself (`hermes mcp add` would start the server and ask which tools to keep)
+function llm_hermes_mcp_add() {
+    local name="$1" cmd="$2" args
+    shift 2
+    command -v hermes > /dev/null || return 0
+    args=$(python3 -I -c 'import json, sys; print(json.dumps(sys.argv[1:]))' "$@") || args="[]"
+    hermes config set "mcp_servers.$name.command" "$cmd" \
+        && { [ "$#" -eq 0 ] || hermes config set "mcp_servers.$name.args" "$args"; } \
+        || record_build_failure "other" "$name (Hermes)" "hermes config set mcp_servers.$name failed"
+}
+
+# llm_mcp_register <name> <command> [args...]: register a stdio MCP server that has no setup
+# command of its own with every agent in the image. Claude Code and Codex get the same
+# `mcp add` calls `ptai setup --mcp` makes; OpenCode, Mistral Vibe and Hermes their config entry.
+function llm_mcp_register() {
+    local name="$1" cmd="$2"
+    shift 2
+    if command -v claude > /dev/null; then
+        claude mcp remove --scope user "$name" > /dev/null 2>&1 || true
+        claude mcp add --scope user --transport stdio "$name" -- "$cmd" "$@" \
+            || record_build_failure "other" "$name (Claude Code)" "claude mcp add failed"
+    fi
+    if command -v codex > /dev/null; then
+        codex mcp remove "$name" > /dev/null 2>&1 || true
+        codex mcp add "$name" -- "$cmd" "$@" \
+            || record_build_failure "other" "$name (Codex)" "codex mcp add failed"
+    fi
+    llm_opencode_mcp_add "$name" "$cmd" "$@"
+    llm_vibe_mcp_add "$name" "$cmd" "$@"
+    llm_hermes_mcp_add "$name" "$cmd" "$@"
 }
 
 function llm_nodejs_install() {
@@ -161,15 +226,25 @@ function hermes_agent_soft_install() {
     hermes --version || record_build_failure "other" "hermes-agent" "hermes --version failed after install"
 }
 
+# _llm_sparse_clone <url> <dest> <path>: shallow, blobless clone holding only <path> (and the
+# top-level files); retry-safe. `git pull --ff-only` keeps working on it.
+function _llm_sparse_clone() {
+    rm -rf "$2"
+    git clone -q --depth 1 --filter=blob:none --sparse "$1" "$2" \
+        && git -C "$2" sparse-checkout set "$3"
+}
+
 function llm_skills_install() {
     # Skill packs shared by every agent. All of them are rendered; the default set is enabled
     # (Trail of Bits, farmage, Floorplan, Cloudflare's security-audit, Strix, ARTEX and one index
     # skill standing for the 818 cybersecurity skills, whose descriptions alone would add ~80K
-    # tokens to every turn).
+    # tokens to every turn). Decepticon: its index skill plus its IoT, wireless and ICS/OT skills.
     goodecho "[+] Installing agent skill packs"
     install_dependencies "git python3"
     mkdir -p "$LLM_SKILLS_ROOT/src"
-    local spec name url
+    local spec name url sub
+    # "<name> <url> [<path>]": with a path, only that subtree is fetched (Decepticon's repo is ~90 MB,
+    # its skills ~10 MB). Decepticon moved from PurpleAILAB/Decepticon, which redirects there.
     for spec in \
         "trailofbits https://github.com/trailofbits/skills.git" \
         "farmage https://github.com/farmage/opencode-skills.git" \
@@ -179,12 +254,15 @@ function llm_skills_install() {
         "strix https://github.com/usestrix/strix.git" \
         "artex https://github.com/BaaRai/ARTEX.git" \
         "ponytail https://github.com/DietrichGebert/ponytail.git" \
-        "caveman https://github.com/JuliusBrussee/caveman.git"; do
-        name="${spec%% *}"
-        url="${spec#* }"
+        "caveman https://github.com/JuliusBrussee/caveman.git" \
+        "decepticon https://github.com/BitterSecurity/Decepticon.git packages/decepticon/decepticon/skills"; do
+        read -r name url sub <<< "$spec"
         if [ -d "$LLM_SKILLS_ROOT/src/$name/.git" ]; then
             git -C "$LLM_SKILLS_ROOT/src/$name" pull --ff-only \
                 || criticalecho-noexit "[!] $name skills: git pull failed, keeping the current checkout"
+        elif [ -n "$sub" ]; then
+            installfromnet _llm_sparse_clone "$url" "$LLM_SKILLS_ROOT/src/$name" "$sub" \
+                || record_build_failure "git" "$name skills" "sparse clone failed: $url ($sub)"
         elif ! installfromnet git clone --depth 1 "$url" "$LLM_SKILLS_ROOT/src/$name"; then
             record_build_failure "git" "$name skills" "clone failed: $url"
         fi
@@ -197,6 +275,12 @@ function llm_skills_install() {
     fi
     llm-skills enable trailofbits farmage floorplan cybersecurity-skills cloudflare strix artex \
         || record_build_failure "other" "llm-skills" "enabling the default skill set failed"
+    # Decepticon: its index skill and the RF/hardware categories natively, the other ~260 through
+    # the index (`llm-skills search`, `llm-skills enable decepticon:<keyword>`)
+    if [ -d "$LLM_SKILLS_ROOT/src/decepticon/.git" ]; then
+        llm-skills enable decepticon-skills decepticon:iot decepticon:wireless decepticon:ics-ot ics-overview \
+            || record_build_failure "other" "llm-skills" "enabling the Decepticon index and RF skills failed"
+    fi
 
     # farmage's OpenCode workflow commands (/common-ground, /planning/..., as its installer does)
     if [ -d "$LLM_SKILLS_ROOT/src/farmage/.opencode/commands" ]; then
@@ -322,6 +406,85 @@ EOF
     return 0
 }
 
+# pentest-ai (0xSteph, MIT): PyPI `ptai`, an offensive-security MCP server for the coding agents
+# (wrapped scanners, specialist agents, probes that re-verify their findings) and the `ptai` CLI.
+# Upstream installs it with pipx; here uv (as Strix), on Python 3.12. Builds take the newest PyPI
+# release; PENTESTAI_REVIEWED_VERSION is the last one read for this install (MCP launch command,
+# acceptable-use consent, opt-in telemetry, PyPI version check), and a newer build adds a "review"
+# entry to the build report.
+# Acceptable Use Policy: `ptai start` asks for it once and records the answer in
+# ~/.pentest-ai/aup-consent.txt, but its MCP tools never ask. The image does not accept it for the
+# operator: the agents start the server through `ptai-mcp`, which refuses to start until that file
+# exists, and `ptai-aup` shows pentest-ai's own prompt.
+PENTESTAI_REVIEWED_VERSION="1.6.2"   # read 2026-11-24
+
+function pentestai_soft_install() {
+    goodecho "[+] Installing pentest-ai (ptai)"
+    if ! command -v uv > /dev/null; then
+        record_build_failure "toolchain" "pentest-ai" "uv unavailable"
+        return 0
+    fi
+    install_dependencies "python3"
+    if ! installfromnet uv tool install --force --python 3.12 ptai; then
+        record_build_failure "pip" "pentest-ai" "uv tool install ptai failed"
+        return 0
+    fi
+    local bin ver py
+    for bin in ptai pentest-ai; do
+        [ -e "$HOME/.local/bin/$bin" ] && ln -sf "$HOME/.local/bin/$bin" "/usr/local/bin/$bin"
+    done
+    if ! ver=$(ptai --version 2>/dev/null); then
+        record_build_failure "other" "pentest-ai" "ptai --version failed after install"
+        return 0
+    fi
+    ver=$(printf '%s' "$ver" | grep -oE '[0-9]+(\.[0-9]+)+' | head -n1 || true)
+    if [ -n "$ver" ] && [ "$ver" != "$PENTESTAI_REVIEWED_VERSION" ]; then
+        record_build_failure "review" "pentest-ai" "built ${ver}; last reviewed version is ${PENTESTAI_REVIEWED_VERSION}" || true
+    fi
+    py="$(uv tool dir 2> /dev/null || echo "$HOME/.local/share/uv/tools")/ptai/bin/python"
+
+    # The command the agents run: upstream's `ptai mcp` (stdio), once the AUP is accepted.
+    # PENTEST_AI_AUP_ACCEPTED=1 is pentest-ai's own switch for scripts; the image never sets it.
+    cat > /usr/local/bin/ptai-mcp << 'EOF'
+#!/bin/sh
+# pentest-ai MCP server (stdio), as the agents start it: `ptai mcp`. pentest-ai asks for its
+# Acceptable Use Policy in `ptai start` only, not in its MCP tools, so this wrapper starts the
+# server once the operator has accepted it on this machine: run `ptai-aup` once, in a terminal.
+consent="${PENTEST_AI_CONFIG_DIR:-$HOME/.pentest-ai}/aup-consent.txt"
+case "${PENTEST_AI_AUP_ACCEPTED:-}" in
+    1|true|yes|on) ;;
+    *)  if [ ! -s "$consent" ]; then
+            echo "pentest-ai: its Acceptable Use Policy has not been accepted on this machine." >&2
+            echo "pentest-ai: the operator runs 'ptai-aup' in a terminal, then restarts the agent." >&2
+            exit 1
+        fi ;;
+esac
+exec /usr/local/bin/ptai mcp "$@"
+EOF
+    cat > /usr/local/bin/ptai-aup << EOF
+#!/bin/sh
+# Show pentest-ai's Acceptable Use Policy and record the operator's answer with pentest-ai's own
+# code (engine.aup_consent): "yes" writes ~/.pentest-ai/aup-consent.txt. Revoke: delete that file.
+unset PENTEST_AI_AUP_ACCEPTED
+exec "$py" -I -c '
+import sys
+from engine.aup_consent import CONSENT_PATH, ensure_consent, has_consent
+if has_consent():
+    print(f"pentest-ai: accepted already ({CONSENT_PATH}). Revoke with: rm {CONSENT_PATH}")
+    sys.exit(0)
+if not sys.stdin.isatty():
+    sys.exit("pentest-ai: run ptai-aup in a terminal: the operator has to answer it")
+sys.exit(0 if ensure_consent(interactive=True) else 1)'
+EOF
+    chmod 0755 /usr/local/bin/ptai-mcp /usr/local/bin/ptai-aup
+    "$py" -I -c 'import engine.aup_consent, mcp_server.server' \
+        || record_build_failure "other" "pentest-ai" "its MCP server does not import"
+    # Nothing from the build in the image: no consent, install id or version-check cache
+    rm -rf "$HOME/.pentest-ai"
+    llm_mcp_register pentest-ai /usr/local/bin/ptai-mcp
+    return 0
+}
+
 # LangGraph (LangChain, MIT): a library for writing your own stateful agents as graphs of LLM calls
 # and tools. OPT-IN: llm.docker leaves it commented. Install in a running container with
 #   cd /root/scripts && ./entrypoint.sh langgraph_soft_install
@@ -438,6 +601,131 @@ EOF
     chmod +x /usr/local/bin/artemis-redteam
     artemis-redteam --help > /dev/null 2>&1 \
         || record_build_failure "other" "artemis-redteam" "codex-supervisor --help failed"
+    return 0
+}
+
+# Cairn (oritera, AGPL-3.0): a problem-solving engine validated on AI pentesting. A server keeps a
+# fact/intent graph from an origin to a goal; a dispatcher runs agent CLIs that grow it. OPT-IN:
+# llm.docker leaves it commented. Install in a running container with
+#   cd /root/scripts && ./entrypoint.sh cairn_soft_install
+# Installed from upstream only (AGPL: nothing of Cairn is copied into RF Swift), latest main, in
+# local mode: the workers are this image's `claude` and `codex` CLIs, run as host processes
+# without permission prompts (no Docker). CAIRN_REVIEWED_COMMIT is the last commit read for this
+# install (CLI, server bind, dispatcher config, worker adapters, local backend, uv.lock); a build
+# on a newer commit adds a "review" entry to the build report.
+CAIRN_REVIEWED_COMMIT="8e7e0ea67552383851dfcabfba0c4e9c8d007878"   # read 2026-11-24 (main, 2026-09-07)
+
+function _cairn_clone() {
+    rm -rf "$2"
+    git clone -q --depth 1 "$1" "$2"
+}
+
+function cairn_soft_install() {
+    goodecho "[+] Installing Cairn (opt-in), latest main"
+    if ! command -v uv > /dev/null; then
+        record_build_failure "toolchain" "cairn" "uv unavailable"
+        return 0
+    fi
+    install_dependencies "git"
+    local dir=/opt/cairn head req
+    head=$(git ls-remote https://github.com/oritera/Cairn.git HEAD 2>/dev/null | awk '{print $1}' || true)
+    if [ -n "$head" ] && [ "$head" != "$CAIRN_REVIEWED_COMMIT" ]; then
+        goodecho "[!] Cairn main is at ${head:0:12}, newer than the reviewed commit ${CAIRN_REVIEWED_COMMIT:0:12}"
+        record_build_failure "review" "cairn" "built main at ${head:0:12}; last reviewed commit is ${CAIRN_REVIEWED_COMMIT:0:12}" || true
+    fi
+    if ! installfromnet _cairn_clone https://github.com/oritera/Cairn.git "$dir"; then
+        record_build_failure "git" "cairn" "clone failed"
+        return 0
+    fi
+    # Its uv project (cairn/), with the versions and SHA-256 hashes of upstream's uv.lock. The lock
+    # points at a PyPI mirror (mirrors.aliyun.com, its pyproject's default index): the same files
+    # are fetched from PyPI and checked against those hashes. The venv is the project's own
+    # (cairn/.venv, ignored by git); Cairn itself is installed editable, so a `git pull` applies.
+    req=$(mktemp)
+    if ! (cd "$dir/cairn" && uv export --frozen --no-dev --no-emit-project --no-header \
+              --format requirements-txt -o "$req") \
+        || ! uv venv --python 3.13 "$dir/cairn/.venv" \
+        || ! installfromnet uv pip install --no-config --python "$dir/cairn/.venv/bin/python" \
+              --index-url https://pypi.org/simple --require-hashes -r "$req" \
+        || ! uv pip install --no-config --python "$dir/cairn/.venv/bin/python" \
+              --index-url https://pypi.org/simple --no-deps -e "$dir/cairn"; then
+        record_build_failure "pip" "cairn" "install of its uv project failed"
+        rm -f "$req"
+        return 0
+    fi
+    rm -f "$req"
+
+    # Ready local-mode dispatcher config (from upstream's dispatch.local.example.yaml): Claude Code
+    # for every task, Codex for explore tasks, one project and two workers at a time. dispatch.yaml
+    # is in upstream's .gitignore. ~/.config/cairn/dispatch.yaml, when present, is used instead.
+    cat > "$dir/dispatch.yaml" << 'EOF'
+# Cairn dispatcher, local mode, for the RF Swift llm image (`cairn dispatch` uses it).
+# To change it: cp /opt/cairn/dispatch.yaml ~/.config/cairn/dispatch.yaml and edit that copy.
+# The workers are this image's claude and codex CLIs, run as processes of this container with
+# their own sign-in (`claude` then /login, `codex login`), no permission prompts and no sandbox
+# other than the container. Authorized targets only. Remove a worker whose CLI is not signed in.
+server: "http://127.0.0.1:8000"
+
+runtime:
+  execution: local
+  worker_healthcheck: disabled   # no API endpoint to probe; startup checks the CLIs are on PATH
+  max_workers: 2                 # conservative: every worker is a full agent session on this host
+  max_running_projects: 1
+  max_project_workers: 2
+  interval: 3
+  healthcheck_timeout: 15
+  prompt_group: "default"
+
+tasks:
+  bootstrap:
+    timeout: 120
+    conclude_timeout: 30
+  reason:
+    timeout: 45
+  explore:
+    timeout: 600
+    conclude_timeout: 120
+
+local:
+  workspace_root: "~/cairn-runs"   # one directory per project
+  completed_action: keep           # keep | remove
+
+workers:
+  - name: "local-claude"
+    type: "claudecode"
+    task_types: [bootstrap, reason, explore]
+    max_running: 1
+    priority: 0
+    env:
+      # Claude Code refuses --dangerously-skip-permissions (how Cairn runs it) as root unless
+      # told it is in a sandbox; the container is the sandbox here. Only this worker gets it.
+      IS_SANDBOX: "1"
+
+  - name: "local-codex"
+    type: "codex"
+    task_types: [explore]
+    max_running: 1
+    priority: 1
+EOF
+    cat > /usr/local/bin/cairn << 'EOF'
+#!/bin/sh
+# Cairn (oritera, AGPL-3.0), opt-in install in /opt/cairn. Authorized targets only.
+#   cairn serve       API and web UI on http://127.0.0.1:8000 (loopback unless you pass --host)
+#   cairn dispatch    local-mode dispatcher: ~/.config/cairn/dispatch.yaml, else /opt/cairn/dispatch.yaml
+# The server has no authentication: do not publish or forward port 8000 beyond this machine.
+case "$1" in
+    serve)
+        case " $* " in *" --host"*) ;; *) shift; set -- serve --host 127.0.0.1 "$@" ;; esac ;;
+    dispatch)
+        case " $* " in *" --config"*) ;; *)
+            cfg=/opt/cairn/dispatch.yaml
+            [ -f "$HOME/.config/cairn/dispatch.yaml" ] && cfg="$HOME/.config/cairn/dispatch.yaml"
+            shift; set -- dispatch --config "$cfg" "$@" ;; esac ;;
+esac
+exec /opt/cairn/cairn/.venv/bin/cairn "$@"
+EOF
+    chmod 0755 /usr/local/bin/cairn
+    cairn --help > /dev/null 2>&1 || record_build_failure "other" "cairn" "cairn --help failed after install"
     return 0
 }
 

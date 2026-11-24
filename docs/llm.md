@@ -20,8 +20,10 @@ Coding agents, shared skill packs, agent-side reverse-engineering tools, local s
 | Strix (AI pentest agent) | `strix` | PyPI `strix-agent` (uv tool, Python 3.12) | `~/.strix/` |
 | Vulnhuntr (Protect AI) | `vulnhuntr` | `protectai/vulnhuntr`, latest main (uv tool, Python 3.10) | API keys from the environment |
 | CodeGraph | `codegraph` (MCP server `codegraph serve --mcp`) | npm `@colbymchenry/codegraph` | per project: `.codegraph/` |
+| pentest-ai | `ptai`, `ptai-aup` (MCP server `ptai-mcp`, i.e. `ptai mcp`) | PyPI `ptai` (uv tool, Python 3.12) | `~/.pentest-ai/` |
 | ARTEMIS (multi-agent red teaming, **opt-in**) | `artemis-redteam` | Stanford-Trinity/ARTEMIS @ reviewed commit (Codex fork from source, uv Python 3.12) | `~/.artemis-redteam/` |
 | LangGraph (agent framework, **opt-in**) | `langgraph`, `langgraph-python` | PyPI `langgraph`, `langgraph-cli[inmem]`, `langchain-anthropic`, `langchain-openai`, `langchain-mcp-adapters` (venv `/opt/langgraph`) | per project |
+| Cairn (fact-graph pentest engine, **opt-in**) | `cairn` (`cairn serve`, `cairn dispatch`) | `oritera/Cairn`, latest main, `/opt/cairn` (uv project, Python 3.13) | `~/.local/share/cairn/`, `~/.config/cairn/dispatch.yaml` |
 | Semgrep | `semgrep` | PyPI `semgrep` | `~/.semgrep/` |
 
 Node.js 24 LTS is in `/usr/local` (Ubuntu's 22.22 is too old for REA).
@@ -59,7 +61,7 @@ a fresh container once), or rerun the setup steps below after the first start.
 
 ## Skills
 
-Every agent reads the same skills. They come from six packs:
+Every agent reads the same skills. They come from these packs:
 
 | Pack | Skills | Enabled by default |
 |---|---:|---|
@@ -72,6 +74,7 @@ Every agent reads the same skills. They come from six packs:
 | `artex` ([BaaRai/ARTEX](https://github.com/BaaRai/ARTEX)): web/API recon and audit playbooks (api-recon, api-security, codeaudit, patch-diff, php2shell, edr-bypass-re, bbot-recon, playwright-cli, rea, scopesentry) | 10 | yes |
 | `ponytail` ([DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail)): write only what the task needs (reuse what exists, never cut validation, error handling or security), plus `/ponytail-review` and `/ponytail-audit` | 6 | no |
 | `caveman` ([JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman)): terser answers (`/caveman`, `/ultracave`) and focused workflow skills (review, commit, surgical-patch, safe-refactor, verify-and-stop...) | 16 | no |
+| `decepticon` ([BitterSecurity/Decepticon](https://github.com/BitterSecurity/Decepticon), formerly PurpleAILAB, Apache-2.0): offensive playbooks by category (IoT and sub-GHz/BLE/Zigbee/Z-Wave/LoRaWAN, Wi-Fi, ICS/OT protocols, web/API, AD, cloud, post-exploitation and C2, reversing, mobile, smart contracts, phishing, LLM red teaming, APT emulation) | 297 | IoT, wireless and ICS/OT (34), the rest through one index skill |
 
 Some `artex` skills drive tools that ship in the separate ARTEX image rather than here
 (`bbot-recon` needs bbot/subfinder/httpx, `playwright-cli` needs the Playwright browsers,
@@ -88,9 +91,9 @@ application's LLM calls through the Caveman gateway, `-discover`, `-evidence-rev
 
 Agents send the name and description of every enabled skill to the model on each turn. The
 default set costs about 20K tokens; all 818 cybersecurity skills would add about 80K. So that
-pack is represented by a single `cybersecurity-skills` index skill: the agent runs
-`llm-skills search <words>` and reads the matching `SKILL.md`. Register the ones you use
-natively when you want them offered automatically:
+pack is represented by a single `cybersecurity-skills` index skill (Decepticon likewise by
+`decepticon-skills`): the agent runs `llm-skills search <words>` and reads the matching
+`SKILL.md`. Register the ones you use natively when you want them offered automatically:
 
 ```sh
 llm-skills status                                   # what is enabled, and its cost per turn
@@ -99,6 +102,8 @@ llm-skills list cybersecurity                       # ids and subdomains of one 
 llm-skills search kerberos delegation               # search every pack, enabled or not
 llm-skills enable cybersecurity:web-application-security   # a subdomain, tag or id fragment
 llm-skills enable --project cybersecurity:forensics # only for the project in the current folder
+llm-skills search --pack decepticon flipper         # one pack; keywords and tags count too
+llm-skills enable decepticon:active-directory       # a Decepticon category
 llm-skills disable farmage                          # a whole pack
 llm-skills update                                   # git pull every pack and re-render
 ```
@@ -124,6 +129,42 @@ commands, agents and hooks some plugins add on top of their skills:
 `/plugin install <name>@trailofbits` in Claude Code, `codex plugin add <name>@trailofbits`.
 The plugin's skills then appear twice (`<plugin>:<skill>` and the plain one); disable the plain
 one with `llm-skills disable <id>` if that bothers you.
+
+### Decepticon
+
+Only Decepticon's skills tree is fetched: a sparse, blobless checkout of
+`packages/decepticon/decepticon/skills` (about 14 MB instead of the 90 MB repository), which
+`llm-skills update` pulls like the other packs. Decepticon itself (its agents, sandbox and web UI)
+is not installed. Of its 329 skills, 297 are kept. Left out as platform-internal: the CTF benchmark
+marker, the role prompts of its vulnerability-research pipeline (`plugins/scanner`, `detector`,
+`verifier`, `patcher`, `exploiter`, `vulnresearch`), its orchestrator skills (`standard/decepticon`),
+its planning agent's templates (`standard/soundwave`), its finding workflow (`finding-protocol`,
+`finding_reporter`) and the reference catalogue its tools serve (`shared/references`).
+
+- **What is enabled.** The IoT, wireless and ICS/OT skills are enabled
+  (`decepticon:iot`, `decepticon:wireless`, `decepticon:ics-ot` and `ics-overview`: 34 skills,
+  about 2K tokens per turn). The other ~260 (about 14K tokens if all were enabled) are reached
+  through the `decepticon-skills` index skill, which lists each category and its overview skill,
+  and through `llm-skills search --pack decepticon <words>`. Enable a category with
+  `llm-skills enable decepticon:<keyword>`.
+- **Ids and links.** A skill's id is its frontmatter `name`. Upstream keeps names unique, and
+  several directory names repeat (`specialist-methods` sixteen times). A name already used by an
+  earlier pack is renamed `decepticon-<name>`, with its `name` rewritten to match; `render` prints
+  each rename. There is no clash today. Decepticon's in-sandbox paths (`/skills/standard/...`) are
+  rewritten to the local copies, so category overviews link to the rendered skills. A category's
+  sub-skills are not linked inside its folder, so an agent never sees them twice.
+- **Platform note.** Many skills call Decepticon's own tools: its knowledge graph (`kg_add_node`,
+  `kg_query`...), its sandbox shell (`bash(command=..., session=...)`), finding validators,
+  `load_skill`, and the hosted run's C2, Ghidra and REA bridges. Those tools do not exist here. In
+  the skills that reference one (88 at the current upstream commit), `render` inserts a short note
+  after the frontmatter. The note names the tools and says what to do instead: run the commands
+  directly, use tmux for persistent sessions, and record results with your own notes and findings
+  tools (for example the RF Swift Workbench MCP tools `write_note`, `save_finding` and
+  `save_secret` when they are connected). Apart from that note, the rewritten paths and a renamed
+  `name`, upstream's text is unchanged.
+- The sub-GHz playbook expects radio hardware (HackRF, Flipper Zero, RTL-SDR, YARD Stick One) and
+  tools (`rfcat`, URH, `rtl_433`, `inspectrum`) that are in the RF Swift SDR images (`sdr_light`
+  and up), not in `llm`.
 
 ## Strix
 
@@ -195,6 +236,53 @@ Things to know:
   `scripts/llm_software.sh` records the last commit that was reviewed. A build on a newer commit
   adds a `review` entry to the build report.
 - **Packaging fix:** the install adds `requests`, which upstream imports but does not declare.
+
+## pentest-ai
+
+[pentest-ai](https://github.com/0xSteph/pentest-ai) (0xSteph, MIT; PyPI `ptai`) is an
+offensive-security MCP server: wrapped scanners, specialist agents, and probes that re-run each
+exploit before reporting a finding. The image installs it with uv on Python 3.12 (upstream suggests
+pipx) and registers it, as `pentest-ai`, with Claude Code, Codex, OpenCode, Mistral Vibe and Hermes.
+
+**Accept its Acceptable Use Policy first.** The image does not accept it for you. Run this once,
+as the operator, in a terminal:
+
+```sh
+ptai-aup          # pentest-ai's own prompt: you have written authorization for every target, and accept the AUP and Terms
+```
+
+Answering `yes` writes `~/.pentest-ai/aup-consent.txt`. Mount `~/.pentest-ai` to keep it, along
+with pentest-ai's findings database. `rm ~/.pentest-ai/aup-consent.txt` revokes it. Upstream asks
+only in `ptai start`; its MCP tools never ask. So the agents start the server through `ptai-mcp`,
+which runs upstream's `ptai mcp` (stdio) only once that file exists. Until then an agent shows the
+server as failed, and you restart the agent after accepting. `PENTEST_AI_AUP_ACCEPTED=1` is
+pentest-ai's own switch for scripts. Set it only if you accept the AUP that way; the image never
+sets it.
+
+Then ask an agent, for an authorized target: "with pentest-ai, start an engagement against
+https://staging.example.test, scope web". Or use the CLI directly:
+
+```sh
+ptai doctor                       # what it finds on this machine
+ptai setup --list                 # external tools it can drive, installed or missing
+ptai start https://staging.example.test --scope web
+ptai setup --mcp --dry-run        # what upstream's own MCP setup would write (the build did it already)
+```
+
+Things to know:
+
+- **MCP entry:** `ptai-mcp` everywhere. It is the command `ptai setup --mcp` registers
+  (`claude mcp add --scope user --transport stdio pentest-ai -- ptai mcp`, the same with
+  `codex mcp add`), behind the AUP check. OpenCode gets `mcp.servers.pentest-ai` in
+  `~/.config/opencode/opencode.json` and Hermes `mcp_servers.pentest-ai` in `~/.hermes/config.yaml`.
+  Upstream's setup knows neither of them.
+- **Nothing goes home.** Upstream telemetry is opt-in, and the image also sets
+  `PENTEST_AI_TELEMETRY=0`. The PyPI "update available" check of `ptai start` / `ptai doctor` is off
+  (`PTAI_SKIP_VERSION_CHECK=1`). Scan traffic carries a `pentest-ai/<version> (rv:<install id>)`
+  User-Agent; the id is generated per container, never at build time.
+- **Version:** builds take the newest PyPI release. `PENTESTAI_REVIEWED_VERSION` in
+  `scripts/llm_software.sh` is the last one read for this install, and a newer build adds a `review`
+  entry to the build report.
 
 ## ARTEMIS (opt-in)
 
@@ -335,6 +423,59 @@ The "Studio UI" link it prints is a page on smith.langchain.com that your browse
 at the local server. The page comes from LangChain and your graph's data passes through it in the
 browser. Leave it closed and use the REST API if that matters for the engagement.
 
+## Cairn (opt-in)
+
+[Cairn](https://github.com/oritera/Cairn) (oritera, **AGPL-3.0**) solves a problem by searching
+from an origin (a target) to a goal (a shell, a flag). A server keeps the graph of confirmed facts
+and planned intents, and a dispatcher runs agent CLIs that read the whole graph, decide what to
+explore next and write back what they found. You can add hints at any time. Its authors validated
+it on AI penetration testing. It is **not in the default build**; install it in a running
+container:
+
+```sh
+cd /root/scripts && ./entrypoint.sh cairn_soft_install
+```
+
+It is cloned from upstream into `/opt/cairn` (latest `main`) and set up as its own uv project.
+Nothing of Cairn is copied into RF Swift. Its dependencies are the exact versions and SHA-256 hashes
+of upstream's `uv.lock`. That lock points at a PyPI mirror (`mirrors.aliyun.com`), so the same
+files are fetched from PyPI and checked against those hashes.
+
+The image uses Cairn's **local mode**: the workers are this image's `claude` and `codex` CLIs,
+run as processes of the container with your sign-ins (`claude` then `/login`, `codex login`). No
+Docker and no API keys go in the config. Run the server and the dispatcher in two terminals:
+
+```sh
+cairn serve       # API and web UI on http://127.0.0.1:8000; facts in ~/.local/share/cairn/cairn.db
+cairn dispatch    # runs the workers; each project works in ~/cairn-runs/<project>/
+```
+
+Create a project (origin, goal) in the web UI, watch the graph grow, and add hints.
+
+Things to know:
+
+- **Loopback only.** `cairn serve` binds `127.0.0.1:8000` (its own default, which the wrapper
+  passes explicitly unless you give `--host`). The server has **no authentication**: anyone who
+  reaches it can start projects that the dispatcher hands to the agents. Don't publish port 8000.
+  With host networking, the container's loopback is the host's, and the host's browser reaches it
+  as it is. Otherwise forward it over SSH. Or publish it on the host's loopback only
+  (`-p 127.0.0.1:8000:8000`) and run `cairn serve --host 0.0.0.0`, which also opens it to other
+  containers on that Docker network.
+- **The agents run without permission prompts.** Cairn starts `claude --dangerously-skip-permissions -p`
+  and `codex exec --dangerously-bypass-approvals-and-sandbox`, as root, inside this container. The
+  container is their only sandbox. Claude Code refuses that flag as root unless `IS_SANDBOX=1`, so
+  the config sets it for the Claude worker only. Authorized targets only.
+- **Config:** `/opt/cairn/dispatch.yaml`, written from upstream's `dispatch.local.example.yaml`.
+  Claude Code takes every task type and Codex takes explore tasks. One project and two workers run
+  at a time. To change it, copy it to `~/.config/cairn/dispatch.yaml` (used first) and edit the
+  copy, for example to drop the Codex worker if Codex is not signed in. `cairn dispatch --config FILE`
+  takes any other file. Reinstalling rewrites `/opt/cairn`.
+- **Version:** builds take the latest `main`. `CAIRN_REVIEWED_COMMIT` in `scripts/llm_software.sh`
+  is the last commit read for this install, and a build on a newer one adds a `review` entry to the
+  build report.
+- **Licence:** AGPL-3.0 for personal and educational use; upstream asks commercial users to
+  contact them for a commercial licence.
+
 ## OpenCode
 
 ### Skills
@@ -349,17 +490,18 @@ farmage's workflow commands are installed in `~/.config/opencode/commands`: `/co
 `/discovery/create`, `/planning/epic-plan`, `/execution/execute-ticket`... They expect the
 Atlassian MCP server (Jira, Confluence), which you add yourself.
 
-### MCP servers (REA, Craft Anything)
+### MCP servers (REA, Craft Anything, CodeGraph, pentest-ai)
 
-The build registered both in `~/.config/opencode/opencode.json`. Check them with:
+The build registered them in `~/.config/opencode/opencode.json`. Check them with:
 
 ```sh
 opencode mcp list
 ```
 
 It asks OpenCode's background server, which starts the servers on first use: right after a
-fresh start it can print `No MCP servers configured`. Run it again after ~20 s and both show
-`✓ connected`.
+fresh start it can print `No MCP servers configured`. Run it again after ~20 s and they show
+`✓ connected`. pentest-ai shows as failed until its Acceptable Use Policy is accepted with
+`ptai-aup` (see [pentest-ai](#pentest-ai)).
 
 MCP tools cost context on every turn too. Turn one off for a while with `"disabled": true` on
 its entry (V2 format, under `mcp.servers.<name>`) or in the `/mcps` menu.
@@ -519,11 +661,58 @@ are restored from the data directory on the next attach.
 > Licensed BUSL-1.1 (each release converts to MIT four years after publication): internal and
 > non-competing use is permitted; offering it as a competing hosted product/service is not.
 
+## Design decisions
+
+Choices made when the Decepticon pack, pentest-ai and Cairn were added, and why.
+
+- **Decepticon is fetched from `BitterSecurity/Decepticon`.** `PurpleAILAB/Decepticon` now
+  redirects there. Following a redirect would keep working only as long as nobody re-registers
+  the old name, so the build names the current repository.
+- **Only Decepticon's skills, and only some of them enabled.** The pack is a sparse, blobless
+  checkout of `packages/decepticon/decepticon/skills` (14 MB instead of 90 MB); Decepticon's
+  agents, sandbox and web UI are not installed. Skills that only make sense inside its platform
+  are left out ([Decepticon](#decepticon)). Every enabled skill costs context on every turn, so
+  only the IoT, wireless and ICS/OT skills are enabled; the rest are one `llm-skills enable` or
+  `search` away.
+- **A note instead of edited skills.** Skills that call Decepticon-only tools keep upstream's
+  text; `render` inserts a short note naming those tools and what to do instead. A rewrite would
+  drift from upstream at every `llm-skills update`.
+- **Frontmatter is read more completely, for every pack.** `subdomain`, `tags` and `when_to_use`
+  are read from under `metadata:` too, and tags written as a comma-separated string or `[a, b]`
+  are split. Before, those tags were ignored. The side effect is wider matches for existing packs
+  in `llm-skills search` and `enable <pack>:<keyword>`; check with `llm-skills list <pack>` before
+  enabling a broad keyword.
+- **pentest-ai's consent is enforced in front of its MCP server.** Upstream asks for its
+  acceptable-use consent only in `ptai start`; its MCP tools do not check it, so agents could use
+  it without anyone having accepted. The agents are registered with `ptai-mcp`, which starts
+  `ptai mcp` only once `ptai-aup` recorded the operator's acceptance (or
+  `PENTEST_AI_AUP_ACCEPTED` is set). The image never accepts it on anyone's behalf: build state in
+  `~/.pentest-ai` is removed and the variable is never set. Until then the agents show the server
+  as failed.
+- **Reviewed versions are recorded, not pinned silently.** `PENTESTAI_REVIEWED_VERSION` and
+  `CAIRN_REVIEWED_COMMIT` mark the release or commit whose launch command, consent, telemetry,
+  bind address and configuration were read. They are not a full code audit; a newer upstream
+  appears in the build report as unreviewed.
+- **Cairn is opt-in and runs its agents without prompts.** Cairn drives `claude` and `codex`
+  non-interactively (`--dangerously-skip-permissions`, `--dangerously-bypass-approvals-and-sandbox`)
+  as root, so the container is their only sandbox. Claude Code refuses that flag as root unless
+  `IS_SANDBOX=1`; it is set only in Cairn's Claude worker environment, never image-wide. Cairn's
+  API has no authentication, so `cairn serve` binds to 127.0.0.1. Only build it for an
+  isolated, authorized target. See [Cairn](#cairn-opt-in).
+- **Cairn's dependencies come from PyPI, checked against its lock.** Upstream's `uv.lock` points
+  at a PyPI mirror (`mirrors.aliyun.com`). The exact versions and SHA-256 hashes of that lock are
+  installed from PyPI with hash checking; all 26 hashes match the files PyPI publishes.
+- **AGPL code is installed, not copied.** Cairn (AGPL-3.0, with a separate commercial licence
+  upstream) is cloned from its own repository at build time; nothing of it is part of RF Swift.
+- **The RF Swift Workbench skills are not in this image.** They drive radios and probes through the
+  Workbench's mission tools, and this image has neither; the Workbench installs them in each
+  mission's agent workspace.
+
 ## Updating
 
 ```sh
 npm update -g @anthropic-ai/claude-code @openai/codex @opencode/cli rea-agents
-uv tool upgrade mistral-vibe
+uv tool upgrade mistral-vibe ptai
 uv tool install --force --python 3.11 --torch-backend cpu open-webui
 hermes update
 llm-skills update

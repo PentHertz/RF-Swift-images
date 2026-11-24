@@ -6,6 +6,8 @@ Packs are git checkouts under /opt/llm-skills/src. `render` writes one directory
 skill under /opt/llm-skills/rendered/<id>: a SKILL.md copy whose Claude-only path
 placeholders ({baseDir}, ${CLAUDE_SKILL_DIR}, ${CLAUDE_PLUGIN_ROOT}) are replaced by
 absolute paths, so every agent finds the skill's files, plus symlinks to everything else.
+Skills written for another platform (Decepticon) also get their in-platform skill paths
+rewritten to the local copies, and a short note when they call that platform's own tools.
 
 Enabling a skill symlinks rendered/<id> into the skill folders the agents read:
   ~/.agents/skills   OpenCode, Codex, Mistral Vibe, Hermes (skills.external_dirs)
@@ -46,9 +48,55 @@ PACKS = {
     "caveman": {"glob": "caveman/skills/*", "url": "https://github.com/JuliusBrussee/caveman",
                 "exclude": ["caveman-setup", "caveman-discover", "caveman-evidence-review",
                             "caveman-manage", "caveman-optimize", "caveman-learn"]},
+    # Decepticon (sparse checkout of its skills tree). Skills nest at any depth under "root"
+    # (<category>/SKILL.md is the category's index skill); "include"/"exclude" are paths
+    # relative to it. Left out as platform-internal: the CTF benchmark marker, the
+    # vulnresearch pipeline role prompts (plugins/<stage>), the orchestrator, planning
+    # (Soundwave) and finding-workflow skills, and the reference catalogue served by its tools.
+    "decepticon": {"root": "decepticon/packages/decepticon/decepticon/skills",
+                   "include": ["standard", "shared/adversary-emulation", "shared/defense-evasion",
+                               "shared/opsec", "shared/stealth-infra", "plugins/llm-redteam",
+                               "plugins/verifier/bounty-report", "plugins/verifier/seven-question-gate"],
+                   "exclude": ["standard/decepticon", "standard/soundwave", "standard/finding_reporter"],
+                   # skill id = frontmatter name (unique upstream, unlike the directory names);
+                   # one already taken by an earlier pack gets the prefix, and its name is rewritten
+                   "id_from_name": True, "id_prefix": "decepticon-",
+                   # Decepticon's in-sandbox path for "root", rewritten to the local copies
+                   "vroot": "/skills/",
+                   "platform": "Decepticon", "platform_tools": "decepticon",
+                   "index": "decepticon-skills",
+                   "url": "https://github.com/BitterSecurity/Decepticon"},   # formerly PurpleAILAB/Decepticon
 }
 INDEX_ID = "cybersecurity-skills"   # generated index skill for the cybersecurity pack
-DEFAULTS = ["trailofbits", "farmage", "floorplan", "cloudflare", "strix", "artex", INDEX_ID]
+DECEPTICON_INDEX_ID = PACKS["decepticon"]["index"]
+INDEX_IDS = {INDEX_ID: "cybersecurity-index", DECEPTICON_INDEX_ID: "decepticon-index"}
+# RF/hardware categories of Decepticon registered natively; the rest through its index skill
+# ("decepticon:ics" would also match tags such as "forensics": ICS/OT is ics-ot plus its index)
+DECEPTICON_DEFAULTS = ["decepticon:iot", "decepticon:wireless", "decepticon:ics-ot", "ics-overview"]
+DEFAULTS = ["trailofbits", "farmage", "floorplan", "cloudflare", "strix", "artex", INDEX_ID,
+            DECEPTICON_INDEX_ID] + DECEPTICON_DEFAULTS
+
+# Decepticon platform tools that its skills call: kg_* is its knowledge graph, bash(...) its sandbox
+# shell with named sessions, c2_*/sliver_*/ghidra_*/rea_open_binary the hosted run's MCP companions.
+# Outside the platform they do not exist; render() puts a note after the frontmatter of every skill
+# that references one (as name(...) or `name`).
+PLATFORM_TOOLS = {"decepticon": """
+    kg_add_node kg_add_edge kg_add_candidate kg_query kg_neighbors kg_stats kg_record kg_ingest
+    kg_ingest_sarif kg_ingest_nmap_xml kg_ingest_nuclei_jsonl kg_ingest_httpx_jsonl kg_triage_binary
+    kg_scan_solidity kg_dedupe_findings bash_output bash_kill bash_status ops_start ops_status ops_stop
+    ops_cleanup_engagement load_skill find_skill plan_attack_chains suggest_objectives_from_chains
+    validate_finding validate_workspace_finding verify_evidence create_finding update_finding
+    cvss_score metadata_endpoints payload_search payload_classes methodology_lookup oneliner_search
+    rank_candidates scan_shard slither_ingest solidity_scan solidity_scan_file foundry_reentrancy_test
+    foundry_access_test foundry_flashloan_test adcs_audit tfstate_audit k8s_audit iam_policy_audit
+    bhce_cypher bhce_status bhce_ingest_zip bh_ingest_zip bh_ingest_json bin_identify bin_packer
+    bin_strings bin_symbols_report bin_r2_script bin_ghidra_script bin_rop cve_lookup cve_poc_lookup
+    cve_by_package cve_enrich_dependencies rea_call_tool rea_find_tools rea_status ref_fetch ref_grep
+    ref_suggest ref_list ref_topic patch_propose patch_verify http_request web_search web_fetch
+    ask_user_question complete_engagement_planning rea_open_binary ghidra_find_tools ghidra_import_file
+    ghidra_get_xrefs_from ghidra_get_xrefs_to bh_cypher c2_ensure c2_status c2_find_tools c2_stage_artifact
+    c2_import_artifact sliver_start_http_listener sliver_generate_implant sliver_list_sessions sliver_list_beacons
+""".split()}
 
 
 def die(msg):
@@ -63,13 +111,36 @@ def target_dirs(project):
 
 # --- frontmatter -----------------------------------------------------------------
 
+NESTED = ("subdomain", "tags", "when_to_use")   # also read from under a top-level `metadata:`
+
+
 def frontmatter(text):
-    """Tolerant reader for the few keys we need: name, description, subdomain, tags."""
+    """Tolerant reader for the few keys we need: name, description, subdomain, tags, when_to_use.
+    subdomain, tags and when_to_use may also sit under `metadata:` (Decepticon, Agent Skills spec);
+    a top-level key wins."""
     m = re.match(r"---\s*\n(.*?)\n---\s*(\n|$)", text, re.S)
     if not m:
         return {}
+    lines, meta = m.group(1).splitlines(), []
+    for i, line in enumerate(lines):
+        if re.fullmatch(r"metadata:\s*", line):
+            j = i + 1
+            while j < len(lines) and (not lines[j].strip() or lines[j][0] in " \t-"):
+                j += 1
+            meta, lines = lines[i + 1:j], lines[:i] + lines[j:]
+            break
+    out = _fm_lines(lines)
+    if meta:
+        ind = min(len(s) - len(s.lstrip()) for s in meta if s.strip())
+        for k, v in _fm_lines([s[ind:] for s in meta]).items():
+            if k in NESTED and k not in out:
+                out[k] = v
+    return out
+
+
+def _fm_lines(lines):
     out, key = {}, None
-    for line in m.group(1).splitlines():
+    for line in lines:
         km = re.match(r"^([A-Za-z_][\w-]*):\s*(.*)$", line)
         if km:
             key, val = km.group(1), km.group(2).strip()
@@ -94,32 +165,123 @@ def frontmatter(text):
     return out
 
 
+def tag_list(v):
+    """tags as a YAML list, a flow list ("[a, b]") or a comma-separated string"""
+    if isinstance(v, list):
+        return [t for t in v if t]
+    if isinstance(v, str):
+        v = v.strip()
+        if v.startswith("[") and v.endswith("]"):
+            v = v[1:-1]
+        return [t.strip().strip("'\"") for t in v.split(",") if t.strip().strip("'\"")]
+    return []
+
+
 # --- render ----------------------------------------------------------------------
 
 def skill_dirs():
     for pack, spec in PACKS.items():
         exclude = set(spec.get("exclude", ()))
-        for d in sorted(SRC.glob(spec["glob"])):
-            if (d / "SKILL.md").is_file() and d.name not in exclude:
-                yield pack, spec, d
+        if "root" not in spec:
+            for d in sorted(SRC.glob(spec["glob"])):
+                if (d / "SKILL.md").is_file() and d.name not in exclude:
+                    yield pack, spec, d
+            continue
+        # nested pack: every SKILL.md under root, filtered by include/exclude path prefixes
+        root = SRC / spec["root"]
+        under = lambda rel, prefixes: any(rel == p or rel.startswith(p + "/") for p in prefixes)
+        for f in sorted(root.rglob("SKILL.md")) if root.is_dir() else ():
+            rel = f.parent.relative_to(root).as_posix()
+            if f.is_file() and under(rel, spec.get("include", [rel])) and not under(rel, exclude):
+                yield pack, spec, f.parent
 
 
-def render_one(pack, spec, src_dir, out):
+def is_skill_tree(p):
+    """a directory holding other skills (nested packs): never linked into a rendered skill"""
+    return p.is_dir() and not p.is_symlink() and next(p.rglob("SKILL.md"), None) is not None
+
+
+def platform_note(spec, text):
+    """Note for skills that call tools of the platform they were written for (None if none)."""
+    tools = PLATFORM_TOOLS.get(spec.get("platform_tools"), ())
+    found = [t for t in tools if re.search(rf"(?<![\w.$/-]){t}\(|`{t}(\([^`\n]*\))?`", text)]
+    if re.search(r"(?<![\w.$/-])bash\(\s*(command\s*=|[\"'])", text):
+        found.insert(0, "bash(...)")
+    if not found:
+        return None
+    plat = spec["platform"]
+    names = ", ".join(f"`{t}`" for t in found)
+    lines = [f"> **Outside {plat}** (note added by RF Swift `llm-skills`): this skill was written for the "
+             f"{plat} platform. {names} {'is a' if len(found) == 1 else 'are'} {plat} platform "
+             f"tool{'' if len(found) == 1 else 's'}, not available here: do not call "
+             f"{'it' if len(found) == 1 else 'them'}."]
+    if any(t.startswith("bash") for t in found):
+        lines.append("> - `bash(command=..., session=...)`: run the command directly in your own shell. "
+                     "A `session` is a persistent shell: use tmux or a background job for long or "
+                     "interactive commands.")
+    graph = ("kg_", "validate_", "verify_", "create_finding", "update_finding", "cvss_")
+    if any(t.startswith(graph) for t in found):
+        lines.append(f"> - `kg_*` ({plat}'s knowledge graph) and its finding tools: record hosts, credentials, "
+                     "findings and evidence with your own notes/findings tools instead, for example the "
+                     "RF Swift Workbench MCP tools `write_note`, `save_finding` and `save_secret` when that "
+                     "server is connected, or Markdown notes in the working directory.")
+    if "load_skill" in found:
+        lines.append("> - `load_skill(\"<path>\")`: read that SKILL.md file (the paths point to the local copies).")
+    if any(t.startswith(("rea_", "ghidra_")) for t in found):
+        lines.append("> - `rea_*`, `ghidra_*`: use the REA MCP server's tools directly when it is registered "
+                     "with you (it drives Ghidra when Ghidra is installed).")
+    if any(not t.startswith(("bash", "load_skill", "rea_", "ghidra_") + graph) for t in found):
+        lines.append("> - the others: do the same work with the command-line tools installed here (follow the "
+                     "skill's standalone path where it has one), or skip that step.")
+    return "\n".join(lines) + "\n"
+
+
+def render_one(pack, spec, src_dir, out, rename=None, pathmap=None):
     if out.is_symlink() or out.is_file():
         out.unlink()
     elif out.exists():
         shutil.rmtree(out)
     out.mkdir(parents=True)
+    nested = "root" in spec
     for entry in src_dir.iterdir():
-        if entry.name != "SKILL.md":
+        if entry.name != "SKILL.md" and not (nested and is_skill_tree(entry)):
             (out / entry.name).symlink_to(entry)
     text = (src_dir / "SKILL.md").read_text(errors="replace")
     text = text.replace("{baseDir}", str(out)).replace("${CLAUDE_SKILL_DIR}", str(out))
     up = spec.get("plugin_root_up")
     if up:
         text = text.replace("${CLAUDE_PLUGIN_ROOT}", str(src_dir.parents[up - 1]))
+    if spec.get("vroot") and pathmap is not None:
+        text = rewrite_vpaths(spec, text, pathmap)
+    m = re.match(r"---\s*\n.*?\n---[ \t]*(\n|$)", text, re.S)
+    if rename and m:
+        # id prefixed after a clash: keep the frontmatter name equal to the directory name
+        head = re.sub(r"(?m)^name:.*$", f"name: {rename}", m.group(0), count=1)
+        text = head + text[m.end():]
+        m = re.match(r"---\s*\n.*?\n---[ \t]*(\n|$)", text, re.S)
+    note = platform_note(spec, text) if m else None
+    if note:
+        text = text[:m.end()] + ("" if m.group(1) else "\n") + "\n" + note + text[m.end():]
     (out / "SKILL.md").write_text(text)
-    return text
+    return text, bool(note)
+
+
+def rewrite_vpaths(spec, text, pathmap):
+    """/skills/<rel>/SKILL.md -> the rendered copy; any other /skills/<path> -> the checkout"""
+    root = SRC / spec["root"]
+    top = sorted(p.name for p in root.iterdir() if p.is_dir())
+    if not top:
+        return text
+
+    def sub(m):
+        rel = m.group(1)
+        tail = rel[len(rel.rstrip(".")):]   # sentence punctuation after the path
+        rel = rel[:len(rel) - len(tail)]
+        if rel.endswith("/SKILL.md") and rel[:-9] in pathmap:
+            return str(RENDERED / pathmap[rel[:-9]] / "SKILL.md") + tail
+        return str(root / rel) + ("/" if rel.endswith("/") else "") + tail
+    pat = re.escape(spec["vroot"]) + r"((?:" + "|".join(map(re.escape, top)) + r")(?:/[\w.-]+)*/?)"
+    return re.sub(r"(?<![\w.~-])" + pat, sub, text)
 
 
 def write_index(cyber):
@@ -165,29 +327,124 @@ up in a new session.
 """)
 
 
+def write_decepticon_index(skills, rank):
+    """One small skill that stands for the Decepticon pack: categories and their overview skills.
+    rank: id -> 2 for a category's own index skill, 1 for one that routes to nested skills."""
+    cats = {}
+    for s in skills:
+        c = cats.setdefault(s["category"], {"n": 0, 2: [], 1: [], 0: []})
+        c["n"] += 1
+        c[rank.get(s["id"], 0)].append(s["id"])
+
+    def start(v):
+        ids = v[2] or v[1] or v[0][:3]
+        return ", ".join(f"`{i}`" for i in ids) + (" ..." if not (v[2] or v[1]) and len(v[0]) > 3 else "")
+    rows = "\n".join(f"| `{k}` | {v['n']} | {start(v)} |"
+                     for k, v in sorted(cats.items(), key=lambda kv: -kv[1]["n"]))
+    out = RENDERED / DECEPTICON_INDEX_ID
+    if out.exists():
+        shutil.rmtree(out)
+    out.mkdir(parents=True)
+    plat = PACKS["decepticon"]["platform"]
+    (out / "SKILL.md").write_text(f"""---
+name: {DECEPTICON_INDEX_ID}
+description: Index of {len(skills)} offensive-security playbooks from {plat} covering web/API exploitation, recon, Active Directory, cloud and containers, post-exploitation and C2, reverse engineering, mobile, smart contracts, phishing, ICS/OT, IoT, wireless, LLM red teaming and adversary emulation. Use during an authorized engagement to find and load the matching playbook.
+---
+
+# {plat} skills index
+
+The {len(skills)} skills of the {plat} pack are installed but most are not registered one by one:
+their descriptions alone would take about {sum(len(s['description']) for s in skills) // 4000}K tokens
+of context on every turn (`llm-skills status` shows which ones are). Use this index to find the right one.
+
+1. Search the catalog (all words must match the id, subdomain, tags, keywords or description):
+
+   ```sh
+   llm-skills search --pack decepticon sub-ghz
+   llm-skills search --pack decepticon kerberoasting
+   ```
+
+2. Or start from the category's overview skill below; it routes to the category's playbooks.
+3. Read the skill, `{RENDERED}/<id>/SKILL.md`, and follow it as if it had been loaded.
+   Its `references/` and scripts sit next to it.
+
+{plat} wrote these skills for its own platform. Where a skill calls one of its platform tools
+(`kg_add_node`, `bash(..., session=...)`, `load_skill`, ...), a note at its top says what to do
+instead: run the commands directly and keep results in your own notes and findings.
+
+To register a group natively for this user (or for one project with `--project`):
+`llm-skills enable decepticon:<keyword>` (matches id, subdomain or tags, for example
+`decepticon:active-directory` or `decepticon:cloud`), or a single skill with `llm-skills enable <id>`.
+Agents pick new skills up in a new session.
+
+## Categories
+
+| Category | Skills | Start with |
+|---|---:|---|
+{rows}
+""")
+
+
+def skill_id(spec, d, fm):
+    if spec.get("id_from_name"):
+        n = fm.get("name")
+        if isinstance(n, str) and re.fullmatch(r"[a-z0-9][a-z0-9-]{0,63}", n):
+            return n
+    return d.name
+
+
 def cmd_render(args):
     if not SRC.is_dir():
         die(f"{SRC} not found")
     RENDERED.mkdir(parents=True, exist_ok=True)
-    catalog, seen = [], {}
+    # pick ids first: nested packs rewrite links between their skills to the rendered ids
+    plan, seen = [], {}
     for pack, spec, d in skill_dirs():
-        sid = d.name
-        if sid in seen or sid == INDEX_ID:
+        fm0 = frontmatter((d / "SKILL.md").read_text(errors="replace")) if spec.get("id_from_name") else {}
+        sid = skill_id(spec, d, fm0)
+        if (sid in seen or sid in INDEX_IDS) and spec.get("id_prefix"):
+            print(f"llm-skills: {pack}/{sid} renamed {spec['id_prefix']}{sid}: id already used by "
+                  f"{seen.get(sid, 'an index')}", file=sys.stderr)
+            sid = spec["id_prefix"] + sid
+        if sid in seen or sid in INDEX_IDS:
             print(f"llm-skills: skipping {pack}/{sid}: id already used by {seen.get(sid, 'the index')}",
                   file=sys.stderr)
             continue
         seen[sid] = pack
-        fm = frontmatter(render_one(pack, spec, d, RENDERED / sid))
-        tags = fm.get("tags") if isinstance(fm.get("tags"), list) else []
-        catalog.append({"id": sid, "pack": pack, "description": fm.get("description", ""),
-                        "subdomain": fm.get("subdomain", "") if isinstance(fm.get("subdomain"), str) else "",
-                        "tags": tags, "path": str(RENDERED / sid / "SKILL.md")})
+        rename = sid if spec.get("id_from_name") and sid != fm0.get("name") else None
+        plan.append((pack, spec, d, sid, rename))
+    pathmaps = {}
+    for pack, spec, d, sid, _ in plan:
+        if "root" in spec:
+            pathmaps.setdefault(pack, {})[d.relative_to(SRC / spec["root"]).as_posix()] = sid
+    catalog, noted, rank = [], {}, {}
+    for pack, spec, d, sid, rename in plan:
+        text, note = render_one(pack, spec, d, RENDERED / sid, rename, pathmaps.get(pack))
+        fm = frontmatter(text)
+        entry = {"id": sid, "pack": pack, "description": fm.get("description", ""),
+                 "subdomain": fm.get("subdomain", "") if isinstance(fm.get("subdomain"), str) else "",
+                 "tags": tag_list(fm.get("tags")), "path": str(RENDERED / sid / "SKILL.md")}
+        if isinstance(fm.get("when_to_use"), str) and fm["when_to_use"]:
+            entry["keywords"] = fm["when_to_use"]
+        if "root" in spec:
+            parts = d.relative_to(SRC / spec["root"]).parts
+            entry["category"] = parts[1] if len(parts) > 1 else parts[0]
+            rank[sid] = 2 if len(parts) <= 2 else 1 if any(is_skill_tree(c) for c in d.iterdir()) else 0
+        if note:
+            noted[pack] = noted.get(pack, 0) + 1
+        catalog.append(entry)
     cyber = [s for s in catalog if s["pack"] == "cybersecurity"]
     if cyber:
         write_index(cyber)
         catalog.append({"id": INDEX_ID, "pack": "cybersecurity-index", "subdomain": "", "tags": [],
                         "description": f"Index of the {len(cyber)} cybersecurity skills",
                         "path": str(RENDERED / INDEX_ID / "SKILL.md")})
+    dec = [s for s in catalog if s["pack"] == "decepticon"]
+    if dec:
+        write_decepticon_index(dec, rank)
+        catalog.append({"id": DECEPTICON_INDEX_ID, "pack": "decepticon-index", "subdomain": "", "tags": [],
+                        "description": f"Index of the {len(dec)} Decepticon skills",
+                        "path": str(RENDERED / DECEPTICON_INDEX_ID / "SKILL.md")})
     # drop rendered skills whose source is gone
     keep = {s["id"] for s in catalog}
     for old in RENDERED.iterdir():
@@ -198,6 +455,8 @@ def cmd_render(args):
     for s in catalog:
         counts[s["pack"]] = counts.get(s["pack"], 0) + 1
     print("rendered: " + ", ".join(f"{p} {n}" for p, n in counts.items()))
+    for pack, n in noted.items():
+        print(f"{pack}: platform-tools note added to {n} skill(s)")
 
 
 # --- enable / disable / status -----------------------------------------------------
@@ -213,7 +472,7 @@ def resolve(targets, catalog):
     for t in targets:
         if t == "all":
             ids += [s["id"] for s in catalog]
-        elif t in PACKS or t == "cybersecurity-index":
+        elif t in PACKS or t in INDEX_IDS.values():
             ids += [s["id"] for s in catalog if s["pack"] == t]
         elif ":" in t and t.split(":", 1)[0] in PACKS:
             pack, kw = t.split(":", 1)
@@ -306,7 +565,8 @@ def cmd_search(args):
     for s in load_catalog():
         if args.pack and s["pack"] != args.pack:
             continue
-        hay = " ".join([s["id"], s["subdomain"], " ".join(s["tags"]), s["description"]]).lower()
+        hay = " ".join([s["id"], s["subdomain"], " ".join(s["tags"]), s.get("keywords", ""),
+                        s["description"]]).lower()
         if all(w in hay for w in words):
             desc = s["description"]
             print(f"{s['id']}  [{s['pack']}]\n  {s['path']}\n  {desc[:240]}{'...' if len(desc) > 240 else ''}")
@@ -329,7 +589,7 @@ def cmd_path(args):
 def cmd_update(args):
     for d in sorted(SRC.iterdir()):
         if (d / ".git").exists():
-            print(f"== {d.name}")
+            print(f"== {d.name}", flush=True)
             subprocess.run(["git", "-C", str(d), "pull", "--ff-only"], check=False)
     cmd_render(args)
 
@@ -346,9 +606,9 @@ def main():
     for name, fn, hlp in (("enable", cmd_enable, "register skills with every agent"),
                           ("disable", cmd_disable, "unregister skills")):
         p = sub.add_parser(name, help=hlp,
-                           description="TARGET: a pack (trailofbits, farmage, floorplan, cybersecurity, cloudflare, strix, artex, ponytail, caveman), "
+                           description="TARGET: a pack (trailofbits, farmage, floorplan, cybersecurity, cloudflare, strix, artex, ponytail, caveman, decepticon), "
                                        "pack:keyword (matches id, subdomain or tags), a skill id, "
-                                       f"{INDEX_ID}, or all. Default set: {' '.join(DEFAULTS)}")
+                                       f"an index ({', '.join(INDEX_IDS)}), or all. Default set: {' '.join(DEFAULTS)}")
         p.add_argument("--project", action="store_true", help="use ./.agents/skills and ./.claude/skills")
         p.add_argument("targets", nargs="+", metavar="TARGET")
         p.set_defaults(fn=fn)

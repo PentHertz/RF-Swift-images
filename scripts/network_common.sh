@@ -235,7 +235,9 @@ function bettercap_soft_install() {
 	cd bettercap
 	make build
 	make install
-	ln -s /rftools/bluetoot/bettercap/bettercap /usr/bin/bettercap
+	# make install puts it in /usr/local/bin; the /usr/bin link is kept for scripts
+	# that call it there (it used to point at a misspelled /rftools/bluetoot/ path).
+	ln -sf /rftools/bluetooth/bettercap/bettercap /usr/bin/bettercap
 }
 
 function sipvicious_soft_install() {
@@ -310,13 +312,11 @@ function above_soft_install() {
 
 # Cracking tools
 function hashcat_soft_install() {
+	# Used to install pixiewps (copy-paste slip, defined twice); pixiewps has its own
+	# pixiewps_soft_install. pocl gives hashcat a CPU OpenCL device in containers
+	# without a GPU runtime; a GPU still needs the host's OpenCL/CUDA runtime.
 	goodecho "[+] Installing hashcat"
-	install_dependencies "pixiewps"
-}
-
-function hashcat_soft_install() {
-    goodecho "[+] Installing hashcat"
-    install_dependencies "pixiewps"
+	install_dependencies "hashcat pocl-opencl-icd"
 }
 
 function seclist_soft_install() {

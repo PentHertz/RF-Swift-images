@@ -75,6 +75,32 @@
   kept off `PATH` and given its own `CODEX_HOME`, so it never shadows or reconfigures the real
   Codex CLI. Python 3.12 via uv. Not in the default build because of the slow Rust build.
   AresValley's Artemis signal-identification app (SDR images) keeps its `Artemis` command.
+- `llm`: Decepticon skill pack in `llm-skills` (297 of its 329 skills, Apache-2.0, from
+  BitterSecurity/Decepticon, formerly PurpleAILAB). Only its skills tree is fetched, as a sparse
+  blobless checkout of about 14 MB instead of 90 MB. Its IoT, wireless and ICS/OT skills (34) are
+  enabled, and the rest are reached through a `decepticon-skills` index skill and
+  `llm-skills search`. The platform-internal skills are left out: benchmark marker, pipeline role
+  prompts, orchestrator, planning templates, finding workflow and reference catalogue.
+  `llm-skills` now handles nested skill trees and frontmatter `metadata:` blocks (subdomain, tags,
+  keywords; comma-separated or `[a, b]` tags). Ids come from the skill `name`, and one that clashes
+  with an earlier pack is prefixed `decepticon-` with its name rewritten. Decepticon's in-sandbox
+  skill paths are rewritten to the local copies. Skills that call Decepticon's own tools
+  (`kg_add_node`, `bash(..., session=...)`, `load_skill`...) get a note saying those tools do not
+  exist here and what to do instead.
+- `llm`: pentest-ai (PyPI `ptai`, MIT), an offensive-security MCP server, installed with uv on
+  Python 3.12. It is registered as `pentest-ai` with Claude Code, Codex, OpenCode, Mistral Vibe and
+  Hermes through `ptai-mcp`, which runs upstream's `ptai mcp`. Its Acceptable Use Policy is not
+  accepted in the image. Upstream's MCP tools never ask for it, so `ptai-mcp` starts the server only
+  after the operator has accepted it with `ptai-aup` (pentest-ai's own prompt). Telemetry (opt-in
+  upstream) and the PyPI version check are off. Builds take the newest release, and
+  `PENTESTAI_REVIEWED_VERSION` records the last one read. New helper `llm_mcp_register` registers a
+  stdio MCP server with every agent in the image.
+- `llm` (opt-in): Cairn (oritera, AGPL-3.0), a fact-graph engine for AI pentesting, from upstream
+  `main` into `/opt/cairn`, nothing vendored. Its dependencies are the versions and hashes of
+  upstream's `uv.lock`, fetched from PyPI rather than the lock's Aliyun mirror. A ready local-mode
+  dispatcher config uses the image's `claude` and `codex` CLIs as workers, with one project and two
+  workers at a time. The `cairn` wrapper keeps `cairn serve` on `127.0.0.1:8000`, since the server
+  has no authentication. `CAIRN_REVIEWED_COMMIT` records the last commit read.
 - ARTEX (agent-driven web-security platform) built straight from upstream (latest
   `main`, `ARTEX_REF` to pin): a single image `make artex` with PostgreSQL inside,
   started from the shell by hand (`artex-postgres`, `artex-start`) like Open5GS; and
@@ -120,6 +146,32 @@
   WPE patch yet) all need manual work and were not bumped.
 
 ### Fixed
+
+- `network`: `hashcat_soft_install` installed pixiewps instead of hashcat (and was defined
+  twice), so the `network` and `ad` images had no hashcat although the tool list said so. It
+  now installs `hashcat` with `pocl-opencl-icd`, which gives it a CPU OpenCL device in
+  containers without a GPU runtime. pixiewps keeps its own `pixiewps_soft_install` in the Wi-Fi
+  images.
+- `rfid`: `chameleon_ultra_soft_install` was defined twice and the second copy (nfcpy only, which
+  has its own function) replaced the real one, so `chameleon_cli` was never installed. The
+  duplicate is gone; the installer now records a build-report entry instead of continuing
+  silently when `uv sync` or the native key-recovery helpers fail.
+- `network`/`wifi`: `bettercap_soft_install` linked `/usr/bin/bettercap` to a misspelled
+  `/rftools/bluetoot/` path (a dangling link; `make install` still put it in `/usr/local/bin`).
+- `sdr_full`: trunk-recorder was never installed. `trunkrecorder_soft_install` (defined twice)
+  ran `./install`, copied from op25's installer; trunk-recorder has no such script and the
+  failure was hidden by `|| true`. It is now built with CMake against the image's GNU Radio,
+  gr-osmosdr, UHD and HackRF (upstream's `install.sh` would apt-install Debian's GNU Radio with
+  sudo over them), and a failed build is recorded in the build report.
+- `telecom_utils`: `pyhss_soft_install` installed bromelia (a copy of `bromelia_soft_install`), so
+  PyHSS was missing. It now installs PyHSS from its new home, github.com/pyhss/pyhss (AGPL-3.0),
+  in a Python 3.12 venv under `/telecom/core/pyhss`, with `redis-server`, its `pyhss_*` service
+  commands in `/usr/local/bin` and upstream's `config.yaml` as `/etc/pyhss/config.yaml`.
+- `telecom_utils`: the Dockerfile's default `BASE_IMAGE` was `sdr_light` while the Makefile builds
+  it on `sdrsa_devices`; the default now matches, so a manual build gets the same layers.
+- `wifi_basic`: `hcxdumptool_soft_install` was defined twice (identical); one copy removed.
+- Repository: Python bytecode caches (`__pycache__/*.pyc`) are no longer tracked; a
+  `.gitignore` now excludes them.
 
 - `sdr_gnuradio4`: the GNU Radio 4 build is aligned with 4.0.0-RC3, the newest tag. RC3 turned
   `gnuradio/gnuradio4` into a super-repo with renamed CMake options. The old flags
