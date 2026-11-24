@@ -100,7 +100,7 @@ RUN ./entrypoint.sh caido_soft_install && \
 	./entrypoint.sh  hexhttp_soft_install && \
 	./entrypoint.sh nuclei_soft_install && \
 	./entrypoint.sh commix_soft_install
-# OWASP ZAP (Apache-2.0), the open alternative to Burp Suite for device web UIs and companion-app
+# OWASP ZAP, the open alternative to Burp Suite for device web UIs and companion-app
 # APIs, on OpenJDK 21. Headless: `zap -cmd ...`, daemon mode (`zap -daemon ...`, API) or the
 # automation framework (`zap -cmd -autorun /abs/path/plan.yaml`)
 RUN ./entrypoint.sh zaproxy_soft_install

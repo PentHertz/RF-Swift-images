@@ -81,11 +81,8 @@ RUN ./entrypoint.sh bkcrack_soft_install && \
 # Not built by default. Uncomment, or install in a running container:
 #   cd /root/scripts && ./entrypoint.sh sage_soft_install
 #RUN ./entrypoint.sh sage_soft_install
-# Opt-in: OFRAK (Red Balloon Security), amd64 only. Its Community License covers academic and personal
-# non-commercial use and does not allow redistributing it, so never enable this in an image you publish.
-# Install in your own container (installing it accepts https://ofrak.com/license):
-#   cd /root/scripts && OFRAK_ACCEPT_LICENSE=yes ./entrypoint.sh ofrak_soft_install
-#RUN OFRAK_ACCEPT_LICENSE=yes ./entrypoint.sh ofrak_soft_install
+# OFRAK (Red Balloon Security): firmware unpack / analyse / modify / repack, web GUI (amd64 only)
+RUN ./entrypoint.sh ofrak_soft_install
 
 # Cleaning and quitting
 WORKDIR /root/

@@ -406,7 +406,7 @@ EOF
     return 0
 }
 
-# pentest-ai (0xSteph, MIT): PyPI `ptai`, an offensive-security MCP server for the coding agents
+# pentest-ai (0xSteph): PyPI `ptai`, an offensive-security MCP server for the coding agents
 # (wrapped scanners, specialist agents, probes that re-verify their findings) and the `ptai` CLI.
 # Upstream installs it with pipx; here uv (as Strix), on Python 3.12. Builds take the newest PyPI
 # release; PENTESTAI_REVIEWED_VERSION is the last one read for this install (MCP launch command,
@@ -485,7 +485,7 @@ EOF
     return 0
 }
 
-# LangGraph (LangChain, MIT): a library for writing your own stateful agents as graphs of LLM calls
+# LangGraph (LangChain): a library for writing your own stateful agents as graphs of LLM calls
 # and tools. OPT-IN: llm.docker leaves it commented. Install in a running container with
 #   cd /root/scripts && ./entrypoint.sh langgraph_soft_install
 # Own venv in /opt/langgraph with the Anthropic and OpenAI integrations, the MCP adapters (to use this
@@ -604,11 +604,11 @@ EOF
     return 0
 }
 
-# Cairn (oritera, AGPL-3.0): a problem-solving engine validated on AI pentesting. A server keeps a
+# Cairn (oritera): a problem-solving engine validated on AI pentesting. A server keeps a
 # fact/intent graph from an origin to a goal; a dispatcher runs agent CLIs that grow it. OPT-IN:
 # llm.docker leaves it commented. Install in a running container with
 #   cd /root/scripts && ./entrypoint.sh cairn_soft_install
-# Installed from upstream only (AGPL: nothing of Cairn is copied into RF Swift), latest main, in
+# Installed from upstream, latest main, in
 # local mode: the workers are this image's `claude` and `codex` CLIs, run as host processes
 # without permission prompts (no Docker). CAIRN_REVIEWED_COMMIT is the last commit read for this
 # install (CLI, server bind, dispatcher config, worker adapters, local backend, uv.lock); a build
@@ -709,7 +709,7 @@ workers:
 EOF
     cat > /usr/local/bin/cairn << 'EOF'
 #!/bin/sh
-# Cairn (oritera, AGPL-3.0), opt-in install in /opt/cairn. Authorized targets only.
+# Cairn (oritera), opt-in install in /opt/cairn. Authorized targets only.
 #   cairn serve       API and web UI on http://127.0.0.1:8000 (loopback unless you pass --host)
 #   cairn dispatch    local-mode dispatcher: ~/.config/cairn/dispatch.yaml, else /opt/cairn/dispatch.yaml
 # The server has no authentication: do not publish or forward port 8000 beyond this machine.

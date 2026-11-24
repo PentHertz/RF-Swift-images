@@ -497,7 +497,7 @@ function bromelia_soft_install() {
 
 function pyhss_soft_install() {
 	# Used to install bromelia (copy of bromelia_soft_install), so the documented
-	# PyHSS was missing. PyHSS moved to github.com/pyhss/pyhss (AGPL-3.0). It is a set
+	# PyHSS was missing. PyHSS moved to github.com/pyhss/pyhss. It is a set
 	# of services talking over Redis (>= 7): pyhss_diameter, pyhss_hss and pyhss_api
 	# are the minimum; they bind to 127.0.0.1 by default (config.yaml bind_ip).
 	goodecho "[+] Installing PyHSS"

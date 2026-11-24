@@ -487,7 +487,7 @@ function hetty_soft_install() {
     goodecho "[+] Hetty installed: $(command -v hetty) (proxy + web UI on :8080)"
 }
 
-# OWASP ZAP (Zed Attack Proxy, Apache-2.0): intercepting proxy and DAST scanner, the openly licensed
+# OWASP ZAP (Zed Attack Proxy): intercepting proxy and DAST scanner, the open
 # alternative to Burp Suite for device web UIs and companion-app APIs. The Linux release is pure Java
 # with no bundled JRE, so every architecture installs the same tarball, checked against its SHA-256,
 # and runs it on Ubuntu's OpenJDK 21: ZAP 2.17 needs Java 17 or later, 2.18 raises that to 21, and
@@ -1227,7 +1227,7 @@ function hydra_soft_install() {
     install_dependencies "hydra"
 }
 
-# patator (lanjelot, GPL-2.0): modular brute-forcer, `patator <module> ...` (ftp_login, ssh_login,
+# patator (lanjelot): modular brute-forcer, `patator <module> ...` (ftp_login, ssh_login,
 # telnet_login, smtp_login, http_fuzz, snmp_login, mysql_login, ...). Ubuntu package; its
 # default-jre dependency serves the keystore_pass module. Two of its recommends are added:
 # python3-zombie-telnetlib (telnetlib left Python in 3.13; telnet_login needs it) and ike-scan
@@ -1237,7 +1237,7 @@ function patator_soft_install() {
     install_dependencies "patator python3-zombie-telnetlib ike-scan"
 }
 
-# hashID (psypanda, GPL-3.0+): identifies the hash type of a sample, with the matching hashcat mode
+# hashID (psypanda): identifies the hash type of a sample, with the matching hashcat mode
 # (-m) and John the Ripper format (-j); the successor of hash-identifier. Ubuntu package.
 function hashid_soft_install() {
     goodecho "[+] Installing hashID"
@@ -1580,21 +1580,21 @@ function cloud_uv_tool_install() {
     return 0
 }
 
-# Prowler (Apache-2.0): security best-practice and compliance checks (CIS, NIST, ISO 27001, ...) for
+# Prowler: security best-practice and compliance checks (CIS, NIST, ISO 27001, ...) for
 # AWS, Azure, GCP, Kubernetes, Microsoft 365 and more: `prowler aws`, `prowler azure --az-cli-auth`.
 # Python 3.12, as its upstream container.
 function prowler_soft_install() {
     cloud_uv_tool_install "prowler" "3.12" "prowler" "prowler"
 }
 
-# ScoutSuite (NCC Group, GPL-2.0): multi-cloud security audit (AWS, Azure, GCP, Alibaba Cloud, OCI)
+# ScoutSuite (NCC Group): multi-cloud security audit (AWS, Azure, GCP, Alibaba Cloud, OCI)
 # that writes an offline HTML report: `scout aws`. Its latest release (5.14.0, 2024) declares
 # Python 3.9 to 3.11 and pins old SDK versions, so Python 3.11.
 function scoutsuite_soft_install() {
     cloud_uv_tool_install "ScoutSuite" "3.11" "scoutsuite" "scout"
 }
 
-# Checkov (Prisma Cloud / Bridgecrew, Apache-2.0): static analysis of infrastructure as code
+# Checkov (Prisma Cloud / Bridgecrew): static analysis of infrastructure as code
 # (Terraform, CloudFormation, Kubernetes, Helm, Dockerfiles, ARM, Serverless) from back-end repos or
 # firmware: `checkov -d <dir>`. Python 3.11, as its upstream container.
 function checkov_soft_install() {

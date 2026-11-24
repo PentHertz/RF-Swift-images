@@ -4,19 +4,7 @@
 
 ### Added
 
-- Licence compliance for the published images: `compliance/license-policy.json` lists
-  blocked, review-required and notice-required components with the images they are in,
-  why, and what to decide or keep. `scripts/compliance/generate-sbom.sh` writes syft
-  CycloneDX and SPDX SBOMs of all layers with checksums and runs the policy check
-  (`scripts/compliance/check-license-policy.py`); `scripts/compliance/image-inventory.sh`
-  records install functions, the policy's commands and paths, Debian source packages, git
-  checkouts with their commits and the licence texts. A manual `License compliance`
-  workflow runs them on a published image, and `tests/license-policy.sh` runs in the
-  regression workflow. See `docs/licensing.md`; 16 components (Burp Suite, Caido, Claude
-  Code, Saleae Logic 2, the Harogic, Signal Hound and Deepace vendor software, ...) are
-  listed with why they were reviewed, and stay published in the images. The scripts are adapted from Drost Community (Apache-2.0).
-
-- `network`: OWASP ZAP (`zaproxy_soft_install`, Apache-2.0), the openly licensed
+- `network`: OWASP ZAP (`zaproxy_soft_install`), the open
   alternative to Burp Suite for device web UIs and companion-app APIs. The pure-Java
   Linux release is installed in `/opt/zaproxy` on every architecture and checked against
   its SHA-256 (newer releases against `ZapVersions.xml`); the `zap` / `zap.sh` wrapper
@@ -66,10 +54,8 @@
 - `reversing`: crypto-analysis tools. bkcrack (ZipCrypto known-plaintext attack) is built from the
   newest release's source on every architecture, with `bkcrack-inflate` / `bkcrack-deflate` helpers.
   fplll and fpylll (LLL / BKZ lattice reduction) come from Ubuntu's packages.
-- `reversing`: opt-in OFRAK (`ofrak_soft_install`, amd64 only, Python 3.13 via uv, with the capstone and angr
-  backends and the unpackers' tools). It is never pre-installed: the OFRAK Community License covers academic
-  and personal non-commercial use and does not allow redistributing it. The installer only runs with
-  `OFRAK_ACCEPT_LICENSE=yes`, and each user then registers their own licence with `ofrak license`.
+- `reversing`: OFRAK (`ofrak_soft_install`, amd64 only, Python 3.13 via uv, with the capstone and angr
+  backends and the unpackers' tools) in `/opt/ofrak`, with `ofrak` and `ofrak-python` wrappers.
 - `reversing`: opt-in SageMath through passagemath (`sage_soft_install`, amd64/arm64). It is about
   1.3 GB of wheels and 4 to 5 GB installed, so its RUN line is commented. Install it in a running
   container with `cd /root/scripts && ./entrypoint.sh sage_soft_install`.
@@ -107,7 +93,7 @@
   kept off `PATH` and given its own `CODEX_HOME`, so it never shadows or reconfigures the real
   Codex CLI. Python 3.12 via uv. Not in the default build because of the slow Rust build.
   AresValley's Artemis signal-identification app (SDR images) keeps its `Artemis` command.
-- `llm`: Decepticon skill pack in `llm-skills` (297 of its 329 skills, Apache-2.0, from
+- `llm`: Decepticon skill pack in `llm-skills` (297 of its 329 skills, from
   BitterSecurity/Decepticon, formerly PurpleAILAB). Only its skills tree is fetched, as a sparse
   blobless checkout of about 14 MB instead of 90 MB. Its IoT, wireless and ICS/OT skills (34) are
   enabled, and the rest are reached through a `decepticon-skills` index skill and
@@ -119,7 +105,7 @@
   skill paths are rewritten to the local copies. Skills that call Decepticon's own tools
   (`kg_add_node`, `bash(..., session=...)`, `load_skill`...) get a note saying those tools do not
   exist here and what to do instead.
-- `llm`: pentest-ai (PyPI `ptai`, MIT), an offensive-security MCP server, installed with uv on
+- `llm`: pentest-ai (PyPI `ptai`), an offensive-security MCP server, installed with uv on
   Python 3.12. It is registered as `pentest-ai` with Claude Code, Codex, OpenCode, Mistral Vibe and
   Hermes through `ptai-mcp`, which runs upstream's `ptai mcp`. Its Acceptable Use Policy is not
   accepted in the image. Upstream's MCP tools never ask for it, so `ptai-mcp` starts the server only
@@ -127,7 +113,7 @@
   upstream) and the PyPI version check are off. Builds take the newest release, and
   `PENTESTAI_REVIEWED_VERSION` records the last one read. New helper `llm_mcp_register` registers a
   stdio MCP server with every agent in the image.
-- `llm` (opt-in): Cairn (oritera, AGPL-3.0), a fact-graph engine for AI pentesting, from upstream
+- `llm` (opt-in): Cairn (oritera), a fact-graph engine for AI pentesting, from upstream
   `main` into `/opt/cairn`, nothing vendored. Its dependencies are the versions and hashes of
   upstream's `uv.lock`, fetched from PyPI rather than the lock's Aliyun mirror. A ready local-mode
   dispatcher config uses the image's `claude` and `codex` CLIs as workers, with one project and two
@@ -218,7 +204,7 @@
   gr-osmosdr, UHD and HackRF (upstream's `install.sh` would apt-install Debian's GNU Radio with
   sudo over them), and a failed build is recorded in the build report.
 - `telecom_utils`: `pyhss_soft_install` installed bromelia (a copy of `bromelia_soft_install`), so
-  PyHSS was missing. It now installs PyHSS from its new home, github.com/pyhss/pyhss (AGPL-3.0),
+  PyHSS was missing. It now installs PyHSS from its new home, github.com/pyhss/pyhss,
   in a Python 3.12 venv under `/telecom/core/pyhss`, with `redis-server`, its `pyhss_*` service
   commands in `/usr/local/bin` and upstream's `config.yaml` as `/etc/pyhss/config.yaml`.
 - `telecom_utils`: the Dockerfile's default `BASE_IMAGE` was `sdr_light` while the Makefile builds

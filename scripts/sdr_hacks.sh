@@ -271,7 +271,6 @@ EOF
 #   u220-fpv-gui       Tk front end for it; u220-fpv-generate makes the test signals
 # Host tools track master; FPVCAPTURE_REVIEWED_COMMIT is the last commit reviewed, and a newer one
 # adds a "review" entry to the build report. The boot files are pinned to a release by SHA-256.
-# Upstream has no licence file yet (only the kernel driver carries GPL-2.0).
 FPVCAPTURE_REVIEWED_COMMIT="5b0318bc99cdda4a1cf5314b3dd3d33f43c477aa"   # reviewed 2026-11-23
 FPVCAPTURE_RELEASE="v0.1"
 FPVCAPTURE_BOOTFILES=(

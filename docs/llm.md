@@ -74,7 +74,7 @@ Every agent reads the same skills. They come from these packs:
 | `artex` ([BaaRai/ARTEX](https://github.com/BaaRai/ARTEX)): web/API recon and audit playbooks (api-recon, api-security, codeaudit, patch-diff, php2shell, edr-bypass-re, bbot-recon, playwright-cli, rea, scopesentry) | 10 | yes |
 | `ponytail` ([DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail)): write only what the task needs (reuse what exists, never cut validation, error handling or security), plus `/ponytail-review` and `/ponytail-audit` | 6 | no |
 | `caveman` ([JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman)): terser answers (`/caveman`, `/ultracave`) and focused workflow skills (review, commit, surgical-patch, safe-refactor, verify-and-stop...) | 16 | no |
-| `decepticon` ([BitterSecurity/Decepticon](https://github.com/BitterSecurity/Decepticon), formerly PurpleAILAB, Apache-2.0): offensive playbooks by category (IoT and sub-GHz/BLE/Zigbee/Z-Wave/LoRaWAN, Wi-Fi, ICS/OT protocols, web/API, AD, cloud, post-exploitation and C2, reversing, mobile, smart contracts, phishing, LLM red teaming, APT emulation) | 297 | IoT, wireless and ICS/OT (34), the rest through one index skill |
+| `decepticon` ([BitterSecurity/Decepticon](https://github.com/BitterSecurity/Decepticon), formerly PurpleAILAB): offensive playbooks by category (IoT and sub-GHz/BLE/Zigbee/Z-Wave/LoRaWAN, Wi-Fi, ICS/OT protocols, web/API, AD, cloud, post-exploitation and C2, reversing, mobile, smart contracts, phishing, LLM red teaming, APT emulation) | 297 | IoT, wireless and ICS/OT (34), the rest through one index skill |
 
 Some `artex` skills drive tools that ship in the separate ARTEX image rather than here
 (`bbot-recon` needs bbot/subfinder/httpx, `playwright-cli` needs the Playwright browsers,
@@ -182,7 +182,7 @@ The `strix` skills let any agent above run and triage Strix scans for you.
 
 ## CodeGraph
 
-[CodeGraph](https://github.com/colbymchenry/codegraph) (MIT) keeps a pre-indexed knowledge graph
+[CodeGraph](https://github.com/colbymchenry/codegraph) keeps a pre-indexed knowledge graph
 of a code base: symbols, calls and imports. The agents query it over MCP instead of reading files
 one by one, which means fewer tokens and fewer tool calls. The image already registers it with
 Claude Code, Codex, OpenCode and Hermes (Mistral Vibe is not supported). Index each project once:
@@ -239,7 +239,7 @@ Things to know:
 
 ## pentest-ai
 
-[pentest-ai](https://github.com/0xSteph/pentest-ai) (0xSteph, MIT; PyPI `ptai`) is an
+[pentest-ai](https://github.com/0xSteph/pentest-ai) (0xSteph; PyPI `ptai`) is an
 offensive-security MCP server: wrapped scanners, specialist agents, and probes that re-run each
 exploit before reporting a finding. The image installs it with uv on Python 3.12 (upstream suggests
 pipx) and registers it, as `pentest-ai`, with Claude Code, Codex, OpenCode, Mistral Vibe and Hermes.
@@ -327,7 +327,7 @@ Things to know:
 
 ## LangGraph (opt-in)
 
-[LangGraph](https://github.com/langchain-ai/langgraph) (LangChain, MIT) is a library for writing
+[LangGraph](https://github.com/langchain-ai/langgraph) (LangChain) is a library for writing
 **your own** agents. You describe a workflow as a graph of LLM calls and tools, with saved state
 and points where a human approves the next step. Unlike the agents above, it does nothing until
 you write code with it, so it is not built by default. Install it in a running container:
@@ -425,7 +425,7 @@ browser. Leave it closed and use the REST API if that matters for the engagement
 
 ## Cairn (opt-in)
 
-[Cairn](https://github.com/oritera/Cairn) (oritera, **AGPL-3.0**) solves a problem by searching
+[Cairn](https://github.com/oritera/Cairn) (oritera) solves a problem by searching
 from an origin (a target) to a goal (a shell, a flag). A server keeps the graph of confirmed facts
 and planned intents, and a dispatcher runs agent CLIs that read the whole graph, decide what to
 explore next and write back what they found. You can add hints at any time. Its authors validated
@@ -473,8 +473,6 @@ Things to know:
 - **Version:** builds take the latest `main`. `CAIRN_REVIEWED_COMMIT` in `scripts/llm_software.sh`
   is the last commit read for this install, and a build on a newer one adds a `review` entry to the
   build report.
-- **Licence:** AGPL-3.0 for personal and educational use; upstream asks commercial users to
-  contact them for a commercial licence.
 
 ## OpenCode
 
@@ -702,8 +700,6 @@ Choices made when the Decepticon pack, pentest-ai and Cairn were added, and why.
 - **Cairn's dependencies come from PyPI, checked against its lock.** Upstream's `uv.lock` points
   at a PyPI mirror (`mirrors.aliyun.com`). The exact versions and SHA-256 hashes of that lock are
   installed from PyPI with hash checking; all 26 hashes match the files PyPI publishes.
-- **AGPL code is installed, not copied.** Cairn (AGPL-3.0, with a separate commercial licence
-  upstream) is cloned from its own repository at build time; nothing of it is part of RF Swift.
 - **The RF Swift Workbench skills are not in this image.** They drive radios and probes through the
   Workbench's mission tools, and this image has neither; the Workbench installs them in each
   mission's agent workspace.
