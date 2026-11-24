@@ -563,6 +563,126 @@ function binary_triage_tools_soft_install() {
 }
 
 # ---------------------------------------------------------------------------
+# Carving and memory forensics on raw flash / RAM dumps
+# ---------------------------------------------------------------------------
+# bulk_extractor (Simson Garfinkel; GPL-3.0-or-later, the original NPS code is public domain): scans a
+# raw dump without parsing file systems and reports what it finds: AES key schedules, email
+# addresses, URLs, domains, credit card numbers, JSON and base64 blobs, network packets, plus a
+# histogram per feature (`bulk_extractor -o out/ dump.bin`; -f / -F add your own regexes, e.g. for
+# credentials; -e wordlist builds a cracking wordlist). Not packaged for Ubuntu 26.04, so it is
+# built from the release tarball, checked against the release's SHA256SUMS, on every architecture.
+# libewf adds E01 input.
+BULK_EXTRACTOR_VERSION="2.2.0"   # known-good (with the SHA256 below); the build takes the newest release
+BULK_EXTRACTOR_SHA256="b9e15d40d711aa43590e1bf1a25d30943e3bad8371281d7c80d3803a6f34c268"
+
+function bulk_extractor_soft_install() {
+    goodecho "[+] Installing bulk_extractor"
+    install_dependencies "build-essential pkg-config flex libre2-dev libabsl-dev libexpat1-dev libssl-dev libgcrypt20-dev zlib1g-dev libsqlite3-dev libewf-dev"
+    local ver sha new_sha tmp src
+    sha="$BULK_EXTRACTOR_SHA256"
+    ver=$(latest_release_version simsong/bulk_extractor "$BULK_EXTRACTOR_VERSION" \
+        "https://github.com/simsong/bulk_extractor/releases/download/v@V@/bulk_extractor-@V@.tar.gz")
+    if [ "$ver" != "$BULK_EXTRACTOR_VERSION" ]; then
+        new_sha=$(curl -fsSL --max-time 30 \
+            "https://github.com/simsong/bulk_extractor/releases/download/v${ver}/SHA256SUMS" 2>/dev/null \
+            | awk -v f="bulk_extractor-${ver}.tar.gz" '$2 == f {print $1}' || true)
+        if [ -n "$new_sha" ]; then
+            sha="$new_sha"
+        else
+            note_version_fallback simsong/bulk_extractor "no SHA256SUMS entry for ${ver}" "$BULK_EXTRACTOR_VERSION"
+            ver="$BULK_EXTRACTOR_VERSION"
+        fi
+    fi
+    tmp=$(mktemp -d)
+    if ! installfromnet curl -fsSL -o "$tmp/bulk_extractor.tar.gz" \
+            "https://github.com/simsong/bulk_extractor/releases/download/v${ver}/bulk_extractor-${ver}.tar.gz"; then
+        record_build_failure "net" "bulk_extractor" "download failed (${ver})"
+        rm -rf "$tmp"; return 0
+    fi
+    if ! echo "${sha}  $tmp/bulk_extractor.tar.gz" | sha256sum -c - > /dev/null; then
+        record_build_failure "net" "bulk_extractor" "checksum mismatch (${ver})"
+        rm -rf "$tmp"; return 0
+    fi
+    src="$tmp/bulk_extractor-${ver}"
+    # configure adds -Werror whenever the compiler accepts it, and GCC 15 (resolute) warns where
+    # upstream's CI compilers do not: keep warnings as warnings
+    if tar -xzf "$tmp/bulk_extractor.tar.gz" -C "$tmp" --no-same-owner \
+        && sed -i 's/^CXX_WARNINGS_TO_TEST="-Wall -Werror /CXX_WARNINGS_TO_TEST="-Wall /' "$src/configure" \
+        && (cd "$src" && ./configure --enable-silent-rules && make -j"$(nproc)" && make install); then
+        bulk_extractor -V || record_build_failure "other" "bulk_extractor" "bulk_extractor -V failed after install"
+    else
+        record_build_failure "build" "bulk_extractor" "${ver} configure/make failed"
+    fi
+    rm -rf "$tmp"
+    return 0
+}
+
+# scalpel (GPL-2.0+) and foremost (public domain): header/footer file carving from raw dumps.
+# scalpel's /etc/scalpel/scalpel.conf ships with every file type commented out: uncomment the types
+# you want, or pass your own with -c. foremost has built-in types (-t jpg,zip,exe,...) and
+# /etc/foremost.conf.
+function scalpel_soft_install() {
+    goodecho "[+] Installing scalpel"
+    install_dependencies "scalpel"
+}
+
+function foremost_soft_install() {
+    goodecho "[+] Installing foremost"
+    install_dependencies "foremost"
+}
+
+# Volatility 3 (Volatility Foundation, Volatility Software License 1.0): memory forensics on RAM dumps,
+# `vol -f dump.raw linux.pslist`, `volshell`. Newest PyPI release in its own uv tool venv (Python 3.13).
+# Optional plugin dependencies: amd64 takes volatility3[full]; arm64 the yara-python, capstone and
+# pycryptodome part of it (pillow and leechcorepyc, for LeechCore live acquisition, are left out:
+# leechcorepyc has x86_64 wheels only); riscv64 has no wheels for them and gets the base package,
+# without the plugins that need them (yarascan, the Windows hash/LSA dumps, ...).
+# Linux and macOS dumps need a symbol table (ISF) for the exact kernel: dwarf2json, installed with
+# it, builds one from a vmlinux with debug info (`dwarf2json linux --elf vmlinux > kernel.json`;
+# then `vol -s <dir with kernel.json> ...`). Windows symbols are fetched from Microsoft on first use.
+function volatility3_soft_install() {
+    goodecho "[+] Installing Volatility 3 and dwarf2json"
+    if ! command -v uv > /dev/null; then
+        record_build_failure "toolchain" "volatility3" "uv unavailable"
+        return 0
+    fi
+    local ok=0 b
+    case "$(uname -m)" in
+        x86_64)
+            installfromnet uv tool install --force --python 3.13 "volatility3[full]" && ok=1
+            ;;
+        aarch64)
+            # the same version bounds as volatility3[full]
+            installfromnet uv tool install --force --python 3.13 --with "yara-python>=4.5.1,<5" \
+                --with "capstone>=5.0.3,<6" --with "pycryptodome>=3.21.0,<4" volatility3 && ok=1
+            ;;
+    esac
+    if [ "$ok" -eq 0 ]; then
+        case "$(uname -m)" in
+            x86_64|aarch64) record_build_failure "pip" "volatility3 extras" "optional plugin dependencies failed; installing the base package" ;;
+        esac
+        installfromnet uv tool install --force --python 3.13 volatility3 && ok=1
+    fi
+    if [ "$ok" -eq 0 ]; then
+        record_build_failure "pip" "volatility3" "uv tool install failed"
+    else
+        for b in vol volshell; do
+            [ -e "$HOME/.local/bin/$b" ] && ln -sf "$HOME/.local/bin/$b" "/usr/local/bin/$b"
+        done
+        vol -h > /dev/null || record_build_failure "other" "volatility3" "vol -h failed after install"
+    fi
+    # Go toolchain from corebuild's install_go
+    if command -v go > /dev/null; then
+        installfromnet env GOBIN=/usr/local/bin GOPROXY=https://proxy.golang.org,direct \
+            go install github.com/volatilityfoundation/dwarf2json@latest \
+            || record_build_failure "build" "dwarf2json" "go install failed"
+    else
+        record_build_failure "toolchain" "dwarf2json" "go unavailable"
+    fi
+    return 0
+}
+
+# ---------------------------------------------------------------------------
 # Crypto analysis
 # ---------------------------------------------------------------------------
 # bkcrack (kimci86, Zlib): known-plaintext attack on legacy ZipCrypto archives, common for

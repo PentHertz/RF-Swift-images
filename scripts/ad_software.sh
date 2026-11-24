@@ -122,7 +122,8 @@ function roadtools_soft_install() {
 
 function kerbrute_soft_install() {
     goodecho "[+] Installing kerbrute (Go)"
-    install_dependencies "golang-go git"
+    ensure_go
+    install_dependencies "git"
     if GOBIN=/usr/local/bin go install github.com/ropnop/kerbrute@latest; then
         goodecho "[+] kerbrute installed: /usr/local/bin/kerbrute"
     else

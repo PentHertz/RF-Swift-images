@@ -84,6 +84,12 @@ MANIFEST = {
     "sdrangel":    {"file": "sdr_softwares.sh", "pat": r'SDRANGEL_VERSION="(?P<ver>[\d.]+)"',
                     "source": ("github", "f4exb/sdrangel"), "cls": "needs-care",
                     "note": "version appears in the tag AND the .deb file name; v7->v8 changed packaging"},
+    "zap":         {"file": "network_common.sh", "pat": r'ZAP_VERSION="(?P<ver>[\d.]+)"',
+                    "source": ("github", "zaproxy/zaproxy"), "cls": "needs-care",
+                    "note": "also update ZAP_SHA256 (ZAP_<ver>_Linux.tar.gz, in the release notes); 2.18 needs Java 21"},
+    "bulk-extractor": {"file": "reverse_software.sh", "pat": r'BULK_EXTRACTOR_VERSION="(?P<ver>[\d.]+)"',
+                    "source": ("github", "simsong/bulk_extractor"), "cls": "needs-care",
+                    "note": "also update BULK_EXTRACTOR_SHA256 (from the release's SHA256SUMS)"},
     "fpv-capture": {"file": "sdr_hacks.sh", "pat": r'FPVCAPTURE_RELEASE="v(?P<ver>[\d.]+)"',
                     "source": ("github", "black-pigeon/fpv_capture"), "cls": "needs-care",
                     "note": "AntSDR boot files: asset names carry a build date; update FPVCAPTURE_BOOTFILES names and SHA-256"},
@@ -130,7 +136,7 @@ MANIFEST = {
 FLOATING = {
     "jadx", "ipsw", "uv", "arduino-ide", "imhex", "whispercpp", "cyberether", "qflipper",
     "geckodriver", "node-llm", "craft", "ghidra", "die", "sdrangel", "go", "sniffle-fw",
-    "hostapd", "dsview", "pulseview", "antsdr-uhd", "bkcrack",
+    "hostapd", "dsview", "pulseview", "antsdr-uhd", "bkcrack", "zap", "bulk-extractor",
 }
 
 

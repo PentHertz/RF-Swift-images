@@ -629,10 +629,21 @@ function pipx_install_tool() {
     return 0
 }
 
+# ensure_go: use the Go toolchain corebuild installed (the newest go.dev release in
+# /usr/bin/go); fall back to Ubuntu's golang-go only when there is none. Installing
+# golang-go unconditionally replaced /usr/bin/go with Ubuntu's older toolchain in
+# every image that ran a Go-based installer (network, ad, osint).
+function ensure_go() {
+    if ! command -v go > /dev/null 2>&1; then
+        install_dependencies "golang-go"
+    fi
+}
+
 # go_install_tool <name> <module@version> [name to install the binary as]
 function go_install_tool() {
     local name="$1" module="$2" bin="$3"
-    install_dependencies "golang-go git"
+    ensure_go
+    install_dependencies "git"
     local tmp built
     tmp=$(mktemp -d)
     if GOBIN="$tmp" go install "$module"; then

@@ -487,6 +487,84 @@ function hetty_soft_install() {
     goodecho "[+] Hetty installed: $(command -v hetty) (proxy + web UI on :8080)"
 }
 
+# OWASP ZAP (Zed Attack Proxy, Apache-2.0): intercepting proxy and DAST scanner, the openly licensed
+# alternative to Burp Suite for device web UIs and companion-app APIs. The Linux release is pure Java
+# with no bundled JRE, so every architecture installs the same tarball, checked against its SHA-256,
+# and runs it on Ubuntu's OpenJDK 21: ZAP 2.17 needs Java 17 or later, 2.18 raises that to 21, and
+# Java 25 support is not released yet. openjdk-21-jre adds the AWT/X11 libraries the desktop UI
+# needs on top of openjdk-21-jre-headless, which is all -cmd and -daemon use.
+# Headless use: `zap -cmd ...` (inline: -quickurl <url> -quickout <report>), the automation framework
+# (`zap -cmd -autorun <plan.yaml>`), or daemon mode with the API (`zap -daemon -host 127.0.0.1 -port 8090`).
+ZAP_VERSION="2.17.0"   # known-good (with the SHA256 below); the build takes the newest release
+ZAP_SHA256="efe799aaa3627db683b43f00c9c210aea0b75c00cc8f0a0f0434d12bb3ddde5a"
+
+function zaproxy_soft_install() {
+    goodecho "[+] Installing OWASP ZAP"
+    install_dependencies "openjdk-21-jre-headless openjdk-21-jre"
+    local ver sha new_sha tmp jh
+    sha="$ZAP_SHA256"
+    ver=$(latest_release_version zaproxy/zaproxy "$ZAP_VERSION" \
+        "https://github.com/zaproxy/zaproxy/releases/download/v@V@/ZAP_@V@_Linux.tar.gz")
+    if [ "$ver" != "$ZAP_VERSION" ]; then
+        # The SHA-256 from ZapVersions.xml, the release feed ZAP's own update check reads
+        new_sha=$(curl -fsSL --max-time 30 "https://raw.githubusercontent.com/zaproxy/zap-admin/master/ZapVersions.xml" 2>/dev/null \
+            | awk -v f="<file>ZAP_${ver}_Linux.tar.gz</file>" \
+                'index($0, f) {hit = 1; next} hit && /<hash>/ {sub(/.*<hash>SHA-256:/, ""); sub(/<\/hash>.*/, ""); print; exit}' || true)
+        if [ -n "$new_sha" ]; then
+            sha="$new_sha"
+        else
+            note_version_fallback zaproxy/zaproxy "no SHA-256 for ZAP_${ver}_Linux.tar.gz in ZapVersions.xml" "$ZAP_VERSION"
+            ver="$ZAP_VERSION"
+        fi
+    fi
+    tmp=$(mktemp -d)
+    if ! installfromnet curl -fsSL -o "$tmp/zap.tar.gz" \
+            "https://github.com/zaproxy/zaproxy/releases/download/v${ver}/ZAP_${ver}_Linux.tar.gz"; then
+        record_build_failure "net" "zaproxy" "download failed (ZAP_${ver}_Linux.tar.gz)"
+        rm -rf "$tmp"; return 0
+    fi
+    if ! echo "${sha}  $tmp/zap.tar.gz" | sha256sum -c - > /dev/null; then
+        record_build_failure "net" "zaproxy" "checksum mismatch (ZAP_${ver}_Linux.tar.gz)"
+        rm -rf "$tmp"; return 0
+    fi
+    rm -rf /opt/zaproxy
+    mkdir -p /opt/zaproxy
+    if ! tar -xzf "$tmp/zap.tar.gz" -C /opt/zaproxy --strip-components=1 --no-same-owner \
+        || [ ! -f /opt/zaproxy/zap.sh ]; then
+        record_build_failure "other" "zaproxy" "unexpected archive layout (ZAP_${ver}_Linux.tar.gz)"
+        rm -rf "$tmp"; return 0
+    fi
+    rm -rf "$tmp"
+    chmod 755 /opt/zaproxy/zap.sh
+    # A wrapper rather than a link: it picks Java 21 even when a newer default java is installed
+    # (patator's default-jre brings Java 25)
+    cat > /usr/local/bin/zap << 'EOF'
+#!/bin/sh
+# OWASP ZAP (/opt/zaproxy), on OpenJDK 21 unless JAVA_HOME is set.
+# Headless: zap -cmd -quickurl <url> -quickout /abs/report.html, zap -cmd -autorun /abs/plan.yaml
+# (automation framework), zap -daemon -host 127.0.0.1 -port 8090 (API). zap.sh changes to
+# /opt/zaproxy before it starts ZAP, so give file arguments as absolute paths.
+# The desktop UI needs X11 or Wayland forwarding.
+if [ -z "${JAVA_HOME:-}" ]; then
+    for d in /usr/lib/jvm/java-21-openjdk-*; do
+        if [ -x "$d/bin/java" ]; then
+            JAVA_HOME="$d"; PATH="$d/bin:$PATH"; export JAVA_HOME PATH
+            break
+        fi
+    done
+fi
+exec /opt/zaproxy/zap.sh "$@"
+EOF
+    chmod 755 /usr/local/bin/zap
+    ln -sf /usr/local/bin/zap /usr/local/bin/zap.sh
+    jh=$(ls -d /usr/lib/jvm/java-21-openjdk-* 2> /dev/null | head -n1 || true)
+    if [ -z "$jh" ] || ! "$jh/bin/java" -version > /dev/null 2>&1; then
+        record_build_failure "apt" "zaproxy" "OpenJDK 21 runtime not found; zap needs Java 17+ as the default java"
+    fi
+    goodecho "[+] OWASP ZAP ${ver} installed in /opt/zaproxy (zap, zap.sh)"
+    return 0
+}
+
 function beef_soft_install() {
     colorecho "[+] Installing BeEF"
     export TERM=xterm
@@ -1149,6 +1227,23 @@ function hydra_soft_install() {
     install_dependencies "hydra"
 }
 
+# patator (lanjelot, GPL-2.0): modular brute-forcer, `patator <module> ...` (ftp_login, ssh_login,
+# telnet_login, smtp_login, http_fuzz, snmp_login, mysql_login, ...). Ubuntu package; its
+# default-jre dependency serves the keystore_pass module. Two of its recommends are added:
+# python3-zombie-telnetlib (telnetlib left Python in 3.13; telnet_login needs it) and ike-scan
+# (ike_enum). rdp_login (freerdp3-x11) is left out.
+function patator_soft_install() {
+    goodecho "[+] Installing patator"
+    install_dependencies "patator python3-zombie-telnetlib ike-scan"
+}
+
+# hashID (psypanda, GPL-3.0+): identifies the hash type of a sample, with the matching hashcat mode
+# (-m) and John the Ripper format (-j); the successor of hash-identifier. Ubuntu package.
+function hashid_soft_install() {
+    goodecho "[+] Installing hashID"
+    install_dependencies "hashid"
+}
+
 function masscan_soft_install() {
     goodecho "[+] Installing masscan"
     install_dependencies "masscan"
@@ -1448,4 +1543,60 @@ function mitmproxy_soft_install() {
         [ -e "/root/.local/bin/$b" ] && ln -sf "/root/.local/bin/$b" "/usr/local/bin/$b"
     done
     return 0
+}
+
+# ---------------------------------------------------------------------------
+# Cloud-posture audit of IoT back ends. OPT-IN: they are large (whole cloud SDKs), so
+# general_network.docker leaves them commented. Install in a running container:
+#   cd /root/scripts && ./entrypoint.sh prowler_soft_install    (or scoutsuite_ / checkov_)
+# Each is its own uv tool (own venv, so their pinned SDK sets never collide), on the Python its
+# upstream container uses, with --no-cache so uv keeps no second copy of the wheels. Builds take the
+# newest PyPI release. amd64 and arm64 install from wheels; on riscv64 some dependencies
+# (cryptography, grpcio, rustworkx) have no wheels and build from source, which can fail.
+# ---------------------------------------------------------------------------
+
+# cloud_uv_tool_install <name> <python> <PyPI package> <command>
+function cloud_uv_tool_install() {
+    local name="$1" py="$2" pkg="$3" cmd="$4" target
+    goodecho "[+] Installing ${name} (uv tool, Python ${py})"
+    if ! command -v uv > /dev/null; then
+        record_build_failure "toolchain" "$name" "uv unavailable"
+        return 0
+    fi
+    if ! installfromnet uv tool install --force --no-cache --python "$py" "$pkg"; then
+        record_build_failure "pip" "$name" "uv tool install $pkg failed"
+        return 0
+    fi
+    # uv links the package's commands into ~/.local/bin; the tool venv's bin is the fallback
+    target="$HOME/.local/bin/$cmd"
+    [ -e "$target" ] || target="$(uv tool dir 2> /dev/null || echo "$HOME/.local/share/uv/tools")/$pkg/bin/$cmd"
+    if [ ! -e "$target" ]; then
+        record_build_failure "pip" "$name" "$cmd missing after uv tool install $pkg"
+        return 0
+    fi
+    ln -sf "$target" "/usr/local/bin/$cmd"
+    "/usr/local/bin/$cmd" --help > /dev/null 2>&1 \
+        || record_build_failure "other" "$name" "$cmd --help failed after install"
+    return 0
+}
+
+# Prowler (Apache-2.0): security best-practice and compliance checks (CIS, NIST, ISO 27001, ...) for
+# AWS, Azure, GCP, Kubernetes, Microsoft 365 and more: `prowler aws`, `prowler azure --az-cli-auth`.
+# Python 3.12, as its upstream container.
+function prowler_soft_install() {
+    cloud_uv_tool_install "prowler" "3.12" "prowler" "prowler"
+}
+
+# ScoutSuite (NCC Group, GPL-2.0): multi-cloud security audit (AWS, Azure, GCP, Alibaba Cloud, OCI)
+# that writes an offline HTML report: `scout aws`. Its latest release (5.14.0, 2024) declares
+# Python 3.9 to 3.11 and pins old SDK versions, so Python 3.11.
+function scoutsuite_soft_install() {
+    cloud_uv_tool_install "ScoutSuite" "3.11" "scoutsuite" "scout"
+}
+
+# Checkov (Prisma Cloud / Bridgecrew, Apache-2.0): static analysis of infrastructure as code
+# (Terraform, CloudFormation, Kubernetes, Helm, Dockerfiles, ARM, Serverless) from back-end repos or
+# firmware: `checkov -d <dir>`. Python 3.11, as its upstream container.
+function checkov_soft_install() {
+    cloud_uv_tool_install "checkov" "3.11" "checkov" "checkov"
 }

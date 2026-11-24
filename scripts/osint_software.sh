@@ -36,7 +36,8 @@ function osint_pipx_tools_install() {
 
 function osint_go_tools_install() {
     goodecho "[+] Installing OSINT Go tools"
-    install_dependencies "golang-go git"
+    ensure_go
+    install_dependencies "git"
     local t
     for t in \
         "github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest" \
@@ -115,7 +116,8 @@ EOF
 
 function amass_soft_install() {
     goodecho "[+] Installing OWASP Amass"
-    install_dependencies "golang-go git"
+    ensure_go
+    install_dependencies "git"
     GOBIN=/usr/local/bin go install -v github.com/owasp-amass/amass/v4/...@master \
         || record_build_failure "build" "amass" "go install failed"
     return 0

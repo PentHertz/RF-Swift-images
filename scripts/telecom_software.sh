@@ -156,7 +156,14 @@ function srsran4G_5GNSA_soft_install() {
 	cd /telecom/4G
 	goodecho "[+] Cloninig and installing srsRAN 4G"
 	installfromnet "git" "clone" "https://github.com/srsran/srsRAN_4G.git"
-	cd srsRAN_4G_resolute
+	# The clone is upstream's srsRAN_4G since 5937dde; this used to cd into the
+	# PentHertz fork's directory (srsRAN_4G_resolute), so nothing was built.
+	if ! cd srsRAN_4G; then
+		record_build_failure "build" "srsRAN 4G" "clone missing (srsRAN_4G)"
+		set -e
+		set -o pipefail
+		return 0
+	fi
 	mkdir build
 	cd build
 	cmake -DCMAKE_CXX_FLAGS="-Wno-error=array-bounds" ..

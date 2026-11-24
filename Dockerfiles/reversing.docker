@@ -39,6 +39,14 @@ RUN ./entrypoint.sh sasquatch_soft_install && \
 	./entrypoint.sh binwalkv3_soft_install && \
 	./entrypoint.sh qnx6extractor_soft_install
 
+# Carving and memory forensics on raw flash / RAM dumps: bulk_extractor (AES keys, URLs, emails,
+# regex search for credentials), scalpel and foremost (file carving), Volatility 3 (`vol`, with
+# dwarf2json for Linux symbol tables)
+RUN ./entrypoint.sh bulk_extractor_soft_install && \
+	./entrypoint.sh scalpel_soft_install && \
+	./entrypoint.sh foremost_soft_install && \
+	./entrypoint.sh volatility3_soft_install
+
 # adding some SAST / DAST tools
 RUN ./entrypoint.sh LLVM_install && \
 	./entrypoint.sh AFL_install && \

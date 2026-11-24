@@ -91,6 +91,9 @@ RUN ./entrypoint.sh rfswift_shell_setup
 # kept under /var/lib/db/ for later extraction; the log lines are greppable.
 RUN ./entrypoint.sh print_build_report
 
+# Third-party notices and RF Swift's GPL-3.0 text, inherited by every derived image (docs/licensing.md)
+COPY THIRD_PARTY_NOTICES.md LICENSE /usr/share/rfswift/licenses/
+
 # Cleaning and quitting
 WORKDIR /root/
 RUN rm -rf /root/thirdparty && \

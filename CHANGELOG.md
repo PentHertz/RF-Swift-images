@@ -4,6 +4,26 @@
 
 ### Added
 
+- `network`: OWASP ZAP (`zaproxy_soft_install`, Apache-2.0), the openly licensed
+  alternative to Burp Suite for device web UIs and companion-app APIs. The pure-Java
+  Linux release is installed in `/opt/zaproxy` on every architecture and checked against
+  its SHA-256 (newer releases against `ZapVersions.xml`); the `zap` / `zap.sh` wrapper
+  runs it on Ubuntu's OpenJDK 21. Headless: `zap -cmd ...`, `zap -daemon ...` or the
+  automation framework (`zap -cmd -autorun <plan.yaml>`).
+- `network`: hashID (`hashid`, with the hashcat mode and John format) and patator, from
+  Ubuntu's packages, with `python3-zombie-telnetlib` (patator's `telnet_login` on Python
+  3.13+) and `ike-scan`. patator's `default-jre` dependency adds Java 25.
+- `network`: opt-in cloud-posture tools for IoT back ends, each in its own uv tool venv:
+  Prowler (`prowler`), ScoutSuite (`scout`) and Checkov (`checkov`). They are large, so
+  their RUN line is commented; install them in a running container with
+  `cd /root/scripts && ./entrypoint.sh prowler_soft_install` (or `scoutsuite_soft_install`,
+  `checkov_soft_install`).
+- `reversing`: carving and memory forensics for raw flash and RAM dumps. bulk_extractor is
+  built from the newest release (checked against its `SHA256SUMS`) on every architecture,
+  since Ubuntu 26.04 does not package it; scalpel and foremost come from Ubuntu; Volatility 3
+  (`vol`, `volshell`) is the PyPI release in a uv tool venv on Python 3.13, with dwarf2json
+  for Linux symbol tables.
+
 - `network`: Nuclei (ProjectDiscovery), upstream release binary checked against
   its checksums file (amd64/arm64, `go install` elsewhere), with the community
   templates.
@@ -146,6 +166,17 @@
   WPE patch yet) all need manual work and were not bumped.
 
 ### Fixed
+
+- `telecom_4G_5GNSA`, `telecom_4Gto5G`, `all`: srsRAN 4G was not built. Since 5937dde the
+  installer clones upstream `srsRAN_4G` but still entered the PentHertz fork's directory
+  (`srsRAN_4G_resolute`); it now enters the clone and records a build-report entry if the
+  clone is missing.
+
+- Go-based installers (`go_install_tool`, kerbrute, the OSINT Go tools, Amass) installed
+  Ubuntu's `golang-go` unconditionally, which replaced the newest go.dev toolchain that
+  corebuild puts in `/usr/bin/go` with Ubuntu's older one in the `network`, `ad` and
+  `osint` images. They now use the toolchain already present (`ensure_go`) and fall back
+  to `golang-go` only when there is none.
 
 - `network`: `hashcat_soft_install` installed pixiewps instead of hashcat (and was defined
   twice), so the `network` and `ad` images had no hashcat although the tool list said so. It

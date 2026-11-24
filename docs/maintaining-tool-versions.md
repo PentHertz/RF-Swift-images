@@ -40,6 +40,8 @@ Integrity checks are kept where upstream publishes checksums:
 | Node.js (v24 line) | that release's `SHASUMS256.txt` |
 | Craft Anything | that release's `SHA256SUMS.txt` |
 | Go | the sha256 from go.dev's release list (new: the old install had no check) |
+| OWASP ZAP | the SHA-256 of `ZAP_<ver>_Linux.tar.gz` in `ZapVersions.xml` (zaproxy/zap-admin), the feed ZAP's own update check reads |
+| bulk_extractor | that release's `SHA256SUMS` |
 | geckodriver | **TLS only**: Mozilla publishes `.asc` signatures but no checksum file. The pinned SHA256 still applies when the known-good version is installed |
 
 **Still pinned** (the build installs exactly the version in the script): Kaleido (v1.x is a
@@ -138,6 +140,8 @@ describe how safe it is to bump that fallback.
 | pulseview | 0.4.4 | `hardware.sh` | **PentHertz fork**; cut a fork release before bumping |
 | antsdr-uhd | 4.1.0.0 | `sdr_peripherals.sh` | PentHertz repackage of MicroPhase UHD |
 | fpv-capture | 0.1 | `sdr_hacks.sh` | AntSDR boot files: asset names carry a build date; update the names and SHA-256 in `FPVCAPTURE_BOOTFILES` |
+| zap | 2.17.0 | `network_common.sh` | update `ZAP_SHA256` (the release notes list it); 2.18 raises the minimum to Java 21, which the image already uses |
+| bulk-extractor | 2.2.0 | `reverse_software.sh` | update `BULK_EXTRACTOR_SHA256` from the release's `SHA256SUMS` |
 
 ### locked (do not bump)
 

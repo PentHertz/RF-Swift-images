@@ -87,7 +87,9 @@ RUN ./entrypoint.sh hashcat_soft_install && \
 	./entrypoint.sh johnjumbo_soft_install && \
 	./entrypoint.sh cryptocondor_soft_install && \
 	./entrypoint.sh brutus_soft_install && \
-	./entrypoint.sh nerva_soft_install
+	./entrypoint.sh nerva_soft_install && \
+	./entrypoint.sh hashid_soft_install && \
+	./entrypoint.sh patator_soft_install
 
 # Web pentesting tools
 RUN ./entrypoint.sh caido_soft_install && \
@@ -98,6 +100,10 @@ RUN ./entrypoint.sh caido_soft_install && \
 	./entrypoint.sh  hexhttp_soft_install && \
 	./entrypoint.sh nuclei_soft_install && \
 	./entrypoint.sh commix_soft_install
+# OWASP ZAP (Apache-2.0), the open alternative to Burp Suite for device web UIs and companion-app
+# APIs, on OpenJDK 21. Headless: `zap -cmd ...`, daemon mode (`zap -daemon ...`, API) or the
+# automation framework (`zap -cmd -autorun /abs/path/plan.yaml`)
+RUN ./entrypoint.sh zaproxy_soft_install
 
 # Recent-CVE exploit PoCs, pinned to reviewed commits - authorized testing only
 # (docs/network-exploit-pocs.md). Installed, never run at build.
@@ -127,6 +133,16 @@ RUN ./entrypoint.sh ligolo_ng_soft_install && \
 	./entrypoint.sh rustscan_soft_install && \
 	./entrypoint.sh autorecon_tools_soft_install && \
 	./entrypoint.sh mitmproxy_soft_install
+
+# Opt-in: cloud-posture audit of IoT back ends, each in its own uv tool venv: Prowler (`prowler`),
+# ScoutSuite (`scout`) and Checkov (`checkov`, infrastructure as code). Large (whole cloud SDKs),
+# so not built by default. Uncomment, or install in a running container:
+#   cd /root/scripts && ./entrypoint.sh prowler_soft_install
+#   cd /root/scripts && ./entrypoint.sh scoutsuite_soft_install
+#   cd /root/scripts && ./entrypoint.sh checkov_soft_install
+#RUN ./entrypoint.sh prowler_soft_install && \
+#	./entrypoint.sh scoutsuite_soft_install && \
+#	./entrypoint.sh checkov_soft_install
 
 RUN mkdir -p /sdrtools/
 COPY run /sdrtools/run
