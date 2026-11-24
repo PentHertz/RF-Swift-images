@@ -1,0 +1,139 @@
+name: License compliance (manual)
+
+# CycloneDX and SPDX SBOMs (syft) of one published image, checked against
+# compliance/license-policy.json; the SBOMs and the report are uploaded as an artifact.
+# With "inventory" on, the image is first pulled and run to record what syft cannot see
+# (tools installed from git or tarballs, vendor binaries) and to collect its licence texts.
+# A blocked component fails the run, after the upload. Manual dispatch only.
+# See docs/licensing.md.
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  SYFT_VERSION: 1.57.1
+  # SHA-256 of syft_<version>_linux_amd64.tar.gz, from the release's syft_<version>_checksums.txt
+  SYFT_SHA256: bf52519eb57f675d47c07d43213cb6dff6449f3d6d1147ff6701ed91f44eef0c
+  OUT_DIR: compliance-out
+
+on:
+  workflow_dispatch:
+    inputs:
+      image:
+        description: 'Image tag (<image>_<arch>, e.g. network_amd64) or a full image reference'
+        type: string
+        required: true
+        default: corebuild_amd64
+      registry_image:
+        description: 'Repository a bare tag is looked up in'
+        type: choice
+        default: penthertz/rfswiftdev_resolute
+        options:
+          - penthertz/rfswiftdev_resolute
+          - penthertz/rfswift_resolute
+      inventory:
+        description: 'Also pull and run the image (inventory, licence texts)'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  compliance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Resolve the image
+        id: input
+        env:
+          IMAGE_INPUT: ${{ inputs.image }}
+          REGISTRY_IMAGE: ${{ inputs.registry_image }}
+        run: |
+          set -euo pipefail
+          if [[ ! $IMAGE_INPUT =~ ^[A-Za-z0-9][A-Za-z0-9._/:@-]*$ ]]; then
+            echo "::error::the image input may only contain letters, digits and . _ / : @ -"
+            exit 1
+          fi
+          source scripts/compliance/common.sh
+          ref=$(compliance_image_ref "$IMAGE_INPUT")
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+          echo "prefix=$(compliance_prefix "$ref")" >> "$GITHUB_OUTPUT"
+          echo "Image: $ref, platform: $(compliance_platform "$ref")"
+
+      - name: Policy checker tests
+        run: bash tests/license-policy.sh
+
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          df -h /
+
+      - name: Log in to Docker Hub
+        if: ${{ vars.DOCKERHUB_USERNAME != '' }}
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Install syft (pinned, SHA-256 checked)
+        run: |
+          set -euo pipefail
+          tmp=$(mktemp -d)
+          asset="syft_${SYFT_VERSION}_linux_amd64.tar.gz"
+          curl -fsSL --retry 3 -o "$tmp/$asset" \
+            "https://github.com/anchore/syft/releases/download/v${SYFT_VERSION}/${asset}"
+          echo "${SYFT_SHA256}  $tmp/$asset" | sha256sum -c -
+          tar -xzf "$tmp/$asset" -C "$tmp" syft
+          sudo install -m 0755 "$tmp/syft" /usr/local/bin/syft
+          rm -rf "$tmp"
+          syft version
+
+      - name: Set up QEMU (to run arm64 and riscv64 images)
+        if: ${{ inputs.inventory }}
+        uses: docker/setup-qemu-action@v3
+
+      - name: Inventory the image
+        if: ${{ inputs.inventory }}
+        env:
+          REF: ${{ steps.input.outputs.ref }}
+        run: |
+          set -euo pipefail
+          bash scripts/compliance/image-inventory.sh "$REF"
+          # syft reads the registry itself: free the space the pulled image takes
+          docker image rm "$REF" || true
+          df -h /
+
+      - name: Generate the SBOMs and check the licence policy
+        env:
+          REF: ${{ steps.input.outputs.ref }}
+          SYFT_FROM: registry
+        run: bash scripts/compliance/generate-sbom.sh "$REF" "$OUT_DIR"
+
+      - name: Summarize
+        if: always()
+        env:
+          REF: ${{ steps.input.outputs.ref }}
+          PREFIX: ${{ steps.input.outputs.prefix }}
+        run: |
+          report="$OUT_DIR/$PREFIX.policy.txt"
+          {
+            echo "## Licence policy: $REF"
+            echo ""
+            if [ -f "$report" ]; then
+              echo '```'
+              cat "$report"
+              echo '```'
+            else
+              echo "No report: the SBOM step did not finish."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload SBOMs, inventory and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: license-compliance-${{ steps.input.outputs.prefix || 'unknown' }}
+          path: ${{ env.OUT_DIR }}/
+          if-no-files-found: warn
