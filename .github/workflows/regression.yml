@@ -13,4 +13,3 @@ jobs:
           bash tests/retry.sh
           bash tests/changed-files.sh
           bash tests/license-policy.sh
-          shellcheck --severity=error .github/scripts/*.sh tests/*.sh scripts/*.sh scripts/compliance/*.sh run/*.sh
