@@ -366,9 +366,12 @@ function sdrmm_soft_install() {
 	goodecho "[+] Installing SDRmm"
 	# Latest stable tag, read from the /releases/latest redirect (no API rate limit,
 	# skips the "nightly" pre-release). Falls back to the last version tested here.
+	# One request, redirect not followed, and never fatal: under `set -eo pipefail`
+	# a failed lookup (an HTTP error from github.com, curl exit 22) used to abort the
+	# whole RUN before the fallback below could apply.
 	local version
-	version=$(curl -fsSLI -o /dev/null -w '%{url_effective}' https://github.com/Newspicel/sdrmm/releases/latest 2>/dev/null \
-		| sed -n 's#.*/tag/v\([0-9][0-9.]*\)$#\1#p')
+	version=$(curl -fsS --max-time 30 -o /dev/null -w '%{redirect_url}' https://github.com/Newspicel/sdrmm/releases/latest 2>/dev/null \
+		| sed -n 's#.*/tag/v\([0-9][0-9.]*\)$#\1#p' || true)
 	version="${version:-2.4.3}"
 	colorecho "[SDRmm] Using release v${version}"
 	local url="https://github.com/Newspicel/sdrmm/releases/download/v${version}"

@@ -1,0 +1,1539 @@
+{
+  "schema_version": 1,
+  "description": "Licence policy for the published RF Swift images (penthertz/rfswiftdev_resolute, penthertz/rfswift_resolute). Read by scripts/compliance/check-license-policy.py; see docs/licensing.md. blocked_components fail the check (exit 1); review_required_components need an owner decision; notice_required_components need their notices and source kept.",
+  "image_tree_note": "Image -> images built FROM it (Dockerfiles/Makefile). installed_in names the images whose Dockerfile installs a component; images also lists every image built on them. The checker warns when the two disagree.",
+  "image_tree": {
+    "corebuild": [
+      "sdrsa_devices",
+      "sdrsa_devices_antsdr",
+      "sdrsa_devices_rtlsdrv4",
+      "rfid",
+      "reversing",
+      "automotive",
+      "android",
+      "osint",
+      "llm"
+    ],
+    "sdrsa_devices": [
+      "sdr_light",
+      "network",
+      "bluetooth",
+      "hardware",
+      "telecom_utils",
+      "deeptempest"
+    ],
+    "sdr_light": [
+      "sdr_light_intelgpu",
+      "sdr_light_nvidiagpu",
+      "sdr_gnuradio4",
+      "sdr_hacks",
+      "sdr_full"
+    ],
+    "sdr_light_intelgpu": [
+      "sdr_full_intelgpu"
+    ],
+    "sdr_light_nvidiagpu": [
+      "sdr_full_nvidiagpu"
+    ],
+    "network": [
+      "wifi",
+      "ad"
+    ],
+    "telecom_utils": [
+      "telecom_2Gto3G",
+      "telecom_4Gto5G",
+      "telecom_4G_5GNSA",
+      "telecom_5G",
+      "telecom_5G_oai",
+      "telecom_ltesniffer",
+      "telecom_5G_bladerf"
+    ],
+    "telecom_4G_5GNSA": [
+      "telecom_5G_train"
+    ],
+    "artex_base": [
+      "artex"
+    ]
+  },
+  "blocked_components": [
+    {
+      "id": "ofrak",
+      "name": "OFRAK (Red Balloon Security)",
+      "status": "opt-in, never pre-installed",
+      "installed_in": [],
+      "images": [],
+      "licence": "OFRAK Community License (academic and personal non-commercial use) or OFRAK Pro",
+      "found_in": [
+        "scripts/reverse_software.sh: ofrak_soft_install, which refuses to run without OFRAK_ACCEPT_LICENSE=yes",
+        "Dockerfiles/reversing.docker: commented-out RUN line"
+      ],
+      "reason": "Never pre-installed. The repository's own notes (reverse_software.sh, reversing.docker) record that the Community License covers academic and personal non-commercial use only and does not allow redistributing OFRAK, so a published image must not carry it. It is blocked only as a guard: the entry removes nothing from today's images and fails the check if an image ever ships /opt/ofrak or the ofrak packages.",
+      "decision": "None while it stays opt-in. Remove this entry only with a redistribution grant from Red Balloon Security.",
+      "match": {
+        "install_functions": [
+          "ofrak_soft_install"
+        ],
+        "names": [
+          "ofrak",
+          "ofrak-capstone",
+          "ofrak-angr"
+        ],
+        "purls": [
+          "pkg:pypi/ofrak*"
+        ],
+        "paths": [
+          "/opt/ofrak/"
+        ],
+        "executables": [
+          "ofrak",
+          "ofrak-python"
+        ]
+      }
+    }
+  ],
+  "review_required_components": [
+    {
+      "id": "burpsuite-community",
+      "name": "Burp Suite Community Edition (PortSwigger)",
+      "status": "installed",
+      "installed_in": [
+        "network",
+        "telecom_5G_train"
+      ],
+      "images": [
+        "network",
+        "wifi",
+        "ad",
+        "telecom_5G_train"
+      ],
+      "licence": "PortSwigger proprietary licence (Burp Suite Community Edition terms)",
+      "found_in": [
+        "scripts/network_common.sh: burpsuite_community_install (amd64: PortSwigger's desktop installer from portswigger.net into /opt/burpsuite, with its bundled Java runtime) and install_burpsuite_jar (arm64/riscv64: the Community JAR from portswigger-cdn.net)",
+        "Dockerfiles/general_network.docker",
+        "Dockerfiles/telecom/telecom_4Gto5G_extended.docker (Makefile target telecom_5G_train)"
+      ],
+      "reason": "Proprietary freeware. Its terms give no clear grant to redistribute it in a public container image (Drost, whose pipeline this one is adapted from, blocks it for that reason).",
+      "decision": "Published in the images: Penthertz decided on 2026-11-24 to keep shipping it.",
+      "match": {
+        "install_functions": [
+          "burpsuite_community_install"
+        ],
+        "names": [
+          "burpsuite_community",
+          "burpsuite"
+        ],
+        "paths": [
+          "/opt/burpsuite/"
+        ],
+        "executables": [
+          "burpsuite",
+          "BurpSuiteCommunity"
+        ]
+      }
+    },
+    {
+      "id": "caido",
+      "name": "Caido Desktop",
+      "status": "installed",
+      "installed_in": [
+        "network"
+      ],
+      "images": [
+        "network",
+        "wifi",
+        "ad"
+      ],
+      "licence": "Caido proprietary licence (free tier); terms not recorded in the repository",
+      "found_in": [
+        "scripts/network_common.sh: caido_soft_install (newest Linux desktop tarball from api.caido.io into /security/Caido, launcher /usr/bin/caido; no version pin or checksum)",
+        "Dockerfiles/general_network.docker"
+      ],
+      "reason": "Closed-source vendor application. Whether its licence allows redistribution in a public image is not established, and the build takes whatever release is current.",
+      "decision": "Published in the images: Penthertz decided on 2026-11-24 to keep shipping it.",
+      "match": {
+        "install_functions": [
+          "caido_soft_install"
+        ],
+        "paths": [
+          "/security/Caido/"
+        ],
+        "executables": [
+          "caido"
+        ]
+      }
+    },
+    {
+      "id": "claude-code",
+      "name": "Claude Code (Anthropic)",
+      "status": "installed",
+      "installed_in": [
+        "llm"
+      ],
+      "images": [
+        "llm"
+      ],
+      "licence": "Proprietary. npm licence field: \"SEE LICENSE IN README.md\"; the package's LICENSE.md: \"© Anthropic PBC. All rights reserved. Use is subject to the Legal Agreements outlined here: https://code.claude.com/docs/en/legal-and-compliance.\" (checked on @anthropic-ai/claude-code 2.1.331)",
+      "found_in": [
+        "scripts/llm_software.sh: claudecode_soft_install (npm install -g @anthropic-ai/claude-code, which pulls the native binary as the optional dependency @anthropic-ai/claude-code-linux-<arch>)",
+        "Dockerfiles/llm.docker"
+      ],
+      "reason": "All rights reserved, no open-source licence. Whether Anthropic's terms let a third party redistribute the package inside a public image is not established.",
+      "decision": "Published in the images: Penthertz decided on 2026-11-24 to keep shipping it.",
+      "match": {
+        "install_functions": [
+          "claudecode_soft_install"
+        ],
+        "names": [
+          "@anthropic-ai/claude-code",
+          "@anthropic-ai/claude-code-linux-x64",
+          "@anthropic-ai/claude-code-linux-arm64"
+        ],
+        "purls": [
+          "pkg:npm/@anthropic-ai/claude-code*"
+        ],
+        "paths": [
+          "/usr/local/lib/node_modules/@anthropic-ai/claude-code",
+          "/usr/lib/node_modules/@anthropic-ai/claude-code"
+        ],
+        "executables": [
+          "claude"
+        ]
+      }
+    },
+    {
+      "id": "nodeterm-server",
+      "name": "NodeTerm Server Edition",
+      "status": "installed",
+      "installed_in": [
+        "llm"
+      ],
+      "images": [
+        "llm"
+      ],
+      "licence": "BUSL-1.1 (Business Source License 1.1, Licensor Enes Kirca; Change License MIT four years after each release; the Additional Use Grant excludes offerings that compete with the Licensed Work and tampering with its licence-key mechanisms)",
+      "found_in": [
+        "scripts/llm_software.sh: nodeterm_server_soft_install (git clone --depth 1 of github.com/eneskirca/nodeterm into /opt/nodeterm, built with npm; launcher /usr/local/bin/nodeterm-server)",
+        "Dockerfiles/llm.docker"
+      ],
+      "reason": "Source-available, not open source. BUSL-1.1 allows copying and redistribution but limits production use to the Additional Use Grant, and the licence must accompany every copy. Built from the default branch, so the version and its Change Date move with every build.",
+      "decision": "Published in the images: Penthertz decided on 2026-11-24 to keep shipping it.",
+      "match": {
+        "install_functions": [
+          "nodeterm_server_soft_install"
+        ],
+        "names": [
+          "nodeterm"
+        ],
+        "paths": [
+          "/opt/nodeterm/"
+        ],
+        "executables": [
+          "nodeterm-server"
+        ]
+      }
+    },
+    {
+      "id": "waybackurls",
+      "name": "waybackurls (tomnomnom)",
+      "status": "installed",
+      "installed_in": [
+        "osint"
+      ],
+      "images": [
+        "osint"
+      ],
+      "licence": "None: github.com/tomnomnom/waybackurls has no licence file (GitHub reports no licence, checked 2026-11-24)",
+      "found_in": [
+        "scripts/osint_software.sh: osint_go_tools_install (GOBIN=/usr/local/bin go install github.com/tomnomnom/waybackurls@latest)",
+        "Dockerfiles/osint.docker"
+      ],
+      "reason": "Without a licence there is no permission to redistribute the binary. Drost blocks it for the same reason.",
+      "decision": "Published in the images: Penthertz decided on 2026-11-24 to keep shipping it.",
+      "match": {
+        "names": [
+          "github.com/tomnomnom/waybackurls"
+        ],
+        "purls": [
+          "pkg:golang/github.com/tomnomnom/waybackurls*"
+        ],
+        "paths": [
+          "/usr/local/bin/waybackurls"
+        ],
+        "executables": [
+          "waybackurls"
+        ]
+      }
+    },
+    {
+      "id": "saleae-logic2",
+      "name": "Saleae Logic 2",
+      "status": "installed",
+      "installed_in": [
+        "hardware"
+      ],
+      "images": [
+        "hardware"
+      ],
+      "licence": "Saleae proprietary licence (EULA)",
+      "found_in": [
+        "scripts/hardware.sh: logic2_saleae_install (Logic 2.4.49 AppImage from downloads2.saleae.com, extracted to /hardware/Saleae/squashfs-root; commands Logic, logic, logic2, Logic-2-Saleae; amd64)",
+        "Dockerfiles/hardware.docker"
+      ],
+      "reason": "Closed-source vendor application, redistributed in extracted form. Whether Saleae's licence allows that in a public image is not established.",
+      "decision": "Published in the images: Penthertz decided on 2026-11-24 to keep shipping it.",
+      "match": {
+        "install_functions": [
+          "logic2_saleae_install"
+        ],
+        "paths": [
+          "/hardware/Saleae/"
+        ],
+        "executables": [
+          "Logic",
+          "logic2",
+          "Logic-2-Saleae"
+        ]
+      }
+    },
+    {
+      "id": "harogic",
+      "name": "Harogic SAStudio4, HTRA API, H2 API, SGStudio and VNA Studio",
+      "status": "installed",
+      "installed_in": [
+        "sdrsa_devices",
+        "sdrsa_devices_antsdr",
+        "sdrsa_devices_rtlsdrv4",
+        "sdr_light"
+      ],
+      "images": [
+        "sdrsa_devices",
+        "sdrsa_devices_antsdr",
+        "sdrsa_devices_rtlsdrv4",
+        "sdr_light",
+        "sdr_light_intelgpu",
+        "sdr_light_nvidiagpu",
+        "sdr_gnuradio4",
+        "sdr_hacks",
+        "sdr_full",
+        "sdr_full_intelgpu",
+        "sdr_full_nvidiagpu",
+        "deeptempest",
+        "network",
+        "wifi",
+        "ad",
+        "bluetooth",
+        "hardware",
+        "telecom_utils",
+        "telecom_2Gto3G",
+        "telecom_4Gto5G",
+        "telecom_4G_5GNSA",
+        "telecom_5G_train",
+        "telecom_5G",
+        "telecom_5G_oai",
+        "telecom_ltesniffer",
+        "telecom_5G_bladerf"
+      ],
+      "licence": "Proprietary Harogic Technologies software; the re-hosting repository github.com/PentHertz/rfswift_harogic_install has no licence file",
+      "found_in": [
+        "scripts/sa_devices.sh: harogic_sa_device_latest (SAStudio4 4.4.55.64 into /rftools/analysers, SA_Linux_API into /opt/htraapi and /usr/lib/libhtraapi.so*), harogic_h2api_install (SG_Linux_API, vendor install_h2_lib.sh, /opt/h2api), harogic_sg_device (SGStudio 2.7.6.1 into /rftools/generators)",
+        "scripts/cal_devices.sh: harogic_vna_cal_device (VNA Studio 1.0.8 into /rftools/calibration/VNStudio)",
+        "scripts/gr_oot_modules.sh: soapyharogic_grmod_install, grhtra_grmod_install (gr-htra, GPL-3.0), grharogic_sg_grmod_install, built against these APIs",
+        "Dockerfiles/SDR/sdrsa_devices.docker, Dockerfiles/SDR/sdr_light.docker"
+      ],
+      "reason": "Vendor binaries downloaded from PentHertz's GitHub re-host, not from Harogic, so redistribution rests on an agreement with Harogic. The bundles also carry third-party libraries (Qt under LGPL, Intel MKL and libiomp5, Arm RAL, libusb, liquid-dsp) whose notices must travel with them, and GPL modules (gr-htra and the other GNU Radio / SoapySDR modules) are linked against the proprietary API.",
+      "decision": "Published in the images: Penthertz decided on 2026-11-24 to keep shipping it.",
+      "match": {
+        "install_functions": [
+          "harogic_sa_device_latest",
+          "harogic_sa_device",
+          "harogic_sa_device_new",
+          "harogic_h2api_install",
+          "harogic_sg_device",
+          "harogic_vna_cal_device"
+        ],
+        "paths": [
+          "/opt/htraapi/",
+          "/opt/h2api/",
+          "/rftools/analysers/SAStudio4",
+          "/rftools/generators/SGStudio",
+          "/rftools/calibration/VNStudio/",
+          "/usr/lib/libhtraapi.so"
+        ],
+        "executables": [
+          "sastudio",
+          "sgstudio",
+          "vnastudio",
+          "vnaserver"
+        ]
+      }
+    },
+    {
+      "id": "signalhound",
+      "name": "Signal Hound Spike, VSG software and SDK (BB, SM, SP, VSG, TG APIs)",
+      "status": "installed",
+      "installed_in": [
+        "sdrsa_devices",
+        "sdrsa_devices_antsdr",
+        "sdrsa_devices_rtlsdrv4",
+        "sdr_light"
+      ],
+      "images": [
+        "sdrsa_devices",
+        "sdrsa_devices_antsdr",
+        "sdrsa_devices_rtlsdrv4",
+        "sdr_light",
+        "sdr_light_intelgpu",
+        "sdr_light_nvidiagpu",
+        "sdr_gnuradio4",
+        "sdr_hacks",
+        "sdr_full",
+        "sdr_full_intelgpu",
+        "sdr_full_nvidiagpu",
+        "deeptempest",
+        "network",
+        "wifi",
+        "ad",
+        "bluetooth",
+        "hardware",
+        "telecom_utils",
+        "telecom_2Gto3G",
+        "telecom_4Gto5G",
+        "telecom_4G_5GNSA",
+        "telecom_5G_train",
+        "telecom_5G",
+        "telecom_5G_oai",
+        "telecom_ltesniffer",
+        "telecom_5G_bladerf"
+      ],
+      "licence": "Proprietary Signal Hound software and SDK; licence terms ship in the vendor archives (not reviewed)",
+      "found_in": [
+        "scripts/sa_devices.sh: signalhound_spike_sa_device (Spike(Ubuntu_x64)_4_0_18 from signalhound.com into /rftools/analysers, runs its setup.sh; the wrapper also adds /usr/local/MATLAB/MATLAB_Runtime/v911 to the library path), signalhound_vsg60_sa_device (VSG(Ubuntu_x64)_2_0_5 into /rftools/generators), signalhound_sdk_install (SDK 09_14_26 into /opt/signalhound, libraries in /usr/lib)",
+        "scripts/gr_oot_modules.sh: grsignalhound_Receiver_grmod_install (SDK 10_05_26 libraries in /usr/local/lib, gr-signal-hound from github.com/PentHertz/gr-signal-hound)",
+        "scripts/sdr_peripherals.sh: sdrpp_extramodules_install (prebuilt SDR++ plugin signalhound_bb_source.so from the github.com/PentHertz/SDRPlusPlus releases, amd64)",
+        "Dockerfiles/SDR/sdrsa_devices.docker, Dockerfiles/SDR/sdr_light.docker"
+      ],
+      "reason": "Proprietary binaries downloaded from the vendor at build time and redistributed in the image. GPL-3.0 programs (the gr-signal-hound GNU Radio module, the SDR++ plugin) are linked to the proprietary API; shipping such combined binaries may conflict with the GPL unless the copyright holders allow it. If Spike's setup.sh installs the MATLAB Runtime, that is a further MathWorks component.",
+      "decision": "Published in the images: Penthertz decided on 2026-11-24 to keep shipping it.",
+      "match": {
+        "install_functions": [
+          "signalhound_spike_sa_device",
+          "signalhound_vsg60_sa_device",
+          "signalhound_sdk_install",
+          "grsignalhound_Receiver_grmod_install"
+        ],
+        "paths": [
+          "/opt/signalhound/",
+          "/rftools/analysers/Spike(",
+          "/rftools/generators/VSG(",
+          "/usr/lib/libbb_api.so",
+          "/usr/local/lib/libbb_api.so",
+          "/usr/lib/sdrpp/plugins/signalhound_bb_source.so",
+          "/usr/local/MATLAB/"
+        ],
+        "executables": [
+          "Spike",
+          "vsg_signalhound"
+        ]
+      }
+    },
+    {
+      "id": "deepace-kc908",
+      "name": "Deepace KC908 SDK (libkcsdr), gr-kc_sdr bundle and KCSDI",
+      "status": "installed",
+      "installed_in": [
+        "sdr_light"
+      ],
+      "images": [
+        "sdr_light",
+        "sdr_light_intelgpu",
+        "sdr_light_nvidiagpu",
+        "sdr_gnuradio4",
+        "sdr_hacks",
+        "sdr_full",
+        "sdr_full_intelgpu",
+        "sdr_full_nvidiagpu"
+      ],
+      "licence": "Proprietary Deepace software; the re-hosting repository github.com/PentHertz/rfswift_deepace_install has no licence file",
+      "found_in": [
+        "scripts/sa_devices.sh: kc908_sa_device (KC908-GNURadio24.4.06.zip from the re-host's 'nightly' release: libkcsdr.so into /usr/local/lib, FTDI libftd3xx into /usr/lib, gr-kc_sdr built; amd64)",
+        "scripts/cal_devices.sh: KCSDI_cal_device (KCSDI AppImage into /rftools/calibration/Deepace)",
+        "scripts/sdr_peripherals.sh: sdrpp_extramodules_install (prebuilt SDR++ plugin kcsdr_source from the github.com/PentHertz/SDRPlusPlus releases, amd64)",
+        "Dockerfiles/SDR/sdr_light.docker"
+      ],
+      "reason": "Vendor binaries re-hosted by PentHertz under a moving 'nightly' tag, with no checksum. Redistribution rests on an agreement with Deepace; the bundle also carries FTDI's proprietary D3XX driver (see ftdi-drivers).",
+      "decision": "Published in the images: Penthertz decided on 2026-11-24 to keep shipping it.",
+      "match": {
+        "install_functions": [
+          "kc908_sa_device",
+          "KCSDI_cal_device"
+        ],
+        "paths": [
+          "/usr/local/lib/libkcsdr.so",
+          "/usr/local/include/kcsdr/",
+          "/rftools/calibration/Deepace/",
+          "/usr/lib/sdrpp/plugins/kcsdr_source"
+        ],
+        "executables": [
+          "KCSDI"
+        ]
+      }
+    },
+    {
+      "id": "ftdi-drivers",
+      "name": "FTDI D2XX (libftd2xx) and D3XX (libftd3xx) drivers",
+      "status": "installed",
+      "installed_in": [
+        "sdrsa_devices",
+        "sdrsa_devices_antsdr",
+        "sdrsa_devices_rtlsdrv4",
+        "sdr_light"
+      ],
+      "images": [
+        "sdrsa_devices",
+        "sdrsa_devices_antsdr",
+        "sdrsa_devices_rtlsdrv4",
+        "sdr_light",
+        "sdr_light_intelgpu",
+        "sdr_light_nvidiagpu",
+        "sdr_gnuradio4",
+        "sdr_hacks",
+        "sdr_full",
+        "sdr_full_intelgpu",
+        "sdr_full_nvidiagpu",
+        "deeptempest",
+        "network",
+        "wifi",
+        "ad",
+        "bluetooth",
+        "hardware",
+        "telecom_utils",
+        "telecom_2Gto3G",
+        "telecom_4Gto5G",
+        "telecom_4G_5GNSA",
+        "telecom_5G_train",
+        "telecom_5G",
+        "telecom_5G_oai",
+        "telecom_ltesniffer",
+        "telecom_5G_bladerf"
+      ],
+      "licence": "FTDI proprietary driver licence (text not reviewed for these versions)",
+      "found_in": [
+        "scripts/gr_oot_modules.sh: grsignalhound_Receiver_grmod_install (libftd2xx 1.4.34 from github.com/PentHertz/rfswift_ftdi, a re-host without a licence file, into /usr/local/lib)",
+        "scripts/sa_devices.sh: signalhound_sdk_install (libftd2xx from the Signal Hound SDK into /usr/lib, x86_64), kc908_sa_device (libftd3xx 0.5.21 from the Deepace bundle into /usr/lib)"
+      ],
+      "reason": "FTDI's driver licence attaches conditions to redistribution (tied to products that use FTDI devices); whether it covers a general-purpose public image, and a re-host on PentHertz's GitHub, is not established.",
+      "decision": "Published in the images: Penthertz decided on 2026-11-24 to keep shipping it.",
+      "match": {
+        "paths": [
+          "/usr/local/lib/libftd2xx.so",
+          "/usr/lib/libftd2xx.so",
+          "/usr/lib/libftd3xx.so"
+        ]
+      }
+    },
+    {
+      "id": "nvidia-cuda",
+      "name": "NVIDIA CUDA toolkit and OpenCL packages (Ubuntu multiverse)",
+      "status": "installed",
+      "installed_in": [
+        "hardware",
+        "sdr_full",
+        "sdr_full_intelgpu",
+        "sdr_full_nvidiagpu",
+        "sdr_light_nvidiagpu"
+      ],
+      "images": [
+        "sdr_light_nvidiagpu",
+        "sdr_full",
+        "sdr_full_intelgpu",
+        "sdr_full_nvidiagpu",
+        "hardware"
+      ],
+      "licence": "NVIDIA proprietary licence (CUDA EULA), distributed by Ubuntu in multiverse",
+      "found_in": [
+        "scripts/corebuild.sh: install_GPU_nvidia (apt nvidia-opencl-dev nvidia-modprobe nvidia-cuda-dev, amd64) and enable_apt_components (enables multiverse)",
+        "Dockerfiles/hardware.docker, Dockerfiles/SDR/sdr_full.docker, Dockerfiles/SDR/sdr_light_nvidiagpu.docker"
+      ],
+      "reason": "Multiverse holds software that is not free. Ubuntu redistributes these packages under NVIDIA's terms; whether those terms let a third party redistribute them in a public image is not established.",
+      "decision": "Published in the images: Penthertz decided on 2026-11-24 to keep shipping it.",
+      "match": {
+        "install_functions": [
+          "install_GPU_nvidia"
+        ],
+        "names": [
+          "nvidia-cuda-dev",
+          "nvidia-cuda-toolkit",
+          "nvidia-opencl-dev"
+        ]
+      }
+    },
+    {
+      "id": "amdgpu-repository",
+      "name": "AMD Radeon packages from repo.radeon.com (amdgpu-install)",
+      "status": "installed",
+      "installed_in": [
+        "hardware",
+        "sdr_full",
+        "sdr_full_intelgpu",
+        "sdr_full_nvidiagpu"
+      ],
+      "images": [
+        "sdr_full",
+        "sdr_full_intelgpu",
+        "sdr_full_nvidiagpu",
+        "hardware"
+      ],
+      "licence": "Per package; AMD's repository also carries EULA-bound proprietary packages",
+      "found_in": [
+        "scripts/corebuild.sh: install_GPU_latest_Radeon (amdgpu-install 31.30 from repo.radeon.com, --usecase=graphics,opencl --no-dkms; the script avoids --accept-eula on purpose, amd64)",
+        "Dockerfiles/hardware.docker, Dockerfiles/SDR/sdr_full.docker"
+      ],
+      "reason": "A vendor repository with a licence-acceptance mechanism. The chosen use cases are meant to install open-source packages only; that is not checked anywhere.",
+      "decision": "Published in the images: Penthertz decided on 2026-11-24 to keep shipping it.",
+      "match": {
+        "install_functions": [
+          "install_GPU_latest_Radeon"
+        ],
+        "names": [
+          "amdgpu-install"
+        ]
+      }
+    },
+    {
+      "id": "nordic-nrf-sniffer",
+      "name": "Nordic nRF Sniffer for Bluetooth LE 4.1.1",
+      "status": "installed",
+      "installed_in": [
+        "bluetooth"
+      ],
+      "images": [
+        "bluetooth"
+      ],
+      "licence": "Nordic Semiconductor licence (in the zip; not reviewed)",
+      "found_in": [
+        "scripts/rf_tools.sh: mirage_soft_install (zip from Nordic's download CDN, nsscprodmedia.blob.core.windows.net, kept in /rftools/bluetooth/firmwares/NRFSniffer)",
+        "Dockerfiles/bluetooth.docker"
+      ],
+      "reason": "Vendor package (firmware images and Wireshark plugin) redistributed as downloaded; its redistribution terms were not checked.",
+      "decision": "Published in the images: Penthertz decided on 2026-11-24 to keep shipping it.",
+      "match": {
+        "paths": [
+          "/rftools/bluetooth/firmwares/NRFSniffer/"
+        ]
+      }
+    },
+    {
+      "id": "fpv-capture",
+      "name": "fpv_capture (black-pigeon) host tools and AntSDR E200/E310 boot files",
+      "status": "installed",
+      "installed_in": [
+        "sdr_hacks"
+      ],
+      "images": [
+        "sdr_hacks"
+      ],
+      "licence": "None: upstream has no licence file (noted in scripts/sdr_hacks.sh; GitHub reports none, checked 2026-11-24); only its kernel driver carries GPL-2.0",
+      "found_in": [
+        "scripts/sdr_hacks.sh: fpvcapture_sdrhacks_install (git clone into /rftools/sdr/fpv_capture, release v0.1 boot file tarballs in bootfiles/, u220_fpv_tx built)",
+        "Dockerfiles/SDR/sdr_hacks.docker (uncommitted addition)"
+      ],
+      "reason": "Without a licence there is no permission to redistribute the code or the boot files. If the boot files hold a Linux kernel, U-Boot or other GPL binaries (not inspected), their corresponding source is owed as well.",
+      "decision": "Published in the images: Penthertz decided on 2026-11-24 to keep shipping it.",
+      "match": {
+        "install_functions": [
+          "fpvcapture_sdrhacks_install"
+        ],
+        "paths": [
+          "/rftools/sdr/fpv_capture/"
+        ],
+        "executables": [
+          "fpv-receive",
+          "u220-fpv-tx"
+        ]
+      }
+    },
+    {
+      "id": "tetra-acelp-codec",
+      "name": "ETSI TETRA ACELP speech codec",
+      "status": "installer only, codec not pre-installed",
+      "installed_in": [],
+      "images": [],
+      "licence": "ETSI terms for the TETRA codec reference code",
+      "found_in": [
+        "scripts/sdr_softwares.sh: tetra_suite_install clones github.com/sq5bpf/install-tetra-codec into /rftools/sdr and links install-tetra-codec; the codec is \"not built - user runs it manually due to ETSI licensing\"",
+        "Dockerfiles/SDR/sdr_full.docker"
+      ],
+      "reason": "Not pre-installed: only the installer is in sdr_full, and the codec is built when a user runs install-tetra-codec. An image that carries the built codec needs ETSI's terms checked first.",
+      "decision": "Published in the images: Penthertz decided on 2026-11-24 to keep shipping it.",
+      "match": {
+        "executables": [
+          "cdecoder",
+          "sdecoder"
+        ]
+      }
+    },
+    {
+      "id": "pocketvna",
+      "name": "pocketVNA software (unofficial re-host)",
+      "status": "not installed by any Dockerfile",
+      "installed_in": [],
+      "images": [],
+      "licence": "Vendor software; the re-hosting repository github.com/PentHertz/rfswift_unofficial_pocketvna has no licence file",
+      "found_in": [
+        "scripts/cal_devices.sh: pocketvna_sa_device (vendor .run binary into /rftools/calibration/pocketVNA, amd64), not called by any Dockerfile"
+      ],
+      "reason": "Not installed today. It is an unofficial re-host of a vendor binary, so adding it to an image would need the vendor's agreement.",
+      "decision": "Published in the images: Penthertz decided on 2026-11-24 to keep shipping it.",
+      "match": {
+        "install_functions": [
+          "pocketvna_sa_device"
+        ],
+        "paths": [
+          "/rftools/calibration/pocketVNA/"
+        ],
+        "executables": [
+          "pocketVNA"
+        ]
+      }
+    }
+  ],
+  "notice_required_components": [
+    {
+      "id": "nmap",
+      "name": "Nmap",
+      "status": "installed",
+      "installed_in": [
+        "network",
+        "telecom_5G_train",
+        "telecom_5G_bladerf"
+      ],
+      "images": [
+        "network",
+        "wifi",
+        "ad",
+        "telecom_5G_train",
+        "telecom_5G_bladerf"
+      ],
+      "licence": "Nmap Public Source License (NPSL; the version Ubuntu ships is named in /usr/share/doc/nmap/copyright)",
+      "found_in": [
+        "scripts/network_common.sh: nmap_soft_install (Ubuntu package nmap)",
+        "Dockerfiles/general_network.docker, Dockerfiles/telecom/telecom_4Gto5G_extended.docker, Dockerfiles/telecom/telecom_5G_bladerf.docker"
+      ],
+      "reason": "NPSL is a GPL-2.0-based licence with extra conditions; it is not the licence of RF Swift.",
+      "keep": "/usr/share/doc/nmap/copyright; the Ubuntu source package and version (debian-source-packages.tsv) as corresponding source; do not present Nmap as GPL-3.0. Products that embed Nmap need Nmap's OEM licence.",
+      "match": {
+        "names": [
+          "nmap"
+        ],
+        "executables": [
+          "nmap"
+        ]
+      }
+    },
+    {
+      "id": "open5gs",
+      "name": "Open5GS (core network and WebUI)",
+      "status": "installed",
+      "installed_in": [
+        "telecom_4G_5GNSA",
+        "telecom_4Gto5G",
+        "telecom_5G",
+        "telecom_5G_oai",
+        "telecom_5G_bladerf",
+        "telecom_5G_train"
+      ],
+      "images": [
+        "telecom_4Gto5G",
+        "telecom_4G_5GNSA",
+        "telecom_5G_train",
+        "telecom_5G",
+        "telecom_5G_oai",
+        "telecom_5G_bladerf"
+      ],
+      "licence": "AGPL-3.0",
+      "found_in": [
+        "scripts/telecom_software.sh: Open5GS_soft_install, Open5GS_nohttp2_soft_install, Open5GS_0caps_soft_install (git clone of the default branch into /telecom/5G, built in place)",
+        "Dockerfiles/telecom/*.docker"
+      ],
+      "reason": "AGPL network server built from source.",
+      "keep": "The source tree and LICENSE in the image; the exact upstream commit (git-checkouts.tsv) as corresponding source. Anyone who runs a modified copy as a network service must offer its source to the users of that service (AGPL section 13).",
+      "match": {
+        "install_functions": [
+          "Open5GS_soft_install",
+          "Open5GS_nohttp2_soft_install",
+          "Open5GS_0caps_soft_install"
+        ],
+        "paths": [
+          "/telecom/5G/open5gs"
+        ],
+        "executables": [
+          "Open5Gs_deployall"
+        ]
+      }
+    },
+    {
+      "id": "srsran-4g",
+      "name": "srsRAN 4G",
+      "status": "installed",
+      "installed_in": [
+        "telecom_4G_5GNSA",
+        "telecom_4Gto5G",
+        "telecom_5G_train"
+      ],
+      "images": [
+        "telecom_4Gto5G",
+        "telecom_4G_5GNSA",
+        "telecom_5G_train"
+      ],
+      "licence": "AGPL-3.0",
+      "found_in": [
+        "scripts/telecom_software.sh: srsran4G_5GNSA_soft_install (git clone into /telecom/4G)"
+      ],
+      "reason": "AGPL network software built from source.",
+      "keep": "LICENSE and the source tree; the upstream commit as corresponding source; AGPL section 13 for modified copies offered over a network.",
+      "match": {
+        "install_functions": [
+          "srsran4G_5GNSA_soft_install"
+        ],
+        "paths": [
+          "/telecom/4G/srsRAN_4G"
+        ],
+        "executables": [
+          "srsenb",
+          "srsepc",
+          "srsue"
+        ]
+      }
+    },
+    {
+      "id": "srsran-project-bladerf",
+      "name": "srsRAN Project (FlUxIuS bladeRF fork)",
+      "status": "installed",
+      "installed_in": [
+        "telecom_5G_bladerf"
+      ],
+      "images": [
+        "telecom_5G_bladerf"
+      ],
+      "licence": "AGPL-3.0",
+      "found_in": [
+        "scripts/telecom_software.sh: srsran5GSA_bladerf_soft_install (github.com/FlUxIuS/srsRAN_Project_bladerf into /telecom/5G)"
+      ],
+      "reason": "AGPL network software built from a PentHertz-maintained fork.",
+      "keep": "LICENSE and the source tree; the fork's commit as corresponding source (the fork must stay public); AGPL section 13 for modified copies offered over a network.",
+      "match": {
+        "install_functions": [
+          "srsran5GSA_bladerf_soft_install"
+        ],
+        "paths": [
+          "/telecom/5G/srsRAN_Project_bladerf"
+        ]
+      }
+    },
+    {
+      "id": "ocudu",
+      "name": "OCUDU (5G SA RAN, replaces srsRAN Project in these images)",
+      "status": "installed",
+      "installed_in": [
+        "telecom_4Gto5G",
+        "telecom_5G"
+      ],
+      "images": [
+        "telecom_4Gto5G",
+        "telecom_5G"
+      ],
+      "licence": "BSD-3-Clause-Open-MPI per its LICENSE file (GitLab licence detection and file checked 2026-11-24), not AGPL; bundled third-party code is listed in COPYRIGHTS.txt and LICENSES/",
+      "found_in": [
+        "scripts/telecom_software.sh: ocudu_soft_install, called by srsran5GSA_soft_install (git clone of gitlab.com/ocudu/ocudu into /telecom/5G)"
+      ],
+      "reason": "BSD-style: binary redistribution must reproduce the copyright notice and licence.",
+      "keep": "/telecom/5G/ocudu/LICENSE, COPYRIGHTS.txt and LICENSES/ next to the installed binaries.",
+      "match": {
+        "install_functions": [
+          "ocudu_soft_install"
+        ],
+        "paths": [
+          "/telecom/5G/ocudu"
+        ]
+      }
+    },
+    {
+      "id": "ueransim",
+      "name": "UERANSIM",
+      "status": "installed",
+      "installed_in": [
+        "telecom_5G",
+        "telecom_5G_train"
+      ],
+      "images": [
+        "telecom_5G_train",
+        "telecom_5G"
+      ],
+      "licence": "AGPL-3.0 (upstream LICENSE file, checked 2026-11-24)",
+      "found_in": [
+        "scripts/telecom_software.sh: UERANSIM_soft_install (github.com/aligungr/UERANSIM), UERANSIM_nullciph_soft_install (github.com/FlUxIuS/UERANSIM, branch nullciph), both in /telecom/5G"
+      ],
+      "reason": "AGPL software built from source (one variant from a PentHertz-maintained fork).",
+      "keep": "LICENSE and the source tree; the commit (and the fork) as corresponding source.",
+      "match": {
+        "install_functions": [
+          "UERANSIM_soft_install",
+          "UERANSIM_nullciph_soft_install"
+        ],
+        "paths": [
+          "/telecom/5G/UERANSIM"
+        ],
+        "executables": [
+          "nr-gnb",
+          "nr-ue"
+        ]
+      }
+    },
+    {
+      "id": "pyhss",
+      "name": "PyHSS",
+      "status": "installed",
+      "installed_in": [
+        "telecom_utils"
+      ],
+      "images": [
+        "telecom_utils",
+        "telecom_2Gto3G",
+        "telecom_4Gto5G",
+        "telecom_4G_5GNSA",
+        "telecom_5G_train",
+        "telecom_5G",
+        "telecom_5G_oai",
+        "telecom_ltesniffer",
+        "telecom_5G_bladerf"
+      ],
+      "licence": "AGPL-3.0",
+      "found_in": [
+        "scripts/telecom_software.sh: pyhss_soft_install (github.com/pyhss/pyhss into /telecom/core/pyhss, with redis-server; uncommitted change)",
+        "Dockerfiles/telecom/telecom_utils.docker"
+      ],
+      "reason": "AGPL network server.",
+      "keep": "LICENSE and the source tree; the commit as corresponding source; AGPL section 13.",
+      "match": {
+        "install_functions": [
+          "pyhss_soft_install"
+        ],
+        "paths": [
+          "/telecom/core/pyhss"
+        ],
+        "executables": [
+          "pyhss_hss",
+          "pyhss_api",
+          "pyhss_diameter"
+        ]
+      }
+    },
+    {
+      "id": "jss7",
+      "name": "jSS7 (PentHertz fork of RestComm jSS7)",
+      "status": "installed",
+      "installed_in": [
+        "telecom_utils"
+      ],
+      "images": [
+        "telecom_utils",
+        "telecom_2Gto3G",
+        "telecom_4Gto5G",
+        "telecom_4G_5GNSA",
+        "telecom_5G_train",
+        "telecom_5G",
+        "telecom_5G_oai",
+        "telecom_ltesniffer",
+        "telecom_5G_bladerf"
+      ],
+      "licence": "AGPL-3.0",
+      "found_in": [
+        "scripts/telecom_software.sh: jss7_soft_install (github.com/PentHertz/jss7 into /telecom/2G/jss7, Maven build, amd64)"
+      ],
+      "reason": "AGPL software built from a PentHertz fork; Maven also pulls Java dependencies under their own licences.",
+      "keep": "LICENSE and the source tree; the fork's commit as corresponding source.",
+      "match": {
+        "install_functions": [
+          "jss7_soft_install"
+        ],
+        "paths": [
+          "/telecom/2G/jss7"
+        ]
+      }
+    },
+    {
+      "id": "ltesniffer",
+      "name": "LTESniffer",
+      "status": "installed",
+      "installed_in": [
+        "telecom_ltesniffer"
+      ],
+      "images": [
+        "telecom_ltesniffer"
+      ],
+      "licence": "AGPL-3.0 (upstream LICENSE file, checked 2026-11-24)",
+      "found_in": [
+        "scripts/telecom_software.sh: LTESniffer_soft_install (github.com/SysSec-KAIST/LTESniffer into /telecom/4G)"
+      ],
+      "reason": "AGPL software built from source.",
+      "keep": "LICENSE and the source tree; the commit as corresponding source.",
+      "match": {
+        "install_functions": [
+          "LTESniffer_soft_install"
+        ],
+        "paths": [
+          "/telecom/4G/LTESniffer"
+        ],
+        "executables": [
+          "LTESniffer"
+        ]
+      }
+    },
+    {
+      "id": "gsm-umts-stacks",
+      "name": "OpenBTS, OpenBTS-UMTS, Osmocom network elements, Yate and YateBTS",
+      "status": "installed",
+      "installed_in": [
+        "telecom_2Gto3G"
+      ],
+      "images": [
+        "telecom_2Gto3G"
+      ],
+      "licence": "AGPL-3.0 (OpenBTS, most Osmocom network elements) and GPL (Yate, YateBTS, Osmocom libraries); check each tree's COPYING",
+      "found_in": [
+        "scripts/telecom_software.sh: openbts_uhd_soft_install, openbts_umts_soft_install, osmobts_suite_soft_install (gitea.osmocom.org), yatebts_blade2_soft_install (PentHertz forks OpenBTS, OpenBTS-UMTS, yate_resolute and yatebts-rc3-nonoff)",
+        "Dockerfiles/telecom/telecom_2Gto3G.docker"
+      ],
+      "reason": "Copyleft telecom stacks built from source, several from PentHertz forks.",
+      "keep": "Each tree's licence files; the commits (and the forks) as corresponding source; AGPL section 13 for the AGPL servers.",
+      "match": {
+        "install_functions": [
+          "openbts_uhd_soft_install",
+          "openbts_umts_soft_install",
+          "osmobts_suite_soft_install",
+          "yatebts_blade2_soft_install"
+        ],
+        "paths": [
+          "/telecom/2G/OpenBTS",
+          "/telecom/2G/osmocom",
+          "/telecom/2G/yate_resolute",
+          "/telecom/2G/yatebts-rc3-nonoff",
+          "/telecom/3G/OpenBTS-UMTS"
+        ]
+      }
+    },
+    {
+      "id": "openairinterface5g",
+      "name": "OpenAirInterface 5G RAN",
+      "status": "installed",
+      "installed_in": [
+        "telecom_5G_oai"
+      ],
+      "images": [
+        "telecom_5G_oai"
+      ],
+      "licence": "OAI Public License v1.1 (Apache-2.0-based with patent licensing conditions; name not re-checked against v2.4.0, the download was rate-limited)",
+      "found_in": [
+        "scripts/telecom_software.sh: openairinterface5g_soft_install (tag v2.4.0 from gitlab.eurecom.fr into /telecom/5G/openairinterface5g)",
+        "Dockerfiles/telecom/telecom_5G_oai.docker"
+      ],
+      "reason": "A special licence: it is not one of the common open-source licences, and its patent terms matter for commercial use.",
+      "keep": "LICENSE and NOTICE files of the source tree; the tag as corresponding source.",
+      "match": {
+        "install_functions": [
+          "openairinterface5g_soft_install"
+        ],
+        "paths": [
+          "/telecom/5G/openairinterface5g"
+        ],
+        "executables": [
+          "nr-softmodem",
+          "nr-uesoftmodem"
+        ]
+      }
+    },
+    {
+      "id": "mongodb-server",
+      "name": "MongoDB Community Server 6.0 (mongodb-org)",
+      "status": "installed",
+      "installed_in": [
+        "telecom_4G_5GNSA",
+        "telecom_4Gto5G",
+        "telecom_5G",
+        "telecom_5G_oai",
+        "telecom_5G_bladerf",
+        "telecom_5G_train"
+      ],
+      "images": [
+        "telecom_4Gto5G",
+        "telecom_4G_5GNSA",
+        "telecom_5G_train",
+        "telecom_5G",
+        "telecom_5G_oai",
+        "telecom_5G_bladerf"
+      ],
+      "licence": "SSPL-1.0 (server); the shell and tools are Apache-2.0",
+      "found_in": [
+        "scripts/telecom_software.sh: Open5GS_soft_install and its variants (apt mongodb-org from repo.mongodb.org, jammy/mongodb-org/6.0)"
+      ],
+      "reason": "SSPL is a copyleft licence that is not OSI-approved. Redistributing unmodified binaries is allowed; its section 13 applies to anyone who offers MongoDB as a service.",
+      "keep": "The licence files the packages install (/usr/share/doc/mongodb-org-server/); MongoDB's source for the installed version (github.com/mongodb/mongo) as corresponding source.",
+      "match": {
+        "names": [
+          "mongodb-org",
+          "mongodb-org-server",
+          "mongodb-org-mongos"
+        ],
+        "paths": [
+          "/usr/bin/mongod"
+        ],
+        "executables": [
+          "mongod"
+        ]
+      }
+    },
+    {
+      "id": "redis-server",
+      "name": "Redis (Ubuntu package)",
+      "status": "installed",
+      "installed_in": [
+        "telecom_utils"
+      ],
+      "images": [
+        "telecom_utils",
+        "telecom_2Gto3G",
+        "telecom_4Gto5G",
+        "telecom_4G_5GNSA",
+        "telecom_5G_train",
+        "telecom_5G",
+        "telecom_5G_oai",
+        "telecom_ltesniffer",
+        "telecom_5G_bladerf"
+      ],
+      "licence": "As stated in /usr/share/doc/redis-server/copyright (Redis 7.4 and later are no longer BSD-only; Redis 8 is also offered under AGPL-3.0)",
+      "found_in": [
+        "scripts/telecom_software.sh: pyhss_soft_install (apt redis-server; uncommitted change)"
+      ],
+      "reason": "The licence depends on the version Ubuntu 26.04 ships, which was not checked here.",
+      "keep": "/usr/share/doc/redis-server/copyright; if it is AGPL-3.0, treat it like the other AGPL servers.",
+      "match": {
+        "names": [
+          "redis-server"
+        ],
+        "executables": [
+          "redis-server"
+        ]
+      }
+    },
+    {
+      "id": "arduino-ide",
+      "name": "Arduino IDE 2",
+      "status": "installed",
+      "installed_in": [
+        "hardware"
+      ],
+      "images": [
+        "hardware"
+      ],
+      "licence": "AGPL-3.0 (github.com/arduino/arduino-ide); the AppImage bundles Electron and arduino-cli (GPL-3.0)",
+      "found_in": [
+        "scripts/hardware.sh: arduino_ide_install (AppImage from downloads.arduino.cc into /hardware/Arduino, command arduino; amd64)",
+        "Dockerfiles/hardware.docker"
+      ],
+      "reason": "AGPL desktop application redistributed as the upstream AppImage.",
+      "keep": "The AppImage unmodified (it carries its licences); the release tag as corresponding source.",
+      "match": {
+        "install_functions": [
+          "arduino_ide_install"
+        ],
+        "paths": [
+          "/hardware/Arduino/"
+        ],
+        "executables": [
+          "arduino"
+        ]
+      }
+    },
+    {
+      "id": "vulnhuntr",
+      "name": "Vulnhuntr (Protect AI)",
+      "status": "installed",
+      "installed_in": [
+        "llm"
+      ],
+      "images": [
+        "llm"
+      ],
+      "licence": "AGPL-3.0",
+      "found_in": [
+        "scripts/llm_software.sh: vulnhuntr_soft_install (uv tool install from git main, entrypoint in /opt/vulnhuntr/bin)",
+        "Dockerfiles/llm.docker"
+      ],
+      "reason": "AGPL software installed from the default branch.",
+      "keep": "The package's licence (dist-info); the commit as corresponding source.",
+      "match": {
+        "install_functions": [
+          "vulnhuntr_soft_install"
+        ],
+        "names": [
+          "vulnhuntr"
+        ],
+        "paths": [
+          "/opt/vulnhuntr/",
+          "/root/.local/share/uv/tools/vulnhuntr"
+        ],
+        "executables": [
+          "vulnhuntr"
+        ]
+      }
+    },
+    {
+      "id": "cairn",
+      "name": "Cairn (oritera)",
+      "status": "opt-in, not pre-installed",
+      "installed_in": [],
+      "images": [],
+      "licence": "AGPL-3.0",
+      "found_in": [
+        "scripts/llm_software.sh: cairn_soft_install (latest main into /opt/cairn)",
+        "Dockerfiles/llm.docker: commented-out RUN line"
+      ],
+      "reason": "Opt-in AGPL server, not in the published llm image.",
+      "keep": "If it is ever pre-installed: LICENSE, the source tree and the commit as corresponding source; AGPL section 13 for its server.",
+      "match": {
+        "install_functions": [
+          "cairn_soft_install"
+        ],
+        "paths": [
+          "/opt/cairn/"
+        ],
+        "executables": [
+          "cairn"
+        ]
+      }
+    },
+    {
+      "id": "artex",
+      "name": "ARTEX (BaaRai)",
+      "status": "installed",
+      "installed_in": [
+        "artex_base",
+        "llm"
+      ],
+      "images": [
+        "llm",
+        "artex_base",
+        "artex"
+      ],
+      "licence": "AGPL-3.0",
+      "found_in": [
+        "Dockerfiles/Makefile: artex_base builds upstream's own Dockerfile from github.com/BaaRai/ARTEX at ARTEX_REF (default main); Dockerfiles/artex.docker adds PostgreSQL",
+        "scripts/llm_software.sh: llm_skills_install (ARTEX's skills, /opt/llm-skills/src/artex)"
+      ],
+      "reason": "AGPL web platform; the artex image is built from upstream's own Dockerfile, not from corebuild.",
+      "keep": "LICENSE in the image; the ARTEX commit the image was built from as corresponding source (record ARTEX_REF when building).",
+      "match": {
+        "paths": [
+          "/opt/llm-skills/src/artex"
+        ]
+      }
+    },
+    {
+      "id": "open-webui",
+      "name": "Open WebUI",
+      "status": "installed",
+      "installed_in": [
+        "llm"
+      ],
+      "images": [
+        "llm"
+      ],
+      "licence": "Open WebUI License: BSD-3-Clause terms plus a clause forbidding removal or alteration of the \"Open WebUI\" branding (except for deployments of up to 50 users, or with permission)",
+      "found_in": [
+        "scripts/llm_software.sh: openwebui_soft_install (uv tool install open-webui)",
+        "Dockerfiles/llm.docker"
+      ],
+      "reason": "Not an OSI licence: the branding condition binds anyone who redistributes or deploys it.",
+      "keep": "The licence in the package's dist-info; the Open WebUI branding unchanged.",
+      "match": {
+        "install_functions": [
+          "openwebui_soft_install"
+        ],
+        "names": [
+          "open-webui"
+        ],
+        "purls": [
+          "pkg:pypi/open-webui*"
+        ],
+        "paths": [
+          "/root/.local/share/uv/tools/open-webui"
+        ],
+        "executables": [
+          "open-webui"
+        ]
+      }
+    },
+    {
+      "id": "little-snitch",
+      "name": "Little Snitch for Linux (Objective Development)",
+      "status": "installed",
+      "installed_in": [
+        "corebuild"
+      ],
+      "images": [
+        "corebuild",
+        "sdrsa_devices",
+        "sdrsa_devices_antsdr",
+        "sdrsa_devices_rtlsdrv4",
+        "sdr_light",
+        "sdr_light_intelgpu",
+        "sdr_light_nvidiagpu",
+        "sdr_gnuradio4",
+        "sdr_hacks",
+        "sdr_full",
+        "sdr_full_intelgpu",
+        "sdr_full_nvidiagpu",
+        "deeptempest",
+        "rfid",
+        "network",
+        "wifi",
+        "ad",
+        "bluetooth",
+        "hardware",
+        "reversing",
+        "automotive",
+        "android",
+        "osint",
+        "llm",
+        "telecom_utils",
+        "telecom_2Gto3G",
+        "telecom_4Gto5G",
+        "telecom_4G_5GNSA",
+        "telecom_5G_train",
+        "telecom_5G",
+        "telecom_5G_oai",
+        "telecom_ltesniffer",
+        "telecom_5G_bladerf"
+      ],
+      "licence": "LicenseRef-Obdev-Freeware for /usr/bin/littlesnitch (redistribution allowed unmodified, with the licence text, not sold on its own) and GPL-2.0-only for /var/lib/littlesnitch/*, files the .deb itself does not contain (copyright file of the 1.1.1 package, checked 2026-11-24)",
+      "found_in": [
+        "scripts/corebuild.sh: littlesnitch_soft_install (obdev.at .deb unpacked with dpkg-deb -x and copied to /, so dpkg-query and the SBOM do not list it)",
+        "Dockerfiles/corebuild.docker"
+      ],
+      "reason": "Proprietary freeware in every corebuild-based image. Its conditions can be met, but only if the licence text stays with the binary.",
+      "keep": "/usr/share/doc/littlesnitch/copyright; the binary unmodified; if /var/lib/littlesnitch holds the GPL-2.0 parts, their source from Objective Development.",
+      "match": {
+        "install_functions": [
+          "littlesnitch_soft_install"
+        ],
+        "paths": [
+          "/usr/bin/littlesnitch",
+          "/usr/share/doc/littlesnitch/",
+          "/var/lib/littlesnitch/"
+        ],
+        "executables": [
+          "littlesnitch"
+        ]
+      }
+    },
+    {
+      "id": "metasploit-framework",
+      "name": "Metasploit Framework (Rapid7 omnibus package)",
+      "status": "installed",
+      "installed_in": [
+        "network"
+      ],
+      "images": [
+        "network",
+        "wifi",
+        "ad"
+      ],
+      "licence": "BSD-3-Clause; the omnibus package bundles Ruby, gems and other components under their own licences",
+      "found_in": [
+        "scripts/network_common.sh: metasploit_soft_install (Rapid7's msfinstall adds apt.metasploit.com and installs metasploit-framework into /opt/metasploit-framework; amd64/arm64)",
+        "Dockerfiles/general_network.docker"
+      ],
+      "reason": "Permissive, but a large bundle of separately licensed components.",
+      "keep": "The licence files under /opt/metasploit-framework (LICENSE, LICENSE_GEMS and the embedded ones).",
+      "match": {
+        "install_functions": [
+          "metasploit_soft_install"
+        ],
+        "names": [
+          "metasploit-framework"
+        ],
+        "paths": [
+          "/opt/metasploit-framework/"
+        ],
+        "executables": [
+          "msfconsole"
+        ]
+      }
+    },
+    {
+      "id": "gnuradio",
+      "name": "GNU Radio and its out-of-tree modules",
+      "status": "installed",
+      "installed_in": [
+        "sdr_light",
+        "deeptempest",
+        "telecom_5G_train"
+      ],
+      "images": [
+        "sdr_light",
+        "sdr_light_intelgpu",
+        "sdr_light_nvidiagpu",
+        "sdr_gnuradio4",
+        "sdr_hacks",
+        "sdr_full",
+        "sdr_full_intelgpu",
+        "sdr_full_nvidiagpu",
+        "deeptempest",
+        "telecom_5G_train"
+      ],
+      "licence": "GPL-3.0-or-later (Ubuntu packages); the out-of-tree modules built from git are mostly GPL-3.0",
+      "found_in": [
+        "scripts/sdr_softwares.sh: gnuradio_soft_install (apt gnuradio gnuradio-dev)",
+        "scripts/gr_oot_modules.sh: *_grmod_install (modules built from git)"
+      ],
+      "reason": "Copyleft; prebuilt modules linked to proprietary vendor libraries are covered by the harogic, signalhound and deepace-kc908 entries.",
+      "keep": "The copyright files; the Ubuntu source package and the modules' commits as corresponding source.",
+      "match": {
+        "install_functions": [
+          "gnuradio_soft_install"
+        ],
+        "names": [
+          "gnuradio"
+        ]
+      }
+    },
+    {
+      "id": "wireshark",
+      "name": "Wireshark and TShark",
+      "status": "installed",
+      "installed_in": [
+        "network",
+        "telecom_5G_train",
+        "telecom_5G_bladerf"
+      ],
+      "images": [
+        "network",
+        "wifi",
+        "ad",
+        "telecom_5G_train",
+        "telecom_5G_bladerf"
+      ],
+      "licence": "GPL-2.0-or-later (Ubuntu packages)",
+      "found_in": [
+        "scripts/network_common.sh: wireshark_soft_install, tshark_soft_install"
+      ],
+      "reason": "Copyleft Ubuntu packages.",
+      "keep": "/usr/share/doc/wireshark*/copyright; the Ubuntu source package as corresponding source.",
+      "match": {
+        "install_functions": [
+          "wireshark_soft_install",
+          "tshark_soft_install"
+        ],
+        "names": [
+          "wireshark"
+        ]
+      }
+    },
+    {
+      "id": "penthertz-gpl-packages",
+      "name": "GPL packages built by PentHertz (DSView, PulseView, antsdr-uhd, URH)",
+      "status": "installed",
+      "installed_in": [
+        "hardware",
+        "sdrsa_devices_antsdr",
+        "sdr_light"
+      ],
+      "images": [
+        "sdrsa_devices_antsdr",
+        "sdr_light",
+        "sdr_light_intelgpu",
+        "sdr_light_nvidiagpu",
+        "sdr_gnuradio4",
+        "sdr_hacks",
+        "sdr_full",
+        "sdr_full_intelgpu",
+        "sdr_full_nvidiagpu",
+        "hardware"
+      ],
+      "licence": "GPL-3.0 (DSView, PulseView, URH) and GPL-3.0-or-later (UHD)",
+      "found_in": [
+        "scripts/hardware.sh: dsview_install, pulseview_install (.deb from github.com/PentHertz/DSView and github.com/PentHertz/pulseview releases)",
+        "scripts/sdr_peripherals.sh: antsdr_uhd_devices_install (github.com/PentHertz/antsdr_uhd releases)",
+        "scripts/sdr_softwares.sh: urh_soft_install (github.com/PentHertz/urh-ng releases)"
+      ],
+      "reason": "PentHertz distributes these GPL binaries itself, so PentHertz owes their corresponding source.",
+      "keep": "Each fork's source at the release tag the .deb was built from, kept public as long as the images are distributed.",
+      "match": {
+        "install_functions": [
+          "dsview_install",
+          "pulseview_install",
+          "antsdr_uhd_devices_install",
+          "urh_soft_install"
+        ]
+      }
+    },
+    {
+      "id": "volatility3",
+      "name": "Volatility 3",
+      "status": "installed",
+      "installed_in": [
+        "reversing"
+      ],
+      "images": [
+        "reversing"
+      ],
+      "licence": "Volatility Software License 1.0 (a custom licence; Drost's policy keeps its full text)",
+      "found_in": [
+        "scripts/reverse_software.sh: volatility3_soft_install (uv tool install volatility3, commands vol and volshell; uncommitted addition)",
+        "Dockerfiles/reversing.docker (uncommitted addition)"
+      ],
+      "reason": "A licence of its own, not a common open-source licence; its full text must accompany the copy.",
+      "keep": "The complete licence text in the package's dist-info; the PyPI release as corresponding source.",
+      "match": {
+        "install_functions": [
+          "volatility3_soft_install"
+        ],
+        "names": [
+          "volatility3"
+        ],
+        "purls": [
+          "pkg:pypi/volatility3*"
+        ],
+        "paths": [
+          "/root/.local/share/uv/tools/volatility3"
+        ],
+        "executables": [
+          "vol",
+          "volshell"
+        ]
+      }
+    },
+    {
+      "id": "trailofbits-skills",
+      "name": "Trail of Bits skills (llm-skills pack)",
+      "status": "installed",
+      "installed_in": [
+        "llm"
+      ],
+      "images": [
+        "llm"
+      ],
+      "licence": "CC-BY-SA-4.0",
+      "found_in": [
+        "scripts/llm_software.sh: llm_skills_install (github.com/trailofbits/skills into /opt/llm-skills/src/trailofbits)"
+      ],
+      "reason": "Attribution and share-alike licence for the skill texts.",
+      "keep": "The LICENSE file and attribution in the clone; adaptations stay under CC-BY-SA-4.0.",
+      "match": {
+        "paths": [
+          "/opt/llm-skills/src/trailofbits"
+        ]
+      }
+    }
+  ]
+}

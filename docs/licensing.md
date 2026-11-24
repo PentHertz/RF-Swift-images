@@ -2,7 +2,7 @@
 
 RF Swift images redistribute a lot of third-party software: Ubuntu packages, tools built
 from upstream source, Python/npm/Go/Rust packages, and vendor binaries for radio and test
-equipment. Each keeps its own licence (see [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md)).
+equipment. Each keeps its own licence.
 Some of them need a notice or their source kept available, and some need a decision
 before they are redistributed in a public image at all. The licence-compliance pipeline
 finds those components in a built image and reports them.
@@ -23,8 +23,6 @@ what each image contains, and flag new components that need the same look.
 | `scripts/compliance/common.sh` | Helpers shared by the two shell scripts (image tag, output prefix, platform) |
 | `tests/license-policy.sh` | Tests of the checker and the two scripts on synthetic SBOMs (syft and docker stubbed) |
 | `.github/workflows/license_compliance.yml` | Manual CI run for one image |
-| `THIRD_PARTY_NOTICES.md` | Generic notice, copied by `corebuild.docker` to `/usr/share/rfswift/licenses/` with `LICENSE` |
-| `SOURCE_OFFER.md` | **Draft** written source offer, not in effect and not copied into images |
 
 The three compliance scripts are adapted from Drost Community Edition
 (<https://github.com/drost-ai/drost-community>, Apache-2.0); their headers say so and
@@ -48,7 +46,7 @@ The three compliance scripts are adapted from Drost Community Edition
    - every git checkout under the tool roots with its remote and commit,
 
    and collects the `copyright`, `LICENSE*`, `COPYING*` and `NOTICE*` files of
-   `/usr/share/doc`, `/usr/share/rfswift`, `/usr/local`, `/opt`, `/rftools`, `/telecom`,
+   `/usr/share/doc`, `/usr/local`, `/opt`, `/rftools`, `/telecom`,
    `/hardware`, `/reverse`, `/automotive`, `/security`, `/nettools`, `/sast`, `/mobile` and
    `/root` into a tarball, plus RF Swift's own records (`/var/lib/db/rfswift_*`).
 3. **Policy check.** `check-license-policy.py` matches each policy entry against the SBOM
@@ -234,5 +232,3 @@ adds them); Vivado/Vitis are not shipped.
   program. The evidence lines say what matched.
 - **Other architectures and tags.** One run covers one tag. Some components exist on
   amd64 only (Saleae, the Burp installer, KC908, Signal Hound applications).
-- **Images not built on corebuild.** `artex` is built from upstream ARTEX and does not get
-  `/usr/share/rfswift/licenses/`.

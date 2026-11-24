@@ -1071,13 +1071,37 @@ function whad_soft_install () {
 }
 
 function rfquak_soft_install () {
-	goodecho "[+] Installing RFQuack from PIP"
+	# RFQuack pins its Python dependencies, PlatformIO included, for Python ^3.10 in
+	# requirements.pip (with hashes). Those 2022 pins do not install on the image's
+	# Python 3.14 (PyYAML 6.0 has no wheel there and its sdist fails with Cython 3:
+	# "'build_ext' object has no attribute 'cython_sources'"), which also left `pio`
+	# missing for the firmware build. Use a uv-managed Python 3.10 in a private venv,
+	# like mirage: the client (`rfq`, `rq`) and PlatformIO both live there.
+	goodecho "[+] Installing RFQuack"
+	local venv=/opt/rfquack-env
+	if ! uv python install 3.10; then
+		record_build_failure "python" "RFQuack" "uv python install 3.10 failed"
+		return 0
+	fi
 	[ -d /rftools ] || mkdir -p /rftools
 	cd /rftools
-	installfromnet git clone --recursive https://github.com/rfquack/RFQuack
+	if [ ! -d RFQuack ] && ! installfromnet git clone --recursive https://github.com/rfquack/RFQuack; then
+		record_build_failure "net" "RFQuack" "git clone failed"
+		return 0
+	fi
 	cd RFQuack
-	pip3install -r requirements.pip || true
-	make clean build || record_build_failure "build" "RFQuack" "firmware build failed"
+	if ! uv venv --clear --seed --python 3.10 "$venv" \
+		|| ! uv pip install --python "$venv/bin/python" -r requirements.pip \
+		|| ! uv pip install --python "$venv/bin/python" --no-deps .; then
+		record_build_failure "pip" "RFQuack" "client or PlatformIO install failed (Python 3.10 venv)"
+		return 0
+	fi
+	local cmd
+	for cmd in rfq rq; do
+		ln -sf "$venv/bin/$cmd" "/usr/local/bin/$cmd"
+	done
+	# Firmware image (PlatformIO fetches the board toolchain on the first build)
+	PATH="$venv/bin:$PATH" make clean build || record_build_failure "build" "RFQuack" "firmware build failed"
 	return 0
 }
 

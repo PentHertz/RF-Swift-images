@@ -4,6 +4,18 @@
 
 ### Added
 
+- Licence compliance for the published images: `compliance/license-policy.json` lists
+  blocked, review-required and notice-required components with the images they are in,
+  why, and what to decide or keep. `scripts/compliance/generate-sbom.sh` writes syft
+  CycloneDX and SPDX SBOMs of all layers with checksums and runs the policy check
+  (`scripts/compliance/check-license-policy.py`); `scripts/compliance/image-inventory.sh`
+  records install functions, the policy's commands and paths, Debian source packages, git
+  checkouts with their commits and the licence texts. A manual `License compliance`
+  workflow runs them on a published image, and `tests/license-policy.sh` runs in the
+  regression workflow. See `docs/licensing.md`; 16 components (Burp Suite, Caido, Claude
+  Code, Saleae Logic 2, the Harogic, Signal Hound and Deepace vendor software, ...) are
+  listed with why they were reviewed, and stay published in the images. The scripts are adapted from Drost Community (Apache-2.0).
+
 - `network`: OWASP ZAP (`zaproxy_soft_install`, Apache-2.0), the openly licensed
   alternative to Burp Suite for device web UIs and companion-app APIs. The pure-Java
   Linux release is installed in `/opt/zaproxy` on every architecture and checked against
@@ -166,6 +178,17 @@
   WPE patch yet) all need manual work and were not bumped.
 
 ### Fixed
+
+- `sdr_full`: `sdrmm_soft_install` aborted the build with exit code 22 whenever github.com
+  answered the latest-release lookup with an HTTP error (common on shared CI runners): the
+  lookup was a bare `curl -f` in a command substitution, so `set -eo pipefail` stopped the
+  RUN before the fallback version applied. The lookup is now a single request that reads the
+  redirect without following it, and a failure falls back to the tested release.
+- `sdr_full`: RFQuack was never installed. Its pinned 2022 requirements (PyYAML 6.0 and others)
+  do not install on Python 3.14, which also left PlatformIO's `pio` missing for the firmware
+  build. RFQuack now uses a uv-managed Python 3.10 venv in `/opt/rfquack-env` (upstream
+  requires ^3.10, and every compiled pin has 3.10 wheels for amd64 and arm64) with its client
+  (`rfq`, `rq`) and PlatformIO, and builds the firmware with that `pio`.
 
 - `telecom_4G_5GNSA`, `telecom_4Gto5G`, `all`: srsRAN 4G was not built. Since 5937dde the
   installer clones upstream `srsRAN_4G` but still entered the PentHertz fork's directory
