@@ -4,6 +4,16 @@
 
 ### Added
 
+- `corebuild` and every image built on it: See (`see_soft_install`), a native desktop
+  source-code reader (<https://see.wibus.ren>) for extracted firmware, tool sources and
+  scripts: file tree, tabs, fuzzy file and symbol search, workspace search with ripgrep, Git
+  status/diff/blame/history, a terminal, Markdown and hex preview, and language servers when
+  installed. `see <folder>`, `see --diff <a> <b>`, `cmd | see -`, or the desktop menu. amd64
+  and arm64 (no riscv64 release). The Linux tarball goes to `/opt/see`; it needs GTK 3 only,
+  not the WebKitGTK the `.deb` declares. Builds take the newest release and check the tarball
+  like See's updater does (ed25519 signature of its SHA-256 from `update-linux-<arch>.json`,
+  against the pinned update key); 0.3.9 is the known-good fallback. Automatic update checks
+  start off; Settings > Updates turns them on.
 - `network`: OWASP ZAP (`zaproxy_soft_install`), the open
   alternative to Burp Suite for device web UIs and companion-app APIs. The pure-Java
   Linux release is installed in `/opt/zaproxy` on every architecture and checked against

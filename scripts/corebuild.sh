@@ -362,6 +362,87 @@ EOF
     goodecho "[!] Note: container must be run with --cap-add SYS_ADMIN --cap-add DAC_READ_SEARCH"
 }
 
+# See (wibus-wee/see, https://see.wibus.ren): native desktop source-code reader for extracted
+# firmware, tool sources and scripts. File tree, tabs, fuzzy file/symbol search, workspace
+# search (ripgrep), Git status/diff/blame/history, terminal, Markdown and hex preview, and
+# language servers (gopls, clangd, TypeScript) when they are installed.
+#   see [file-or-folder]   see --diff <a> <b>   some-command | see -
+# The Linux tarball, not the .deb: the binary loads GTK 3 and its usual libraries at run time
+# (corebuild has them) and never WebKitGTK, which the .deb declares anyway.
+# The newest release is taken at build time and checked like See's own updater does: the
+# ed25519 signature of the tarball's SHA-256, from update-linux-<arch>.json, against See's
+# update public key (mygo.json in the repo). SEE_VERSION is the known-good fallback.
+# Automatic update checks start off (updater.json, like the other tools' update checks);
+# Settings > Updates turns them back on.
+SEE_VERSION="0.3.9"
+SEE_UPDATE_PUBKEY="zqudRNfvgRsHbNMYIlH4FywgyKmPrAl4w64zAbhFhFk="
+
+# see_verify ARCHIVE SIGNATURE_BASE64: ed25519 signature of the archive's SHA-256 digest.
+function see_verify() {
+    local tmp rc=0
+    tmp=$(mktemp -d)
+    { printf '\x30\x2a\x30\x05\x06\x03\x2b\x65\x70\x03\x21\x00'; printf '%s' "$SEE_UPDATE_PUBKEY" | base64 -d; } > "$tmp/pub.der"
+    if ! printf '%s' "$2" | base64 -d > "$tmp/sig" 2> /dev/null \
+        || ! openssl pkey -pubin -inform DER -in "$tmp/pub.der" -out "$tmp/pub.pem" 2> /dev/null \
+        || ! openssl dgst -sha256 -binary -out "$tmp/digest" "$1" \
+        || ! openssl pkeyutl -verify -pubin -inkey "$tmp/pub.pem" -rawin -in "$tmp/digest" -sigfile "$tmp/sig" > /dev/null; then
+        rc=1
+    fi
+    rm -rf "$tmp"
+    return "$rc"
+}
+
+function see_soft_install() {
+    goodecho "[+] Installing See (source-code reader)"
+    local arch
+    case "$(uname -m)" in
+        x86_64|amd64) arch="amd64" ;;
+        aarch64|arm64) arch="arm64" ;;
+        *) criticalecho-noexit "[-] See: no Linux release for $(uname -m), skipping"; return 0 ;;
+    esac
+    install_dependencies "openssl jq libgtk-3-0t64 libepoxy0 libsecret-1-0"
+    local base="https://github.com/wibus-wee/see/releases/download" ver tmp sig
+    ver=$(latest_release_version wibus-wee/see "$SEE_VERSION" \
+        "$base/v@V@/see-@V@-linux-${arch}.tar.gz" "$base/v@V@/update-linux-${arch}.json")
+    tmp=$(mktemp -d)
+    if ! installfromnet curl -fsSL --max-time 300 -o "$tmp/see.tar.gz" "$base/v${ver}/see-${ver}-linux-${arch}.tar.gz" \
+        || ! installfromnet curl -fsSL --max-time 60 -o "$tmp/update.json" "$base/v${ver}/update-linux-${arch}.json"; then
+        rm -rf "$tmp"
+        record_build_failure "net" "see" "download of ${ver} failed"
+        return 0
+    fi
+    sig=$(jq -r --arg f "see-${ver}-linux-${arch}.tar.gz" 'select(.url | endswith("/" + $f)) | .signature // empty' "$tmp/update.json" 2> /dev/null || true)
+    if [ -z "$sig" ] || ! see_verify "$tmp/see.tar.gz" "$sig"; then
+        rm -rf "$tmp"
+        record_build_failure "verify" "see" "${ver} tarball does not match the signature in update-linux-${arch}.json"
+        return 0
+    fi
+    rm -rf /opt/see
+    mkdir -p /opt/see
+    tar -xzf "$tmp/see.tar.gz" -C /opt/see --no-same-owner
+    rm -rf "$tmp"
+    # The `see` shell command is a symlink to the binary (See tells a shell call from a launch
+    # that way); the menu entry starts the binary itself, which opens See's welcome window.
+    ln -sf /opt/see/see /usr/local/bin/see
+    install -Dm644 /opt/see/see.png /usr/share/pixmaps/see.png
+    cat > /usr/share/applications/see.desktop << 'EOF'
+[Desktop Entry]
+Type=Application
+Name=See
+Comment=Read source code: tree, search, Git history, hex and Markdown preview
+Exec=/opt/see/see
+Icon=see
+Categories=Development;Utility;
+Terminal=false
+StartupWMClass=see
+EOF
+    mkdir -p /root/.config/See
+    [ -s /root/.config/See/updater.json ] || printf '{"automaticChecks":false}\n' > /root/.config/See/updater.json
+    see --help > /dev/null 2>&1 || record_build_failure "other" "see" "see --help does not run"
+    goodecho "[+] See ${ver} installed: see [file-or-folder], see --diff <a> <b>"
+    return 0
+}
+
 function x11_egl_shim_install() {
     # Mesa's GLX client cannot create a context on XQuartz (macOS hosts, Docker
     # Desktop / Podman / Lima alike): the server exposes no fbconfig that the

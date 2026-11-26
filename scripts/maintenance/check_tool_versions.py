@@ -58,6 +58,9 @@ MANIFEST = {
                     "source": ("github", "luigifcruz/CyberEther"), "cls": "simple"},
     "bkcrack":     {"file": "reverse_software.sh", "pat": r'BKCRACK_VERSION="(?P<ver>[\d.]+)"',
                     "source": ("github", "kimci86/bkcrack"), "cls": "simple"},
+    "see":         {"file": "corebuild.sh", "pat": r'SEE_VERSION="(?P<ver>[\d.]+)"',
+                    "source": ("github", "wibus-wee/see"), "cls": "simple",
+                    "note": "signature-checked at build (SEE_UPDATE_PUBKEY); no SHA to update"},
     "qflipper":    {"file": "rf_tools.sh", "pat": r'QFLIPPER_VERSION="(?P<ver>[\d.]+)"',
                     "source": ("github", "flipperdevices/qFlipper"), "cls": "simple",
                     "note": "x86_64-only AppImage; version string itself is a clean bump"},
@@ -136,7 +139,7 @@ MANIFEST = {
 FLOATING = {
     "jadx", "ipsw", "uv", "arduino-ide", "imhex", "whispercpp", "cyberether", "qflipper",
     "geckodriver", "node-llm", "craft", "ghidra", "die", "sdrangel", "go", "sniffle-fw",
-    "hostapd", "dsview", "pulseview", "antsdr-uhd", "bkcrack", "zap", "bulk-extractor",
+    "hostapd", "dsview", "pulseview", "antsdr-uhd", "bkcrack", "zap", "bulk-extractor", "see",
 }
 
 

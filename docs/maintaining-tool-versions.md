@@ -42,6 +42,7 @@ Integrity checks are kept where upstream publishes checksums:
 | Go | the sha256 from go.dev's release list (new: the old install had no check) |
 | OWASP ZAP | the SHA-256 of `ZAP_<ver>_Linux.tar.gz` in `ZapVersions.xml` (zaproxy/zap-admin), the feed ZAP's own update check reads |
 | bulk_extractor | that release's `SHA256SUMS` |
+| See | the ed25519 signature in that release's `update-linux-<arch>.json` (the check See's own updater makes), against See's update public key pinned as `SEE_UPDATE_PUBKEY` in `corebuild.sh` |
 | geckodriver | **TLS only**: Mozilla publishes `.asc` signatures but no checksum file. The pinned SHA256 still applies when the known-good version is installed |
 
 **Still pinned** (the build installs exactly the version in the script): Kaleido (v1.x is a
@@ -120,6 +121,7 @@ describe how safe it is to bump that fallback.
 | whispercpp | 1.9.5 | `llm_software.sh` | ggml-org/whisper.cpp |
 | cyberether | 1.20.1 | `sdr_softwares.sh` | luigifcruz/CyberEther |
 | qflipper | 1.3.3 | `rf_tools.sh` | flipperdevices/qFlipper (x86_64 AppImage only) |
+| see | 0.3.9 | `corebuild.sh` | wibus-wee/see (amd64, arm64) |
 
 ### needs-care
 

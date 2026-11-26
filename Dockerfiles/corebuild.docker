@@ -71,6 +71,9 @@ RUN ./entrypoint.sh uvpython_install && \
 # Installing Desktop/VNC packages for remote GUI access
 RUN ./entrypoint.sh install_desktop_packages
 
+# See: native source-code reader (`see <folder>`, `see --diff a b`) for firmware and tool sources
+RUN ./entrypoint.sh see_soft_install
+
 # GLFW->EGL shim so OpenGL tools render over XQuartz (macOS hosts), see corebuild.sh
 RUN ./entrypoint.sh x11_egl_shim_install
 
