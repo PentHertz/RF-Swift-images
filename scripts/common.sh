@@ -100,6 +100,18 @@ function installfromnet() {
     return "$status"
 }
 
+# git_clone_at URL DIR COMMIT: clone URL into DIR (replacing it, retried like installfromnet)
+# and check out COMMIT. A full commit hash pins the content, for projects without releases.
+# Returns 1, with DIR removed, when either step fails.
+function git_clone_at() {
+    if installfromnet sh -c 'rm -rf "$1" && git clone -q "$2" "$1"' sh "$2" "$1" \
+        && git -C "$2" -c advice.detachedHead=false checkout -q "$3"; then
+        return 0
+    fi
+    rm -rf "$2"
+    return 1
+}
+
 # ---------------------------------------------------------------------------
 # Newest release at build time. A tool keeps its current version in its script as a
 # known-good fallback; the installer asks for the newest release first and falls back to

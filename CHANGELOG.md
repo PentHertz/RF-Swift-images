@@ -14,6 +14,56 @@
   like See's updater does (ed25519 signature of its SHA-256 from `update-linux-<arch>.json`,
   against the pinned update key); 0.3.9 is the known-good fallback. Automatic update checks
   start off; Settings > Updates turns them on.
+- `corebuild` and every image built on it: CRC and checksum reverse engineering for radio
+  frames and firmware, on every architecture, each checked against a known answer at build:
+  - CRC RevEng 3.0.6 (`reveng_soft_install`, <https://reveng.sourceforge.io>): finds a CRC's
+    parameters from message+CRC samples (`reveng -w 16 -s ...`) and computes its 113 catalogue
+    presets (`reveng -m CRC-16/MODBUS -c ...`). Built from the SourceForge release, checked
+    against its SHA256SUMS, with the presets compiled in (`config.h` set to the 64-bit word
+    size: the stock 32-bit setting fails the build's own test on amd64, arm64 and riscv64).
+  - delsum 1.0.0 (`delsum_soft_install`): `delsum reverse` finds CRCs, modular sums and
+    Fletcher checksums from files and their checksums; `delsum part` finds which byte range a
+    known checksum covers. Built with `cargo install --locked`; links libgf2x.
+  - CRC Beagle (`crcbeagle_soft_install`): the CRC differential technique for same-length
+    frames, which recovers an equivalent CRC even with non-standard init/xorout and prints
+    Python that reproduces it. Upstream is a library with no packaging, releases or CLI: it is
+    pinned to its last commit (2021-09-07), installed in `/opt/crcbeagle` (a venv on the
+    system Python, with crccheck), and gets a `crcbeagle` command (`crcbeagle -w 16
+    <hex-frame> <hex-frame> ...`, `MESSAGE/CRC` to split a frame yourself, `-f -` for frames
+    on stdin).
+  - crchack (`crchack_soft_install`): forges a CRC, changing the bits you allow so a modified
+    frame or image gets the CRC you want. No releases: pinned to a commit; its own test suite
+    runs at build.
+  - pycrc (`pycrc_soft_install`, Ubuntu package): C code for a CRC from its parameters.
+  - The version checker tracks reveng (through a new SourceForge source), delsum, and CRC
+    Beagle and crchack (manual: commit pins).
+- `corebuild` and every image built on it: binary data helpers, each checked against a known
+  answer at build:
+  - ent (`ent_soft_install`, Ubuntu package): entropy and randomness tests of a file.
+  - fq (`fq_soft_install`): jq for binary formats (ELF, pcap, protobuf, MessagePack, ZIP, ...).
+    amd64 and arm64 take the newest release, checked against its `checksums.txt` (0.18.0
+    known-good); riscv64, which has no release build, gets Ubuntu's older `fq` package.
+  - xortool (`xortool_soft_install`): XOR key length and key recovery, in a uv tool venv on the
+    system Python.
+- `reversing`: raw firmware triage, each checked against a known answer at build:
+  - cpu_rec (`cpu_rec_soft_install`, v1.1 pinned by commit): the CPU architecture of a raw
+    blob, about 70 known. The build's check trains it once and then drops the 150 MB cache, so
+    the first run in a container trains for about 10 s and caches again.
+  - binbloom (`binbloom_soft_install`, v2.1 pinned by commit): endianness and load address of
+    a raw 32/64-bit image, and the UDS table of ECU firmware.
+  - Binary Refinery 0.11.3 (`refinery_soft_install`): about 400 pipeline units for decoding,
+    decompression, XOR/crypto and carving (amd64, arm64), in `/opt/refinery` (Python 3.13) with capstone,
+    pefile, chardet, pyzstd and brotli; its default extras would add about 300 MB (PDF, ONNX,
+    Unicorn), so they are left out. Its units are appended to the end of PATH
+    (`/opt/refinery/units`), so the four that share a name with a system tool (`rev`, `lzma`,
+    `zstd`, `bat`) never replace it; run those as `/opt/refinery/bin/<unit>`.
+  - blackboxprotobuf (`bbpb_soft_install`): decodes and re-encodes protobuf without the schema.
+  - The version checker tracks Binary Refinery, cpu_rec and binbloom.
+- `sdr_light` and the images built on it: minimodem (`minimodem_soft_install`, Ubuntu package),
+  audio FSK modems (Bell 103/202, RTTY, TDD, NOAA SAME, caller ID, UIC train radio, any
+  baud rate) for data sent as tones over a voice channel. The build checks a Bell 202 round trip.
+- `scripts/common.sh`: `git_clone_at URL DIR COMMIT`, a retried clone pinned to a commit, for
+  projects without releases.
 - `network`: OWASP ZAP (`zaproxy_soft_install`), the open
   alternative to Burp Suite for device web UIs and companion-app APIs. The pure-Java
   Linux release is installed in `/opt/zaproxy` on every architecture and checked against

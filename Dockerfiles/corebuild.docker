@@ -74,6 +74,19 @@ RUN ./entrypoint.sh install_desktop_packages
 # See: native source-code reader (`see <folder>`, `see --diff a b`) for firmware and tool sources
 RUN ./entrypoint.sh see_soft_install
 
+# CRC / checksum reverse engineering for radio frames and firmware: CRC RevEng, delsum, CRC Beagle
+# (find a CRC), crchack (forge one), pycrc (generate code for one)
+RUN ./entrypoint.sh reveng_soft_install && \
+	./entrypoint.sh delsum_soft_install && \
+	./entrypoint.sh crcbeagle_soft_install && \
+	./entrypoint.sh crchack_soft_install && \
+	./entrypoint.sh pycrc_soft_install
+
+# Binary data helpers: entropy (ent), jq for binary formats (fq), XOR key recovery (xortool)
+RUN ./entrypoint.sh ent_soft_install && \
+	./entrypoint.sh fq_soft_install && \
+	./entrypoint.sh xortool_soft_install
+
 # GLFW->EGL shim so OpenGL tools render over XQuartz (macOS hosts), see corebuild.sh
 RUN ./entrypoint.sh x11_egl_shim_install
 

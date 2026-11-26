@@ -443,6 +443,312 @@ EOF
     return 0
 }
 
+# ---------------------------------------------------------------------------
+# CRC and checksum reverse engineering, for radio frames (rtl_433, URH, inspectrum captures)
+# and firmware images and headers. All three are checked with a known answer at build time.
+#  - CRC RevEng (Greg Cook, https://reveng.sourceforge.io): finds a CRC's width, polynomial,
+#    init, reflection and xorout from message+CRC samples (`reveng -w 16 -s <hex> <hex> ...`;
+#    give 4 or more), computes any of its 113 catalogue presets (`reveng -m CRC-16/MODBUS -c <hex>`,
+#    `reveng -D` lists them) and reverses a CRC (the bits that give a wanted value). It prints a
+#    CRC in the byte order it has in the message (little-endian for reflected CRCs).
+#  - delsum (8051Enthusiast): CRCs, modular sums and Fletcher checksums. `delsum reverse` finds the
+#    algorithm from files and their checksums, `delsum part` finds which byte range of a file a
+#    known checksum covers (a header CRC over an unknown span), `delsum check` computes one.
+#  - CRC Beagle (Colin O'Flynn): the CRC differential technique, for protocols whose frames share
+#    a length. It recovers an equivalent CRC even with a non-standard init or xorout, spots plain
+#    sums and XOR checksums, and prints Python code that reproduces the CRC.
+# ---------------------------------------------------------------------------
+
+# Not packaged for Ubuntu: built from the SourceForge release, checked against the SHA-256 from
+# that release's SHA256SUMS. Upstream releases rarely (3.0.6: August 2024), so this is a pin.
+REVENG_VERSION="3.0.6"
+REVENG_SHA256="a552b908d4e7eff713122a4c11deb6eb93f7a5e2defaac1267621fc3778f0365"   # reveng-3.0.6.tar.xz
+
+function reveng_soft_install() {
+    goodecho "[+] Installing CRC RevEng"
+    install_dependencies "build-essential xz-utils"
+    local tmp src bits
+    tmp=$(mktemp -d)
+    if ! installfromnet curl -fsSL --max-time 120 -o "$tmp/reveng.tar.xz" \
+            "https://downloads.sourceforge.net/project/reveng/${REVENG_VERSION}/reveng-${REVENG_VERSION}.tar.xz"; then
+        record_build_failure "net" "reveng" "download failed (${REVENG_VERSION})"
+        rm -rf "$tmp"; return 0
+    fi
+    if ! echo "${REVENG_SHA256}  $tmp/reveng.tar.xz" | sha256sum -c - > /dev/null; then
+        record_build_failure "net" "reveng" "checksum mismatch (${REVENG_VERSION})"
+        rm -rf "$tmp"; return 0
+    fi
+    src="$tmp/reveng-${REVENG_VERSION}"
+    # The presets are compiled in (-DPRESETS), and they need config.h's BMP_BIT to be the width
+    # of unsigned long and BMP_SUB half of it. config.h ships 32/16, so on amd64, arm64 and
+    # riscv64 (64-bit longs) the build's own bmptst step fails until they are set to 64/32.
+    bits=$(getconf LONG_BIT)
+    if tar -xJf "$tmp/reveng.tar.xz" -C "$tmp" --no-same-owner \
+        && sed -i -e "s/^#define BMP_BIT   32\$/#define BMP_BIT   ${bits}/" \
+            -e "s/^#define BMP_SUB   16\$/#define BMP_SUB   $((bits / 2))/" "$src/config.h" \
+        && make -C "$src" && make -C "$src" pretst \
+        && install -m 755 "$src/reveng" /usr/local/bin/reveng; then
+        # CRC-16/XMODEM of "123456789" is 0x31C3 (the catalogue's check value)
+        [ "$(reveng -m CRC-16/XMODEM -c 313233343536373839)" = "31c3" ] \
+            || record_build_failure "other" "reveng" "wrong CRC-16/XMODEM check value"
+    else
+        record_build_failure "build" "reveng" "${REVENG_VERSION} build failed"
+    fi
+    rm -rf "$tmp"
+    return 0
+}
+
+# Built with cargo from crates.io (with its Cargo.lock; cargo checks the crate's checksum against
+# the index). It links libgf2x. Upstream's release profile keeps debug info: left out here.
+DELSUM_VERSION="1.0.0"
+
+function delsum_soft_install() {
+    goodecho "[+] Installing delsum"
+    install_dependencies "build-essential libgf2x-dev"
+    [ -x "$HOME/.cargo/bin/cargo" ] && export PATH="$HOME/.cargo/bin:$PATH"
+    if ! command -v cargo > /dev/null; then
+        record_build_failure "toolchain" "delsum" "cargo unavailable"
+        return 0
+    fi
+    local tdir
+    tdir=$(mktemp -d)
+    if CARGO_TARGET_DIR="$tdir" CARGO_PROFILE_RELEASE_DEBUG=false CARGO_PROFILE_RELEASE_STRIP=symbols \
+        cargo install --locked --force --root /usr/local delsum --version "$DELSUM_VERSION"; then
+        # CRC-16/XMODEM of "123456789" is 0x31C3
+        printf '123456789' > "$tdir/check.bin"
+        [ "$(delsum check -m 'crc width=16 poly=0x1021 init=0x0 xorout=0x0 refin=false refout=false' "$tdir/check.bin")" = "31c3" ] \
+            || record_build_failure "other" "delsum" "wrong CRC-16/XMODEM check value"
+    else
+        record_build_failure "build" "delsum" "cargo install of ${DELSUM_VERSION} failed"
+    fi
+    rm -rf "$tdir"
+    return 0
+}
+
+# Upstream is a Python library with no packaging, no releases and no command line, unchanged
+# since 2021: pinned to its last commit, in its own venv (/opt/crcbeagle, with crccheck) and with
+# a `crcbeagle` command written here. The clone stays in /opt/crcbeagle/src (README, demo.py).
+CRCBEAGLE_COMMIT="86e54fbc63c1bca5ba13b8231f7cf4902c21f9e6"
+
+function crcbeagle_soft_install() {
+    goodecho "[+] Installing CRC Beagle"
+    if ! command -v uv > /dev/null; then
+        record_build_failure "toolchain" "crcbeagle" "uv unavailable"
+        return 0
+    fi
+    # Pure Python: the venv uses the system Python, so no extra interpreter goes into every image
+    install_dependencies "python3 git"
+    local site
+    rm -rf /opt/crcbeagle
+    if ! uv venv --python /usr/bin/python3 /opt/crcbeagle \
+        || ! installfromnet uv pip install --no-cache --python /opt/crcbeagle/bin/python "crccheck>=1.3,<2"; then
+        record_build_failure "pip" "crcbeagle" "venv or crccheck install failed"
+        rm -rf /opt/crcbeagle; return 0
+    fi
+    if ! git_clone_at https://github.com/colinoflynn/crcbeagle.git /opt/crcbeagle/src "$CRCBEAGLE_COMMIT"; then
+        record_build_failure "net" "crcbeagle" "clone of ${CRCBEAGLE_COMMIT} failed"
+        rm -rf /opt/crcbeagle; return 0
+    fi
+    site=$(/opt/crcbeagle/bin/python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')
+    cp -r /opt/crcbeagle/src/crcbeagle "$site/"
+    cat > /usr/local/bin/crcbeagle << 'EOF'
+#!/opt/crcbeagle/bin/python
+"""Command-line front end for CRC Beagle (colinoflynn/crcbeagle), added by RF Swift.
+
+Give two or more captured frames in hex, each with its CRC. The CRC is the last WIDTH/8
+bytes of a frame (the first with --crc-first); write MESSAGE/CRC to split a frame yourself,
+e.g. to leave a preamble or sync word out, and the CRC's length then sets the width.
+Spaces, ':' and '-' inside a frame are ignored. Frames of the same length are compared with
+each other (the CRC differential technique), so give at least two of each length.
+
+examples:
+  crcbeagle a5100207...fd0e a5100207...5a26 a5100207...f8ec
+  crcbeagle -w 8 -f frames.txt          one frame per line, '#' starts a comment
+  ... | crcbeagle -w 16 -f -           frames on stdin
+
+As a library: /opt/crcbeagle/bin/python -c 'from crcbeagle import crcbeagle'
+"""
+import argparse
+import re
+import sys
+
+from crcbeagle import crcbeagle
+
+
+def unhex(text):
+    digits = re.sub(r"[\s:\-]", "", text)
+    if digits[:2].lower() == "0x":
+        digits = digits[2:]
+    if not digits or len(digits) % 2 or not re.fullmatch(r"[0-9a-fA-F]+", digits):
+        raise ValueError("not an even number of hex digits: %r" % text)
+    return list(bytes.fromhex(digits))
+
+
+def split_frame(frame, nbytes, crc_first):
+    if "/" in frame:
+        message, crc = frame.split("/", 1)
+        return unhex(message), unhex(crc)
+    data = unhex(frame)
+    if len(data) <= nbytes:
+        raise ValueError("frame is not longer than its %d-byte CRC: %r" % (nbytes, frame))
+    if crc_first:
+        return data[nbytes:], data[:nbytes]
+    return data[:-nbytes], data[-nbytes:]
+
+
+def main():
+    parser = argparse.ArgumentParser(prog="crcbeagle", description=__doc__,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("frames", nargs="*", metavar="FRAME", help="hex frame, or MESSAGE/CRC")
+    parser.add_argument("-w", "--width", type=int, choices=(8, 16, 32), default=16,
+                        help="CRC width in bits when it is split off a frame (default 16)")
+    parser.add_argument("--crc-first", action="store_true", help="the CRC starts the frame")
+    parser.add_argument("-f", "--file", help="read frames from FILE, one per line ('-' = stdin)")
+    parser.add_argument("--no-example", action="store_true", help="do not print example code")
+    args = parser.parse_args()
+
+    frames = list(args.frames)
+    if args.file:
+        stream = sys.stdin if args.file == "-" else open(args.file)
+        with stream:
+            frames += [line.split("#", 1)[0].strip() for line in stream]
+    frames = [f for f in frames if f]
+    try:
+        pairs = [split_frame(f, args.width // 8, args.crc_first) for f in frames]
+        if len(pairs) < 2:
+            raise ValueError("give at least two frames")
+        if any(len(crc) not in (1, 2, 4) for _, crc in pairs):
+            raise ValueError("CRC Beagle handles 8-, 16- and 32-bit CRCs only")
+        crcbeagle.CRCBeagle().search([m for m, _ in pairs], [c for _, c in pairs],
+                                     print_examples=not args.no_example)
+    except (ValueError, TypeError) as err:
+        parser.exit(2, "crcbeagle: %s\n" % err)
+
+
+if __name__ == "__main__":
+    main()
+EOF
+    chmod 755 /usr/local/bin/crcbeagle
+    # The README's example: three 20-byte frames, CRC-16 poly 0x1021 with xorout 0xCACA
+    local out
+    out=$(crcbeagle --no-example a510020755a3d17215838f9034bbb78eb427a94cfd0e \
+        a51002078c27f2cab5d1dcf89c704280ecbb23b05a26 a510020771691e76a4602bc654aa7b4c6be185c2f8ec \
+        2> /dev/null || true)
+    grep -q 'XOR-out value for len = 20: 0xCACA' <<< "$out" \
+        || record_build_failure "other" "crcbeagle" "the README example is not solved"
+    return 0
+}
+
+# crchack (resilar): forges a CRC instead of finding it. It changes the bits you allow so that
+# a modified frame or firmware image gets the CRC you want, e.g. to keep a patched image's CRC-32
+# valid: `crchack -o 4 patched.bin 1234abcd > forged.bin` (bytes 4-7 change), or
+# `crchack patched.bin 1234abcd` to append 4 bytes instead. Any CRC: -w/-p/-i/-x/-r/-R (the
+# parameters reveng finds); default CRC-32. Upstream has no releases: pinned to a commit, and
+# its own test suite runs at build.
+CRCHACK_COMMIT="0f40f3e16d25a8ca63f478dc7c4473a4c9d61f75"
+
+function crchack_soft_install() {
+    goodecho "[+] Installing crchack"
+    install_dependencies "build-essential git"
+    local tmp out
+    tmp=$(mktemp -d)
+    if ! git_clone_at https://github.com/resilar/crchack.git "$tmp/crchack" "$CRCHACK_COMMIT"; then
+        record_build_failure "net" "crchack" "clone of ${CRCHACK_COMMIT} failed"
+        rm -rf "$tmp"; return 0
+    fi
+    if make -C "$tmp/crchack" && install -m 755 "$tmp/crchack/crchack" /usr/local/bin/crchack; then
+        # check.sh prints OK or FAIL per case and always exits 0
+        out=$(sh "$tmp/crchack/check.sh" /usr/local/bin/crchack 2>&1 || true)
+        if grep -q FAIL <<< "$out" || ! grep -q OK <<< "$out"; then
+            record_build_failure "other" "crchack" "its test suite (check.sh) reports failures"
+        fi
+    else
+        record_build_failure "build" "crchack" "make failed"
+    fi
+    rm -rf "$tmp"
+    return 0
+}
+
+# pycrc: writes C code (or computes values) for a CRC from its parameters, for a frame
+# generator or a patcher once reveng has found the CRC:
+# `pycrc --model crc-16-modbus --check-string 123456789`,
+# `pycrc --width 16 --poly 0x8005 --reflect-in true --xor-in 0xffff --reflect-out true
+#  --xor-out 0 --algorithm table-driven --generate c -o crc.c` (and `--generate h` for the header).
+function pycrc_soft_install() {
+    goodecho "[+] Installing pycrc"
+    install_dependencies "pycrc"
+}
+
+# ent: entropy, chi-square, mean, Monte Carlo pi and serial correlation of a file (`ent fw.bin`,
+# `ent -t` for CSV). Close to 8 bits per byte means compressed or encrypted data; chi-square
+# helps tell the two apart (encrypted data looks uniformly random, compressed data less so).
+function ent_soft_install() {
+    goodecho "[+] Installing ent"
+    install_dependencies "ent"
+}
+
+# fq (wader): jq for binary formats. Decodes a hundred or so formats (ELF, PE, Mach-O, pcap and
+# pcapng, TLS, DNS, protobuf, CBOR, MessagePack, ZIP, gzip, tar, PNG, MP4, ...) into a tree you
+# query with jq: `fq . file`, `fq -d msgpack . blob`, `fq -d bytes` for raw data, `fq -i` for an
+# interactive REPL. amd64 and arm64 take the newest release, checked against its checksums.txt;
+# riscv64 (no release build) and a failed download get Ubuntu's older fq package.
+FQ_VERSION="0.18.0"   # known-good; the build takes the newest release
+
+function fq_soft_install() {
+    goodecho "[+] Installing fq"
+    local arch ver tmp sha base="https://github.com/wader/fq/releases/download"
+    case "$(uname -m)" in
+        x86_64|amd64) arch="amd64" ;;
+        aarch64|arm64) arch="arm64" ;;
+        *) install_dependencies "fq"; return 0 ;;
+    esac
+    ver=$(latest_release_version wader/fq "$FQ_VERSION" \
+        "$base/v@V@/fq_@V@_linux_${arch}.tar.gz" "$base/v@V@/checksums.txt")
+    tmp=$(mktemp -d)
+    if ! installfromnet curl -fsSL --max-time 120 -o "$tmp/fq.tar.gz" "$base/v${ver}/fq_${ver}_linux_${arch}.tar.gz" \
+        || ! installfromnet curl -fsSL --max-time 30 -o "$tmp/checksums.txt" "$base/v${ver}/checksums.txt"; then
+        record_build_failure "net" "fq" "download of ${ver} failed; installed Ubuntu's fq instead"
+        rm -rf "$tmp"; install_dependencies "fq"; return 0
+    fi
+    sha=$(awk -v f="fq_${ver}_linux_${arch}.tar.gz" '$2 == f {print $1}' "$tmp/checksums.txt")
+    if [ -z "$sha" ] || ! echo "${sha}  $tmp/fq.tar.gz" | sha256sum -c - > /dev/null \
+        || ! tar -xzf "$tmp/fq.tar.gz" -C "$tmp" --no-same-owner fq \
+        || ! install -m 755 "$tmp/fq" /usr/local/bin/fq; then
+        record_build_failure "verify" "fq" "${ver} does not match its checksums.txt; installed Ubuntu's fq instead"
+        rm -rf "$tmp"; install_dependencies "fq"; return 0
+    fi
+    rm -rf "$tmp"
+    # MessagePack [1, "hi"]
+    [ "$(printf '\x92\x01\xa2hi' | fq -r -d msgpack '.elements[1].value | tovalue')" = "hi" ] \
+        || record_build_failure "other" "fq" "${ver} does not decode a MessagePack sample"
+    return 0
+}
+
+# xortool (hellman): key length and key of XOR-obfuscated data (firmware, configs, payloads):
+# `xortool -c 00 fw.bin` for binaries (0x00 the most frequent plaintext byte), `-c 20` for text,
+# `-l LEN` to fix the key length; it writes the candidate plaintexts to ./xortool_out/.
+# `xortool-xor` XORs data with a key. In its own uv tool venv on the system Python.
+function xortool_soft_install() {
+    goodecho "[+] Installing xortool"
+    if ! command -v uv > /dev/null; then
+        record_build_failure "toolchain" "xortool" "uv unavailable"
+        return 0
+    fi
+    install_dependencies "python3"
+    if ! UV_TOOL_BIN_DIR=/usr/local/bin installfromnet uv tool install --force --python /usr/bin/python3 xortool; then
+        record_build_failure "pip" "xortool" "uv tool install failed"
+        return 0
+    fi
+    # Text XORed with the 4-byte key "rfsw"
+    local tmp
+    tmp=$(mktemp -d)
+    python3 -c 'import sys; k=b"rfsw"; t=b"The quick brown fox jumps over the lazy dog. " * 60; open(sys.argv[1], "wb").write(bytes(c ^ k[i % 4] for i, c in enumerate(t)))' "$tmp/sample.bin"
+    (cd "$tmp" && xortool -c 20 sample.bin > out.txt 2>&1) || true
+    grep -qx 'rfsw' "$tmp/out.txt" || record_build_failure "other" "xortool" "the key of a test sample is not found"
+    rm -rf "$tmp"
+    return 0
+}
+
 function x11_egl_shim_install() {
     # Mesa's GLX client cannot create a context on XQuartz (macOS hosts, Docker
     # Desktop / Podman / Lima alike): the server exposes no fbconfig that the

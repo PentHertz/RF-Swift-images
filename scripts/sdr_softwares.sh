@@ -497,6 +497,23 @@ function multimon_ng_soft_install () {
 	install_dependencies "multimon-ng"
 }
 
+# minimodem: audio FSK modems (Bell 103 `300`, Bell 202 `1200`, RTTY `rtty`, TDD `tdd`, NOAA
+# SAME `same`, caller ID, UIC-751-3 train radio `uic-train`/`uic-ground`, or any baud rate and
+# mark/space tones you set), for data sent as audio tones over a radio voice channel.
+# `minimodem --rx 1200 -f audio.wav` decodes a recording (demodulated audio from gqrx, SDR++ or
+# GNU Radio); without -f it listens to the sound card or PulseAudio. `--tx` makes test signals.
+function minimodem_soft_install () {
+	goodecho "[+] Installing minimodem"
+	install_dependencies "minimodem"
+	local tmp
+	tmp=$(mktemp -d)
+	echo "RFSWIFT 1200 BAUD TEST" | minimodem --tx 1200 -f "$tmp/bell202.wav" > /dev/null 2>&1 || true
+	[ "$(minimodem --rx 1200 -q -f "$tmp/bell202.wav" 2> /dev/null)" = "RFSWIFT 1200 BAUD TEST" ] \
+		|| record_build_failure "other" "minimodem" "a Bell 202 test signal does not decode"
+	rm -rf "$tmp"
+	return 0
+}
+
 function urh_soft_pip_install() {
     goodecho "[+] Installing URH"
     # Check if architecture is riscv64 and skip if it is

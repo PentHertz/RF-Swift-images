@@ -58,6 +58,14 @@ MANIFEST = {
                     "source": ("github", "luigifcruz/CyberEther"), "cls": "simple"},
     "bkcrack":     {"file": "reverse_software.sh", "pat": r'BKCRACK_VERSION="(?P<ver>[\d.]+)"',
                     "source": ("github", "kimci86/bkcrack"), "cls": "simple"},
+    "delsum":      {"file": "corebuild.sh", "pat": r'DELSUM_VERSION="(?P<ver>[\d.]+)"',
+                    "source": ("github", "8051Enthusiast/delsum"), "cls": "simple"},
+    "fq":          {"file": "corebuild.sh", "pat": r'FQ_VERSION="(?P<ver>[\d.]+)"',
+                    "source": ("github", "wader/fq"), "cls": "simple",
+                    "note": "amd64/arm64 release, checked against its checksums.txt at build; riscv64 uses Ubuntu's fq"},
+    "binary-refinery": {"file": "reverse_software.sh", "pat": r'REFINERY_VERSION="(?P<ver>[\d.]+)"',
+                    "source": ("pypi", "binary-refinery"), "cls": "simple",
+                    "note": "PyPI source package with Cython extensions; its build check runs emit | b64"},
     "see":         {"file": "corebuild.sh", "pat": r'SEE_VERSION="(?P<ver>[\d.]+)"',
                     "source": ("github", "wibus-wee/see"), "cls": "simple",
                     "note": "signature-checked at build (SEE_UPDATE_PUBKEY); no SHA to update"},
@@ -93,6 +101,15 @@ MANIFEST = {
     "bulk-extractor": {"file": "reverse_software.sh", "pat": r'BULK_EXTRACTOR_VERSION="(?P<ver>[\d.]+)"',
                     "source": ("github", "simsong/bulk_extractor"), "cls": "needs-care",
                     "note": "also update BULK_EXTRACTOR_SHA256 (from the release's SHA256SUMS)"},
+    "reveng":      {"file": "corebuild.sh", "pat": r'REVENG_VERSION="(?P<ver>[\d.]+)"',
+                    "source": ("sourceforge", "reveng"), "cls": "needs-care",
+                    "note": "also update REVENG_SHA256 (reveng-<ver>.tar.xz, from the release's SHA256SUMS)"},
+    "cpu-rec":     {"file": "reverse_software.sh", "pat": r'CPU_REC_COMMIT="[0-9a-f]{40}"\s+# v(?P<ver>[\d.]+)',
+                    "source": ("github", "airbus-seclab/cpu_rec"), "cls": "needs-care",
+                    "note": "pinned by commit: set CPU_REC_COMMIT to the new tag's commit and update the # v<ver> comment"},
+    "binbloom":    {"file": "reverse_software.sh", "pat": r'BINBLOOM_COMMIT="[0-9a-f]{40}"\s+# v(?P<ver>[\d.]+)',
+                    "source": ("github", "quarkslab/binbloom"), "cls": "needs-care",
+                    "note": "pinned by commit: set BINBLOOM_COMMIT to the new tag's commit and update the # v<ver> comment"},
     "fpv-capture": {"file": "sdr_hacks.sh", "pat": r'FPVCAPTURE_RELEASE="v(?P<ver>[\d.]+)"',
                     "source": ("github", "black-pigeon/fpv_capture"), "cls": "needs-care",
                     "note": "AntSDR boot files: asset names carry a build date; update FPVCAPTURE_BOOTFILES names and SHA-256"},
@@ -126,6 +143,12 @@ MANIFEST = {
     # ---- manual: vendor downloads, no machine-readable 'latest' ----
     "burp":        {"file": "network_common.sh", "pat": r'\$\{1:-(?P<ver>[\d.]+)\}',
                     "source": ("manual", "https://portswigger.net/burp/releases"), "cls": "manual"},
+    "crcbeagle":   {"file": "corebuild.sh", "pat": r'CRCBEAGLE_COMMIT="(?P<ver>[0-9a-f]{40})"',
+                    "source": ("manual", "https://github.com/colinoflynn/crcbeagle/commits"), "cls": "manual",
+                    "note": "no releases: pinned to a commit (last change 2021-09-07); compare with the newest commit"},
+    "crchack":     {"file": "corebuild.sh", "pat": r'CRCHACK_COMMIT="(?P<ver>[0-9a-f]{40})"',
+                    "source": ("manual", "https://github.com/resilar/crchack/commits"), "cls": "manual",
+                    "note": "no releases: pinned to a commit (2024-03-30); compare with the newest commit"},
     "little-snitch": {"file": "corebuild.sh", "pat": r'local version="(?P<ver>[\d.]+)"',
                     "source": ("manual", "https://obdev.at/products/littlesnitch/"), "cls": "manual",
                     "note": "first `local version=` match in file; verify it is the Little Snitch one"},
@@ -139,7 +162,7 @@ MANIFEST = {
 FLOATING = {
     "jadx", "ipsw", "uv", "arduino-ide", "imhex", "whispercpp", "cyberether", "qflipper",
     "geckodriver", "node-llm", "craft", "ghidra", "die", "sdrangel", "go", "sniffle-fw",
-    "hostapd", "dsview", "pulseview", "antsdr-uhd", "bkcrack", "zap", "bulk-extractor", "see",
+    "hostapd", "dsview", "pulseview", "antsdr-uhd", "bkcrack", "zap", "bulk-extractor", "see", "fq",
 }
 
 
@@ -183,6 +206,11 @@ def fetch_latest(source):
         if kind == "w1fi_hostapd":
             txt = http_text("https://w1.fi/releases/")
             vers = re.findall(r"hostapd-(\d+\.\d+)\.tar\.gz", txt)
+            return sorted(set(vers), key=lambda s: [int(x) for x in s.split(".")])[-1] if vers else None
+        if kind == "sourceforge":
+            # the project's file feed lists /<version>/<file> paths, newest first
+            txt = http_text(f"https://sourceforge.net/projects/{source[1]}/rss?path=/")
+            vers = re.findall(r"<title><!\[CDATA\[/(\d+(?:\.\d+)+)/", txt)
             return sorted(set(vers), key=lambda s: [int(x) for x in s.split(".")])[-1] if vers else None
         if kind == "manual":
             return None

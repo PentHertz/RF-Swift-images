@@ -84,6 +84,15 @@ RUN ./entrypoint.sh bkcrack_soft_install && \
 # OFRAK (Red Balloon Security): firmware unpack / analyse / modify / repack, web GUI (amd64 only)
 RUN ./entrypoint.sh ofrak_soft_install
 
+# Raw firmware triage: cpu_rec (CPU architecture), binbloom (load address, endianness),
+# Binary Refinery (decode / decompress / carve pipelines), bbpb (protobuf without a schema)
+RUN ./entrypoint.sh cpu_rec_soft_install && \
+	./entrypoint.sh binbloom_soft_install && \
+	./entrypoint.sh refinery_soft_install && \
+	./entrypoint.sh bbpb_soft_install
+# Binary Refinery's units come after every other directory on PATH, so none replaces a system tool
+ENV PATH="${PATH}:/opt/refinery/units"
+
 # Cleaning and quitting
 WORKDIR /root/
 #RUN rm -rf /root/scripts/

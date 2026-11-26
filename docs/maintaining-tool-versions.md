@@ -42,12 +42,15 @@ Integrity checks are kept where upstream publishes checksums:
 | Go | the sha256 from go.dev's release list (new: the old install had no check) |
 | OWASP ZAP | the SHA-256 of `ZAP_<ver>_Linux.tar.gz` in `ZapVersions.xml` (zaproxy/zap-admin), the feed ZAP's own update check reads |
 | bulk_extractor | that release's `SHA256SUMS` |
+| fq | that release's `checksums.txt` (amd64 and arm64; riscv64 installs Ubuntu's `fq` package) |
 | See | the ed25519 signature in that release's `update-linux-<arch>.json` (the check See's own updater makes), against See's update public key pinned as `SEE_UPDATE_PUBKEY` in `corebuild.sh` |
 | geckodriver | **TLS only**: Mozilla publishes `.asc` signatures but no checksum file. The pinned SHA256 still applies when the known-good version is installed |
 
 **Still pinned** (the build installs exactly the version in the script): Kaleido (v1.x is a
 different distribution), LLVM (toolchain major, bump deliberately), scapy (locked for Mirage),
-and the vendor downloads Burp Suite and Little Snitch.
+CRC RevEng and delsum (rare releases), Binary Refinery (built from source), cpu_rec and binbloom
+(pinned by the commit of their release tag), CRC Beagle and crchack (no releases: pinned to a
+commit), and the vendor downloads Burp Suite and Little Snitch.
 
 ## Tracking upstream against a reviewed version
 
@@ -105,8 +108,8 @@ Each pin has a **class** that says how safe a bump is:
 ## Tracked pins
 
 Versions below are the values in the scripts as of 2026-11-21. Every tool in the **simple**
-and **needs-care** tables takes the newest release at build time, except **kaleido** and
-**llvm**, so for those tools the version shown is the known-good fallback. The classes still
+and **needs-care** tables takes the newest release at build time, except **kaleido**,
+**llvm**, **delsum**, **binary-refinery**, **reveng**, **cpu-rec** and **binbloom**, so for those tools the version shown is the known-good fallback. The classes still
 describe how safe it is to bump that fallback.
 
 ### simple (auto-bumpable)
@@ -122,6 +125,9 @@ describe how safe it is to bump that fallback.
 | cyberether | 1.20.1 | `sdr_softwares.sh` | luigifcruz/CyberEther |
 | qflipper | 1.3.3 | `rf_tools.sh` | flipperdevices/qFlipper (x86_64 AppImage only) |
 | see | 0.3.9 | `corebuild.sh` | wibus-wee/see (amd64, arm64) |
+| delsum | 1.0.0 | `corebuild.sh` | 8051Enthusiast/delsum (built with `cargo install --locked` from crates.io) |
+| fq | 0.18.0 | `corebuild.sh` | wader/fq (amd64, arm64; riscv64 uses Ubuntu's package) |
+| binary-refinery | 0.11.3 | `reverse_software.sh` | PyPI `binary-refinery` (source package with Cython extensions) |
 
 ### needs-care
 
@@ -144,6 +150,9 @@ describe how safe it is to bump that fallback.
 | fpv-capture | 0.1 | `sdr_hacks.sh` | AntSDR boot files: asset names carry a build date; update the names and SHA-256 in `FPVCAPTURE_BOOTFILES` |
 | zap | 2.17.0 | `network_common.sh` | update `ZAP_SHA256` (the release notes list it); 2.18 raises the minimum to Java 21, which the image already uses |
 | bulk-extractor | 2.2.0 | `reverse_software.sh` | update `BULK_EXTRACTOR_SHA256` from the release's `SHA256SUMS` |
+| cpu-rec | 1.1 | `reverse_software.sh` | pinned by commit: set `CPU_REC_COMMIT` to the new tag's commit and update its `# v<ver>` comment |
+| binbloom | 2.1 | `reverse_software.sh` | pinned by commit: set `BINBLOOM_COMMIT` to the new tag's commit and update its `# v<ver>` comment |
+| reveng | 3.0.6 | `corebuild.sh` | SourceForge project `reveng` (the checker reads its file feed); update `REVENG_SHA256` for `reveng-<ver>.tar.xz` from the release's `SHA256SUMS` |
 
 ### locked (do not bump)
 
@@ -157,6 +166,8 @@ describe how safe it is to bump that fallback.
 |------|---------|------|----------------|
 | burp | 2026.11.2 | `network_common.sh` | https://portswigger.net/burp/releases |
 | little-snitch | 1.1.1 | `corebuild.sh` | https://obdev.at/products/littlesnitch/ |
+| crchack | commit `0f40f3e` | `corebuild.sh` | https://github.com/resilar/crchack/commits (no releases; move `CRCHACK_COMMIT`) |
+| crcbeagle | commit `86e54fb` | `corebuild.sh` | https://github.com/colinoflynn/crcbeagle/commits (no releases; move `CRCBEAGLE_COMMIT`) |
 
 > Old Python versions are not pinned here: tools that need one (bluing and Mirage need 3.10)
 > get it from `uv python install <ver>` and a `uv venv --seed --python <ver>` venv behind a

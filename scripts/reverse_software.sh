@@ -794,3 +794,161 @@ EOF
     ofrak deps --missing-only || record_build_failure "other" "ofrak" "ofrak deps failed after install"
     return 0
 }
+
+# ---------------------------------------------------------------------------
+# Raw firmware triage: CPU, load address, obfuscation layers, schema-less protobuf
+# ---------------------------------------------------------------------------
+# cpu_rec (Airbus SecLab): which CPU architecture a raw blob is for (about 70 known: ARM,
+# AArch64, MIPS, PowerPC, AVR, MSP430, 8051, Xtensa, RISC-V, SuperH, V850, ...), for MCU firmware
+# and radio-module dumps with no headers. `cpu_rec fw.bin` gives the best match for the whole file
+# and for its largest code-like chunk; `-v -v` shows the scores. It is statistical: read the
+# answer as a lead. Analysis takes about a minute per MB. The first run trains from the corpus
+# (about 10 s) and caches that as /opt/cpu_rec/stats.pick (about 150 MB), which later runs load.
+# Pinned to the v1.1 commit; runs on the system Python.
+CPU_REC_COMMIT="6b192399cd56ad6953e568e1263024dd8a4ef38d"   # v1.1
+
+function cpu_rec_soft_install() {
+    goodecho "[+] Installing cpu_rec"
+    install_dependencies "python3 git binutils make"
+    if ! git_clone_at https://github.com/airbus-seclab/cpu_rec.git /opt/cpu_rec "$CPU_REC_COMMIT"; then
+        record_build_failure "net" "cpu_rec" "clone of ${CPU_REC_COMMIT} failed"
+        return 0
+    fi
+    rm -rf /opt/cpu_rec/.git
+    cat > /usr/local/bin/cpu_rec << 'EOF'
+#!/bin/sh
+# cpu_rec (/opt/cpu_rec): CPU architecture of raw binary data
+exec python3 /opt/cpu_rec/cpu_rec.py "$@"
+EOF
+    chmod 755 /usr/local/bin/cpu_rec
+    # 64 KB of this machine's own code (make's .text) must come out as this architecture
+    local expect="" tmp out
+    case "$(uname -m)" in
+        x86_64) expect="X86-64" ;;
+        aarch64) expect="ARM64" ;;
+        riscv64) expect="RISC-V" ;;
+    esac
+    tmp=$(mktemp -d)
+    if [ -n "$expect" ] && objcopy -O binary --only-section=.text "$(command -v make)" "$tmp/text"; then
+        head -c 65536 "$tmp/text" > "$tmp/code.bin"
+        out=$(cpu_rec "$tmp/code.bin" 2> /dev/null || true)
+        grep -qw -- "$expect" <<< "$out" \
+            || record_build_failure "other" "cpu_rec" "64 KB of ${expect} code is not recognised"
+    fi
+    # the test trained it: drop the cache rather than ship it
+    rm -rf "$tmp" /opt/cpu_rec/stats.pick
+    return 0
+}
+
+# binbloom (Quarkslab): endianness and load (base) address of a raw 32- or 64-bit firmware
+# image, from the pointers it holds to its own strings; that address is what Ghidra, IDA or
+# radare2 need to load the image. `binbloom fw.bin`, `binbloom -a 64 fw.bin`, `-t N` threads; with
+# `-b <base>` it also looks for a UDS diagnostic table (automotive ECUs). It draws progress bars
+# on stdout, so on a pipe keep the end: `binbloom fw.bin | tr '\r' '\n' | tail -20`.
+# Pinned to the v2.1 commit.
+BINBLOOM_COMMIT="95cfaacf2dfcbeba51c7d09132f188331449ec24"   # v2.1
+
+function binbloom_soft_install() {
+    goodecho "[+] Installing binbloom"
+    install_dependencies "build-essential autoconf automake git python3"
+    local tmp
+    tmp=$(mktemp -d)
+    if ! git_clone_at https://github.com/quarkslab/binbloom.git "$tmp/binbloom" "$BINBLOOM_COMMIT"; then
+        record_build_failure "net" "binbloom" "clone of ${BINBLOOM_COMMIT} failed"
+        rm -rf "$tmp"; return 0
+    fi
+    if ! (cd "$tmp/binbloom" && autoreconf -i && ./configure && make -j"$(nproc)" && make install); then
+        record_build_failure "build" "binbloom" "autoreconf/configure/make failed"
+        rm -rf "$tmp"; return 0
+    fi
+    # A 32-bit little-endian image whose string pointers assume a load address of 0x08000000
+    python3 - "$tmp/blob.bin" << 'EOF'
+import random, struct, sys
+random.seed(1)
+base, blob, off, ptrs = 0x08000000, bytearray(random.randbytes(0x3000)), 0x2000, []
+for s in (b"Firmware v1.2.3\0", b"Error: CRC mismatch\0", b"radio_init\0", b"tx power %d dBm\0",
+          b"bootloader\0", b"Copyright 2024 Vendor\0", b"rx timeout\0", b"key=%08x\0",
+          b"Hello world\0", b"spi_flash_read\0"):
+    blob[off:off + len(s)] = s
+    ptrs.append(base + off)
+    off += len(s) + 3
+for i, p in enumerate(ptrs * 3):
+    blob[0x400 + 4 * i:0x404 + 4 * i] = struct.pack("<I", p)
+open(sys.argv[1], "wb").write(blob)
+EOF
+    binbloom "$tmp/blob.bin" > "$tmp/out.txt" 2>&1 || true
+    grep -qE 'Base address (seems to be|found:) 0x08000000' "$tmp/out.txt" \
+        || record_build_failure "other" "binbloom" "the load address of a test image is not found"
+    rm -rf "$tmp"
+    return 0
+}
+
+# Binary Refinery (binref): about 400 small commands ("units") chained with pipes, CyberChef on
+# the command line: encodings (b64, hex, url), decompression (zl, lzma, aplib, lznt1, zstd, ...),
+# XOR and crypto (xor, aes, rc4), carving (carve, carve-pe), formats (pe, elf, zip) and
+# disassembly (opc). `emit fw.bin | carve -d b64 | b64 | zl | peek`; `binref <keyword>` finds a
+# unit. In its own venv (/opt/refinery, Python 3.13) with the optional packages useful on
+# firmware (capstone, pefile, chardet, pyzstd, brotli). A unit that needs another package names
+# it: `uv pip install --python /opt/refinery/bin/python <package>`. The units sit at the END of
+# PATH (ENV in reversing.docker), so a unit named like a system tool (rev, lzma, zstd, bat, ...)
+# never replaces that tool; run such a unit as /opt/refinery/bin/<unit>. The build log lists them.
+REFINERY_VERSION="0.11.3"
+
+function refinery_soft_install() {
+    goodecho "[+] Installing Binary Refinery"
+    # It requires lief, which has no riscv64 wheel (a source build of lief is a long C++ build)
+    if [ "$(uname -m)" = "riscv64" ]; then
+        criticalecho-noexit "[-] Binary Refinery: no lief build for riscv64, skipping"
+        return 0
+    fi
+    if ! command -v uv > /dev/null; then
+        record_build_failure "toolchain" "binary-refinery" "uv unavailable"
+        return 0
+    fi
+    # the PyPI release is a source package with Cython extensions
+    install_dependencies "build-essential"
+    rm -rf /opt/refinery
+    if ! uv venv --python 3.13 /opt/refinery \
+        || ! installfromnet uv pip install --no-cache --python /opt/refinery/bin/python \
+            "binary-refinery==${REFINERY_VERSION}" capstone pefile chardet pyzstd brotli; then
+        record_build_failure "pip" "binary-refinery" "install of ${REFINERY_VERSION} failed"
+        rm -rf /opt/refinery; return 0
+    fi
+    # Only the units (and binref) go on PATH, not the venv's python and pip
+    local name path clashes=""
+    mkdir -p /opt/refinery/units
+    for name in $(/opt/refinery/bin/python -c 'import importlib.metadata as m; print("\n".join(e.name for e in m.entry_points(group="console_scripts") if e.dist.name == "binary-refinery"))'); do
+        if path=$(command -v "$name" 2> /dev/null) && [ "${path#/opt/refinery/}" = "$path" ]; then
+            clashes="$clashes $name"
+        fi
+        ln -sf "/opt/refinery/bin/$name" "/opt/refinery/units/$name"
+    done
+    if [ -n "$clashes" ]; then
+        goodecho "[+] Binary Refinery units shadowed by other commands (run as /opt/refinery/bin/<unit>):${clashes}"
+    fi
+    [ "$(/opt/refinery/units/emit aGVsbG8gcmFkaW8= | /opt/refinery/units/b64)" = "hello radio" ] \
+        || record_build_failure "other" "binary-refinery" "emit | b64 does not decode a test string"
+    return 0
+}
+
+# blackboxprotobuf (NCC Group, `bbpb`): decodes protobuf without its .proto schema, e.g. from a
+# companion app's API, a BLE characteristic or a firmware config blob. `bbpb -r < msg.bin` prints
+# the fields as JSON; plain `bbpb < msg.bin > msg.json` adds a typedef (name the fields, fix their
+# types), and `bbpb -e < msg.json > new.bin` re-encodes it after you edit the values. In its own
+# uv tool venv on the system Python.
+function bbpb_soft_install() {
+    goodecho "[+] Installing blackboxprotobuf (bbpb)"
+    if ! command -v uv > /dev/null; then
+        record_build_failure "toolchain" "bbpb" "uv unavailable"
+        return 0
+    fi
+    install_dependencies "python3"
+    if ! UV_TOOL_BIN_DIR=/usr/local/bin installfromnet uv tool install --force --python /usr/bin/python3 bbpb; then
+        record_build_failure "pip" "bbpb" "uv tool install failed"
+        return 0
+    fi
+    # field 1 = varint 150
+    [ "$(printf '\x08\x96\x01' | bbpb -r --compact)" = '{"1": 150}' ] \
+        || record_build_failure "other" "bbpb" "a test message does not decode"
+    return 0
+}
