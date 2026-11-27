@@ -439,14 +439,20 @@ function unblob_soft_install() {
     RUSTUP_TOOLCHAIN=stable pipx install .
 }
 
+# pyvex (angr's VEX lifter) uses bitstring.ConstBitStream, which bitstring 5 removed: angr, angrop
+# and OFRAK keep bitstring 4.x
 function angr_soft_install() {
-	goodecho "[+] Installing angrop"
-	pip3install "angr"
+	goodecho "[+] Installing angr"
+	pip3install "angr" "bitstring<5"
 }
 
 function angrop_soft_install() {
 	goodecho "[+] Installing angrop"
-	pipx install git+https://github.com/angr/angrop.git
+	local constraints
+	constraints=$(mktemp)
+	echo "bitstring<5" > "$constraints"
+	PIP_CONSTRAINT="$constraints" pipx install git+https://github.com/angr/angrop.git
+	rm -f "$constraints"
 }
 
 
@@ -672,6 +678,7 @@ function volatility3_soft_install() {
         vol -h > /dev/null || record_build_failure "other" "volatility3" "vol -h failed after install"
     fi
     # Go toolchain from corebuild's install_go
+    ensure_go
     if command -v go > /dev/null; then
         installfromnet env GOBIN=/usr/local/bin GOPROXY=https://proxy.golang.org,direct \
             go install github.com/volatilityfoundation/dwarf2json@latest \
@@ -771,10 +778,11 @@ function ofrak_soft_install() {
     # External tools its unpackers and packers call (`ofrak deps` lists them)
     install_dependencies "build-essential liblzo2-dev libmagic1t64 7zip aapt apktool binutils cpio e2fsprogs genisoimage lzop mtd-utils pigz squashfs-tools unar unzip util-linux-extra zip zstd"
     rm -rf /opt/ofrak
-    # binwalk 2.3.4 is the Python module OFRAK's binwalk analyzer imports (requirements-non-pypi.txt)
+    # binwalk 2.3.4 is the Python module OFRAK's binwalk analyzer imports (requirements-non-pypi.txt).
+    # bitstring<5: ofrak-angr's pyvex needs bitstring.ConstBitStream (see angr_soft_install).
     if ! uv venv --python 3.13 /opt/ofrak \
         || ! installfromnet uv pip install --no-cache --python /opt/ofrak/bin/python \
-            ofrak ofrak-capstone ofrak-angr python-lzo \
+            ofrak ofrak-capstone ofrak-angr python-lzo "bitstring<5" \
             "binwalk @ git+https://github.com/ReFirmLabs/binwalk.git@v2.3.4"; then
         record_build_failure "pip" "ofrak" "install failed"
         return 0

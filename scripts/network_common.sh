@@ -227,6 +227,7 @@ function crunch_soft_install() {
 function bettercap_soft_install() {
 	goodecho "[+] Installing bettercap"
 	rm -rf ~/.cache/go-build #TODO: trying to solve build exit for ARM on GitHub
+	ensure_go
 	export GOPROXY=https://proxy.golang.org,direct
 	install_dependencies "libnetfilter-queue-dev"
 	[ -d /rftools/bluetooth ] || mkdir -p /rftools/bluetooth
@@ -816,12 +817,31 @@ function sniffnet_soft_install_fromsource() {
         return 1
     fi
     cd sniffnet
-    if cargo build --release; then
+    # Sniffnet follows the newest stable Rust (Option::map_or_default needs 1.98), while
+    # corebuild's toolchain is the stable release of the day corebuild was built. When that one
+    # is older than the Rust upstream's Dockerfile builds with, build with upstream's version as
+    # a temporary toolchain, removed afterwards.
+    local want have tc=""
+    want=$(sed -n 's/^FROM rust:\([0-9][0-9.]*\).*/\1/p' Dockerfile 2> /dev/null | head -n1)
+    have=$(rustc --version 2> /dev/null | awk '{print $2}')
+    if [ -n "$want" ] && [ "$(printf '%s\n' "$want" "$have" | sort -V | head -n1)" != "$want" ]; then
+        goodecho "[+] Sniffnet: building with Rust $want (default toolchain: ${have:-none})"
+        if installfromnet rustup toolchain install "$want" --profile minimal; then
+            tc="$want"
+        else
+            record_build_failure "toolchain" "sniffnet" "rustup could not install Rust $want; trying ${have:-the default}"
+        fi
+    fi
+    if cargo ${tc:+"+$tc"} build --release; then
         install -m 0755 target/release/sniffnet /usr/local/bin/sniffnet
         goodecho "[+] Sniffnet installed: /usr/local/bin/sniffnet"
     else
         record_build_failure "build" "sniffnet" "cargo build --release failed"
     fi
+    # The build tree is a few GB and the binary is installed
+    rm -rf target
+    [ -n "$tc" ] && rustup toolchain uninstall "$tc" > /dev/null 2>&1
+    return 0
 }
 
 function curlie_soft_install_fromsource() {

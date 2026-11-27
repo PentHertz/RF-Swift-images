@@ -265,7 +265,9 @@ install_go() {
     if wget "$GO_URL" -O "/tmp/$GO_TAR" \
         && { [ -z "$go_sha" ] || echo "${go_sha}  /tmp/$GO_TAR" | sha256sum -c -; }; then
         # Extract and move Go to /usr/bin/go
-        sudo tar -C /usr --strip-components=1 -xzf /tmp/$GO_TAR go/bin go/pkg go/src
+        # go.env holds Go's defaults (GOPROXY, GOSUMDB, GOTOOLCHAIN): without it GOPROXY is
+        # empty and no module can be downloaded
+        sudo tar -C /usr --strip-components=1 -xzf /tmp/$GO_TAR go/bin go/pkg go/src go/go.env
         rm /tmp/$GO_TAR
         echo "Go $GO_VERSION installed successfully in /usr/bin."
         echo 'export GOPROXY=https://proxy.golang.org,direct' >> /root/.bashrc

@@ -225,6 +225,34 @@
 
 ### Fixed
 
+- Every `go install` failed ("GOPROXY list is not the empty string, but contains no entries",
+  "verifying module: missing GOSUMDB"): subfinder, assetfinder, waybackurls, Amass, kerbrute,
+  ligolo-ng, chisel, Caeruleus, dwarf2json and others. corebuild's `install_go` unpacked Go
+  without `go.env`, the file that sets Go's default module proxy, checksum database and
+  toolchain switching. It is unpacked now, and `ensure_go` writes Go's defaults when an older
+  corebuild lacks the file; Caeruleus, dwarf2json, bettercap and the Trivy fallback now call
+  `ensure_go`.
+- `general_network`: Sniffnet builds again. It uses `Option::map_or_default` (Rust 1.98) and
+  follows the newest stable Rust, so when corebuild's toolchain is older than the one
+  upstream's Dockerfile builds with, it is built with that version as a temporary toolchain.
+  Its multi-GB `target/` tree is removed after the binary is installed.
+- `reversing`: OFRAK, angr and angrop keep bitstring below 5. bitstring 5.0 removed
+  `ConstBitStream`, which pyvex (angr's VEX lifter) uses, so they failed to import.
+- `telecom`: LTESniffer builds again. The srsRAN2 it downloads appends `-Werror` after the
+  build's own flags, and GCC 15 warns in `turbodecoder.c`: the installer removes that
+  `-Werror` from the downloaded source and configures again.
+- `gr_oot_modules`: deep-tempest's `binary_serializer.grc` example compiles again under GNU
+  Radio 3.10 (the installer adds the missing Import block for `gr`).
+- `sdr_light`: KillerBee installs again on Python 3.14, with pycryptodome in place of the
+  abandoned pycrypto its `setup.py` still requires (KillerBee is installed with `--no-deps`
+  and checked with an import test).
+- `bluetooth`: SweynTooth's BLESMPServer extension is built into its venv with pip, replacing
+  upstream's missing `make build` target.
+- `sdr_light`: FISSURE builds its gr-ainfosec block again (`cppzmq-dev`, since 26.04's
+  libzmq3-dev no longer ships `zmq.hpp`), and its venv gets pytak, meshtastic (unpinned:
+  upstream's 2.6.4 needs Python < 3.14), pandas, seaborn and yellowbrick, so
+  `generate_certificates.py` and the Dashboard's imports work. `python3-pyproj` comes from apt,
+  as upstream installs it.
 - `sdr_full`: `sdrmm_soft_install` aborted the build with exit code 22 whenever github.com
   answered the latest-release lookup with an HTTP error (common on shared CI runners): the
   lookup was a bare `curl -f` in a command substitution, so `set -eo pipefail` stopped the

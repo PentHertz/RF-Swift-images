@@ -1247,14 +1247,20 @@ function fissure_soft_install() {
     # 1) System apt deps FISSURE needs (GUI toolkit + helpers). apt-managed Python
     #    modules (PyQt5, tk) are fine system-wide and are visible to the venv via
     #    --system-site-packages; only the version-pinned pip deps are isolated.
-    install_dependencies "qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools python3-pyqt5 python3-tk libosmocore-dev liborc-0.4-dev expect wireshark-common tshark gpsd python3-venv"
+    #    cppzmq-dev: gr-ainfosec includes <zmq.hpp>, which 26.04's libzmq3-dev no
+    #    longer ships. python3-pyproj: fissure/utils/geo.py (upstream takes it from apt).
+    install_dependencies "qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools python3-pyqt5 python3-tk libosmocore-dev liborc-0.4-dev cppzmq-dev expect wireshark-common tshark gpsd python3-venv python3-pyproj"
 
     # 2) Dedicated venv holding FISSURE's pip deps (mirrors FISSURE's
-    #    Installer/OS/ubuntu24_04 "Misc. Dependencies" list). pycrypto -> the
-    #    maintained pycryptodome (same `Crypto` module, builds on modern Python).
+    #    Installer/OS/ubuntu24_04 "Misc. Dependencies" and Meshtastic lists).
+    #    pycrypto -> the maintained pycryptodome (same `Crypto` module, builds on
+    #    modern Python). fissure.utils imports pytak and fissure.comms imports
+    #    meshtastic when they load, so generate_certificates.py needs both;
+    #    meshtastic is unpinned because upstream's 2.6.4 requires Python < 3.14.
+    #    The Dashboard's TSI tab imports pandas, seaborn and yellowbrick on load.
     python3 -m venv --system-site-packages "$FISSURE_VENV"
     "$FISSURE_VENV/bin/python3" -m pip install --upgrade pip > /dev/null 2>&1 || true
-    local FISSURE_PIP="PyYAML bitarray crcmod pycryptodome pyzmq psutil pyserial gpsd-py3 geopy sounddevice qasync pydotplus netron ipython scikit-learn opencv-python-headless pyzipper mgrs watchdog aiohttp paho-mqtt msgpack eventlet psycopg2-binary python-dotenv"
+    local FISSURE_PIP="PyYAML bitarray crcmod pycryptodome pyzmq psutil pyserial gpsd-py3 geopy sounddevice qasync pydotplus netron ipython scikit-learn opencv-python-headless pyzipper mgrs watchdog aiohttp paho-mqtt msgpack eventlet psycopg2-binary python-dotenv pytak meshtastic pandas seaborn yellowbrick"
     "$FISSURE_VENV/bin/python3" -m pip install $FISSURE_PIP \
         || record_build_failure "pip" "FISSURE venv deps" "venv pip install reported errors"
     # tensorflow is only for the optional ML classifier; heavy, install best-effort.
@@ -1622,6 +1628,13 @@ function rfcat_soft_install() {
 function killerbee_soft_install() {
     goodecho "[+] Installing KillerBee (IEEE 802.15.4 / Zigbee)"
     install_dependencies "libgcrypt20-dev libusb-1.0-0-dev python3-dev build-essential python3-usb python3-serial"
-    pip3install "git+https://github.com/riverloopsec/killerbee" || true
+    # KillerBee's setup.py still requires pycrypto, which no longer builds (abandoned, no Python 3.14
+    # support). KillerBee only uses it for `from Crypto.Cipher import AES` (dot154decode), which
+    # pycryptodome provides under the same `Crypto` name: install the dependencies with pycryptodome
+    # in its place, then KillerBee itself without its declared ones.
+    pip3install pyserial pyusb pycryptodome rangeparser scapy || true
+    pip3install --no-deps "git+https://github.com/riverloopsec/killerbee" || true
+    python3 -c 'import killerbee, killerbee.dot154decode, zigbee_crypt' > /dev/null 2>&1 \
+        || record_build_failure "other" "killerbee" "import check failed after install"
     return 0
 }

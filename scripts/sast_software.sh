@@ -162,6 +162,7 @@ function trivy_install() {
 
     # No prebuilt binary for this arch (e.g. riscv64) or the download failed:
     # build from source with the Go toolchain from corebuild's install_go.
+    ensure_go
     if command -v go >/dev/null 2>&1; then
         GOBIN=/usr/local/bin go install github.com/aquasecurity/trivy/cmd/trivy@latest \
             || record_build_failure "build" "trivy" "go install failed"

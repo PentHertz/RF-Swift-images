@@ -159,10 +159,29 @@ function grtempest_grmod_install() {
 function deeptempest_grmod_install() {
     grclone_and_build "https://github.com/PentHertz/deep-tempest.git" "gr-tempest" "deeptempest_grmod_install"
     cd examples
-    # Pre-compile the example flowgraphs to .py (convenience only). Best-effort:
-    # some upstream examples (e.g. binary_serializer.grc) fail to evaluate under
-    # GRC 3.10.12 ("gr.GR_LSB_FIRST" -> name 'gr' is not defined) and must not
-    # abort the whole image build.
+    # binary_serializer.grc (a hier block) sets its Packed to Unpacked endianness to
+    # gr.GR_LSB_FIRST, but none of its blocks imports gr, and GRC 3.10 evaluates parameters
+    # with the flowgraph's own imports only ("name 'gr' is not defined"). Add an Import
+    # block for gr; skipped once upstream's file has one.
+    if grep -q 'gr\.GR_' binary_serializer.grc \
+        && ! grep -q '^    imports: from gnuradio import gr$' binary_serializer.grc; then
+        sed -i '/^blocks:$/r /dev/stdin' binary_serializer.grc <<'EOF'
+- name: import_gr
+  id: import
+  parameters:
+    alias: ''
+    comment: ''
+    imports: from gnuradio import gr
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [16, 120.0]
+    rotation: 0
+    state: true
+EOF
+    fi
+    # Pre-compile the example flowgraphs to .py (convenience only), best-effort
     for f in FFT_autocorrelate.grc FFT_crosscorrelate.grc Keep_1_in_N_frames.grc binary_serializer.grc; do
         grcc "$f" || record_build_failure "grcc" "deep-tempest/$f" "GRC example failed to compile (GNU Radio 3.10)"
     done

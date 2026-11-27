@@ -299,6 +299,7 @@ function caeruleus_soft_install() {
     # bluetooth image; it's pure Go so `go install` covers every arch (upstream
     # prebuilt binaries are amd64/arm64 only).
     goodecho "[+] Installing Caeruleus (BLE toolkit)"
+    ensure_go
     if command -v go >/dev/null 2>&1; then
         GOBIN=/usr/local/bin go install github.com/praetorian-inc/caeruleus/cmd/caeruleus@latest \
             && goodecho "[+] Caeruleus installed: /usr/local/bin/caeruleus" \
@@ -1214,7 +1215,7 @@ function crackle_soft_install() {
 
 function sweyntooth_soft_install() {
     goodecho "[+] Staging SweynTooth BLE test suite (needs an nRF52840 dongle flashed with the bundled firmware)"
-    install_dependencies "python3-venv build-essential"
+    install_dependencies "python3-venv python3-dev build-essential"
     [ -d /rftools/bluetooth/exploits ] || mkdir -p /rftools/bluetooth/exploits
     cd /rftools/bluetooth/exploits
     gitinstall "https://github.com/Matheus-Garbelini/sweyntooth_bluetooth_low_energy_attacks.git" "sweyntooth_soft_install" || true
@@ -1223,8 +1224,13 @@ function sweyntooth_soft_install() {
         python3 -m venv .venv
         ./.venv/bin/pip install -r requirements.txt \
             || record_build_failure "pip" "sweyntooth" "requirements install failed"
-        ( cd libs/smp_server && make build && make install ) \
-            || record_build_failure "build" "sweyntooth smp_server" "make failed"
+        # BLESMPServer (libs/smp_server), the C++ SMP extension esp32_hci_desync.py imports, built
+        # into the venv. Upstream's install script calls `make build`, a target its Makefile does not
+        # have, and its `make install` runs whatever `python` is first on PATH.
+        installfromnet ./.venv/bin/pip install ./libs/smp_server \
+            && ./.venv/bin/python -c 'import BLESMPServer' \
+            || record_build_failure "build" "sweyntooth smp_server" "BLESMPServer build failed"
+        rm -rf libs/smp_server/build libs/smp_server/*.egg-info
         goodecho "[+] SweynTooth staged in $(pwd): ./.venv/bin/python <test>.py <serial port> <target address>"
     else
         record_build_failure "git" "sweyntooth" "clone failed"

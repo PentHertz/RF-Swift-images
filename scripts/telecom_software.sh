@@ -711,7 +711,11 @@ function LTESniffer_soft_install() {
 	[ -d /telecom/4G ] || mkdir -p /telecom/4G
 	cd /telecom/4G
 	installfromnet "git" "clone" "https://github.com/SysSec-KAIST/LTESniffer.git"
-	if [ -d LTESniffer ] && ( cd LTESniffer && mkdir -p build && cd build && cmake ../ && make -j"$(nproc)" ); then
+	# The first cmake run downloads srsRAN2 into build/srsRAN-src. Its CMakeLists appends -Werror
+	# after any flags we pass, and GCC 15's new warnings then stop the build (turbodecoder.c):
+	# drop that -Werror and configure again.
+	if [ -d LTESniffer ] && ( cd LTESniffer && mkdir -p build && cd build && cmake ../ \
+		&& sed -i 's/ -Werror")/")/' srsRAN-src/CMakeLists.txt && cmake ../ && make -j"$(nproc)" ); then
 		ln -sf /telecom/4G/LTESniffer/build/src/LTESniffer /usr/local/bin/LTESniffer
 		goodecho "[+] LTESniffer built: /telecom/4G/LTESniffer/build/src/LTESniffer"
 	else

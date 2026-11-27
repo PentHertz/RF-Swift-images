@@ -649,6 +649,18 @@ function ensure_go() {
     if ! command -v go > /dev/null 2>&1; then
         install_dependencies "golang-go"
     fi
+    # Go takes its defaults (module proxy, checksum database, toolchain switching) from
+    # $GOROOT/go.env. corebuild images built before install_go unpacked that file have none,
+    # and every module download fails ("GOPROXY list is not the empty string, but contains no
+    # entries", "verifying module: missing GOSUMDB"). Write Go's own defaults when it is missing.
+    local goroot
+    goroot=$(go env GOROOT 2> /dev/null) || return 0
+    if [ -n "$goroot" ] && [ ! -e "$goroot/go.env" ]; then
+        printf '%s\n' "GOPROXY=https://proxy.golang.org,direct" "GOSUMDB=sum.golang.org" \
+            "GOTOOLCHAIN=auto" > "$goroot/go.env" \
+            || criticalecho-noexit "[-] Could not write $goroot/go.env: Go module downloads will fail"
+    fi
+    return 0
 }
 
 # go_install_tool <name> <module@version> [name to install the binary as]
